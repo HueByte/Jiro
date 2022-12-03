@@ -48,6 +48,8 @@ namespace Jiro.Core.Services.GPTService
             if (response.IsSuccessStatusCode)
             {
                 var result = await response.Content?.ReadFromJsonAsync<GPTResponse>()!;
+
+                _logger.LogInformation("GPT response: {tokens}", result?.Usage?.TotalTokens);
                 return result?.Choices?.First()?.Text!;
             }
             else

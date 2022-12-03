@@ -59,7 +59,6 @@ namespace Jiro.Core.Services.CommandHandler
             if (command.IsAsync)
             {
                 // temp solution
-                var x = command.Action.Invoke(command.Instance, new object[] { prompt });
                 var commandTask = (Task)command.Action.Invoke(command.Instance, new object[] { prompt })!;
                 await commandTask;
                 result = (object)((dynamic)commandTask).Result;
