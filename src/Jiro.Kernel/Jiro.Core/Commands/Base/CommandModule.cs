@@ -1,12 +1,19 @@
+using System.Reflection;
+using Jiro.Core.Entities;
+
 namespace Jiro.Core.Commands.Base
 {
     public class CommandModule
     {
-        public string DefaultCommand { get; private set; } = string.Empty;
+        public string Name { get; private set; } = string.Empty;
         public Dictionary<string, CommandInfo> Commands { get; private set; } = new();
 
-        public void SetDefaultCommand(string defaultCommand) => DefaultCommand = defaultCommand;
-        public void AddCommands(List<CommandInfo> commands)
+        public void SetName(string name)
+        {
+            Name = name;
+        }
+
+        public void SetCommands(List<CommandInfo> commands)
         {
             foreach (var command in commands)
             {

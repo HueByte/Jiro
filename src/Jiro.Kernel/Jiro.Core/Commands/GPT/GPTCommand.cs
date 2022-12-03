@@ -1,15 +1,22 @@
 using Jiro.Core.Attributes;
+using Jiro.Core.Interfaces.IServices;
 
 namespace Jiro.Core.Commands.GPT
 {
     [CommandContainer("GPT")]
     public class GPTCommand
     {
+        private readonly IGPTService _gptService;
+        public GPTCommand(IGPTService gptService)
+        {
+            _gptService = gptService;
+        }
+
         [Command("chat")]
         public async Task<string> Chat(string prompt)
         {
-            await Task.Delay(1000);
-            return "Funny response";
+            var result = await _gptService.ChatAsync(prompt);
+            return result;
         }
     }
 }

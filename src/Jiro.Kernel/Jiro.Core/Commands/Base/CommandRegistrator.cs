@@ -11,6 +11,7 @@ namespace Jiro.Core.Commands.Base
         public static IServiceCollection RegisterCommands(this IServiceCollection services)
         {
             var assemblies = AppDomain.CurrentDomain.GetAssemblies();
+
             var commandContainers = assemblies
                 .SelectMany(asm => asm.GetTypes()
                     .Where(type =>
@@ -19,36 +20,42 @@ namespace Jiro.Core.Commands.Base
                 ))
                 .ToList();
 
-            var commandMethods = commandContainers
-                .SelectMany(container =>
-                    container.GetMethods()
-                        .Where(method => method.GetCustomAttributes(typeof(CommandAttribute), false).Length > 0))
-                .ToList();
 
-            var commands = commandMethods.Select(method => new CommandInfo
-            (
-                method.GetCustomAttribute<CommandAttribute>()?.CommandName.ToLower() ?? "",
-                method.GetCustomAttribute<AsyncStateMachineAttribute>() is not null,
-                method.DeclaringType!,
-                method
-            ));
-
-            foreach (var commandContainer in commandContainers)
+            List<CommandModule> commandModules = new();
+            List<CommandInfo> commandInfos = new();
+            foreach (var container in commandContainers)
             {
-                Console.WriteLine($"Registering {commandContainer} command container");
-                services.AddScoped(commandContainer);
-            }
+                CommandModule commandModule = new();
+                var commands = GetCommands(container);
+                commandModule.SetCommands(commands);
+                commandModule.SetName(container.GetCustomAttribute<CommandContainerAttribute>()?.ContainerName ?? "");
 
-            foreach (var command in commands)
-                Console.WriteLine($"Created command {command.Name} | {command.IsAsync}");
+                services.AddScoped(container);
+                commandModules.Add(commandModule);
+                commandInfos.AddRange(commands);
+            };
 
-            CommandModule commandModule = new();
-            commandModule.SetDefaultCommand("chat");
-            commandModule.AddCommands(commands.ToList());
-
-            services.AddSingleton(commandModule);
+            CommandsContainer globalContainer = new();
+            globalContainer.AddModules(commandModules);
+            globalContainer.AddCommands(commandInfos);
+            globalContainer.SetDefaultCommand("chat");
+            services.AddSingleton(globalContainer);
 
             return services;
+        }
+
+        private static List<CommandInfo> GetCommands(Type type)
+        {
+            return type
+                .GetMethods()
+                .Where(method => method.GetCustomAttributes(typeof(CommandAttribute), false).Length > 0)
+                .Select(method => new CommandInfo(
+                    method.GetCustomAttribute<CommandAttribute>()?.CommandName.ToLower() ?? "",
+                    method.GetCustomAttribute<AsyncStateMachineAttribute>() is not null,
+                    method.DeclaringType!,
+                    method
+                ))
+                .ToList();
         }
     }
 }

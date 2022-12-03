@@ -16,9 +16,9 @@ public class JiroController : BaseController
     }
 
     [HttpPost]
-    public async Task<IActionResult> PushCommand([FromBody] BasicQuery prompt)
+    public async Task<IActionResult> PushCommand([FromBody] BasicQuery query)
     {
-        var result = await _commandHandlerService.ExecuteCommandAsync(prompt.prompt);
+        var result = await _commandHandlerService.ExecuteCommandAsync(query.prompt);
         return Ok(result);
     }
 }

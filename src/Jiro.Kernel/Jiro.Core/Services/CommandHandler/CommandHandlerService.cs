@@ -1,3 +1,4 @@
+using System.Linq.Expressions;
 using Jiro.Core.Commands.Base;
 using Jiro.Core.Entities;
 using Jiro.Core.Interfaces.IServices;
@@ -9,9 +10,9 @@ namespace Jiro.Core.Services.CommandHandler
     public class CommandHandlerService : ICommandHandlerService
     {
         private readonly ILogger _logger;
-        private readonly CommandModule _commandModule;
+        private readonly CommandsContainer _commandModule;
         private readonly IServiceScopeFactory _scopeFactory;
-        public CommandHandlerService(ILogger<CommandHandlerService> logger, CommandModule commandModule, IServiceScopeFactory scopeFactory)
+        public CommandHandlerService(ILogger<CommandHandlerService> logger, CommandsContainer commandModule, IServiceScopeFactory scopeFactory)
         {
             _logger = logger;
             _commandModule = commandModule;
