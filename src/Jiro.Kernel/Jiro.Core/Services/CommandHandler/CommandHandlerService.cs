@@ -1,4 +1,5 @@
 using System.Linq.Expressions;
+using System.Runtime.InteropServices;
 using Jiro.Core.Base;
 using Jiro.Core.Entities;
 using Jiro.Core.Interfaces.IServices;
@@ -12,6 +13,7 @@ namespace Jiro.Core.Services.CommandHandler
         private readonly ILogger _logger;
         private readonly CommandsContainer _commandModule;
         private readonly IServiceScopeFactory _scopeFactory;
+        public event Action<string, object[]> OnLog;
         public CommandHandlerService(ILogger<CommandHandlerService> logger, CommandsContainer commandModule, IServiceScopeFactory scopeFactory)
         {
             _logger = logger;
@@ -63,7 +65,7 @@ namespace Jiro.Core.Services.CommandHandler
             {
                 if (command.IsAsync)
                 {
-                    _logger.LogInformation("Running command <{commandName}>", command.Name);
+                    OnLog?.Invoke("Running command [{0}]", new object[] { command.Name });
                     var task = command.Descriptor((CommandBase)command.Instance!, new object[] { prompt });
                     if (task is Task<ICommandResult> commandTask)
                     {

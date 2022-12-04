@@ -49,7 +49,7 @@ namespace Jiro.Core.Services.GPTService
             {
                 var result = await response.Content?.ReadFromJsonAsync<GPTResponse>()!;
 
-                _logger.LogInformation("GPT response: {tokens}", result?.Usage?.TotalTokens);
+                _logger.LogInformation("Tokens used: {tokens}", result?.Usage?.TotalTokens);
                 return result?.Choices?.First()?.Text!;
             }
             else

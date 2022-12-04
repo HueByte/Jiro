@@ -1,9 +1,19 @@
 using Jiro.Api;
 using Jiro.Api.Configurator;
 using Jiro.Core.Utils;
-using Microsoft.AspNetCore.Mvc;
+using Serilog;
+using Serilog.Events;
 
 var builder = WebApplication.CreateBuilder(args);
+
+Log.Logger = new LoggerConfiguration()
+    .MinimumLevel.Override("Microsoft", LogEventLevel.Information)
+    .Enrich.FromLogContext()
+    .CreateBootstrapLogger();
+
+builder.Host.UseSerilog((context, services, configuration) => configuration
+    .ReadFrom.Configuration(context.Configuration)
+    .ReadFrom.Services(services));
 
 ModuleManager moduleManager = new(builder.Services, builder.Configuration);
 
@@ -22,7 +32,9 @@ builder.Services.AddHttpClients(builder.Configuration);
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+AppConfigurator appConfigurator = new(app.Services);
+appConfigurator.ConfigureEvents();
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -35,6 +47,6 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-app.Map("/", () => Results.Redirect("/swagger"));
+if (AppUtils.IsDebug()) app.Map("/", () => Results.Redirect("/swagger"));
 
 app.Run();

@@ -10,7 +10,9 @@ namespace Jiro.Api.Configurator
         public static IServiceCollection AddServices(this IServiceCollection services)
         {
             services.AddScoped<IGPTService, GPTService>();
-            services.AddScoped<ICommandHandlerService, CommandHandlerService>();
+
+            services.AddSingleton<ICommandHandlerService, CommandHandlerService>();
+            services.AddSingleton<EventsConfigurator>();
 
             return services;
         }
