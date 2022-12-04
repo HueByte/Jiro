@@ -1,5 +1,5 @@
 using System.Linq.Expressions;
-using Jiro.Core.Commands.Base;
+using Jiro.Core.Base;
 using Jiro.Core.Entities;
 using Jiro.Core.Interfaces.IServices;
 using Microsoft.Extensions.DependencyInjection;
@@ -63,6 +63,7 @@ namespace Jiro.Core.Services.CommandHandler
             {
                 if (command.IsAsync)
                 {
+                    _logger.LogInformation("Running command <{commandName}>", command.Name);
                     var task = command.Descriptor((CommandBase)command.Instance!, new object[] { prompt });
                     if (task is Task<ICommandResult> commandTask)
                     {

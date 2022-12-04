@@ -1,5 +1,5 @@
 using Jiro.Core.Attributes;
-using Jiro.Core.Commands.Base;
+using Jiro.Core.Base;
 using Jiro.Core.Interfaces.IServices;
 
 namespace Jiro.Core.Commands.GPT

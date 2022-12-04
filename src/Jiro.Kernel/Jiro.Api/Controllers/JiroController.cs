@@ -1,5 +1,5 @@
 using Jiro.Api.Extensions;
-using Jiro.Core.Commands.Base;
+using Jiro.Core.Base;
 using Jiro.Core.Interfaces.IServices;
 using Microsoft.AspNetCore.Mvc;
 

@@ -1,4 +1,4 @@
-using Jiro.Core.Commands.Base;
+using Jiro.Core.Base;
 
 namespace Jiro.Core.Interfaces.IServices
 {

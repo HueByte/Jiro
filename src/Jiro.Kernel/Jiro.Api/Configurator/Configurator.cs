@@ -1,4 +1,4 @@
-using Jiro.Core.Commands.Base;
+using Jiro.Core.Base;
 using Jiro.Core.Interfaces.IServices;
 using Jiro.Core.Services.CommandHandler;
 using Jiro.Core.Services.GPTService;
