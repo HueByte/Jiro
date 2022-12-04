@@ -35,7 +35,7 @@ namespace Jiro.Core.Services.GPTService
             GPTRequest model = new()
             {
                 Model = "text-davinci-003",
-                MaxTokens = 200,
+                MaxTokens = 300,
                 Prompt = aiContext,
                 Temperature = 0.6,
                 N = 1
