@@ -68,13 +68,11 @@ namespace Jiro.Core.Commands.Base
 
                 var compiledLambda = CreateMethodInvoker(methodInfo!);
 
-                var temp2 = compiledLambda as Func<CommandBase, object[], Task>;
-
                 CommandInfo commandInfo = new(
                     methodInfo!.GetCustomAttribute<CommandAttribute>()?.CommandName.ToLower() ?? "",
                     methodInfo!.GetCustomAttribute<AsyncStateMachineAttribute>() is not null,
                     delcaringType,
-                    temp2
+                    compiledLambda as Func<CommandBase, object[], Task>
                 );
 
                 commandInfos.Add(commandInfo);

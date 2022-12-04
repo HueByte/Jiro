@@ -30,7 +30,7 @@ namespace Jiro.Core.Services.GPTService
             if (string.IsNullOrEmpty(aiContext)) aiContext = "";
             if (!(prompt.EndsWith('?') || prompt.EndsWith('.'))) prompt += '.';
 
-            aiContext += prompt + "\n[Huppy]:";
+            aiContext += prompt + "\n[Jiro]:";
 
             GPTRequest model = new()
             {
