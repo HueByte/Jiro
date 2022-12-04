@@ -3,15 +3,10 @@ import sys
 import sharedStorage
 import asyncio
 import json
-import os
-import pwd
+import lib
 
 
-def get_username():
-    return pwd.getpwuid(os.getuid())[0]
-
-
-async def make_jiro_request(prompt):
+async def send_request(prompt):
     body = JiroRequest(prompt)
     requestUrl = sharedStorage.config['jiroUrl']
 
@@ -22,13 +17,15 @@ async def make_jiro_request(prompt):
 
 
 async def print_response_message(message):
-    sys.stdout.write("[Jiro]: ")
+    sys.stdout.write(f"\n{lib.colors.JIRO}[Jiro]$ ")
     sys.stdout.flush()
+
     for char in message:
         sys.stdout.write(char)
         sys.stdout.flush()
         await asyncio.sleep(0.02)
-    print('\n\n')
+
+    print(f'{lib.colors.ENDC}\n')
 
 
 class JiroRequest:

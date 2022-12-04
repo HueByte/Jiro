@@ -1,12 +1,16 @@
 import asyncio
 import sharedStorage
 import jiro
+import lib
 
 
 async def main():
+    username = lib.get_username()
     while True:
-        command = input("[User]: ")
-        result = await jiro.make_jiro_request(command)
+        prompt = input(f"{lib.colors.USER}[{username}]$ ")
+        print(lib.colors.ENDC, end=" ")
+
+        result = await jiro.send_request(prompt)
         await jiro.print_response_message(result.data)
 
 asyncio.run(main())
