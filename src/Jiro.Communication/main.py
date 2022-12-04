@@ -5,6 +5,7 @@ import lib
 
 
 async def main():
+    print(lib.logo)
     username = lib.get_username()
     while True:
         prompt = input(f"{lib.colors.USER}[{username}]$ ")
