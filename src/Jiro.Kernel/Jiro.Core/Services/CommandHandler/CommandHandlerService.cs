@@ -69,7 +69,7 @@ namespace Jiro.Core.Services.CommandHandler
                     var task = command.Descriptor((CommandBase)command.Instance!, new object[] { prompt });
                     if (task is Task<ICommandResult> commandTask)
                     {
-                        result.Data = await commandTask;
+                        result.Data = (await commandTask).Data;
                     }
                     else
                     {
@@ -78,7 +78,7 @@ namespace Jiro.Core.Services.CommandHandler
                 }
                 else
                 {
-                    result.Data = command.Descriptor.Invoke((CommandBase)command.Instance!, new object[] { prompt });
+                    result.Data = ((ICommandResult)command.Descriptor.Invoke((CommandBase)command.Instance!, new object[] { prompt })).Data;
                 }
             }
             catch (Exception ex)
