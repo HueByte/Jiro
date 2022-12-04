@@ -21,4 +21,12 @@
     <ProjectReference Include="..\Jiro.ModularBase\Jiro.ModularBase.csproj" />
   </ItemGroup>
 
+  <Target Name="CreateLogFolder" AfterTargets="Build">
+   <MakeDir Directories="$(OutDir)logs" />
+  </Target>
+
+  <Target Name="CreateModulesFolder" AfterTargets="Build">
+     <MakeDir Directories="$(OutDir)modules" />
+  </Target>
+
 </Project>
