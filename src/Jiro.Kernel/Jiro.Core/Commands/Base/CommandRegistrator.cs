@@ -1,6 +1,9 @@
+using System.Linq.Expressions;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices.ObjectiveC;
 using Jiro.Core.Attributes;
+using Jiro.Core.Commands.GPT;
 using Jiro.Core.Entities;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -38,7 +41,7 @@ namespace Jiro.Core.Commands.Base
             CommandsContainer globalContainer = new();
             globalContainer.AddModules(commandModules);
             globalContainer.AddCommands(commandInfos);
-            globalContainer.SetDefaultCommand("chat");
+            globalContainer.SetDefaultCommand(nameof(GPTCommand.Chat).ToLower());
             services.AddSingleton(globalContainer);
 
             return services;
@@ -46,16 +49,62 @@ namespace Jiro.Core.Commands.Base
 
         private static List<CommandInfo> GetCommands(Type type)
         {
-            return type
+            List<CommandInfo> commandInfos = new();
+            var methodInfos = type
                 .GetMethods()
                 .Where(method => method.GetCustomAttributes(typeof(CommandAttribute), false).Length > 0)
-                .Select(method => new CommandInfo(
-                    method.GetCustomAttribute<CommandAttribute>()?.CommandName.ToLower() ?? "",
-                    method.GetCustomAttribute<AsyncStateMachineAttribute>() is not null,
-                    method.DeclaringType!,
-                    method
-                ))
                 .ToList();
+
+            var createMethodInvoker = typeof(CommandRegistrator)
+                ?.GetMethod("CreateMethodInvoker");
+
+            foreach (var methodInfo in methodInfos)
+            {
+                if (methodInfo is null) continue;
+
+                var delcaringType = methodInfo?.DeclaringType;
+
+                if (delcaringType is null) continue;
+
+                var compiledLambda = CreateMethodInvoker(methodInfo!);
+
+                var temp2 = compiledLambda as Func<CommandBase, object[], Task>;
+
+                CommandInfo commandInfo = new(
+                    methodInfo!.GetCustomAttribute<CommandAttribute>()?.CommandName.ToLower() ?? "",
+                    methodInfo!.GetCustomAttribute<AsyncStateMachineAttribute>() is not null,
+                    delcaringType,
+                    temp2
+                );
+
+                commandInfos.Add(commandInfo);
+            }
+
+            return commandInfos;
+        }
+
+        public static Func<CommandBase, object[], Task> CreateMethodInvoker(MethodInfo methodInfo)
+        {
+            var parameters = methodInfo.GetParameters();
+            var paramsExp = new Expression[parameters.Length];
+
+            var instanceExp = Expression.Parameter(typeof(CommandBase), "instance");
+            var argsExp = Expression.Parameter(typeof(object[]), "args");
+
+            for (var i = 0; i < parameters.Length; i++)
+            {
+                var parameter = parameters[i];
+
+                var indexExp = Expression.Constant(i);
+                var accessExp = Expression.ArrayIndex(argsExp, indexExp);
+                paramsExp[i] = Expression.Convert(accessExp, parameter.ParameterType);
+            }
+
+            var callExp = Expression.Call(Expression.Convert(instanceExp, methodInfo.ReflectedType!), methodInfo, paramsExp);
+            var finalExp = Expression.Convert(callExp, typeof(Task));
+            var lambda = Expression.Lambda<Func<CommandBase, object[], Task>>(finalExp, instanceExp, argsExp);
+
+            return lambda.Compile();
         }
     }
 }

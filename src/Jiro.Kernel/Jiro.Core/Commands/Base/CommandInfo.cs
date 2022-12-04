@@ -1,6 +1,3 @@
-using System.Reflection;
-using Jiro.Core.Entities;
-
 namespace Jiro.Core.Commands.Base
 {
     public class CommandInfo
@@ -8,14 +5,14 @@ namespace Jiro.Core.Commands.Base
         public string Name { get; } = string.Empty;
         public bool IsAsync { get; } = false;
         public Type Container { get; } = default!;
-        public MethodInfo Action { get; }
+        public Func<CommandBase, object[], Task> Descriptor = default!;
 
-        public CommandInfo(string name, bool isAsync, Type container, MethodInfo action)
+        public CommandInfo(string name, bool isAsync, Type container, Func<CommandBase, object[], Task> descriptor)
         {
             Name = name;
             IsAsync = isAsync;
             Container = container;
-            Action = action;
+            Descriptor = descriptor;
         }
     }
 }

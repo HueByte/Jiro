@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jiro.Api", "Jiro.Api\Jiro.Api.csproj", "{87E048B0-583D-4074-BBD4-FD05083BF728}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jiro.Core", "Jiro.Core\Jiro.Core.csproj", "{A6B68289-90F8-404A-ADF3-A0E7F14F7DE3}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{87E048B0-583D-4074-BBD4-FD05083BF728}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{87E048B0-583D-4074-BBD4-FD05083BF728}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{87E048B0-583D-4074-BBD4-FD05083BF728}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{87E048B0-583D-4074-BBD4-FD05083BF728}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A6B68289-90F8-404A-ADF3-A0E7F14F7DE3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A6B68289-90F8-404A-ADF3-A0E7F14F7DE3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A6B68289-90F8-404A-ADF3-A0E7F14F7DE3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A6B68289-90F8-404A-ADF3-A0E7F14F7DE3}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal

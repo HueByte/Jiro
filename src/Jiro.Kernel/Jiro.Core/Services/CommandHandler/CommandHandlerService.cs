@@ -30,7 +30,7 @@ namespace Jiro.Core.Services.CommandHandler
             return new()
             {
                 Name = commandInfo.Name,
-                Action = commandInfo.Action,
+                Descriptor = commandInfo.Descriptor,
                 IsAsync = commandInfo.IsAsync,
                 Instance = scope.ServiceProvider.GetRequiredService(commandInfo.Container),
             };
@@ -54,21 +54,37 @@ namespace Jiro.Core.Services.CommandHandler
 
             var command = GetCommand(commandName, scope);
 
-            object? result = null;
-
-            if (command.IsAsync)
+            CommandResponse result = new()
             {
-                // temp solution
-                var commandTask = (Task)command.Action.Invoke(command.Instance, new object[] { prompt })!;
-                await commandTask;
-                result = (object)((dynamic)commandTask).Result;
-            }
-            else
+                IsSuccess = true
+            };
+
+            try
             {
-                result = command.Action.Invoke(command.Instance, null);
+                if (command.IsAsync)
+                {
+                    var task = command.Descriptor((CommandBase)command.Instance!, new object[] { prompt });
+                    if (task is Task<ICommandResult> commandTask)
+                    {
+                        result.Data = await commandTask;
+                    }
+                    else
+                    {
+                        await task;
+                    }
+                }
+                else
+                {
+                    result.Data = command.Descriptor.Invoke((CommandBase)command.Instance!, new object[] { prompt });
+                }
+            }
+            catch (Exception ex)
+            {
+                result.IsSuccess = false;
+                result.Errors.Add(ex.Message);
             }
 
-            return new CommandResponse() { Data = result };
+            return result;
         }
     }
 }

@@ -1,5 +1,6 @@
 using System.ComponentModel;
 using Jiro.Core.Attributes;
+using Jiro.Core.Commands.Base;
 using Microsoft.Extensions.Logging;
 
 namespace Jiro.Core.Commands.Test.GPTCommand
@@ -7,7 +8,7 @@ namespace Jiro.Core.Commands.Test.GPTCommand
     public record TestResult(string? message);
 
     [CommandContainer("Test")]
-    public class TestCommand
+    public class TestCommand : CommandBase
     {
         private readonly ILogger _logger;
         public TestCommand(ILogger<TestCommand> logger)
