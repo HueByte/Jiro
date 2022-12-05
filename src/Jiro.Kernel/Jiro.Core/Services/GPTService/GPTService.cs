@@ -1,5 +1,6 @@
 using System.Net.Http.Json;
-using Jiro.Core.Attributes;
+using System.Text.Json;
+using System.Xml;
 using Jiro.Core.Constants;
 using Jiro.Core.Interfaces.IServices;
 using Jiro.Core.Services.GPTService.Models;
@@ -30,27 +31,35 @@ namespace Jiro.Core.Services.GPTService
             if (string.IsNullOrEmpty(aiContext)) aiContext = "";
             if (!(prompt.EndsWith('?') || prompt.EndsWith('.'))) prompt += '.';
 
-            aiContext += prompt + "\n[Jiro]:";
+            aiContext += prompt + "\nJiro$";
 
             GPTRequest model = new()
             {
                 Model = "text-davinci-003",
                 MaxTokens = 300,
                 Prompt = aiContext,
-                Temperature = 0.6,
+                Temperature = 0.7,
+                Stop = _config.GetSection("GPT:Stop").Get<string>() ?? "\n",
                 N = 1
             };
 
             var client = _clientFactory.CreateClient("GPT");
 
-            var response = await client.PostAsJsonAsync(ApiEndpoints.TextDavinciCompletions, model);
+            var response = await client.PostAsJsonAsync(ApiEndpoints.GPT_COMPLETIONS, model);
 
             if (response.IsSuccessStatusCode)
             {
                 var result = await response.Content?.ReadFromJsonAsync<GPTResponse>()!;
+                var responseText = result?.Choices?.First()?.Text!;
 
                 _logger.LogInformation("Tokens used: {tokens}", result?.Usage?.TotalTokens);
-                return result?.Choices?.First()?.Text!;
+
+                if (_config.GetSection("GPT:FineTune").Get<bool>())
+                {
+                    await FineTuneAsync(aiContext, responseText);
+                }
+
+                return responseText.Trim();
             }
             else
             {
@@ -59,6 +68,20 @@ namespace Jiro.Core.Services.GPTService
 
                 throw new Exception("GPT request wasn't successful");
             }
+        }
+
+        private static async Task<bool> FineTuneAsync(string prompt, string completion)
+        {
+            GPTFineTune fineTune = new()
+            {
+                Prompt = prompt,
+                Completion = completion
+            };
+
+            var jsonAppend = JsonSerializer.Serialize(fineTune);
+            await File.AppendAllTextAsync(AppContext.BaseDirectory + "Model.jsonl", $"{jsonAppend}\n");
+
+            return true;
         }
     }
 }
