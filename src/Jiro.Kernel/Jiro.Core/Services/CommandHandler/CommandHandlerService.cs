@@ -64,11 +64,15 @@ namespace Jiro.Core.Services.CommandHandler
 
             try
             {
+                object[] args = tokens is not null
+                    ? tokens.Cast<object>().ToArray()
+                    : new object[] { prompt };
+
                 if (command.IsAsync)
                 {
                     OnLog?.Invoke("Running command [{0}]", new object[] { command.Name });
 
-                    var task = command.Descriptor((CommandBase)command.Instance!, new object[] { prompt });
+                    var task = command.Descriptor((CommandBase)command.Instance!, args);
 
                     if (task is Task<ICommandResult> commandTask)
                     {
@@ -81,7 +85,7 @@ namespace Jiro.Core.Services.CommandHandler
                 }
                 else
                 {
-                    result.Result = (ICommandResult)command.Descriptor.Invoke((CommandBase)command.Instance!, new object[] { prompt });
+                    result.Result = (ICommandResult)command.Descriptor.Invoke((CommandBase)command.Instance!, args);
                 }
             }
             catch (Exception ex)
