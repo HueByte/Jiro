@@ -2,11 +2,13 @@ import asyncio
 import sharedStorage
 import jiro
 import lib
+import graphs
 
 
 async def main():
     print(lib.logo)
     username = lib.get_username()
+
     while True:
         try:
             prompt = input(f"{lib.colors.USER}[{username}]$ ")
@@ -22,5 +24,6 @@ async def main():
                 await jiro.print_response_message("Give me some message first")
         except BaseException as ex:
             await jiro.print_response_message("Something went wrong, try again. " + str(ex))
+
 
 asyncio.run(main())

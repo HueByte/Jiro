@@ -38,6 +38,17 @@ class JiroResponse:
         self.result = result
         self.isSuccess = isSuccess
         self.errors = errors
+        self.type = "temp"
 
     def __init__(self, jsonString):
         self.__dict__ = json.loads(jsonString)
+
+
+class JiroChat:
+    def __init__(self) -> None:
+        pass
+
+
+class Weather:
+    def __init__(self) -> None:
+        pass
