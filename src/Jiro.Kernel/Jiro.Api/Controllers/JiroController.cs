@@ -1,5 +1,4 @@
 using Jiro.Api.Extensions;
-using Jiro.Core.Base;
 using Jiro.Core.Interfaces.IServices;
 using Microsoft.AspNetCore.Mvc;
 
@@ -19,6 +18,7 @@ public class JiroController : BaseController
     public async Task<IActionResult> PushCommand([FromBody] BasicQuery query)
     {
         var result = await _commandHandlerService.ExecuteCommandAsync(query.prompt);
+
         return Ok(result);
     }
 }

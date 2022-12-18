@@ -4,9 +4,13 @@ public class CommandResult : ICommandResult
 {
     public object? Data { get; set; }
 
-    public CommandResult Create(object? data)
+    private CommandResult(object? data)
     {
         Data = data;
-        return this;
+    }
+
+    public static CommandResult Create(object? data)
+    {
+        return new CommandResult(data);
     }
 }

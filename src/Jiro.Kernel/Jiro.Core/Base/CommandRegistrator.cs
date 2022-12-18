@@ -13,6 +13,7 @@ public static class CommandRegistrator
     {
         var assemblies = AppDomain.CurrentDomain.GetAssemblies();
 
+        // types that contain CommandContainer attribute
         var commandContainers = assemblies
             .SelectMany(asm => asm.GetTypes()
                 .Where(type =>
@@ -47,6 +48,7 @@ public static class CommandRegistrator
 
     private static List<CommandInfo> GetCommands(Type type)
     {
+
         List<CommandInfo> commandInfos = new();
         var methodInfos = type
             .GetMethods()
@@ -56,6 +58,7 @@ public static class CommandRegistrator
         var createMethodInvoker = typeof(CommandRegistrator)
             ?.GetMethod("CreateMethodInvoker");
 
+        // iterate thru all methods and extract command info
         foreach (var methodInfo in methodInfos)
         {
             if (methodInfo is null) continue;
@@ -79,11 +82,12 @@ public static class CommandRegistrator
         return commandInfos;
     }
 
-    public static Func<CommandBase, object[], Task> CreateMethodInvoker(MethodInfo methodInfo)
+    private static Func<CommandBase, object[], Task> CreateMethodInvoker(MethodInfo methodInfo)
     {
         var parameters = methodInfo.GetParameters();
         var paramsExp = new Expression[parameters.Length];
 
+        // set first param as Module instance that's fetched from DI container
         var instanceExp = Expression.Parameter(typeof(CommandBase), "instance");
         var argsExp = Expression.Parameter(typeof(object[]), "args");
 

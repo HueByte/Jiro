@@ -34,8 +34,8 @@ class JiroRequest:
 
 
 class JiroResponse:
-    def __init__(self, data, isSuccess, errors):
-        self.data = data
+    def __init__(self, result, isSuccess, errors):
+        self.result = result
         self.isSuccess = isSuccess
         self.errors = errors
 

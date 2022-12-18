@@ -18,7 +18,7 @@ namespace Jiro.Core.Commands.GPT
         {
             var result = await _gptService.ChatAsync(prompt);
 
-            return new CommandResult().Create(result);
+            return CommandResult.Create(result);
         }
     }
 }

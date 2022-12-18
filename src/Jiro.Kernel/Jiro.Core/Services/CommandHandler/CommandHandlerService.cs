@@ -34,7 +34,7 @@ namespace Jiro.Core.Services.CommandHandler
                 Name = commandInfo.Name,
                 Descriptor = commandInfo.Descriptor,
                 IsAsync = commandInfo.IsAsync,
-                Instance = scope.ServiceProvider.GetRequiredService(commandInfo.Container),
+                Instance = scope.ServiceProvider.GetRequiredService(commandInfo.Module),
             };
         }
 
@@ -54,7 +54,8 @@ namespace Jiro.Core.Services.CommandHandler
             await using var scope = _scopeFactory.CreateAsyncScope();
             (var commandName, var tokens) = GetCommandNameFromPrompt(prompt);
 
-            var command = GetCommand(commandName, scope);
+            // get command from CommandContainer by name and use scope to get instance of command module
+            Command? command = GetCommand(commandName, scope);
 
             CommandResponse result = new()
             {
@@ -66,10 +67,12 @@ namespace Jiro.Core.Services.CommandHandler
                 if (command.IsAsync)
                 {
                     OnLog?.Invoke("Running command [{0}]", new object[] { command.Name });
+
                     var task = command.Descriptor((CommandBase)command.Instance!, new object[] { prompt });
+
                     if (task is Task<ICommandResult> commandTask)
                     {
-                        result.Data = (await commandTask).Data;
+                        result.Result = await commandTask;
                     }
                     else
                     {
@@ -78,7 +81,7 @@ namespace Jiro.Core.Services.CommandHandler
                 }
                 else
                 {
-                    result.Data = ((ICommandResult)command.Descriptor.Invoke((CommandBase)command.Instance!, new object[] { prompt })).Data;
+                    result.Result = (ICommandResult)command.Descriptor.Invoke((CommandBase)command.Instance!, new object[] { prompt });
                 }
             }
             catch (Exception ex)

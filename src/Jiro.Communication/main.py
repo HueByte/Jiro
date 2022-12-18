@@ -13,8 +13,11 @@ async def main():
             print(lib.colors.ENDC, end=" ")
 
             if (prompt):
-                result = await jiro.send_request(prompt)
-                await jiro.print_response_message(result.data)
+                if (prompt.lower() == "exit"):
+                    break
+
+                response = await jiro.send_request(prompt)
+                await jiro.print_response_message(response.result['data'])
             else:
                 await jiro.print_response_message("Give me some message first")
         except BaseException as ex:
