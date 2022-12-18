@@ -13,12 +13,12 @@ namespace Jiro.Core.Services.GPTService
     {
         private readonly ILogger _logger;
         private readonly IConfiguration _config;
-        private readonly IHttpClientFactory _clientFactory;
+        private readonly HttpClient _client;
         public GPTService(ILogger<GPTService> logger, IConfiguration config, IHttpClientFactory clientFactory)
         {
             _logger = logger;
             _config = config;
-            _clientFactory = clientFactory;
+            _client = clientFactory.CreateClient(HttpClientNames.GPT_CLIENT);
         }
 
         public async Task<string> ChatAsync(string prompt)
@@ -43,9 +43,7 @@ namespace Jiro.Core.Services.GPTService
                 N = 1
             };
 
-            var client = _clientFactory.CreateClient("GPT");
-
-            var response = await client.PostAsJsonAsync(ApiEndpoints.GPT_COMPLETIONS, model);
+            var response = await _client.PostAsJsonAsync(ApiEndpoints.GPT_COMPLETIONS, model);
 
             if (response.IsSuccessStatusCode)
             {
