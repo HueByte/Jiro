@@ -9,6 +9,7 @@ public record BasicQuery(string prompt);
 public class JiroController : BaseController
 {
     private readonly ICommandHandlerService _commandHandlerService;
+
     public JiroController(ICommandHandlerService commandHandlerService)
     {
         _commandHandlerService = commandHandlerService;
