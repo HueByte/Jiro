@@ -21,8 +21,11 @@ namespace Jiro.Core.Services.CommandHandler
 
         private string GetCommandName(string[] tokens)
         {
-            if (tokens.Length >= 2 && (tokens[0].ToLower().StartsWith("command") || tokens[0].ToLower().StartsWith('$')))
-                return tokens[1].ToLower();
+            if (tokens.Length >= 2)
+            {
+                if (tokens[0].ToLower().StartsWith("command") || tokens[0].ToLower().StartsWith('$'))
+                    return tokens[1].ToLower();
+            }
 
             return _commandModule.DefaultCommand;
         }
