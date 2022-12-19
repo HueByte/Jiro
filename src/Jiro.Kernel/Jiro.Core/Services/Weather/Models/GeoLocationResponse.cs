@@ -19,7 +19,7 @@ namespace Jiro.Core.Services.Weather.Models
         public string OsmType { get; set; }
 
         [JsonPropertyName("osm_id")]
-        public int OsmId { get; set; }
+        public long OsmId { get; set; }
 
         [JsonPropertyName("boundingbox")]
         public List<string> Boundingbox { get; set; }
