@@ -21,7 +21,7 @@ namespace Jiro.Core.Services.CommandHandler
 
         private string GetCommandName(string[] tokens)
         {
-            if (tokens.Length >= 2 && (tokens[0].StartsWith("command") || tokens[0].StartsWith('$')))
+            if (tokens.Length >= 2 && (tokens[0].ToLower().StartsWith("command") || tokens[0].ToLower().StartsWith('$')))
                 return tokens[1].ToLower();
 
             return _commandModule.DefaultCommand;
@@ -70,7 +70,7 @@ namespace Jiro.Core.Services.CommandHandler
             var command = GetCommand(commandName, scope);
             var args = GetCommandArgs(command, tokens);
 
-            CommandResponse commandResult = new() { IsSuccess = true };
+            CommandResponse commandResult = new() { IsSuccess = true, CommandName = command.Name };
 
             try
             {
