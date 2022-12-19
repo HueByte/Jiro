@@ -23,7 +23,7 @@ async def main():
             else:
                 await jiro.print_response_message("Give me some message first")
         except BaseException as ex:
-            await jiro.print_response_message("Something went wrong, try again. " + str(ex))
+            await jiro.print_response_message("Something went wrong, try again.\n" + str(ex))
 
 
 asyncio.run(main())
