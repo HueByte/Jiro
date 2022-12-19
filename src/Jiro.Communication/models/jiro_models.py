@@ -23,6 +23,7 @@ class JiroResponse:
     result: CommandResult
     isSuccess: bool
     errors: list[str]
+    commandName: str
 
     def __init__(self, result: CommandResult, isSuccess: bool, errors: list[str]):
         self.result = result
