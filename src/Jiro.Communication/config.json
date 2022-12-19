@@ -1,3 +1,4 @@
 {
-    "jiroUrl": "http://localhost:18090"
+    "jiroUrl": "http://localhost:18090",
+    "chatSpeed": 0.02
 }
