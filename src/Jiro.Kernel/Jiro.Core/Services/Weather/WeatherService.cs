@@ -15,7 +15,7 @@ namespace Jiro.Core.Services.WeatherService
             _geoClient = clientFactory.CreateClient(HttpClientNames.GEOLOCATION_CLIENT);
         }
 
-        public async Task<object?> GetWeatherAsync(string city)
+        public async Task<string?> GetWeatherAsync(string city)
         {
             var locationInfo = await GetGeoLocationAsync(city);
 

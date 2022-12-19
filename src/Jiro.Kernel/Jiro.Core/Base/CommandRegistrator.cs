@@ -40,6 +40,8 @@ public static class CommandRegistrator
         CommandsContainer globalContainer = new();
         globalContainer.AddModules(commandModules);
         globalContainer.AddCommands(commandInfos);
+
+        // add default command attribute
         globalContainer.SetDefaultCommand(nameof(GPTCommand.Chat).ToLower());
         services.AddSingleton(globalContainer);
 

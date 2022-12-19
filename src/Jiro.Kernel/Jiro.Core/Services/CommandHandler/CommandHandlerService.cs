@@ -1,5 +1,3 @@
-using System.Linq.Expressions;
-using System.Runtime.InteropServices;
 using Jiro.Core.Base;
 using Jiro.Core.Entities;
 using Jiro.Core.Interfaces.IServices;
@@ -21,6 +19,30 @@ namespace Jiro.Core.Services.CommandHandler
             _scopeFactory = scopeFactory;
         }
 
+        private string GetCommandName(string[] tokens)
+        {
+            if (tokens.Length >= 2 && (tokens[0].StartsWith("command") || tokens[0].StartsWith('$')))
+                return tokens[1].ToLower();
+
+            return _commandModule.DefaultCommand;
+        }
+
+        private object[] GetCommandArgs(Command command, string[] tokens)
+        {
+            object[]? args;
+
+            if (command.Name == _commandModule.DefaultCommand)
+                args = new object[] { string.Join(' ', tokens) };
+
+            else if (tokens.Length >= 3)
+                args = tokens[2..].Cast<object>().ToArray();
+
+            else
+                args = Array.Empty<object>();
+
+            return args;
+        }
+
         private Command GetCommand(string? commandName, IServiceScope scope)
         {
             if (string.IsNullOrEmpty(commandName) || !_commandModule.Commands.TryGetValue(commandName, out CommandInfo? commandInfo))
@@ -38,36 +60,20 @@ namespace Jiro.Core.Services.CommandHandler
             };
         }
 
-        private static (string?, string[]?) GetCommandNameFromPrompt(string prompt)
-        {
-            if (prompt.StartsWith("command"))
-            {
-                string[] tokens = prompt.Split(Array.Empty<char>(), StringSplitOptions.RemoveEmptyEntries);
-                return (tokens[1].ToLower(), tokens[2..]);
-            }
-
-            return (null, null);
-        }
-
         public async Task<CommandResponse> ExecuteCommandAsync(string prompt)
         {
             await using var scope = _scopeFactory.CreateAsyncScope();
-            (var commandName, var tokens) = GetCommandNameFromPrompt(prompt);
 
-            // get command from CommandContainer by name and use scope to get instance of command module
-            Command? command = GetCommand(commandName, scope);
+            string[] tokens = prompt.Split(Array.Empty<char>(), StringSplitOptions.RemoveEmptyEntries);
 
-            CommandResponse result = new()
-            {
-                IsSuccess = true
-            };
+            var commandName = GetCommandName(tokens);
+            var command = GetCommand(commandName, scope);
+            var args = GetCommandArgs(command, tokens);
+
+            CommandResponse commandResult = new() { IsSuccess = true };
 
             try
             {
-                object[] args = tokens is not null
-                    ? tokens.Cast<object>().ToArray()
-                    : new object[] { prompt };
-
                 if (command.IsAsync)
                 {
                     OnLog?.Invoke("Running command [{0}]", new object[] { command.Name });
@@ -76,7 +82,7 @@ namespace Jiro.Core.Services.CommandHandler
 
                     if (task is Task<ICommandResult> commandTask)
                     {
-                        result.Result = await commandTask;
+                        commandResult.Result = await commandTask;
                     }
                     else
                     {
@@ -85,16 +91,17 @@ namespace Jiro.Core.Services.CommandHandler
                 }
                 else
                 {
-                    result.Result = (ICommandResult)command.Descriptor.Invoke((CommandBase)command.Instance!, args);
+                    commandResult.Result = (ICommandResult)command.Descriptor.Invoke((CommandBase)command.Instance!, args);
                 }
             }
             catch (Exception ex)
             {
-                result.IsSuccess = false;
-                result.Errors.Add(ex.Message);
+                commandResult.IsSuccess = false;
+                commandResult.Errors.Add(ex.Message);
+                _logger.LogError(ex, "Error while executing command [{name}]", command.Name);
             }
 
-            return result;
+            return commandResult;
         }
     }
 }
