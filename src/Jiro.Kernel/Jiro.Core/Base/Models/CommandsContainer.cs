@@ -2,6 +2,9 @@ using Jiro.Core.Entities;
 
 namespace Jiro.Core.Base;
 
+/// <summary>
+/// Global container for all commands and modules
+/// </summary>
 public class CommandsContainer
 {
     public string DefaultCommand { get; private set; } = string.Empty;

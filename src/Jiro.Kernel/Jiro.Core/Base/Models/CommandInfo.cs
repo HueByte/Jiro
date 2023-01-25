@@ -1,5 +1,8 @@
 namespace Jiro.Core.Base;
 
+/// <summary>
+/// Contains necessary information about a command to be executed
+/// </summary>
 public class CommandInfo
 {
     public string Name { get; } = string.Empty;

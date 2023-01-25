@@ -3,6 +3,9 @@ using Jiro.Core.Base;
 
 namespace Jiro.Core.Entities
 {
+    /// <summary>
+    /// Represents a command instance
+    /// </summary>
     public class Command
     {
         public string Name { get; set; } = string.Empty;

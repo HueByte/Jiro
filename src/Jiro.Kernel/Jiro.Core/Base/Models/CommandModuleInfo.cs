@@ -3,6 +3,9 @@ using Jiro.Core.Entities;
 
 namespace Jiro.Core.Base;
 
+/// <summary>
+/// Module information containing its commands
+/// </summary>
 public class CommandModuleInfo
 {
     public string Name { get; private set; } = string.Empty;

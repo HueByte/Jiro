@@ -19,6 +19,50 @@ namespace Jiro.Core.Services.CommandHandler
             _scopeFactory = scopeFactory;
         }
 
+        public async Task<CommandResponse> ExecuteCommandAsync(string prompt)
+        {
+            await using var scope = _scopeFactory.CreateAsyncScope();
+
+            string[] tokens = prompt.Split(Array.Empty<char>(), StringSplitOptions.RemoveEmptyEntries);
+
+            var commandName = GetCommandName(tokens);
+            var command = GetCommand(commandName, scope);
+            var args = GetCommandArgs(command, tokens);
+
+            CommandResponse commandResult = new() { IsSuccess = true, CommandName = command.Name };
+
+            try
+            {
+                if (command.IsAsync)
+                {
+                    OnLog?.Invoke("Running command [{0}]", new object[] { command.Name });
+
+                    var task = command.Descriptor((CommandBase)command.Instance!, args);
+
+                    if (task is Task<ICommandResult> commandTask)
+                    {
+                        commandResult.Result = await commandTask;
+                    }
+                    else
+                    {
+                        await task;
+                    }
+                }
+                else
+                {
+                    commandResult.Result = (ICommandResult)command.Descriptor.Invoke((CommandBase)command.Instance!, args);
+                }
+            }
+            catch (Exception ex)
+            {
+                commandResult.IsSuccess = false;
+                commandResult.Errors.Add(ex.Message);
+                _logger.LogError(ex, "Error while executing command [{name}]", command.Name);
+            }
+
+            return commandResult;
+        }
+
         private string GetCommandName(string[] tokens)
         {
             if (tokens.Length >= 2)
@@ -62,50 +106,6 @@ namespace Jiro.Core.Services.CommandHandler
                 IsAsync = commandInfo.IsAsync,
                 Instance = scope.ServiceProvider.GetRequiredService(commandInfo.Module),
             };
-        }
-
-        public async Task<CommandResponse> ExecuteCommandAsync(string prompt)
-        {
-            await using var scope = _scopeFactory.CreateAsyncScope();
-
-            string[] tokens = prompt.Split(Array.Empty<char>(), StringSplitOptions.RemoveEmptyEntries);
-
-            var commandName = GetCommandName(tokens);
-            var command = GetCommand(commandName, scope);
-            var args = GetCommandArgs(command, tokens);
-
-            CommandResponse commandResult = new() { IsSuccess = true, CommandName = command.Name };
-
-            try
-            {
-                if (command.IsAsync)
-                {
-                    OnLog?.Invoke("Running command [{0}]", new object[] { command.Name });
-
-                    var task = command.Descriptor((CommandBase)command.Instance!, args);
-
-                    if (task is Task<ICommandResult> commandTask)
-                    {
-                        commandResult.Result = await commandTask;
-                    }
-                    else
-                    {
-                        await task;
-                    }
-                }
-                else
-                {
-                    commandResult.Result = (ICommandResult)command.Descriptor.Invoke((CommandBase)command.Instance!, args);
-                }
-            }
-            catch (Exception ex)
-            {
-                commandResult.IsSuccess = false;
-                commandResult.Errors.Add(ex.Message);
-                _logger.LogError(ex, "Error while executing command [{name}]", command.Name);
-            }
-
-            return commandResult;
         }
     }
 }
