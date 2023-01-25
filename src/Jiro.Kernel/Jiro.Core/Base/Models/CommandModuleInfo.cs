@@ -3,7 +3,7 @@ using Jiro.Core.Entities;
 
 namespace Jiro.Core.Base;
 
-public class CommandModule
+public class CommandModuleInfo
 {
     public string Name { get; private set; } = string.Empty;
     public Dictionary<string, CommandInfo> Commands { get; private set; } = new();

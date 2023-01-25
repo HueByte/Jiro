@@ -1,6 +1,6 @@
 using System.Reflection.Metadata;
 
-namespace Jiro.Core.Attributes
+namespace Jiro.Core.Base.Attributes
 {
     [AttributeUsage(AttributeTargets.Method)]
     public class CommandAttribute : Attribute

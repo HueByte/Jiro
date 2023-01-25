@@ -23,7 +23,8 @@ namespace Jiro.Core.Services.CommandHandler
         {
             if (tokens.Length >= 2)
             {
-                if (tokens[0].ToLower().StartsWith("command") || tokens[0].ToLower().StartsWith('$'))
+                var commandParam = tokens[0].ToLower();
+                if (commandParam.StartsWith("command") || commandParam.StartsWith('$'))
                     return tokens[1].ToLower();
             }
 

@@ -5,7 +5,7 @@ namespace Jiro.Core.Base;
 public class CommandsContainer
 {
     public string DefaultCommand { get; private set; } = string.Empty;
-    public Dictionary<string, CommandModule> CommandModules { get; private set; } = new();
+    public Dictionary<string, CommandModuleInfo> CommandModules { get; private set; } = new();
     public Dictionary<string, CommandInfo> Commands { get; private set; } = new();
 
     public void SetDefaultCommand(string defaultCommand) => DefaultCommand = defaultCommand;
@@ -18,7 +18,7 @@ public class CommandsContainer
         }
     }
 
-    public void AddModules(List<CommandModule> commandModules)
+    public void AddModules(List<CommandModuleInfo> commandModules)
     {
         foreach (var commandModule in commandModules)
         {

@@ -1,12 +1,12 @@
 using System.Resources;
-using Jiro.Core.Attributes;
 using Jiro.Core.Base;
+using Jiro.Core.Base.Attributes;
 using Jiro.Core.Interfaces.IServices;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Jiro.Core.Commands.Weather
 {
-    [CommandContainer("Weather")]
+    [CommandModule("Weather")]
     public class WeatherCommand : CommandBase
     {
         private readonly IWeatherService _weatherService;

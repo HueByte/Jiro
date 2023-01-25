@@ -1,10 +1,10 @@
-using Jiro.Core.Attributes;
 using Jiro.Core.Base;
+using Jiro.Core.Base.Attributes;
 using Jiro.Core.Interfaces.IServices;
 
 namespace Jiro.Core.Commands.GPT
 {
-    [CommandContainer("GPT")]
+    [CommandModule("GPT")]
     public class GPTCommand : CommandBase
     {
         private readonly IGPTService _gptService;

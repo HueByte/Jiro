@@ -1,7 +1,7 @@
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using Jiro.Core.Attributes;
+using Jiro.Core.Base.Attributes;
 using Jiro.Core.Commands.GPT;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -14,35 +14,36 @@ public static class CommandRegistrator
         var assemblies = AppDomain.CurrentDomain.GetAssemblies();
 
         // types that contain CommandContainer attribute
-        var commandContainers = assemblies
+        var commandModules = assemblies
             .SelectMany(asm => asm.GetTypes()
                 .Where(type =>
                     !type.IsInterface
-                    && type.GetCustomAttributes(typeof(CommandContainerAttribute), false).Length > 0
+                    && type.GetCustomAttributes(typeof(CommandModuleAttribute), false).Length > 0
             ))
             .ToList();
 
 
-        List<CommandModule> commandModules = new();
-        List<CommandInfo> commandInfos = new();
-        foreach (var container in commandContainers)
+        List<CommandModuleInfo> commandModulesInfos = new();
+        foreach (var container in commandModules)
         {
-            CommandModule commandModule = new();
-            var commands = GetCommands(container);
-            commandModule.SetCommands(commands);
-            commandModule.SetName(container.GetCustomAttribute<CommandContainerAttribute>()?.ContainerName ?? "");
+            CommandModuleInfo commandModuleInfo = new();
+            var commandsInfos = GetCommands(container);
+            commandModuleInfo.SetCommands(commandsInfos);
+            commandModuleInfo.SetName(container.GetCustomAttribute<CommandModuleAttribute>()?.ModuleName ?? "");
 
             services.AddScoped(container);
-            commandModules.Add(commandModule);
-            commandInfos.AddRange(commands);
+            commandModulesInfos.Add(commandModuleInfo);
         };
 
         CommandsContainer globalContainer = new();
-        globalContainer.AddModules(commandModules);
-        globalContainer.AddCommands(commandInfos);
 
         // add default command attribute
         globalContainer.SetDefaultCommand(nameof(GPTCommand.Chat).ToLower());
+        globalContainer.AddModules(commandModulesInfos);
+        globalContainer.AddCommands(commandModulesInfos
+            .SelectMany(x => x.Commands.Select(e => e.Value))
+            .ToList());
+
         services.AddSingleton(globalContainer);
 
         return services;
@@ -50,7 +51,6 @@ public static class CommandRegistrator
 
     private static List<CommandInfo> GetCommands(Type type)
     {
-
         List<CommandInfo> commandInfos = new();
         var methodInfos = type
             .GetMethods()
@@ -69,7 +69,7 @@ public static class CommandRegistrator
 
             if (delcaringType is null) continue;
 
-            var compiledLambda = CreateMethodInvoker(methodInfo!);
+            var compiledLambda = CompileLambda(methodInfo!);
 
             CommandInfo commandInfo = new(
                 methodInfo!.GetCustomAttribute<CommandAttribute>()?.CommandName.ToLower() ?? "",
@@ -84,7 +84,7 @@ public static class CommandRegistrator
         return commandInfos;
     }
 
-    private static Func<CommandBase, object[], Task> CreateMethodInvoker(MethodInfo methodInfo)
+    private static Func<CommandBase, object[], Task> CompileLambda(MethodInfo methodInfo)
     {
         var parameters = methodInfo.GetParameters();
         var paramsExp = new Expression[parameters.Length];
