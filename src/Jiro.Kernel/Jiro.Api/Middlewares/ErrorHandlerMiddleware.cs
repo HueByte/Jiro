@@ -29,8 +29,8 @@ namespace Jiro.Api.Middlewares
 
                 context.Response.StatusCode = ex switch
                 {
-                    HandledException => (int)HttpStatusCode.OK,
-                    HandledExceptionList => (int)HttpStatusCode.OK,
+                    HandledException => (int)HttpStatusCode.BadRequest,
+                    HandledExceptionList => (int)HttpStatusCode.BadRequest,
                     TokenException => (int)HttpStatusCode.Unauthorized,
                     _ => (int)HttpStatusCode.BadRequest
                 };
