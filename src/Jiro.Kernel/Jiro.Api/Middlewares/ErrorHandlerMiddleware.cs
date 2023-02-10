@@ -29,6 +29,7 @@ namespace Jiro.Api.Middlewares
 
                 context.Response.StatusCode = ex switch
                 {
+                    CommandException => (int)HttpStatusCode.BadRequest,
                     HandledException => (int)HttpStatusCode.BadRequest,
                     HandledExceptionList => (int)HttpStatusCode.BadRequest,
                     TokenException => (int)HttpStatusCode.Unauthorized,
@@ -45,6 +46,12 @@ namespace Jiro.Api.Middlewares
         {
             ApiResponse<object> errorResult = exception switch
             {
+                CommandException ex => new()
+                {
+                    Data = ex.CommandName,
+                    Errors = new string[] { exception.Message },
+                    IsSuccess = false
+                },
                 HandledException => new()
                 {
                     Data = default,

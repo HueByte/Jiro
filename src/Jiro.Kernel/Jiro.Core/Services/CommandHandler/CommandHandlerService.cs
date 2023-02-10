@@ -28,8 +28,7 @@ namespace Jiro.Core.Services.CommandHandler
             var commandName = GetCommandName(tokens);
             var command = GetCommand(commandName, scope);
             var args = GetCommandArgs(command, tokens);
-
-            CommandResponse commandResult = new() { IsSuccess = true, CommandName = command.Name };
+            CommandResponse commandResult = new() { CommandName = command.Name };
 
             try
             {
@@ -53,11 +52,13 @@ namespace Jiro.Core.Services.CommandHandler
                     commandResult.Result = (ICommandResult)command.Descriptor.Invoke((CommandBase)command.Instance!, args);
                 }
             }
-            catch (Exception ex)
+            catch (CommandException)
             {
-                commandResult.IsSuccess = false;
-                commandResult.Errors.Add(ex.Message);
-                _logger.LogError(ex, "Error while executing command [{name}]", command.Name);
+                throw;
+            }
+            catch (Exception exception)
+            {
+                throw new CommandException(commandName, exception.Message);
             }
 
             return commandResult;

@@ -1,39 +1,29 @@
-import { useEffect } from "react";
-import logo from "./logo.svg";
 import "./App.css";
-import { JiroService } from "./api";
+import { BrowserRouter, Router } from "react-router-dom";
+import ClientRouter from "./routes/ClientRouter";
+// import Loader from "./components/Loaders/Loader";
+import { ReactNode, Suspense } from "react";
 
 function App() {
-  useEffect(() => {
-    (async () => {
-      let test = await fetch("/api");
-      console.log(test);
-
-      let result: any = await JiroService.postApiJiro({
-        requestBody: { prompt: "Hello World!" },
-      });
-      console.log(result);
-    })();
-  }, []);
+  // const history: BrowserHistory = createBrowserHistory();
 
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <BrowserRouter>
+      <Suspense fallback={<div>Loading...</div>}>
+        <ErrorBoundary>
+          <ClientRouter />
+        </ErrorBoundary>
+      </Suspense>
+    </BrowserRouter>
   );
 }
+
+interface Props {
+  children?: ReactNode;
+}
+
+const ErrorBoundary = ({ children }: Props) => {
+  return <>{children}</>;
+};
 
 export default App;

@@ -11,10 +11,19 @@ public class HandledExceptionList : Exception
 
 public class HandledException : Exception
 {
-    public HandledException(string ExceptionMessage) : base(ExceptionMessage) { }
+    public HandledException(string exceptionMessage) : base(exceptionMessage) { }
 }
 
 public class TokenException : Exception
 {
-    public TokenException(string ExceptionMessage) : base(ExceptionMessage) { }
+    public TokenException(string exceptionMessage) : base(exceptionMessage) { }
+}
+
+public class CommandException : Exception
+{
+    public string CommandName { get; set; }
+    public CommandException(string commandName, string exceptionMessage) : base(exceptionMessage)
+    {
+        CommandName = commandName;
+    }
 }
