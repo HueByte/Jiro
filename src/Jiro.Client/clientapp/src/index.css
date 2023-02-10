@@ -2,6 +2,20 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer components {
+  .mts-input {
+    @apply rounded-md border-2 border-transparent bg-altBackgroundColorLight p-2 text-textColor duration-300;
+  }
+
+  .mts-input:focus {
+    @apply border-2 border-neutralDarker;
+  }
+
+  .mts-input:hover {
+    @apply border-2 border-secondary;
+  }
+}
+
 body {
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",

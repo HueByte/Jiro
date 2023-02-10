@@ -3,9 +3,9 @@ import Menu from "./Menu";
 
 const MainLayout = () => {
   return (
-    <div className="flex w-full flex-row">
+    <div className="flex h-screen w-full flex-row">
       <Menu />
-      <div>
+      <div className="flex w-full">
         <Outlet />
       </div>
     </div>
