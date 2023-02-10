@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 
-namespace Jiro.Api.Extensions
+namespace Jiro.Api.Base
 {
     [ApiController]
     [Route("api/[controller]")]

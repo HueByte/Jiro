@@ -8,9 +8,11 @@ namespace Jiro.Api.Configurator
             _eventsConfigurator = provider.GetRequiredService<EventsConfigurator>();
         }
 
-        public void ConfigureEvents()
+        public AppConfigurator ConfigureEvents()
         {
             _eventsConfigurator?.ConfigureLoggingEvents();
+
+            return this;
         }
     }
 }

@@ -1,10 +1,8 @@
-using Jiro.Api.Extensions;
-using Jiro.Core.Interfaces.IServices;
+using Jiro.Core;
+using Jiro.Core.Base;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Jiro.Api.Controllers;
-
-public record BasicQuery(string prompt);
 
 public class JiroController : BaseController
 {
@@ -16,10 +14,31 @@ public class JiroController : BaseController
     }
 
     [HttpPost]
-    public async Task<IActionResult> PushCommand([FromBody] BasicQuery query)
+    public async Task<IActionResult> PushCommand([FromBody] JiroPromptDTO query)
     {
-        var result = await _commandHandlerService.ExecuteCommandAsync(query.prompt);
+        var result = await _commandHandlerService.ExecuteCommandAsync(query.Prompt);
 
-        return Ok(result);
+        return ApiResponseCreator.Data(result);
+    }
+
+    [HttpGet("1")]
+    public IActionResult Error1()
+    {
+        throw new HandledException("Error1");
+        return Ok();
+    }
+
+    [HttpGet("2")]
+    public IActionResult Error2()
+    {
+        throw new HandledExceptionList(new string[] { "Error1", "Error2" });
+        return Ok();
+    }
+
+    [HttpGet("3")]
+    public IActionResult Error3()
+    {
+        throw new Exception("Error1");
+        return Ok();
     }
 }
