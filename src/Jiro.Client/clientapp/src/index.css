@@ -3,16 +3,40 @@
 @tailwind utilities;
 
 @layer components {
-  .mts-input {
+  .base-input {
     @apply rounded-md border-2 border-transparent bg-altBackgroundColorLight p-2 text-textColor duration-300;
   }
 
-  .mts-input:focus {
+  .base-input:focus {
     @apply border-2 border-neutralDarker;
   }
 
-  .mts-input:hover {
+  .base-input:hover {
     @apply border-2 border-secondary;
+  }
+
+  .base-bg-gradient-r {
+    @apply bg-gradient-to-r from-neutralDarker to-secondaryLight;
+  }
+
+  .base-border-gradient-r {
+    @apply rounded-xl border-4 border-transparent bg-gradient-to-r from-neutralDarker to-primary bg-clip-border bg-origin-border;
+  }
+
+  .glow {
+    box-shadow: 0 0 10px 5px #ffa69e;
+  }
+}
+
+@keyframes glow {
+  0% {
+    box-shadow: 0 0 10px 5px #ffa69e;
+  }
+  50% {
+    box-shadow: none;
+  }
+  100% {
+    box-shadow: 0 0 10px 5px #ffa69e;
   }
 }
 
@@ -23,9 +47,34 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  scroll-behavior: smooth;
 }
 
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
     monospace;
+}
+
+/* width */
+::-webkit-scrollbar {
+  width: 4px;
+  height: 6px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+  background: #001829;
+  border-radius: 10px;
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+  border-radius: 10px;
+  background: #da3f67;
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+  background: #c62368;
+  cursor: pointer;
 }

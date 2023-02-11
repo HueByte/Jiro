@@ -23,7 +23,7 @@ const Menu = () => {
     <>
       <div
         className={`fixed z-50 flex h-full w-[256px] flex-col bg-element bg-opacity-90 transition duration-300 backdrop-blur-sm${
-          isOpen ? " translate-x-[-256px]" : ""
+          isOpen ? "" : " translate-x-[-256px]"
         }`}
       >
         <div className="relative flex w-full flex-col gap-2 pt-12">
@@ -42,7 +42,7 @@ const Menu = () => {
       </div>
       <div
         className={`absolute top-4 left-4 text-3xl transition duration-1000 hover:scale-125 hover:cursor-pointer${
-          isOpen ? "" : " opacity-0"
+          isOpen ? " opacity-0" : ""
         }`}
         onClick={() => setIsOpen(!isOpen)}
       >

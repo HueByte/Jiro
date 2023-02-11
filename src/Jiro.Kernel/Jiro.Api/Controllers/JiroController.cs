@@ -14,7 +14,7 @@ public class JiroController : BaseController
     }
 
     [HttpPost]
-    [ProducesResponseType(typeof(ApiResponse<JiroPromptDTO>), 200)]
+    [ProducesResponseType(typeof(ApiResponse<CommandResponse>), 200)]
     [ProducesResponseType(typeof(ApiResponse<object>), 400)]
     public async Task<IActionResult> PushCommand([FromBody] JiroPromptDTO query)
     {
