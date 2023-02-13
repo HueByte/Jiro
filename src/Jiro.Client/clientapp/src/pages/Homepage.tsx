@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { BiMailSend } from "react-icons/bi";
 import { CommandResponse, JiroService } from "../api";
 import jiroAvatar from "../assets/Jiro.png";
-import CommandOutputRenderer from "./components/CommandOutputRenderer";
+import { CommandOutputRenderer } from "./components";
 import { UserCommand } from "./Models";
 
 const Homepage = () => {
@@ -78,7 +78,7 @@ const Homepage = () => {
   };
 
   return (
-    <div className="flex w-full flex-row justify-center gap-6 px-8 pt-8 lg:flex-col">
+    <div className="flex w-full flex-row justify-center gap-6 px-8 pt-8 lg:flex-col md:px-4">
       <div
         className={`${
           isFetching ? "shadow-lg shadow-accent3 " : ""
