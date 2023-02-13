@@ -2,34 +2,51 @@ import { useState } from "react";
 import { GiHamburgerMenu } from "react-icons/gi";
 import { HiOutlineX } from "react-icons/hi";
 import { NavLink } from "react-router-dom";
+import { AiFillFire } from "react-icons/ai";
 
 const Menu = () => {
   const [isOpen, setIsOpen] = useState(false);
   const menuItems = [
     {
+      icon: <AiFillFire className="inline" />,
+      path: "/",
       value: "Home",
     },
     {
+      icon: <HiOutlineX className="inline" />,
+      path: "/1",
       value: "Home",
     },
     {
+      icon: <HiOutlineX className="inline" />,
+      path: "/2",
       value: "Home",
     },
     {
+      icon: <HiOutlineX className="inline" />,
+      path: "/3",
       value: "Home",
     },
   ];
   return (
     <>
       <div
-        className={`fixed z-50 flex h-full w-[256px] flex-col bg-element bg-opacity-90 transition duration-300 backdrop-blur-sm${
-          isOpen ? "" : " translate-x-[-256px]"
+        className={`fixed z-50 flex h-full w-[400px] flex-col bg-backgroundColor bg-opacity-70 transition duration-300 md:w-full backdrop-blur-sm${
+          isOpen ? "" : " translate-x-[-400px] md:-translate-x-full"
         }`}
       >
-        <div className="relative flex w-full flex-col gap-2 pt-12">
+        <div className="relative flex w-full flex-col gap-2 pt-14 md:items-center">
           {menuItems.map((item, index) => (
-            <NavLink to="/" className="p-4" key={index}>
-              {item.value}
+            <NavLink
+              to={item.path}
+              className={(navData) =>
+                `${
+                  navData.isActive ? "menu-active " : ""
+                }p-4 text-xl font-bold transition duration-300 hover:bg-accent6 md:w-full md:text-center md:text-3xl`
+              }
+              key={index}
+            >
+              {item.icon} {item.value}
             </NavLink>
           ))}
           <div

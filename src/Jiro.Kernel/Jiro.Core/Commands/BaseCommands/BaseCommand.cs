@@ -6,15 +6,22 @@ namespace Jiro.Core.Commands.BaseCommands
     [CommandModule("BaseCommands")]
     public class BaseCommand : CommandBase
     {
-        public BaseCommand()
+        private readonly CommandsContainer _commandsContainer;
+        public BaseCommand(CommandsContainer commandsContainer)
         {
-
+            _commandsContainer = commandsContainer;
         }
 
         [Command("help")]
         public async Task<ICommandResult> Help()
         {
-            return CommandResult.Create("Help");
+            var commands = _commandsContainer.Commands
+                .Select(cmd => cmd.Key)
+                .ToList();
+
+            var helpMessage = $"Commands avaliable: {string.Join(", ", commands)}";
+
+            return CommandResult.Create(helpMessage);
         }
     }
 }

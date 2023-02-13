@@ -23,6 +23,10 @@
     @apply rounded-xl border-4 border-transparent bg-gradient-to-r from-neutralDarker to-primary bg-clip-border bg-origin-border;
   }
 
+  .menu-active {
+    @apply bg-gradient-to-r from-primary hover:bg-transparent md:from-transparent md:via-primary md:to-transparent;
+  }
+
   .glow {
     box-shadow: 0 0 10px 5px #ffa69e;
   }
