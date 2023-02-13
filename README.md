@@ -1,5 +1,5 @@
-# ✨ Jiro
-### Virtual Assistant powered by ChatGPT and custom code integration! 
+# ✨ `Jiro `
+### Virtual Assistant powered by ChatGPT (once API gets released) and custom code integration! 
 ### This assistant combines the cutting-edge language processing capabilities of OpenAI's ChatGPT with the flexibility and awesomeness of Jiro plugins.
 
 # ⚗️ Dev
