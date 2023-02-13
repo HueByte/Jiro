@@ -33,7 +33,7 @@ export const CommandOutputRenderer = memo(
             <div>
               {command?.isLoading ? (
                 <div>
-                  <span className="text-accent">Jiro: </span>...
+                  <span className="animate-pulse text-accent">Jiro: </span>...
                 </div>
               ) : (
                 <span>Something went wrong</span>

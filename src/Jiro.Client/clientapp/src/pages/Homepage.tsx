@@ -6,18 +6,11 @@ import { CommandOutputRenderer } from "./components";
 import { UserCommand } from "./Models";
 
 const Homepage = () => {
-  const [commands, setCommands] = useState<UserCommand[]>([]);
   const messageInputRef = React.useRef<HTMLInputElement | null>(null);
   const chatContainerRef = React.useRef<HTMLDivElement | null>(null);
+  const [commands, setCommands] = useState<UserCommand[]>([]);
+  const [newDataAvailable, setNewDataAvailable] = useState<CommandResponse>();
   const [isFetching, setIsFetching] = useState(false);
-  const [newData, setNewData] = useState<CommandResponse>();
-
-  useEffect(() => {
-    chatContainerRef.current?.scrollTo(
-      0,
-      chatContainerRef.current.scrollHeight
-    );
-  }, []);
 
   useEffect(() => {
     chatContainerRef.current?.scrollTo(
@@ -28,19 +21,21 @@ const Homepage = () => {
 
   useEffect(() => {
     (async () => {
-      if (!newData) return;
+      if (!newDataAvailable) return;
 
       let userCommand: UserCommand = {
         prompt: commands[commands.length - 1].prompt,
-        response: newData,
+        response: newDataAvailable,
         isLoading: false,
       };
 
       setCommands((previous) => {
         return [...previous.slice(0, -1), userCommand];
       });
+
+      setIsFetching(false);
     })();
-  }, [newData]);
+  }, [newDataAvailable]);
 
   const sendMessage = async () => {
     if (
@@ -70,8 +65,7 @@ const Homepage = () => {
       },
     });
 
-    setNewData(result.data);
-    setIsFetching(false);
+    setNewDataAvailable(result.data);
 
     // scroll to the bottom of the chat
     messageInputRef.current?.focus();
