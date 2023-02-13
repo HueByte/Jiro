@@ -14,9 +14,8 @@ export const GraphOutput = (props: { command: any }) => {
   const { command } = props;
   const [data, setData] = useState<any>(null);
   const [units, setUnits] = useState<any>(null);
-  const [summary, setSummary] = useState<any>(null);
   const [members, setMembers] = useState<string[]>([]);
-  let colors = [
+  const colors = [
     "#c62368",
     "#7300ff",
     "#FFA69E",
@@ -26,18 +25,18 @@ export const GraphOutput = (props: { command: any }) => {
   ];
 
   useEffect(() => {
-    let reqData = command.result?.data.slice(0, 24);
-
     // convert date to local time
-    reqData = reqData.map((item: any, index: any) => {
-      return {
-        ...item,
-        date: new Date(item.date + "Z").toLocaleTimeString([], {
-          hour: "2-digit",
-          minute: "2-digit",
-        }),
-      };
-    });
+    let reqData = command.result?.data
+      .slice(0, 24)
+      .map((item: any, index: any) => {
+        return {
+          ...item,
+          date: new Date(item.date + "Z").toLocaleTimeString([], {
+            hour: "2-digit",
+            minute: "2-digit",
+          }),
+        };
+      });
 
     // get members
     let props = Object.getOwnPropertyNames(command.result?.data[0]);
@@ -46,8 +45,6 @@ export const GraphOutput = (props: { command: any }) => {
     setUnits(command.result?.units);
     setMembers(props);
   }, []);
-
-  const average = (arr: any[]) => arr.reduce((a, b) => a + b) / arr.length;
 
   const getColor = () => {
     return colors[Math.floor(Math.random() * colors.length)];
@@ -87,21 +84,6 @@ export const GraphOutput = (props: { command: any }) => {
                 <Legend />
               </LineChart>
             </ResponsiveContainer>
-            {/* <div>
-              Average:{" "}
-              <span>
-                {" "}
-                {summary.avgTemp.toFixed(2)} {units.temp}{" "}
-              </span>
-              <span>
-                {" "}
-                {summary.avgWind.toFixed(2)} {units.wind}
-              </span>
-              <span>
-                {" "}
-                {summary.avgRain.toFixed(2)} {units.rain}
-              </span>
-            </div> */}
           </div>
         ) : (
           <></>
