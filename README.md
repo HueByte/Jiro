@@ -1,14 +1,14 @@
-# ✨ `Jiro `
+# ✨ Jiro
 ### Virtual Assistant powered by ChatGPT and custom code integration! 
 ### This assistant combines the cutting-edge language processing capabilities of OpenAI's ChatGPT with the flexibility and awesomeness of Jiro plugins.
 
-# ⚗️ `Dev`
+# ⚗️ Dev
 ## `Requirements`
 - dotnet SDK
 - Python
 - Node
 
-## `How to run`
+## How to run
 ### **Jiro API**
 1. navigate to Jiro.Kernel/Jiro.Api
 2. rename `appsettings.example.json` to `appsettings.json` and configure it up to your needs

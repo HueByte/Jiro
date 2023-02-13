@@ -15,7 +15,7 @@ namespace Jiro.Core.Commands.Weather
             _weatherService = weatherService;
         }
 
-        [Command("weather")]
+        [Command("weather", CommandType.Graph)]
         public async Task<ICommandResult> Weather(string location)
         {
             var result = await _weatherService.GetWeatherAsync(location);

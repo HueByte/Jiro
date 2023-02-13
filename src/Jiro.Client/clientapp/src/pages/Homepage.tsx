@@ -1,13 +1,16 @@
 import React, { useEffect, useState } from "react";
 import { BiMailSend } from "react-icons/bi";
-import { JiroService } from "../api";
+import { CommandResponse, JiroService } from "../api";
 import jiroAvatar from "../assets/Jiro.png";
+import CommandOutputRenderer from "./components/CommandOutputRenderer";
+import { UserCommand } from "./Models";
 
 const Homepage = () => {
-  const [messages, setMessages] = useState<string[]>([]);
+  const [commands, setCommands] = useState<UserCommand[]>([]);
   const messageInputRef = React.useRef<HTMLInputElement | null>(null);
   const chatContainerRef = React.useRef<HTMLDivElement | null>(null);
   const [isFetching, setIsFetching] = useState(false);
+  const [newData, setNewData] = useState<CommandResponse>();
 
   useEffect(() => {
     chatContainerRef.current?.scrollTo(
@@ -23,6 +26,22 @@ const Homepage = () => {
     );
   }, [isFetching]);
 
+  useEffect(() => {
+    (async () => {
+      if (!newData) return;
+
+      let userCommand: UserCommand = {
+        prompt: commands[commands.length - 1].prompt,
+        response: newData,
+        isLoading: false,
+      };
+
+      setCommands((previous) => {
+        return [...previous.slice(0, -1), userCommand];
+      });
+    })();
+  }, [newData]);
+
   const sendMessage = async () => {
     if (
       isFetching ||
@@ -32,23 +51,27 @@ const Homepage = () => {
       return;
 
     // clear the input field
-    let local = messageInputRef.current?.value;
-    messageInputRef!.current!.value = "";
+    let promptValue = messageInputRef.current?.value;
+    messageInputRef.current!.value = "";
 
-    // append user message to the chat
-    setMessages([...messages, local as string]);
     setIsFetching(true);
+
+    let userCommand: UserCommand = {
+      prompt: promptValue,
+      response: undefined,
+      isLoading: true,
+    };
+
+    setCommands([...commands, userCommand]);
 
     let result = await JiroService.postApiJiro({
       requestBody: {
-        prompt: local,
+        prompt: promptValue,
       },
     });
 
+    setNewData(result.data);
     setIsFetching(false);
-
-    // append response to the chat
-    setMessages((previous) => [...previous, result?.data?.result?.data]);
 
     // scroll to the bottom of the chat
     messageInputRef.current?.focus();
@@ -72,23 +95,15 @@ const Homepage = () => {
           ref={chatContainerRef}
           className="mx-12 my-4 flex flex-1 flex-col overflow-y-auto overflow-x-hidden pr-2"
         >
-          {messages.map((message, index) => {
-            let author = index % 2 === 0 ? "Me" : "Jiro";
-            return (
-              <div key={index} className="my-1 break-words">
-                <>
-                  <span
-                    className={`${
-                      index % 2 ? "text-accent3 " : "text-accent "
-                    }font-bold`}
-                  >
-                    {author}
-                  </span>
-                  : {message}
-                </>
-              </div>
-            );
-          })}
+          {commands?.length > 0 &&
+            commands?.map((command, index) => {
+              let author = index % 2 === 0 ? "Me" : "Jiro";
+              return (
+                <div key={index} className="my-1 break-words">
+                  <CommandOutputRenderer command={command} />
+                </div>
+              );
+            })}
         </div>
         <div className="relative h-fit px-12 py-4">
           <input
