@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { BiMailSend } from "react-icons/bi";
-import { CommandResponse, JiroService } from "../api";
+import * as api from "../api";
 import jiroAvatar from "../assets/Jiro.png";
 import { CommandOutputRenderer } from "./components";
 import { UserCommand } from "./Models";
@@ -9,7 +9,8 @@ const Homepage = () => {
   const messageInputRef = React.useRef<HTMLInputElement | null>(null);
   const chatContainerRef = React.useRef<HTMLDivElement | null>(null);
   const [commands, setCommands] = useState<UserCommand[]>([]);
-  const [newDataAvailable, setNewDataAvailable] = useState<CommandResponse>();
+  const [newDataAvailable, setNewDataAvailable] =
+    useState<api.ICommandResultCommandResponse>();
   const [isFetching, setIsFetching] = useState(false);
 
   useEffect(() => {
@@ -59,7 +60,7 @@ const Homepage = () => {
 
     setCommands([...commands, userCommand]);
 
-    let result = await JiroService.postApiJiro({
+    let result = await api.JiroService.postApiJiro({
       requestBody: {
         prompt: promptValue,
       },

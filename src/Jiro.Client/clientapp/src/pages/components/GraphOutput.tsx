@@ -9,50 +9,53 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { CommandResponse } from "../../api";
 
-export const GraphOutput = (props: { command: CommandResponse }) => {
+export const GraphOutput = (props: { command: any }) => {
   const { command } = props;
   const [data, setData] = useState<any>(null);
   const [units, setUnits] = useState<any>(null);
   const [summary, setSummary] = useState<any>(null);
+  const [members, setMembers] = useState<string[]>([]);
+  let colors = [
+    "#c62368",
+    "#7300ff",
+    "#FFA69E",
+    "#861657",
+    "#00fa9a",
+    "#fa7268",
+  ];
 
   useEffect(() => {
-    let data = JSON.parse(command.result?.data);
-    if (data && data.hourly) {
-      let hourly = data.hourly;
+    let reqData = command.result?.data.slice(0, 24);
 
-      let finalData: any = hourly.time
-        .slice(0, 24)
-        .map((item: any, index: any) => {
-          return {
-            time: new Date(item + "Z").toLocaleTimeString([], {
-              hour: "2-digit",
-              minute: "2-digit",
-            }),
-            temp: hourly.temperature_2m[index],
-            wind: hourly.windspeed_10m[index],
-            rain: hourly.rain[index],
-          };
-        });
+    // convert date to local time
+    reqData = reqData.map((item: any, index: any) => {
+      return {
+        ...item,
+        date: new Date(item.date + "Z").toLocaleTimeString([], {
+          hour: "2-digit",
+          minute: "2-digit",
+        }),
+      };
+    });
 
-      setUnits({
-        rain: data.hourly_units.rain,
-        wind: data.hourly_units.windspeed_10m,
-        temp: data.hourly_units.temperature_2m,
-      });
+    // get members
+    let props = Object.getOwnPropertyNames(command.result?.data[0]);
 
-      setData(finalData);
-
-      setSummary({
-        avgRain: average(hourly.rain),
-        avgTemp: average(hourly.temperature_2m),
-        avgWind: average(hourly.windspeed_10m),
-      });
-    }
+    setData(reqData);
+    setUnits(command.result?.units);
+    setMembers(props);
   }, []);
 
   const average = (arr: any[]) => arr.reduce((a, b) => a + b) / arr.length;
+
+  const getColor = () => {
+    return colors[Math.floor(Math.random() * colors.length)];
+  };
+
+  const isNumeric = (val: string): boolean => {
+    return !isNaN(Number(val));
+  };
 
   return (
     <div className="my-1 break-words">
@@ -62,32 +65,29 @@ export const GraphOutput = (props: { command: CommandResponse }) => {
           <div>
             <ResponsiveContainer width="96%" height={500}>
               <LineChart data={data}>
-                <Line
-                  type="monotone"
-                  dataKey="temp"
-                  stroke="#c62368"
-                  unit={units.temp}
-                />
-                <Line
-                  type="monotone"
-                  dataKey="wind"
-                  stroke="#861657"
-                  unit={units.wind}
-                />
-                <Line
-                  type="monotone"
-                  dataKey="rain"
-                  stroke="#7300ff"
-                  unit={units.rain}
-                />
+                {members.map((member, index) => {
+                  let instance = data[0];
+                  let value = instance[member];
+                  if (!isNumeric(value)) return;
+
+                  return (
+                    <Line
+                      key={index}
+                      type="monotone"
+                      dataKey={member}
+                      unit={units[member]}
+                      stroke={getColor()}
+                    />
+                  );
+                })}
                 <CartesianGrid stroke="#FFF" />
-                <XAxis dataKey="time" />
+                <XAxis angle={-10} dataKey={command.result.xAxis} />
                 <YAxis />
                 <Tooltip />
                 <Legend />
               </LineChart>
             </ResponsiveContainer>
-            <div>
+            {/* <div>
               Average:{" "}
               <span>
                 {" "}
@@ -101,7 +101,7 @@ export const GraphOutput = (props: { command: CommandResponse }) => {
                 {" "}
                 {summary.avgRain.toFixed(2)} {units.rain}
               </span>
-            </div>
+            </div> */}
           </div>
         ) : (
           <></>

@@ -1,6 +1,8 @@
+using System.Text.Json.Serialization;
+using Jiro.Core.Base.Result;
+
 namespace Jiro.Core.Base;
 
-public interface ICommandResult
-{
-    object? Data { get; set; }
-}
+[JsonDerivedType(typeof(GraphResult))]
+[JsonDerivedType(typeof(TextResult))]
+public interface ICommandResult { }

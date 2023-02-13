@@ -21,7 +21,7 @@ namespace Jiro.Core.Commands.BaseCommands
 
             var helpMessage = $"Commands avaliable: {string.Join(", ", commands)}";
 
-            return CommandResult.Create(helpMessage);
+            return TextResult.Create(helpMessage);
         }
     }
 }

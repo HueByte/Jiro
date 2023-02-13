@@ -1,4 +1,4 @@
-import { memo } from "react";
+import { memo, useEffect } from "react";
 import { GraphOutput, TextOutput } from ".";
 import { CommandType } from "../../api/CommandEnum";
 import { UserCommand } from "../Models";
@@ -6,6 +6,9 @@ import { UserCommand } from "../Models";
 export const CommandOutputRenderer = memo(
   (props: { command?: UserCommand }) => {
     const { command } = props;
+    useEffect(() => {
+      console.log("CommandOutputRenderer: ", command);
+    }, []);
 
     if (command?.response?.commandType === CommandType.Text) {
       return (

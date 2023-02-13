@@ -1,7 +1,7 @@
-import { CommandResponse } from "../../api";
+import { ICommandResultCommandResponse } from "../../api";
 
 export interface UserCommand {
   prompt?: string;
-  response?: CommandResponse;
+  response?: any | undefined;
   isLoading: boolean;
 }

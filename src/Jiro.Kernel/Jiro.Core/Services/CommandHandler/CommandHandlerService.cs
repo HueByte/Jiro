@@ -16,7 +16,7 @@ namespace Jiro.Core.Services.CommandHandler
             _scopeFactory = scopeFactory;
         }
 
-        public async Task<CommandResponse> ExecuteCommandAsync(string prompt)
+        public async Task<CommandResponse<ICommandResult>> ExecuteCommandAsync(string prompt)
         {
             await using var scope = _scopeFactory.CreateAsyncScope();
 
@@ -27,7 +27,7 @@ namespace Jiro.Core.Services.CommandHandler
             var commandInstance = GetCommandInstance(command.Module, scope);
             var args = GetCommandArgs(command.Name, tokens);
 
-            CommandResponse commandResult = new()
+            CommandResponse<ICommandResult> commandResult = new()
             {
                 CommandName = command.Name,
                 CommandType = command.CommandType
