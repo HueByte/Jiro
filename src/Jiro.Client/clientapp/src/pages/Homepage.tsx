@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { BiMailSend } from "react-icons/bi";
 import { JiroService } from "../api";
+import jiroAvatar from "../assets/Jiro.png";
 
 const Homepage = () => {
   const [messages, setMessages] = useState<string[]>([]);
@@ -62,7 +63,7 @@ const Homepage = () => {
       >
         <img
           className="rounded-full bg-elementLight"
-          src="https://cdn.discordapp.com/avatars/215556401467097088/3342856edc77dcb72bda6c94de4592cc.png?size=256"
+          src={jiroAvatar}
           alt="temp image"
         />
       </div>
