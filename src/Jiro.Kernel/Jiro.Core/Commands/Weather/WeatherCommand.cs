@@ -7,7 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 namespace Jiro.Core.Commands.Weather
 {
     [CommandModule("Weather")]
-    public class WeatherCommand : CommandBase
+    public class WeatherCommand : ICommandBase
     {
         private readonly IWeatherService _weatherService;
         public WeatherCommand(IWeatherService weatherService)

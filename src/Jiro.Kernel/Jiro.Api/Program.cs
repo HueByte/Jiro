@@ -1,6 +1,7 @@
 using Jiro.Api;
 using Jiro.Api.Configurator;
 using Jiro.Api.Middlewares;
+using Jiro.Core.Base;
 using Jiro.Core.Options;
 using Jiro.Core.Utils;
 using Serilog;
@@ -50,6 +51,10 @@ servicesRef.RegisterCommandModules();
 servicesRef.AddHttpClients(configRef);
 
 var app = builder.Build();
+
+// Log loaded modules
+var commandContainer = app.Services.GetRequiredService<CommandsContainer>();
+foreach (var module in commandContainer.CommandModules.Keys) Log.Information("Module {Module} loaded", module);
 
 _ = new AppConfigurator(app.Services)
     .ConfigureEvents();

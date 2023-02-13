@@ -1,6 +1,3 @@
-using System.Reflection;
-using Jiro.Core.Entities;
-
 namespace Jiro.Core.Base;
 
 /// <summary>

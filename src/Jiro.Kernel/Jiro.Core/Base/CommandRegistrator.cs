@@ -74,10 +74,10 @@ public static class CommandRegistrator
 
             CommandInfo commandInfo = new(
                 methodInfo.GetCustomAttribute<CommandAttribute>()?.CommandName.ToLower() ?? "",
+                methodInfo.GetCustomAttribute<CommandAttribute>()?.CommandType ?? CommandType.Text,
                 methodInfo.GetCustomAttribute<AsyncStateMachineAttribute>() is not null,
                 delcaringType,
-                compiledLambda as Func<CommandBase, object[], Task>,
-                methodInfo.GetCustomAttribute<CommandAttribute>()?.CommandType ?? CommandType.Text
+                compiledLambda as Func<ICommandBase, object[], Task>
             );
 
             commandInfos.Add(commandInfo);
@@ -86,13 +86,13 @@ public static class CommandRegistrator
         return commandInfos;
     }
 
-    private static Func<CommandBase, object[], Task> CompileLambda(MethodInfo methodInfo)
+    private static Func<ICommandBase, object[], Task> CompileLambda(MethodInfo methodInfo)
     {
         var parameters = methodInfo.GetParameters();
         var paramsExp = new Expression[parameters.Length];
 
         // set first param as Module instance that's fetched from DI container
-        var instanceExp = Expression.Parameter(typeof(CommandBase), "instance");
+        var instanceExp = Expression.Parameter(typeof(ICommandBase), "instance");
         var argsExp = Expression.Parameter(typeof(object[]), "args");
 
         for (var i = 0; i < parameters.Length; i++)
@@ -106,7 +106,7 @@ public static class CommandRegistrator
 
         var callExp = Expression.Call(Expression.Convert(instanceExp, methodInfo.ReflectedType!), methodInfo, paramsExp);
         var finalExp = Expression.Convert(callExp, typeof(Task));
-        var lambda = Expression.Lambda<Func<CommandBase, object[], Task>>(finalExp, instanceExp, argsExp);
+        var lambda = Expression.Lambda<Func<ICommandBase, object[], Task>>(finalExp, instanceExp, argsExp);
 
         return lambda.Compile();
     }

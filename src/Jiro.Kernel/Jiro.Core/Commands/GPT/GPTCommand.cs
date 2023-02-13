@@ -5,7 +5,7 @@ using Jiro.Core.Interfaces.IServices;
 namespace Jiro.Core.Commands.GPT
 {
     [CommandModule("GPT")]
-    public class GPTCommand : CommandBase
+    public class GPTCommand : ICommandBase
     {
         private readonly IGPTService _gptService;
         public GPTCommand(IGPTService gptService)

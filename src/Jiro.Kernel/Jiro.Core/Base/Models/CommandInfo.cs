@@ -6,17 +6,17 @@ namespace Jiro.Core.Base;
 public class CommandInfo
 {
     public string Name { get; } = string.Empty;
+    public CommandType CommandType { get; }
     public bool IsAsync { get; } = false;
     public Type Module { get; } = default!;
-    public CommandType CommandType { get; }
-    public readonly Func<CommandBase, object[], Task> Descriptor = default!;
+    public readonly Func<ICommandBase, object[], Task> Descriptor = default!;
 
-    public CommandInfo(string name, bool isAsync, Type container, Func<CommandBase, object[], Task> descriptor, CommandType commandType)
+    public CommandInfo(string name, CommandType commandType, bool isAsync, Type container, Func<ICommandBase, object[], Task> descriptor)
     {
         Name = name;
+        CommandType = commandType;
         IsAsync = isAsync;
         Module = container;
         Descriptor = descriptor;
-        CommandType = commandType;
     }
 }

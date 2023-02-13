@@ -4,7 +4,7 @@ using Jiro.Core.Base.Attributes;
 namespace Jiro.Core.Commands.BaseCommands
 {
     [CommandModule("BaseCommands")]
-    public class BaseCommand : CommandBase
+    public class BaseCommand : ICommandBase
     {
         private readonly CommandsContainer _commandsContainer;
         public BaseCommand(CommandsContainer commandsContainer)
