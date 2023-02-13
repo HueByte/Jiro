@@ -1,52 +1,61 @@
 <!DOCTYPE html>
 <html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" href="%PUBLIC_URL%/favicon.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#da3f67" />
 
-<head>
-  <meta charset="utf-8" />
-  <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="theme-color" content="#da3f67" />
+    <meta property="type" content="website" />
+    <meta property="og:title" content="Jiro assistant" />
+    <meta property="og:image" content="%PUBLIC_URL%/favicon.png" />
+    <meta
+      property="og:description"
+      content="Virtual Assistant powered by ChatGPT and custom code integration"
+    />
 
-  <meta property="type" content="website" />
-  <meta property="og:title" content="Jiro assistant" />
-  <meta property="og:image" content="%PUBLIC_URL%/favicon.png" />
-  <meta property="og:description" content="todo" />
+    <meta
+      name="description"
+      content="Virtual Assistant powered by ChatGPT and custom code integration! This assistant combines the cutting-edge language processing capabilities of OpenAI's ChatGPT with the flexibility and awesomeness of Jiro plugins."
+    />
+    <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
+    <title>Jiro</title>
+    <style>
+      *,
+      *:before,
+      *:after {
+        box-sizing: inherit;
+      }
 
-  <meta name="description" content="Jiro the assistant" />
-  <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
-  <title>Jiro</title>
-  <style>
-    *,
-    *:before,
-    *:after {
-      box-sizing: inherit;
-    }
+      html {
+        box-sizing: border-box;
+        color: white;
+        background-color: #001220;
+        background-image: linear-gradient(
+          120deg,
+          #190038 0%,
+          #001220 30%,
+          #2b071c 100%
+        );
+      }
 
-    html {
-      box-sizing: border-box;
-      color: white;
-      background-color: #001220;
-      background-image: linear-gradient(120deg, #190038 0%, #001220 30%, #2b071c 100%);
-    }
+      html,
+      body,
+      #root {
+        min-height: 100vh;
+        width: 100%;
+        overflow-x: hidden;
+        color: white;
+        font-family: "Fira Mono", monospace;
+        border: 0;
+        margin: 0;
+        padding: 0;
+      }
+    </style>
+  </head>
 
-    html,
-    body,
-    #root {
-      min-height: 100vh;
-      width: 100%;
-      overflow-x: hidden;
-      color: white;
-      font-family: 'Fira Mono', monospace;
-      border: 0;
-      margin: 0;
-      padding: 0;
-    }
-  </style>
-</head>
-
-<body>
-  <noscript>You need to enable JavaScript to run this app.</noscript>
-  <div id="root"></div>
-</body>
-
+  <body>
+    <noscript>You need to enable JavaScript to run this app.</noscript>
+    <div id="root"></div>
+  </body>
 </html>
