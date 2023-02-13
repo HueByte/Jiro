@@ -97,7 +97,6 @@ const Homepage = () => {
         >
           {commands?.length > 0 &&
             commands?.map((command, index) => {
-              let author = index % 2 === 0 ? "Me" : "Jiro";
               return (
                 <div key={index} className="my-1 break-words">
                   <CommandOutputRenderer command={command} />
