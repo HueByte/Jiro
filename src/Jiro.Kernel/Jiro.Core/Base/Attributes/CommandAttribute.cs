@@ -9,10 +9,12 @@ namespace Jiro.Core.Base.Attributes
     public class CommandAttribute : Attribute
     {
         public string CommandName { get; }
+        public CommandType CommandType { get; }
 
-        public CommandAttribute(string commandName)
+        public CommandAttribute(string commandName, CommandType commandType = CommandType.Text)
         {
             CommandName = commandName;
+            CommandType = commandType;
         }
     }
 }

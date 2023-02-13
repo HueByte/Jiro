@@ -65,17 +65,19 @@ public static class CommandRegistrator
         {
             if (methodInfo is null) continue;
 
-            var delcaringType = methodInfo?.DeclaringType;
+            var delcaringType = methodInfo.DeclaringType;
 
             if (delcaringType is null) continue;
 
             var compiledLambda = CompileLambda(methodInfo!);
+            var test = methodInfo.GetCustomAttribute<CommandAttribute>();
 
             CommandInfo commandInfo = new(
-                methodInfo!.GetCustomAttribute<CommandAttribute>()?.CommandName.ToLower() ?? "",
-                methodInfo!.GetCustomAttribute<AsyncStateMachineAttribute>() is not null,
+                methodInfo.GetCustomAttribute<CommandAttribute>()?.CommandName.ToLower() ?? "",
+                methodInfo.GetCustomAttribute<AsyncStateMachineAttribute>() is not null,
                 delcaringType,
-                compiledLambda as Func<CommandBase, object[], Task>
+                compiledLambda as Func<CommandBase, object[], Task>,
+                methodInfo.GetCustomAttribute<CommandAttribute>()?.CommandType ?? CommandType.Text
             );
 
             commandInfos.Add(commandInfo);

@@ -11,6 +11,7 @@ namespace Jiro.Core.Entities
         public string Name { get; set; } = string.Empty;
         public bool IsAsync { get; set; } = false;
         public object? Instance { get; set; } = default;
+        public CommandType CommandType { get; set; }
         public Func<CommandBase, object[], Task> Descriptor = default!;
     }
 }

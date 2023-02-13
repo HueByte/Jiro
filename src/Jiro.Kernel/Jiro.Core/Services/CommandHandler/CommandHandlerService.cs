@@ -28,13 +28,18 @@ namespace Jiro.Core.Services.CommandHandler
             var commandName = GetCommandName(tokens);
             var command = GetCommand(commandName, scope);
             var args = GetCommandArgs(command, tokens);
-            CommandResponse commandResult = new() { CommandName = command.Name };
+
+            CommandResponse commandResult = new()
+            {
+                CommandName = command.Name,
+                CommandType = command.CommandType
+            };
 
             try
             {
                 if (command.IsAsync)
                 {
-                    OnLog?.Invoke("Running command [{0}]", new object[] { command.Name });
+                    OnLog?.Invoke("Running command [{0}] [{1}]", new object[] { command.Name, command.CommandType.ToString() });
 
                     var task = command.Descriptor((CommandBase)command.Instance!, args);
 
@@ -106,6 +111,7 @@ namespace Jiro.Core.Services.CommandHandler
                 Descriptor = commandInfo.Descriptor,
                 IsAsync = commandInfo.IsAsync,
                 Instance = scope.ServiceProvider.GetRequiredService(commandInfo.Module),
+                CommandType = commandInfo.CommandType
             };
         }
     }
