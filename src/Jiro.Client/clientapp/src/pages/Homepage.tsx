@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { BiMailSend } from "react-icons/bi";
 import * as api from "../api";
-import { ICommandResultCommandResponse } from "../api";
 import { CommandType } from "../api/CommandEnum";
 import jiroAvatar from "../assets/Jiro.png";
 import { CommandOutputRenderer } from "./components";
@@ -12,7 +11,7 @@ const Homepage = () => {
   const chatContainerRef = React.useRef<HTMLDivElement | null>(null);
   const [commands, setCommands] = useState<UserCommand[]>([]);
   const [newDataAvailable, setNewDataAvailable] =
-    useState<api.ICommandResultCommandResponse>();
+    useState<api.CommandResponse>();
   const [isFetching, setIsFetching] = useState(false);
 
   useEffect(() => {
@@ -65,7 +64,7 @@ const Homepage = () => {
 
     setCommands([...commands, userCommand]);
 
-    let data: ICommandResultCommandResponse | undefined = undefined;
+    let data: api.CommandResponse | undefined = undefined;
 
     try {
       let result = await api.JiroService.postApiJiro({

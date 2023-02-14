@@ -1,8 +1,8 @@
 namespace Jiro.Core.Base;
 
-public class CommandResponse<T> where T : ICommandResult
+public class CommandResponse
 {
-    public T? Result { get; set; }
+    public ICommandResult? Result { get; set; }
     public string? CommandName { get; set; }
     public CommandType CommandType { get; set; }
 }
