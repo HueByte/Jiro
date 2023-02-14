@@ -10,38 +10,42 @@ export const CommandOutputRenderer = memo(
     // match rendere to command type
     if (command?.response?.commandType === CommandType.Text) {
       return (
-        <>
-          <div>
+        <div className="flex flex-col">
+          <div className="w-full">
             <span className="text-primary">Me:</span> {command.prompt}
           </div>
-          <TextOutput command={command.response} />
-        </>
+          <div className="w-full">
+            <TextOutput command={command.response} />
+          </div>
+        </div>
       );
     } else if (command?.response?.commandType === CommandType.Graph) {
       return (
-        <>
-          <div>
+        <div className="flex flex-col">
+          <div className="w-full">
             <span className="text-primary">Me:</span> {command.prompt}
           </div>
-          <GraphOutput command={command.response} />
-        </>
+          <div className="w-full">
+            <GraphOutput command={command.response} />
+          </div>
+        </div>
       );
     } else {
       return (
-        <>
-          <div>
+        <div className="flex flex-col">
+          <div className="w-full">
             <span className="text-primary">Me:</span> {command?.prompt}
-            <div>
-              {command?.isLoading ? (
-                <div>
-                  <span className="animate-pulse text-accent">Jiro: </span>...
-                </div>
-              ) : (
-                <span>Something went wrong</span>
-              )}
-            </div>
           </div>
-        </>
+          <div className="w-full">
+            {command?.isLoading ? (
+              <div>
+                <span className="animate-pulse text-accent">Jiro: </span>...
+              </div>
+            ) : (
+              <div>Something went wrong</div>
+            )}
+          </div>
+        </div>
       );
     }
   }

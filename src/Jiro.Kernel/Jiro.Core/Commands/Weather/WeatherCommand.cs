@@ -1,5 +1,6 @@
 using System.Resources;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using Jiro.Core.Base;
 using Jiro.Core.Base.Attributes;
 using Jiro.Core.Base.Result;
@@ -21,6 +22,7 @@ namespace Jiro.Core.Commands.Weather
         [Command("weather", CommandType.Graph)]
         public async Task<ICommandResult> Weather(string location)
         {
+            // fetch weather data
             var result = await _weatherService.GetWeatherAsync(location);
 
             if (string.IsNullOrEmpty(result))
@@ -42,6 +44,7 @@ namespace Jiro.Core.Commands.Weather
                         WindSpeed = weather.Hourly.Windspeed10m[index]
                     });
 
+            // create units dictionary
             Dictionary<string, string> units = new()
             {
                 { "temperature", weather.HourlyUnits.Temperature2m },
@@ -49,7 +52,10 @@ namespace Jiro.Core.Commands.Weather
                 { "windSpeed", weather.HourlyUnits.Windspeed10m },
             };
 
-            return GraphResult.Create(data.ToArray(), units, "date", note: "What a nice weather");
+            // create note
+            var note = $"Current weather in {location} is {weather.CurrentWeather.Temperature} {weather.HourlyUnits.Temperature2m} with wind of {weather.CurrentWeather.Windspeed} {weather.CurrentWeather.Windspeed}";
+
+            return GraphResult.Create(data.ToArray(), units, "date", note: note);
         }
     }
 }

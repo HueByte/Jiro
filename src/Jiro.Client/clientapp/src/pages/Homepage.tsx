@@ -93,7 +93,7 @@ const Homepage = () => {
           {commands?.length > 0 &&
             commands?.map((command, index) => {
               return (
-                <div key={index} className="my-1 break-words">
+                <div key={index} className="my-2 break-words">
                   <CommandOutputRenderer command={command} />
                 </div>
               );

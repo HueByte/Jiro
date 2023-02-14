@@ -55,8 +55,8 @@ export const GraphOutput = (props: { command: any }) => {
   };
 
   return (
-    <div className="my-1 break-words">
-      <span className="text-accent">Jiro:</span>
+    <div className="break-words">
+      <div className="text-accent">Jiro:</div>
       <div className="w-full">
         {data ? (
           <div>
@@ -84,6 +84,7 @@ export const GraphOutput = (props: { command: any }) => {
                 <Legend />
               </LineChart>
             </ResponsiveContainer>
+            <div>{command.result?.note}</div>
           </div>
         ) : (
           <></>
