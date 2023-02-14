@@ -22,6 +22,7 @@ export const GraphOutput = (props: { command: any }) => {
     "#861657",
     "#00fa9a",
     "#fa7268",
+    "#e1e0e0",
   ];
 
   useEffect(() => {
@@ -84,7 +85,7 @@ export const GraphOutput = (props: { command: any }) => {
                 <Legend />
               </LineChart>
             </ResponsiveContainer>
-            <div>{command.result?.note}</div>
+            <div className="text-center">{command.result?.note}</div>
           </div>
         ) : (
           <></>
