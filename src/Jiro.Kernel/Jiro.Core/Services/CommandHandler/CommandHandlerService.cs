@@ -103,7 +103,8 @@ namespace Jiro.Core.Services.CommandHandler
                 args = new object[] { string.Join(' ', tokens) };
 
             else if (tokens.Length >= 3)
-                args = tokens[2..].Cast<object>().ToArray();
+                // args = tokens[2..].Cast<object>().ToArray();
+                args = new object[] { string.Join(' ', tokens[2..]) };
 
             else
                 args = Array.Empty<object>();

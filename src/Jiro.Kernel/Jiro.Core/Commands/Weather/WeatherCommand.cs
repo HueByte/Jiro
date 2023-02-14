@@ -1,12 +1,9 @@
-using System.Resources;
 using System.Text.Json;
-using System.Text.Json.Serialization;
 using Jiro.Core.Base;
 using Jiro.Core.Base.Attributes;
 using Jiro.Core.Base.Result;
 using Jiro.Core.Interfaces.IServices;
 using Jiro.Core.Services.Weather.Models;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace Jiro.Core.Commands.Weather
 {
