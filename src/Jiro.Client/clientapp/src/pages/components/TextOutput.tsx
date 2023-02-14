@@ -6,8 +6,7 @@ export const TextOutput = (props: { command: any }) => {
 
   return (
     <div className="my-1 break-words">
-      <span className="text-accent">Jiro:</span>
-      {command.result?.response}
+      <span className="text-accent">Jiro:</span> {command.result?.response}
     </div>
   );
 };
