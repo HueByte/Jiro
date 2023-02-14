@@ -8,18 +8,22 @@ import { UserCommand } from "./Models";
 
 const Homepage = () => {
   const messageInputRef = React.useRef<HTMLInputElement | null>(null);
-  const chatContainerRef = React.useRef<HTMLDivElement | null>(null);
+  const dummy = React.useRef<HTMLInputElement | null>(null);
+  const chatContainer = React.useRef<HTMLInputElement | null>(null);
   const [commands, setCommands] = useState<UserCommand[]>([]);
   const [newDataAvailable, setNewDataAvailable] =
     useState<api.CommandResponse>();
   const [isFetching, setIsFetching] = useState(false);
 
   useEffect(() => {
-    chatContainerRef.current?.scrollTo(
-      0,
-      chatContainerRef.current.scrollHeight
-    );
-  }, [isFetching]);
+    if (
+      chatContainer &&
+      chatContainer.current &&
+      chatContainer.current.clientHeight
+    ) {
+      debounce(scroll, 200);
+    }
+  });
 
   useEffect(() => {
     (async () => {
@@ -87,6 +91,18 @@ const Homepage = () => {
     messageInputRef.current?.focus();
   };
 
+  const scroll = () => {
+    console.log("scrolling");
+    dummy?.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  const debounce = (method: any, delay: number) => {
+    clearTimeout(method._tId);
+    method._tId = setTimeout(() => {
+      method();
+    }, delay);
+  };
+
   return (
     <div className="flex w-full flex-row justify-center gap-6 px-8 pt-8 lg:flex-col md:px-4">
       <div
@@ -102,7 +118,7 @@ const Homepage = () => {
       </div>
       <div className="flex h-[90%] w-[1024px] min-w-[700px] flex-col rounded-xl bg-altBackgroundColor shadow-lg shadow-element lg:h-[calc(90%_-_196px)] lg:w-full lg:min-w-full">
         <div
-          ref={chatContainerRef}
+          ref={chatContainer}
           className="mx-12 my-4 flex flex-1 flex-col overflow-y-auto overflow-x-hidden pr-2"
         >
           {commands?.length > 0 &&
@@ -113,6 +129,7 @@ const Homepage = () => {
                 </div>
               );
             })}
+          <div ref={dummy}></div>
         </div>
         <div className="relative h-fit px-12 py-4">
           <input

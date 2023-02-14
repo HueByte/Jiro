@@ -27,6 +27,8 @@ export const GraphOutput = (props: { command: any }) => {
 
   useEffect(() => {
     // convert date to local time
+    if (!command.result) return;
+
     let reqData = command.result?.data
       .slice(0, 24)
       .map((item: any, index: any) => {
