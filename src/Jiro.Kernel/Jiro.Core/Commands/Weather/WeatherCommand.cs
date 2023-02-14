@@ -53,7 +53,7 @@ namespace Jiro.Core.Commands.Weather
             };
 
             // create note
-            var note = $"Current weather in {location} is {weather.CurrentWeather.Temperature} {weather.HourlyUnits.Temperature2m} with wind of {weather.CurrentWeather.Windspeed} {weather.CurrentWeather.Windspeed}";
+            var note = $"Current weather in {location} is {weather.CurrentWeather.Temperature} {weather.HourlyUnits.Temperature2m} with wind of {weather.CurrentWeather.Windspeed} {weather.HourlyUnits.Windspeed10m}";
 
             return GraphResult.Create(data.ToArray(), units, "date", note: note);
         }
