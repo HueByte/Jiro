@@ -1,8 +1,8 @@
 import "./App.css";
-import { BrowserRouter, Router } from "react-router-dom";
+import { BrowserRouter } from "react-router-dom";
 import ClientRouter from "./routes/ClientRouter";
-// import Loader from "./components/Loaders/Loader";
 import { ReactNode, Suspense } from "react";
+import "./api/AxiosClient";
 
 function App() {
   // const history: BrowserHistory = createBrowserHistory();

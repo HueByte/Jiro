@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { BiMailSend } from "react-icons/bi";
 import * as api from "../api";
+import { ICommandResultCommandResponse } from "../api";
+import { CommandType } from "../api/CommandEnum";
 import jiroAvatar from "../assets/Jiro.png";
 import { CommandOutputRenderer } from "./components";
 import { UserCommand } from "./Models";
@@ -22,7 +24,10 @@ const Homepage = () => {
 
   useEffect(() => {
     (async () => {
-      if (!newDataAvailable) return;
+      if (!newDataAvailable) {
+        setIsFetching(false);
+        return;
+      }
 
       let userCommand: UserCommand = {
         prompt: commands[commands.length - 1].prompt,
@@ -60,15 +65,26 @@ const Homepage = () => {
 
     setCommands([...commands, userCommand]);
 
-    let result = await api.JiroService.postApiJiro({
-      requestBody: {
-        prompt: promptValue,
-      },
-    });
+    let data: ICommandResultCommandResponse | undefined = undefined;
 
-    setNewDataAvailable(result.data);
+    try {
+      let result = await api.JiroService.postApiJiro({
+        requestBody: {
+          prompt: promptValue,
+        },
+      });
 
-    // scroll to the bottom of the chat
+      data = result.data;
+    } catch (err: any) {
+      data = {
+        commandName: err.data,
+        result: { response: err.errors.join(", ") },
+        commandType: CommandType.Text,
+      };
+    }
+
+    setNewDataAvailable(data);
+
     messageInputRef.current?.focus();
   };
 
