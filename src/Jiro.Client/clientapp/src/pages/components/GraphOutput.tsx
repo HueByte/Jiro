@@ -22,7 +22,9 @@ export const GraphOutput = (props: { command: any }) => {
     "#861657",
     "#00fa9a",
     "#fa7268",
-    "#e1e0e0",
+    "#8075FF",
+    "#55D6BE",
+    "#36C9C6",
   ];
 
   useEffect(() => {

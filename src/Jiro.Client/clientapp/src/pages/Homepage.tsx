@@ -92,7 +92,6 @@ const Homepage = () => {
   };
 
   const scroll = () => {
-    console.log("scrolling");
     dummy?.current?.scrollIntoView({ behavior: "smooth" });
   };
 
