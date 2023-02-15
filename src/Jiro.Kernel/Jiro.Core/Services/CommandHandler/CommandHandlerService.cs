@@ -2,7 +2,6 @@ using System.Text.RegularExpressions;
 using Jiro.Core.Base;
 using Jiro.Core.Interfaces.IServices;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 
 namespace Jiro.Core.Services.CommandHandler
 {
@@ -22,43 +21,15 @@ namespace Jiro.Core.Services.CommandHandler
         {
             await using var scope = _scopeFactory.CreateAsyncScope();
 
-            string[] tokens = prompt.Split(Array.Empty<char>(), StringSplitOptions.RemoveEmptyEntries);
+            var tokens = ParseTokens(prompt);
 
             var commandName = GetCommandName(tokens);
             var command = GetCommand(commandName);
-            var commandInstance = GetCommandInstance(command.Module, scope);
-            var args = GetCommandArgs(command, prompt);
 
-            CommandResponse commandResult = new()
-            {
-                CommandName = command.Name,
-                CommandType = command.CommandType
-            };
-
+            CommandResponse result = null;
             try
             {
-                if (commandInstance is null)
-                    throw new CommandException(commandName, "Command instance is null");
-
-                if (command.IsAsync)
-                {
-                    OnLog?.Invoke("Running command [{0}] [{1}]", new object[] { command.Name, command.CommandType.ToString() });
-
-                    var task = command.Descriptor((ICommandBase)commandInstance, args);
-
-                    if (task is Task<ICommandResult> commandTask)
-                    {
-                        commandResult.Result = await commandTask;
-                    }
-                    else
-                    {
-                        await task;
-                    }
-                }
-                else
-                {
-                    commandResult.Result = (ICommandResult)command.Descriptor.Invoke((ICommandBase)commandInstance, args);
-                }
+                result = await command.ExecuteAsync(scope, _commandModule, tokens);
             }
             catch (CommandException)
             {
@@ -69,7 +40,7 @@ namespace Jiro.Core.Services.CommandHandler
                 throw new CommandException(commandName, exception.Message);
             }
 
-            return commandResult;
+            return result;
         }
 
         private string GetCommandName(string[] tokens)
@@ -93,41 +64,6 @@ namespace Jiro.Core.Services.CommandHandler
                 throw new Exception("Couldn't find this command, default command wasn't configured either");
 
             return commandInfo;
-        }
-
-        private static object? GetCommandInstance(Type type, IServiceScope scope) => scope.ServiceProvider.GetRequiredService(type);
-
-        private object?[] GetCommandArgs(CommandInfo command, string prompt)
-        {
-            object?[]? args;
-            var tokens = ParseTokens(prompt);
-
-            if (command.Name == _commandModule.DefaultCommand)
-            {
-                args = new object[] { prompt };
-            }
-            else if (tokens.Length >= 3)
-            {
-                var paramTokens = tokens[2..];
-                args = new object[command.Parameters.Count];
-
-                if (args.Length == 1 && command.Parameters[0].Type == typeof(string))
-                {
-                    args[0] = string.Join(' ', paramTokens);
-                    return args;
-                }
-
-                for (int i = 0; i < args.Length; i++)
-                {
-                    args[i] = command.Parameters[i].Parse(i > paramTokens.Length - 1 ? null : paramTokens[i]);
-                }
-            }
-            else
-            {
-                args = Array.Empty<object>();
-            }
-
-            return args;
         }
 
         private string[] ParseTokens(string input)
