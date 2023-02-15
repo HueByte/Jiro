@@ -69,15 +69,17 @@ public static class CommandRegistrator
 
             if (delcaringType is null) continue;
 
-            var compiledLambda = CompileLambda(methodInfo!);
-            var test = methodInfo.GetCustomAttribute<CommandAttribute>();
+            var compiledLambda = CompileMethodInvoker(methodInfo!);
+
+            var args = GetParameters(methodInfo);
 
             CommandInfo commandInfo = new(
                 methodInfo.GetCustomAttribute<CommandAttribute>()?.CommandName.ToLower() ?? "",
                 methodInfo.GetCustomAttribute<CommandAttribute>()?.CommandType ?? CommandType.Text,
                 methodInfo.GetCustomAttribute<AsyncStateMachineAttribute>() is not null,
                 delcaringType,
-                compiledLambda as Func<ICommandBase, object[], Task>
+                compiledLambda as Func<ICommandBase, object[], Task>,
+                args
             );
 
             commandInfos.Add(commandInfo);
@@ -86,7 +88,7 @@ public static class CommandRegistrator
         return commandInfos;
     }
 
-    private static Func<ICommandBase, object[], Task> CompileLambda(MethodInfo methodInfo)
+    private static Func<ICommandBase, object[], Task> CompileMethodInvoker(MethodInfo methodInfo)
     {
         var parameters = methodInfo.GetParameters();
         var paramsExp = new Expression[parameters.Length];
@@ -109,5 +111,19 @@ public static class CommandRegistrator
         var lambda = Expression.Lambda<Func<ICommandBase, object[], Task>>(finalExp, instanceExp, argsExp);
 
         return lambda.Compile();
+    }
+
+    private static IReadOnlyList<Models.ParameterInfo> GetParameters(MethodInfo methodInfo)
+    {
+        List<Models.ParameterInfo> parameterInfos = new();
+
+        var parameters = methodInfo.GetParameters();
+
+        foreach (var parameter in parameters)
+        {
+            parameterInfos.Add(new Models.ParameterInfo(parameter.ParameterType));
+        }
+
+        return parameterInfos;
     }
 }

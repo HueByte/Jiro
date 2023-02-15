@@ -1,3 +1,4 @@
+using System.Text.RegularExpressions;
 using Jiro.Core.Base;
 using Jiro.Core.Interfaces.IServices;
 using Microsoft.Extensions.DependencyInjection;
@@ -5,10 +6,11 @@ using Microsoft.Extensions.Logging;
 
 namespace Jiro.Core.Services.CommandHandler
 {
-    public class CommandHandlerService : ICommandHandlerService
+    public partial class CommandHandlerService : ICommandHandlerService
     {
         private readonly CommandsContainer _commandModule;
         private readonly IServiceScopeFactory _scopeFactory;
+        private readonly Regex pattern = RegexCommandParserPattern();
         public event Action<string, object[]>? OnLog;
         public CommandHandlerService(CommandsContainer commandModule, IServiceScopeFactory scopeFactory)
         {
@@ -25,7 +27,7 @@ namespace Jiro.Core.Services.CommandHandler
             var commandName = GetCommandName(tokens);
             var command = GetCommand(commandName);
             var commandInstance = GetCommandInstance(command.Module, scope);
-            var args = GetCommandArgs(command.Name, tokens);
+            var args = GetCommandArgs(command, prompt);
 
             CommandResponse commandResult = new()
             {
@@ -95,21 +97,53 @@ namespace Jiro.Core.Services.CommandHandler
 
         private static object? GetCommandInstance(Type type, IServiceScope scope) => scope.ServiceProvider.GetRequiredService(type);
 
-        private object[] GetCommandArgs(string commandName, string[] tokens)
+        private object?[] GetCommandArgs(CommandInfo command, string prompt)
         {
-            object[]? args;
+            object?[]? args;
+            var tokens = ParseTokens(prompt);
 
-            if (commandName == _commandModule.DefaultCommand)
-                args = new object[] { string.Join(' ', tokens) };
-
+            if (command.Name == _commandModule.DefaultCommand)
+            {
+                args = new object[] { prompt };
+            }
             else if (tokens.Length >= 3)
-                // args = tokens[2..].Cast<object>().ToArray();
-                args = new object[] { string.Join(' ', tokens[2..]) };
+            {
+                var paramTokens = tokens[2..];
+                args = new object[command.Parameters.Count];
 
+                if (args.Length == 1 && command.Parameters[0].Type == typeof(string))
+                {
+                    args[0] = string.Join(' ', paramTokens);
+                    return args;
+                }
+
+                for (int i = 0; i < args.Length; i++)
+                {
+                    args[i] = command.Parameters[i].Parse(i > paramTokens.Length - 1 ? null : paramTokens[i]);
+                }
+            }
             else
+            {
                 args = Array.Empty<object>();
+            }
 
             return args;
         }
+
+        private string[] ParseTokens(string input)
+        {
+            var matches = pattern.Matches(input);
+            var tokens = new string[matches.Count];
+
+            for (int i = 0; i < matches.Count; i++)
+            {
+                tokens[i] = matches[i].Value;
+            }
+
+            return tokens;
+        }
+
+        [GeneratedRegex("[\\\"].+?[\\\"]|[^ ]+", RegexOptions.Compiled)]
+        private static partial Regex RegexCommandParserPattern();
     }
 }
