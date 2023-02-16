@@ -17,8 +17,11 @@ namespace Jiro.Core.Commands.Weather
         }
 
         [Command("weather", CommandType.Graph)]
-        public async Task<ICommandResult> Weather(string location)
+        public async Task<ICommandResult> Weather(string location, int daysRange)
         {
+            if (daysRange == 0) daysRange = 1;
+            int range = daysRange * 24;
+
             // fetch weather data
             var result = await _weatherService.GetWeatherAsync(location);
 
@@ -39,7 +42,8 @@ namespace Jiro.Core.Commands.Weather
                         Temperature = weather.Hourly.Temperature2m[index],
                         Rain = weather.Hourly.Rain[index],
                         WindSpeed = weather.Hourly.Windspeed10m[index]
-                    });
+                    })
+            .Take(range > weather.Hourly.Time.Count ? weather.Hourly.Time.Count : range);
 
             // create units dictionary
             Dictionary<string, string> units = new()

@@ -33,7 +33,7 @@ export const GraphOutput = (props: { command: CommandResponse }) => {
     // convert date to local time
     if (!command.result) return;
 
-    let reqData = cmd?.data?.slice(0, 24).map((item: any, index: any) => {
+    let reqData = cmd?.data?.map((item: any, index: any) => {
       return {
         ...item,
         date: new Date(item.date + "Z").toLocaleTimeString([], {
