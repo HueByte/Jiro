@@ -1,4 +1,4 @@
-namespace Jiro.Core.Base;
+namespace Jiro.Core.Base.Models;
 
 public class CommandResponse
 {

@@ -1,4 +1,4 @@
-namespace Jiro.Core.Base;
+namespace Jiro.Core.Base.Models;
 
 /// <summary>
 /// Module information containing its commands

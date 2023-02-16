@@ -1,4 +1,4 @@
-namespace Jiro.Core.Base;
+namespace Jiro.Core.Base.Models;
 
 /// <summary>
 /// Global container for all commands and modules

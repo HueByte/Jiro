@@ -1,6 +1,4 @@
-using System.Text.Json.Serialization;
-
-namespace Jiro.Core.Base;
+namespace Jiro.Core.Base.Results;
 
 public class TextResult : ICommandResult
 {

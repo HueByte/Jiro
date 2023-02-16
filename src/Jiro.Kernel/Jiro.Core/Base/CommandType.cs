@@ -4,5 +4,6 @@ namespace Jiro.Core.Base
     {
         Text,
         Graph,
+        Image
     }
 }

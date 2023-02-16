@@ -1,7 +1,4 @@
-using System.Security;
-using System.Text.Json.Serialization;
-
-namespace Jiro.Core.Base.Result;
+namespace Jiro.Core.Base.Results;
 
 public class GraphResult : ICommandResult
 {

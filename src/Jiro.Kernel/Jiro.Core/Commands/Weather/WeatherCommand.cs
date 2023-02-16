@@ -1,7 +1,7 @@
 using System.Text.Json;
 using Jiro.Core.Base;
 using Jiro.Core.Base.Attributes;
-using Jiro.Core.Base.Result;
+using Jiro.Core.Base.Results;
 using Jiro.Core.Interfaces.IServices;
 using Jiro.Core.Services.Weather.Models;
 

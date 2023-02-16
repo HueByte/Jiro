@@ -1,7 +1,8 @@
 using Jiro.Core.Base.Models;
+using Jiro.Core.Base.Results;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Jiro.Core.Base;
+namespace Jiro.Core.Base.Models;
 
 /// <summary>
 /// Contains necessary information about a command to be executed

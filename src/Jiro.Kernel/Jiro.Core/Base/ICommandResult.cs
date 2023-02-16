@@ -1,7 +1,7 @@
 using System.Text.Json.Serialization;
-using Jiro.Core.Base.Result;
+using Jiro.Core.Base.Results;
 
-namespace Jiro.Core.Base;
+namespace Jiro.Core;
 
 [JsonDerivedType(typeof(GraphResult))]
 [JsonDerivedType(typeof(TextResult))]
