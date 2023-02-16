@@ -43,7 +43,7 @@ namespace Jiro.Core.Commands.Weather
                         Rain = weather.Hourly.Rain[index],
                         WindSpeed = weather.Hourly.Windspeed10m[index]
                     })
-            .Take(range > weather.Hourly.Time.Count ? weather.Hourly.Time.Count : range);
+                .Take(range > weather.Hourly.Time.Count ? weather.Hourly.Time.Count : range);
 
             // create units dictionary
             Dictionary<string, string> units = new()
