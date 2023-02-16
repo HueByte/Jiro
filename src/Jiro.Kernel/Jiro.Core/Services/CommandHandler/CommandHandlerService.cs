@@ -73,7 +73,11 @@ namespace Jiro.Core.Services.CommandHandler
 
             for (int i = 0; i < matches.Count; i++)
             {
-                tokens[i] = matches[i].Value;
+                var match = matches[i].Value;
+                if (match.StartsWith("\"") && match.EndsWith("\""))
+                    tokens[i] = match[1..^1];
+                else
+                    tokens[i] = match;
             }
 
             return tokens;
