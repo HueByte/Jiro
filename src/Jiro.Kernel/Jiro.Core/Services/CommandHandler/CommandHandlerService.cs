@@ -27,7 +27,8 @@ namespace Jiro.Core.Services.CommandHandler
             var commandName = GetCommandName(tokens);
             var command = GetCommand(commandName);
 
-            CommandResponse result = null;
+            CommandResponse? result = null;
+
             try
             {
                 result = await command.ExecuteAsync(scope, _commandModule, tokens);

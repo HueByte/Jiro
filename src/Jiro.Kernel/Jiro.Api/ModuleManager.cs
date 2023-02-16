@@ -218,8 +218,8 @@ namespace Jiro.Api
                 var args = e.Name.Split(',');
                 res = _assemblies.FirstOrDefault(asm => asm.FullName!.Contains(args[0]));
 
-                if (res is null)
-                    Log.Logger.Error("Asm: {reqAsm} couldn't find {dep} dependency", e.RequestingAssembly, e.Name);
+                // if (res is null)
+                // Log.Logger.Warning("Asm: {reqAsm} couldn't find {dep} dependency", e.RequestingAssembly, e.Name);
             }
 
             return res;
