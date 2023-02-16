@@ -2,6 +2,7 @@ using Jiro.Api;
 using Jiro.Api.Configurator;
 using Jiro.Api.Middlewares;
 using Jiro.Core.Base;
+using Jiro.Core.Base.Models;
 using Jiro.Core.Options;
 using Jiro.Core.Utils;
 using Serilog;

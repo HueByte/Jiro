@@ -1,4 +1,5 @@
 using Jiro.Core.Base;
+using Jiro.Core.Base.Models;
 
 namespace Jiro.Core.Interfaces.IServices
 {

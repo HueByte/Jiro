@@ -1,4 +1,5 @@
 using Jiro.Core.Base;
+using Jiro.Core.Base.Models;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Jiro.Api.Controllers;
