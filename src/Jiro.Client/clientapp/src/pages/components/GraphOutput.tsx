@@ -9,8 +9,9 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import { CommandResponse } from "../../api";
 
-export const GraphOutput = (props: { command: any }) => {
+export const GraphOutput = (props: { command: CommandResponse }) => {
   const { command } = props;
   const [data, setData] = useState<any>(null);
   const [units, setUnits] = useState<any>(null);
@@ -28,26 +29,25 @@ export const GraphOutput = (props: { command: any }) => {
   ];
 
   useEffect(() => {
+    let cmd = command.result as any;
     // convert date to local time
     if (!command.result) return;
 
-    let reqData = command.result?.data
-      .slice(0, 24)
-      .map((item: any, index: any) => {
-        return {
-          ...item,
-          date: new Date(item.date + "Z").toLocaleTimeString([], {
-            hour: "2-digit",
-            minute: "2-digit",
-          }),
-        };
-      });
+    let reqData = cmd?.data.slice(0, 24).map((item: any, index: any) => {
+      return {
+        ...item,
+        date: new Date(item.date + "Z").toLocaleTimeString([], {
+          hour: "2-digit",
+          minute: "2-digit",
+        }),
+      };
+    });
 
     // get members
-    let props = Object.getOwnPropertyNames(command.result?.data[0]);
+    let props = Object.getOwnPropertyNames(cmd.data[0]);
 
     setData(reqData);
-    setUnits(command.result?.units);
+    setUnits(cmd.units);
     setMembers(props);
   }, []);
 
@@ -83,13 +83,13 @@ export const GraphOutput = (props: { command: any }) => {
                   );
                 })}
                 <CartesianGrid stroke="#FFF" />
-                <XAxis angle={-10} dataKey={command.result.xAxis} />
+                <XAxis angle={-10} dataKey={(command.result as any)?.xAxis} />
                 <YAxis />
                 <Tooltip />
                 <Legend />
               </LineChart>
             </ResponsiveContainer>
-            <div className="text-center">{command.result?.note}</div>
+            <div className="text-center">{(command.result as any)?.note}</div>
           </div>
         ) : (
           <></>

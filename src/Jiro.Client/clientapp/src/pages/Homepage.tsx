@@ -58,6 +58,11 @@ const Homepage = () => {
     let promptValue = messageInputRef.current?.value;
     messageInputRef.current!.value = "";
 
+    if (promptValue?.toLowerCase() == "$ clear") {
+      setCommands([]);
+      return;
+    }
+
     setIsFetching(true);
 
     let userCommand: UserCommand = {
