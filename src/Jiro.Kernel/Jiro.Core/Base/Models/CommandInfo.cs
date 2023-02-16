@@ -50,6 +50,7 @@ public class CommandInfo
             else
             {
                 await task;
+                commandResult.Result = TextResult.Create("Command executed successfully");
             }
         }
         else
@@ -60,18 +61,18 @@ public class CommandInfo
         return commandResult;
     }
 
-    private object[] ParseArgs(CommandsContainer commandModule, string[] tokens)
+    private object?[] ParseArgs(CommandsContainer commandModule, string[] tokens)
     {
-        object?[]? args;
+        object?[] args;
 
         if (Name == commandModule.DefaultCommand)
         {
-            args = new object[] { string.Join(' ', tokens) };
+            args = new object?[] { string.Join(' ', tokens) };
         }
         else if (tokens.Length >= 3)
         {
             var paramTokens = tokens[2..];
-            args = new object[Parameters.Count];
+            args = new object?[Parameters.Count];
 
             if (args.Length == 1 && Parameters[0].Type == typeof(string))
             {

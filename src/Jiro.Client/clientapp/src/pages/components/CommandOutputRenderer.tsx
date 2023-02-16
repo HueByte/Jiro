@@ -26,7 +26,7 @@ export const CommandOutputRenderer = memo(
     return (
       <div className="flex flex-col">
         <div className="w-full">
-          <span className="text-primary">Me:</span> {command?.prompt}
+          <span className="text-primary">Me: </span> {command?.prompt}
         </div>
         <div className="w-full">{getComponent()}</div>
       </div>

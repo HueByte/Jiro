@@ -61,7 +61,7 @@ export const GraphOutput = (props: { command: any }) => {
 
   return (
     <div className="break-words">
-      <div className="text-accent">Jiro:</div>
+      <div className="text-accent">Jiro: </div>
       <div className="w-full">
         {data ? (
           <div>
