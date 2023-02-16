@@ -84,7 +84,8 @@ public class CommandInfo
             for (int i = 0; i < Parameters.Count; i++)
             {
                 var param = paramTokens.Length > i ? paramTokens[i] : null;
-                args[i] = Parameters[i].Parse(param);
+                if (Parameters[i].Parser is not null)
+                    args[i] = Parameters[i].Parser.Parse(param);
             }
         }
         else

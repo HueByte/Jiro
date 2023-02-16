@@ -3,6 +3,7 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using Jiro.Core.Base.Attributes;
 using Jiro.Core.Base.Models;
+using Jiro.Core.Base.TypeParsers;
 using Jiro.Core.Commands.GPT;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -122,9 +123,19 @@ public static class CommandRegistrator
 
         foreach (var parameter in parameters)
         {
-            parameterInfos.Add(new Models.ParameterInfo(parameter.ParameterType));
+            Models.ParameterInfo parameterInfo = new(parameter.ParameterType, GetParser(parameter.ParameterType)!);
+            parameterInfos.Add(parameterInfo);
         }
 
         return parameterInfos;
+    }
+
+    private static TypeParser? GetParser(Type type)
+    {
+        // todo
+        return type switch
+        {
+            _ => (TypeParser)Activator.CreateInstance(typeof(DefaultValueParser<>).MakeGenericType(new Type[] { type }))!
+        };
     }
 }
