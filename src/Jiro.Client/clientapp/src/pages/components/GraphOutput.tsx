@@ -34,6 +34,7 @@ export const GraphOutput = (props: { command: CommandResponse }) => {
     if (!command.result) return;
 
     let reqData = cmd?.data?.map((item: any, index: any) => {
+      // todo remove this
       return {
         ...item,
         date: new Date(item.date + "Z").toLocaleTimeString([], {

@@ -19,7 +19,7 @@ namespace Jiro.Core.Commands.Weather
         [Command("weather", CommandType.Graph)]
         public async Task<ICommandResult> Weather(string location, int daysRange)
         {
-            if (daysRange == 0) daysRange = 1;
+            if (daysRange <= 0 || daysRange > 7) daysRange = 1;
             int range = daysRange * 24;
 
             // fetch weather data
