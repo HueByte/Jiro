@@ -103,11 +103,11 @@ const Homepage = () => {
   };
 
   return (
-    <div className="flex w-full flex-row justify-center gap-6 px-8 pt-8 lg:flex-col md:px-4">
+    <div className="flex w-full flex-row justify-center gap-6 px-8 pt-8 lg:flex-col md:px-4 md:pt-0">
       <div
         className={`${
           isFetching ? "shadow-lg shadow-accent3 " : ""
-        }base-border-gradient-r h-fit w-[256px] flex-shrink-0 overflow-hidden rounded-full transition duration-1000 lg:mx-auto lg:w-[196px]`}
+        }base-border-gradient-r h-fit w-[256px] flex-shrink-0 overflow-hidden rounded-full transition duration-1000 lg:mx-auto lg:w-[196px] md:w-[128px]`}
       >
         <img
           className="rounded-full bg-elementLight"
@@ -115,10 +115,10 @@ const Homepage = () => {
           alt="temp image"
         />
       </div>
-      <div className="flex h-[90%] w-[1024px] min-w-[700px] flex-col rounded-xl bg-altBackgroundColor shadow-lg shadow-element lg:h-[calc(90%_-_196px)] lg:w-full lg:min-w-full">
+      <div className="flex h-[90%] w-[1024px] min-w-[700px] flex-col rounded-xl bg-altBackgroundColor shadow-lg shadow-element lg:h-[calc(90%_-_196px)] lg:w-full lg:min-w-full md:h-[calc(90%_-_128px)]">
         <div
           ref={chatContainer}
-          className="mx-12 my-4 flex flex-1 flex-col overflow-y-auto overflow-x-hidden pr-2"
+          className="mx-12 my-4 flex flex-1 flex-col overflow-y-auto overflow-x-hidden pr-2 md:mx-6"
         >
           {commands?.length > 0 &&
             commands?.map((command, index) => {
@@ -130,7 +130,7 @@ const Homepage = () => {
             })}
           <div ref={dummy}></div>
         </div>
-        <div className="relative h-fit px-12 py-4">
+        <div className="relative h-fit px-12 py-4 md:px-6">
           <input
             ref={messageInputRef}
             onKeyDown={(e) => {

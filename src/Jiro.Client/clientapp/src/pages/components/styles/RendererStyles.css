@@ -6,6 +6,12 @@
   color: #fff;
 }
 
+.wmde-markdown ol,
+.wmde-markdown ul {
+  list-style: unset;
+  height: fit-content !important;
+}
+
 .wmde-markdown pre {
   background-color: #001220;
 }

@@ -1,3 +1,4 @@
+using System.Text;
 using Jiro.Core.Base;
 using Jiro.Core.Base.Attributes;
 
@@ -15,13 +16,28 @@ namespace Jiro.Core.Commands.BaseCommands
         [Command("help")]
         public async Task<ICommandResult> Help()
         {
-            var commands = _commandsContainer.Commands
-                .Select(cmd => cmd.Key)
-                .ToList();
+            var commands = _commandsContainer.Commands;
+            var modules = _commandsContainer.CommandModules.Select(e => e.Value);
 
-            var helpMessage = $"Commands avaliable: {string.Join(", ", commands)}";
+            StringBuilder messageBuilder = new();
 
-            return TextResult.Create(helpMessage);
+            foreach (var module in modules)
+            {
+                if (module.Commands.Keys.Count == 0) continue;
+
+                messageBuilder.AppendLine($"## {module.Name}");
+                foreach (var command in module.Commands)
+                {
+                    var parameters = command.Value.Parameters.Select(e => e.Type.Name);
+                    string parametersString = parameters.Any() ? $"[ {string.Join(", ", parameters)} ]" : string.Empty;
+
+                    messageBuilder.AppendLine($"- {command.Key} {parametersString}");
+                }
+
+                messageBuilder.AppendLine();
+            }
+
+            return TextResult.Create(messageBuilder.ToString());
         }
     }
 }
