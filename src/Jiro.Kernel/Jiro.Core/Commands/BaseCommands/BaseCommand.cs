@@ -30,7 +30,7 @@ namespace Jiro.Core.Commands.BaseCommands
                 messageBuilder.AppendLine($"## {module.Name}");
                 foreach (var command in module.Commands)
                 {
-                    var parameters = command.Value.Parameters.Select(e => e.Type.Name);
+                    var parameters = command.Value.Parameters.Select(e => e.ParamType.Name);
                     string parametersString = parameters.Any() ? $"[ {string.Join(", ", parameters)} ]" : string.Empty;
 
                     messageBuilder.AppendLine($"- {command.Key} {parametersString}");

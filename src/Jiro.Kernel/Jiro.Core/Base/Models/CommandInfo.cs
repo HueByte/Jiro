@@ -75,7 +75,7 @@ public class CommandInfo
             var paramTokens = tokens[2..];
             args = new object?[Parameters.Count];
 
-            if (args.Length == 1 && Parameters[0].Type == typeof(string))
+            if (args.Length == 1 && Parameters[0].ParamType == typeof(string))
             {
                 args[0] = string.Join(' ', paramTokens);
                 return args;

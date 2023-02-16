@@ -10,7 +10,7 @@ export const TextOutput = (props: { command: CommandResponse }) => {
       <span className="text-accent">Jiro: </span>
       <MDEditor.Markdown
         source={(command.result as any)?.response}
-        style={{ whiteSpace: "pre-wrap" }}
+        style={{}}
       />
     </div>
   );
