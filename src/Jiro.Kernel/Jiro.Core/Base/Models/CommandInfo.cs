@@ -11,12 +11,14 @@ public class CommandInfo
 {
     public string Name { get; } = string.Empty;
     public CommandType CommandType { get; }
+    public string? CommandSyntax { get; }
+    public string? CommandDescription { get; }
     public bool IsAsync { get; } = false;
     public Type Module { get; } = default!;
     public readonly Func<ICommandBase, object[], Task> Descriptor = default!;
     public IReadOnlyList<ParameterInfo> Parameters { get; }
 
-    public CommandInfo(string name, CommandType commandType, bool isAsync, Type container, Func<ICommandBase, object[], Task> descriptor, IReadOnlyList<ParameterInfo> parameters)
+    public CommandInfo(string name, CommandType commandType, bool isAsync, Type container, Func<ICommandBase, object[], Task> descriptor, IReadOnlyList<ParameterInfo> parameters, string? commandSyntax, string? commandDescription)
     {
         Name = name;
         CommandType = commandType;
@@ -24,6 +26,8 @@ public class CommandInfo
         Module = container;
         Descriptor = descriptor;
         Parameters = parameters;
+        CommandSyntax = commandSyntax;
+        CommandDescription = commandDescription;
     }
 
     public async Task<CommandResponse> ExecuteAsync(IServiceScope scope, CommandsContainer commandModule, string[] tokens)

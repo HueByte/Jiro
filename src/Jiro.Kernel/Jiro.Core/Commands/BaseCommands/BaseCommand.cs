@@ -15,7 +15,7 @@ namespace Jiro.Core.Commands.BaseCommands
             _commandsContainer = commandsContainer;
         }
 
-        [Command("help")]
+        [Command("help", commandDescription: "Shows all available commands and their syntax")]
         public async Task<ICommandResult> Help()
         {
             var commands = _commandsContainer.Commands;
@@ -31,9 +31,11 @@ namespace Jiro.Core.Commands.BaseCommands
                 foreach (var command in module.Commands)
                 {
                     var parameters = command.Value.Parameters.Select(e => e.ParamType.Name);
-                    string parametersString = parameters.Any() ? $"[ {string.Join(", ", parameters)} ]" : string.Empty;
+                    string parametersString = parameters.Any() ? $"<span style=\"color: DeepPink;\">[ {string.Join(", ", parameters)} ]</span><br />" : string.Empty;
 
                     messageBuilder.AppendLine($"- {command.Key} {parametersString}");
+                    if (!string.IsNullOrEmpty(command.Value.CommandDescription)) messageBuilder.AppendLine($"{command.Value.CommandDescription}<br />");
+                    if (!string.IsNullOrEmpty(command.Value.CommandSyntax)) messageBuilder.AppendLine($"Syntax:<span style=\"color: DeepPink;\"> {command.Value.CommandSyntax}</span><br />");
                 }
 
                 messageBuilder.AppendLine();

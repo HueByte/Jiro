@@ -43,6 +43,8 @@ namespace Jiro.Core.Base
 
             var commandName = method.GetCustomAttribute<CommandAttribute>()?.CommandName.ToLower() ?? "";
             var commandType = method.GetCustomAttribute<CommandAttribute>()?.CommandType ?? CommandType.Text;
+            var commandDescription = method.GetCustomAttribute<CommandAttribute>()?.CommandDescription ?? "";
+            var commandSyntax = method.GetCustomAttribute<CommandAttribute>()?.CommandSyntax ?? "";
             var isAsync = method.GetCustomAttribute<AsyncStateMachineAttribute>() is not null;
             var compiledMethod = CompileMethodInvoker<TBaseInstance, TReturn>(method);
             var args = GetParameters(method);
@@ -53,7 +55,9 @@ namespace Jiro.Core.Base
                 isAsync,
                 delcaringType,
                 compiledMethod as Func<ICommandBase, object[], Task>,
-                args
+                args,
+                commandSyntax,
+                commandDescription
             );
 
             return commandInfo;
