@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Text.RegularExpressions;
 using Jiro.Core.Base;
 using Jiro.Core.Base.Models;
@@ -21,7 +22,7 @@ namespace Jiro.Core.Services.CommandHandler
         public async Task<CommandResponse> ExecuteCommandAsync(string prompt)
         {
             await using var scope = _scopeFactory.CreateAsyncScope();
-
+            var watch = Stopwatch.StartNew();
             var tokens = ParseTokens(prompt);
             var commandName = GetCommandName(tokens);
             var command = GetCommand(commandName);
@@ -40,17 +41,21 @@ namespace Jiro.Core.Services.CommandHandler
             {
                 throw new CommandException(commandName, exception.Message);
             }
+            finally
+            {
+                OnLog?.Invoke("Finished [{commandName}] command in {time} ms", new object[] { commandName, watch.ElapsedMilliseconds });
+            }
 
             return result;
         }
 
         private string GetCommandName(string[] tokens)
         {
-            if (tokens.Length >= 2)
+            if (tokens.Length >= 1)
             {
-                var commandPrefix = tokens[0].ToLower();
-                if (commandPrefix == "command" || commandPrefix == "$")
-                    return tokens[1].ToLower();
+                var commandSeg = tokens[0].ToLower();
+                if (commandSeg.StartsWith('$') && commandSeg.Length > 1)
+                    return commandSeg[1..];
             }
 
             return _commandModule.DefaultCommand;
@@ -75,7 +80,7 @@ namespace Jiro.Core.Services.CommandHandler
             for (int i = 0; i < matches.Count; i++)
             {
                 var match = matches[i].Value;
-                if (match.StartsWith("\"") && match.EndsWith("\""))
+                if (match.StartsWith('\"') && match.EndsWith('\"'))
                     tokens[i] = match[1..^1];
                 else
                     tokens[i] = match;

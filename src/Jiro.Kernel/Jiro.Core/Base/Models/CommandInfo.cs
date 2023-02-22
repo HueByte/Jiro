@@ -74,9 +74,9 @@ public class CommandInfo
         {
             args = new object?[] { string.Join(' ', tokens) };
         }
-        else if (tokens.Length >= 3)
+        else if (tokens.Length > 1)
         {
-            var paramTokens = tokens[2..];
+            var paramTokens = tokens[1..];
             args = new object?[Parameters.Count];
 
             if (args.Length == 1 && Parameters[0].ParamType == typeof(string))
