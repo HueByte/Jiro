@@ -23,7 +23,6 @@ namespace Jiro.Core.Services.CommandHandler
             await using var scope = _scopeFactory.CreateAsyncScope();
 
             var tokens = ParseTokens(prompt);
-
             var commandName = GetCommandName(tokens);
             var command = GetCommand(commandName);
 

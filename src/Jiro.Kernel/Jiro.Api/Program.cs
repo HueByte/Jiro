@@ -57,15 +57,15 @@ var app = builder.Build();
 var commandContainer = app.Services.GetRequiredService<CommandsContainer>();
 foreach (var module in commandContainer.CommandModules.Keys) Log.Information("Module {Module} loaded", module);
 
-_ = new AppConfigurator(app.Services)
+var appConf = new AppConfigurator(app)
     .ConfigureEvents();
 
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
+    appConf.UseJiroSwagger();
 }
 
+app.UseStaticFiles();
 app.UseErrorHandler();
 app.UseHttpsRedirection();
 app.UseAuthorization();
