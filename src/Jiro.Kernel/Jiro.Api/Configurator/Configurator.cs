@@ -2,6 +2,7 @@ using Jiro.Core.Base;
 using Jiro.Core.Constants;
 using Jiro.Core.Interfaces.IServices;
 using Jiro.Core.Services.CommandHandler;
+using Jiro.Core.Services.CommandSystem;
 using Jiro.Core.Services.GPTService;
 using Jiro.Core.Services.WeatherService;
 
@@ -15,6 +16,7 @@ namespace Jiro.Api.Configurator
             services.AddScoped<IWeatherService, WeatherService>();
 
             services.AddSingleton<ICommandHandlerService, CommandHandlerService>();
+            services.AddSingleton<IHelpService, HelpService>();
             services.AddSingleton<EventsConfigurator>();
 
             return services;
