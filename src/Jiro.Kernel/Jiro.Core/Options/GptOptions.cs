@@ -15,6 +15,8 @@ namespace Jiro.Core.Options
 
         [Required]
         public bool UseChatGpt { get; set; }
+        [Required]
+        public bool Enable { get; set; }
 
         public ChatGptOptions? ChatGpt { get; set; }
         public SingleGptOptions? SingleGpt { get; set; }
@@ -24,7 +26,6 @@ namespace Jiro.Core.Options
     {
         public const string ChatGpt = "ChatGpt";
 
-        public int TokenLimit { get; set; } = 2048;
         public string SystemMessage { get; set; } = string.Empty;
     }
 

@@ -10,18 +10,16 @@ namespace Jiro.Core.Services.GPTService
     public class ChatGPTStorageService : IChatGPTStorageService
     {
         private readonly ILogger _logger;
-        private readonly ChatGptOptions _chatGptOptions;
         private readonly ConcurrentDictionary<string, ChatGPTSession> _sessions = new();
-        public ChatGPTStorageService(ILogger<ChatGPTStorageService> logger, IOptions<ChatGptOptions> chatGptOptions)
+        public ChatGPTStorageService(ILogger<ChatGPTStorageService> logger)
         {
             _logger = logger;
-            _chatGptOptions = chatGptOptions.Value;
         }
 
         public ChatGPTSession GetOrCreateSession(string userId)
         {
-            if (_sessions.ContainsKey(userId))
-                return _sessions[userId];
+            if (_sessions.TryGetValue(userId, out ChatGPTSession value))
+                return value;
 
             ChatMessage systemMessage = new()
             {
@@ -33,7 +31,6 @@ namespace Jiro.Core.Services.GPTService
             {
                 Model = "gpt-3.5-turbo",
                 Messages = new() { systemMessage },
-                MaxTokens = _chatGptOptions.TokenLimit
             };
 
             ChatGPTSession session = new()

@@ -35,9 +35,9 @@ namespace Jiro.Core.Services.CommandSystem
                     string? syntax = null;
 
                     var parameters = command.Value.Parameters.Select(e => e.ParamType.Name);
-                    string parametersString = parameters.Any() ? $"<span style=\"color: DeepPink;\">[ {string.Join(", ", parameters)} ]</span><br />" : string.Empty;
+                    string parametersString = parameters.Any() ? $"<span style=\"color: DeepPink;\">[ {string.Join(", ", parameters)} ]</span>" : string.Empty;
 
-                    header = $"- {command.Key} {parametersString}";
+                    header = $"- {command.Key} {parametersString}<br />";
 
                     if (!string.IsNullOrEmpty(command.Value.CommandDescription))
                         description = $"{command.Value.CommandDescription}<br />";

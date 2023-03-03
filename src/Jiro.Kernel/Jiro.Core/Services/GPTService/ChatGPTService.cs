@@ -1,5 +1,3 @@
-using System.Collections.ObjectModel;
-using System.ComponentModel;
 using System.Net.Http.Json;
 using Jiro.Core.Constants;
 using Jiro.Core.Interfaces.IServices;
@@ -13,23 +11,22 @@ namespace Jiro.Core.Services.GPTService
     public class ChatGPTService : IChatService
     {
         private readonly ILogger _logger;
-        private readonly GptOptions _options;
         private readonly ChatGptOptions _chatGptOptions;
         private readonly HttpClient _client;
+        private readonly HttpClient _tokenizerClient;
         private readonly IChatGPTStorageService _storageService;
-        public ChatGPTService(ILogger<ChatGPTService> logger, IChatGPTStorageService storageService, IHttpClientFactory clientFactory, IOptions<GptOptions> options, IOptions<ChatGptOptions> chatGptOptions)
+        public ChatGPTService(ILogger<ChatGPTService> logger, IChatGPTStorageService storageService, IHttpClientFactory clientFactory, IOptions<ChatGptOptions> chatGptOptions)
         {
             _logger = logger;
             _storageService = storageService;
             _client = clientFactory.CreateClient(HttpClients.CHAT_GPT_CLIENT);
-            _options = options.Value;
+            _tokenizerClient = clientFactory.CreateClient(HttpClients.TOKENIZER);
             _chatGptOptions = chatGptOptions.Value;
         }
 
         public async Task<string> ChatAsync(string prompt)
         {
             string userId = "tempUser";
-
             var session = _storageService.GetOrCreateSession(userId);
 
             ChatMessage message = new()
@@ -40,31 +37,66 @@ namespace Jiro.Core.Services.GPTService
 
             session.Request.Messages.Add(message);
 
-            var result = await _client.PostAsJsonAsync(ApiEndpoints.CHAT_GPT_COMPLETIONS, session.Request);
-
-            ChatGPTResponse body = null!;
-            if (result.IsSuccessStatusCode)
+            var tokens = await GetTokenCount(session.Request.Messages);
+            while (tokens >= 4096)
             {
-                body = await result.Content.ReadFromJsonAsync<ChatGPTResponse>();
+                _logger.LogInformation("Attempting to reduce token count for {user} session", userId);
+
+                // remove user - assistant message pair
+                if (session.Request.Messages.Count > 2)
+                {
+                    session.Request.Messages.RemoveAt(2);
+                    session.Request.Messages.RemoveAt(1);
+                }
+
+                tokens = await GetTokenCount(session.Request.Messages);
             }
-            else
+
+            ChatGPTResponse? body;
+            try
             {
-                var errMessage = await result.Content.ReadAsStringAsync();
-                _logger.LogError("Something went wrong \n{err}", errMessage);
-                throw new CommandException("ChatGPT", "Failed to get response from ChatGPT API.");
+                var result = await _client.PostAsJsonAsync(ApiEndpoints.CHAT_GPT_COMPLETIONS, session.Request);
+
+                if (result.IsSuccessStatusCode)
+                {
+                    body = await result.Content.ReadFromJsonAsync<ChatGPTResponse>();
+                }
+                else
+                {
+                    var errMessage = await result.Content.ReadAsStringAsync();
+                    _logger.LogError("Open AI: \n{err}", errMessage);
+
+                    throw new CommandException("ChatGPT", "The interaction failed");
+                }
+            }
+            catch (Exception)
+            {
+                session.Request.Messages.RemoveAt(session.Request.Messages.Count - 1);
+                throw;
             }
 
-            _logger.LogInformation("[ChatGPT] tokens consumed: {tokens}", body.Usage.TotalTokens);
+            _logger.LogInformation("[ChatGPT] Tokens consumed: {tokens}", body.Usage.TotalTokens);
 
-            ChatMessage response = new()
+            ChatMessage responseMessage = new()
             {
                 Role = body.Choices[0].Message.Role,
                 Content = body.Choices[0].Message.Content
             };
 
-            session.Request.Messages.Add(response);
+            session.Request.Messages.Add(responseMessage);
 
-            return response.Content;
+            return responseMessage.Content;
         }
+
+        private async Task<int> GetTokenCount(List<ChatMessage> messages)
+        {
+            TokenizeRequest request = new(string.Join(' ', messages.Select(e => e.Content)));
+
+            var result = await _tokenizerClient.PostAsJsonAsync("/tokenize", request);
+
+            return Convert.ToInt32(await result.Content.ReadAsStringAsync());
+        }
+
+        private record TokenizeRequest(string Text);
     }
 }
