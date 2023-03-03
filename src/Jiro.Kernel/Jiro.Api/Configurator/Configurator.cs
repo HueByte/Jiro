@@ -1,6 +1,5 @@
 using Jiro.Core.Base;
 using Jiro.Core.Constants;
-using Jiro.Core.Interfaces.IServices;
 using Jiro.Core.Options;
 using Jiro.Core.Services.CommandHandler;
 using Jiro.Core.Services.CommandSystem;
@@ -12,11 +11,23 @@ namespace Jiro.Api.Configurator
 {
     public static class Configurator
     {
-        public static IServiceCollection AddServices(this IServiceCollection services)
+        public static IServiceCollection AddServices(this IServiceCollection services, IConfiguration config)
         {
-            // services.AddScoped<IChatService, GPTService>();
-            services.AddScoped<IChatService, ChatGPTService>();
+            GptOptions? gptOptions = config.GetSection(GptOptions.Gpt).Get<GptOptions>();
+
+            if (gptOptions is { Enable: true, AuthToken: not null and not "" })
+            {
+                if (gptOptions.UseChatGpt) services.AddScoped<IChatService, ChatGPTService>();
+                else services.AddScoped<IChatService, GPTService>();
+            }
+            else
+            {
+                services.AddScoped<IChatService, DisabledGptService>();
+            }
+
             services.AddSingleton<IChatGPTStorageService, ChatGPTStorageService>();
+
+
             services.AddScoped<IWeatherService, WeatherService>();
 
             services.AddSingleton<ICommandHandlerService, CommandHandlerService>();
@@ -77,6 +88,14 @@ namespace Jiro.Api.Configurator
 
                 if (!string.IsNullOrEmpty(gptOptions.Organization))
                     httpClient.DefaultRequestHeaders.Add("OpenAI-Organization", gptOptions.Organization);
+            });
+
+            services.AddHttpClient(HttpClients.TOKENIZER, (provider, httpClient) =>
+            {
+                var tokenizerUrl = provider.GetRequiredService<IConfiguration>()
+                    .GetValue<string>("TokenizerUrl");
+
+                httpClient.BaseAddress = new Uri(tokenizerUrl ?? "http://localhost:8000");
             });
 
             return services;

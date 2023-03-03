@@ -48,7 +48,7 @@ servicesRef.AddControllers();
 servicesRef.AddEndpointsApiExplorer();
 servicesRef.AddSwaggerGen();
 
-servicesRef.AddServices();
+servicesRef.AddServices(configRef);
 servicesRef.RegisterCommandModules();
 servicesRef.AddHttpClients(configRef);
 
