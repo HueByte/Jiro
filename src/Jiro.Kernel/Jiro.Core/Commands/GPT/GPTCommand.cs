@@ -1,3 +1,4 @@
+using System.Collections.ObjectModel;
 using Jiro.Core.Base;
 using Jiro.Core.Base.Attributes;
 using Jiro.Core.Base.Results;
@@ -9,9 +10,11 @@ namespace Jiro.Core.Commands.GPT
     public class GPTCommand : ICommandBase
     {
         private readonly IChatService _gptService;
-        public GPTCommand(IChatService gptService)
+        private readonly IChatGPTStorageService _storageService;
+        public GPTCommand(IChatService gptService, IChatGPTStorageService storageService)
         {
             _gptService = gptService;
+            _storageService = storageService;
         }
 
         [Command("chat")]
@@ -20,6 +23,15 @@ namespace Jiro.Core.Commands.GPT
             var result = await _gptService.ChatAsync(prompt);
 
             return TextResult.Create(result);
+        }
+
+        [Command("reset", commandDescription: "Clears the current session")]
+        public Task ClearSession()
+        {
+            string tempUser = "tempUser";
+            _storageService.RemoveSession(tempUser);
+
+            return Task.CompletedTask;
         }
     }
 }
