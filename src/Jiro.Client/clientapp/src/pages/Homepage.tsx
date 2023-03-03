@@ -7,7 +7,7 @@ import { CommandOutputRenderer } from "./components";
 import { UserCommand } from "./Models";
 
 const Homepage = () => {
-  const messageInputRef = React.useRef<HTMLInputElement | null>(null);
+  const messageInputRef = React.useRef<HTMLTextAreaElement | null>(null);
   const dummy = React.useRef<HTMLInputElement | null>(null);
   const chatContainer = React.useRef<HTMLInputElement | null>(null);
   const [commands, setCommands] = useState<UserCommand[]>([]);
@@ -50,16 +50,16 @@ const Homepage = () => {
     if (
       isFetching ||
       !messageInputRef ||
-      messageInputRef.current?.value.length === 0
+      messageInputRef.current?.value.trim().length === 0
     )
       return;
 
     // clear the input field
-    let promptValue = messageInputRef.current?.value;
+    let promptValue = messageInputRef.current?.value.trim();
     messageInputRef.current!.value = "";
 
-    if (promptValue?.toLowerCase() == "$ clear") {
-      setCommands([]);
+    if (promptValue?.toLowerCase() == "$clear") {
+      await resetSession();
       return;
     }
 
@@ -96,6 +96,16 @@ const Homepage = () => {
     messageInputRef.current?.focus();
   };
 
+  const resetSession = async () => {
+    await api.JiroService.postApiJiro({
+      requestBody: {
+        prompt: "$reset",
+      },
+    });
+
+    setCommands([]);
+  };
+
   const scroll = () => {
     dummy?.current?.scrollIntoView({ behavior: "smooth" });
   };
@@ -108,7 +118,7 @@ const Homepage = () => {
   };
 
   return (
-    <div className="flex w-full flex-row justify-center gap-6 px-8 pt-8 lg:flex-col md:px-4 md:pt-0">
+    <div className="flex w-full flex-row justify-center gap-6 px-8 py-8 lg:flex-col md:px-4 md:py-0">
       <div
         className={`${
           isFetching ? "shadow-lg shadow-accent3 " : ""
@@ -120,7 +130,7 @@ const Homepage = () => {
           alt="temp image"
         />
       </div>
-      <div className="flex h-[90%] w-[1024px] min-w-[700px] flex-col rounded-xl bg-altBackgroundColor shadow-lg shadow-element lg:h-[calc(90%_-_196px)] lg:w-full lg:min-w-full md:h-[calc(90%_-_128px)]">
+      <div className="flex h-[100%] w-[1024px] min-w-[700px] flex-col rounded-xl bg-altBackgroundColor shadow-lg shadow-element lg:h-[calc(90%_-_196px)] lg:w-full lg:min-w-full md:h-[calc(90%_-_128px)]">
         <div
           ref={chatContainer}
           className="mx-12 my-4 flex flex-1 flex-col overflow-y-auto overflow-x-hidden pr-2 md:mx-6"
@@ -135,16 +145,20 @@ const Homepage = () => {
             })}
           <div ref={dummy}></div>
         </div>
-        <div className="relative h-fit px-12 py-4 md:px-6">
-          <input
+        <div className="relative grid h-24 place-items-center px-12 py-4 md:px-6">
+          <textarea
             ref={messageInputRef}
             onKeyDown={(e) => {
-              if (e.key === "Enter") sendMessage();
+              if (e.key == "Enter" && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+              }
             }}
-            type="text"
-            className="base-input w-full pr-10"
+            className="base-input max-h-full w-full"
             placeholder="Type a message or command..."
-          />
+            style={{ resize: "none" }}
+            rows={1}
+          ></textarea>
           <BiMailSend
             onClick={sendMessage}
             className="absolute right-[56px] top-1/2 -translate-y-1/2 text-3xl hover:cursor-pointer hover:text-accent2"
