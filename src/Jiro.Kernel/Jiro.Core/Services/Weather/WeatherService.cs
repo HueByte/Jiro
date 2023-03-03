@@ -11,8 +11,8 @@ namespace Jiro.Core.Services.WeatherService
         private readonly HttpClient _geoClient;
         public WeatherService(IHttpClientFactory clientFactory)
         {
-            _weatherClient = clientFactory.CreateClient(HttpClientNames.WEATHER_CLIENT);
-            _geoClient = clientFactory.CreateClient(HttpClientNames.GEOLOCATION_CLIENT);
+            _weatherClient = clientFactory.CreateClient(HttpClients.WEATHER_CLIENT);
+            _geoClient = clientFactory.CreateClient(HttpClients.GEOLOCATION_CLIENT);
         }
 
         public async Task<string?> GetWeatherAsync(string city)

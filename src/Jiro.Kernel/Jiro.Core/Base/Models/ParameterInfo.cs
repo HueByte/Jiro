@@ -12,18 +12,5 @@ namespace Jiro.Core.Base.Models
             ParamType = type;
             Parser = parser;
         }
-
-        // public object? Parse(string? input)
-        // {
-        //     if (string.IsNullOrEmpty(input))
-        //     {
-        //         if (ParamType.IsValueType)
-        //             return Activator.CreateInstance(ParamType);
-
-        //         return null;
-        //     }
-
-        //     return Convert.ChangeType(input, ParamType);
-        // }
     }
 }

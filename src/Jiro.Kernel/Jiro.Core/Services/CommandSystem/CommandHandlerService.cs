@@ -43,6 +43,7 @@ namespace Jiro.Core.Services.CommandHandler
             }
             finally
             {
+                watch.Stop();
                 OnLog?.Invoke("Finished [{commandName}] command in {time} ms", new object[] { commandName, watch.ElapsedMilliseconds });
             }
 

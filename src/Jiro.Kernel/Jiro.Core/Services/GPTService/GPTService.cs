@@ -3,22 +3,25 @@ using System.Text.Json;
 using System.Xml;
 using Jiro.Core.Constants;
 using Jiro.Core.Interfaces.IServices;
+using Jiro.Core.Options;
 using Jiro.Core.Services.GPTService.Models;
+using Jiro.Core.Services.GPTService.Models.GPT;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace Jiro.Core.Services.GPTService
 {
-    public class GPTService : IGPTService
+    public class GPTService : IChatService
     {
         private readonly ILogger _logger;
-        private readonly IConfiguration _config;
         private readonly HttpClient _client;
-        public GPTService(ILogger<GPTService> logger, IConfiguration config, IHttpClientFactory clientFactory)
+        private readonly GptOptions _gptOptions;
+        public GPTService(ILogger<GPTService> logger, IHttpClientFactory clientFactory, IOptions<GptOptions> options)
         {
             _logger = logger;
-            _config = config;
-            _client = clientFactory.CreateClient(HttpClientNames.GPT_CLIENT);
+            _client = clientFactory.CreateClient(HttpClients.GPT_CLIENT);
+            _gptOptions = options.Value;
         }
 
         public async Task<string> ChatAsync(string prompt)
@@ -26,24 +29,24 @@ namespace Jiro.Core.Services.GPTService
             if (string.IsNullOrEmpty(prompt))
                 throw new Exception("Prompt for GPT was empty");
 
-            var aiContext = _config.GetSection("GPT:ContextMessage").Get<string>();
+            var aiContext = _gptOptions.SingleGpt?.ContextMessage;
 
             if (string.IsNullOrEmpty(aiContext)) aiContext = "";
             if (!(prompt.EndsWith('?') || prompt.EndsWith('.'))) prompt += '.';
 
-            aiContext += prompt + "\nJiro$";
+            aiContext += prompt + "\nJiro$ ";
 
-            GPTRequest model = new()
+            GPTRequest req = new()
             {
-                Model = "text-davinci-003",
-                MaxTokens = 500,
+                Model = _gptOptions.SingleGpt?.Model ?? "text-davinci-003",
+                MaxTokens = _gptOptions.SingleGpt is not null ? _gptOptions.SingleGpt.TokenLimit : 500,
                 Prompt = aiContext,
                 Temperature = 0.7,
-                Stop = _config.GetSection("GPT:Stop").Get<string>() ?? "\n",
+                Stop = _gptOptions.SingleGpt?.Stop ?? "\n",
                 N = 1
             };
 
-            var response = await _client.PostAsJsonAsync(ApiEndpoints.GPT_COMPLETIONS, model);
+            var response = await _client.PostAsJsonAsync(ApiEndpoints.GPT_COMPLETIONS, req);
 
             if (response.IsSuccessStatusCode)
             {
@@ -52,7 +55,7 @@ namespace Jiro.Core.Services.GPTService
 
                 _logger.LogInformation("Tokens used: {tokens}", result?.Usage?.TotalTokens);
 
-                if (_config.GetSection("GPT:FineTune").Get<bool>())
+                if (_gptOptions.FineTune)
                 {
                     await FineTuneAsync(aiContext, responseText);
                 }

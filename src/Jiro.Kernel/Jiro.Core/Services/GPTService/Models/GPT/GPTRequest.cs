@@ -1,6 +1,6 @@
 using System.Text.Json.Serialization;
 
-namespace Jiro.Core.Services.GPTService.Models
+namespace Jiro.Core.Services.GPTService.Models.GPT
 {
     public class GPTRequest
     {

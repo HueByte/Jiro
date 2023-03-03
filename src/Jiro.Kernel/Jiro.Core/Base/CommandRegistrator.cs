@@ -13,7 +13,6 @@ public static class CommandRegistrator
 {
     public static IServiceCollection RegisterCommands(this IServiceCollection services)
     {
-        // var assemblies = AppDomain.CurrentDomain.GetAssemblies();
         var assemblies = ReflectionUtilities.GetDomainAssemblies();
         if (assemblies is null) throw new Exception("Assemblies is null, something went wrong");
 
@@ -34,8 +33,6 @@ public static class CommandRegistrator
                 var commandInfo = ReflectionUtilities.BuildCommandFromMethodInfo<ICommandBase, Task>(methodInfo);
                 if (commandInfo is not null) commands.Add(commandInfo);
             }
-
-            // var commandsInfos = GetCommands(container);
 
             commandModuleInfo.SetCommands(commands);
             commandModuleInfo.SetName(container.GetCustomAttribute<CommandModuleAttribute>()?.ModuleName ?? "");

@@ -8,8 +8,8 @@ namespace Jiro.Core.Commands.GPT
     [CommandModule("GPT")]
     public class GPTCommand : ICommandBase
     {
-        private readonly IGPTService _gptService;
-        public GPTCommand(IGPTService gptService)
+        private readonly IChatService _gptService;
+        public GPTCommand(IChatService gptService)
         {
             _gptService = gptService;
         }

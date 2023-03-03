@@ -15,8 +15,8 @@ public class CommandInfo
     public string? CommandDescription { get; }
     public bool IsAsync { get; } = false;
     public Type Module { get; } = default!;
-    public readonly Func<ICommandBase, object[], Task> Descriptor = default!;
-    public IReadOnlyList<ParameterInfo> Parameters { get; }
+    public readonly Func<ICommandBase, object?[], Task> Descriptor = default!;
+    public IReadOnlyList<ParameterInfo?>? Parameters { get; }
 
     public CommandInfo(string name, CommandType commandType, bool isAsync, Type container, Func<ICommandBase, object[], Task> descriptor, IReadOnlyList<ParameterInfo> parameters, string? commandSyntax, string? commandDescription)
     {
@@ -35,7 +35,8 @@ public class CommandInfo
         CommandResponse commandResult = new()
         {
             CommandName = Name,
-            CommandType = CommandType
+            CommandType = CommandType,
+            Result = null
         };
 
         var instance = scope.ServiceProvider.GetRequiredService(Module);
@@ -74,12 +75,12 @@ public class CommandInfo
         {
             args = new object?[] { string.Join(' ', tokens) };
         }
-        else if (tokens.Length > 1)
+        else if (Parameters is not null && tokens.Length > 1)
         {
             var paramTokens = tokens[1..];
             args = new object?[Parameters.Count];
 
-            if (args.Length == 1 && Parameters[0].ParamType == typeof(string))
+            if (args.Length == 1 && Parameters[0]?.ParamType == typeof(string))
             {
                 args[0] = string.Join(' ', paramTokens);
                 return args;

@@ -1,4 +1,3 @@
-using System.Text;
 using Jiro.Core.Base;
 using Jiro.Core.Base.Attributes;
 using Jiro.Core.Base.Models;
@@ -19,9 +18,10 @@ namespace Jiro.Core.Commands.BaseCommands
         }
 
         [Command("help", commandDescription: "Shows all available commands and their syntax")]
-        public async Task<ICommandResult> Help()
+        public Task<ICommandResult> Help()
         {
-            return TextResult.Create(_helpService.HelpMessage);
+            var result = TextResult.Create(_helpService.HelpMessage);
+            return Task.FromResult(result as ICommandResult);
         }
     }
 }

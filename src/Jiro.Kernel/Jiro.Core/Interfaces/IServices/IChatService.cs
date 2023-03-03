@@ -1,6 +1,6 @@
 namespace Jiro.Core.Interfaces.IServices
 {
-    public interface IGPTService
+    public interface IChatService
     {
         Task<string> ChatAsync(string prompt);
     }

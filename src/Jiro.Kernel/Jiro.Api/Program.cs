@@ -43,6 +43,7 @@ moduleManager.RegisterModuleServices();
 moduleManager.ValidateModules();
 
 var servicesRef = builder.Services;
+servicesRef.AddOptions(configRef);
 servicesRef.AddControllers();
 servicesRef.AddEndpointsApiExplorer();
 servicesRef.AddSwaggerGen();
