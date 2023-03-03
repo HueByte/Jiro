@@ -1,4 +1,3 @@
-using System.Collections.ObjectModel;
 using Jiro.Core.Base;
 using Jiro.Core.Base.Attributes;
 using Jiro.Core.Base.Results;
@@ -9,18 +8,18 @@ namespace Jiro.Core.Commands.GPT
     [CommandModule("GPT")]
     public class GPTCommand : ICommandBase
     {
-        private readonly IChatService _gptService;
+        private readonly IChatService _chatService;
         private readonly IChatGPTStorageService _storageService;
-        public GPTCommand(IChatService gptService, IChatGPTStorageService storageService)
+        public GPTCommand(IChatService chatService, IChatGPTStorageService storageService)
         {
-            _gptService = gptService;
+            _chatService = chatService;
             _storageService = storageService;
         }
 
         [Command("chat")]
         public async Task<ICommandResult> Chat(string prompt)
         {
-            var result = await _gptService.ChatAsync(prompt);
+            var result = await _chatService.ChatAsync(prompt);
 
             return TextResult.Create(result);
         }
