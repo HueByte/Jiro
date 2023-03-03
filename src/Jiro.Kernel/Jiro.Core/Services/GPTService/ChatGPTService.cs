@@ -13,15 +13,15 @@ namespace Jiro.Core.Services.GPTService
         private readonly ILogger _logger;
         private readonly ChatGptOptions _chatGptOptions;
         private readonly HttpClient _client;
-        private readonly HttpClient _tokenizerClient;
         private readonly IChatGPTStorageService _storageService;
-        public ChatGPTService(ILogger<ChatGPTService> logger, IChatGPTStorageService storageService, IHttpClientFactory clientFactory, IOptions<ChatGptOptions> chatGptOptions)
+        private readonly ITokenizerService _tokenizerService;
+        public ChatGPTService(ILogger<ChatGPTService> logger, IChatGPTStorageService storageService, IHttpClientFactory clientFactory, IOptions<ChatGptOptions> chatGptOptions, ITokenizerService tokenizerService)
         {
             _logger = logger;
             _storageService = storageService;
             _client = clientFactory.CreateClient(HttpClients.CHAT_GPT_CLIENT);
-            _tokenizerClient = clientFactory.CreateClient(HttpClients.TOKENIZER);
             _chatGptOptions = chatGptOptions.Value;
+            _tokenizerService = tokenizerService;
         }
 
         public async Task<string> ChatAsync(string prompt)
@@ -37,20 +37,7 @@ namespace Jiro.Core.Services.GPTService
 
             session.Request.Messages.Add(message);
 
-            var tokens = await GetTokenCount(session.Request.Messages);
-            while (tokens >= 4096)
-            {
-                _logger.LogInformation("Attempting to reduce token count for {user} session", userId);
-
-                // remove user - assistant message pair
-                if (session.Request.Messages.Count > 2)
-                {
-                    session.Request.Messages.RemoveAt(2);
-                    session.Request.Messages.RemoveAt(1);
-                }
-
-                tokens = await GetTokenCount(session.Request.Messages);
-            }
+            await ReduceTokenCount(session);
 
             ChatGPTResponse? body;
             try
@@ -88,15 +75,16 @@ namespace Jiro.Core.Services.GPTService
             return responseMessage.Content;
         }
 
-        private async Task<int> GetTokenCount(List<ChatMessage> messages)
+        private async Task ReduceTokenCount(ChatGPTSession session)
         {
-            TokenizeRequest request = new(string.Join(' ', messages.Select(e => e.Content)));
-
-            var result = await _tokenizerClient.PostAsJsonAsync("/tokenize", request);
-
-            return Convert.ToInt32(await result.Content.ReadAsStringAsync());
+            session.Request.Messages = await _tokenizerService.ReduceTokenCountAsync(session.Request.Messages);
         }
 
-        private record TokenizeRequest(string Text);
+        private async Task<int> GetTokenCount(List<ChatMessage> messages)
+        {
+            var combinedText = string.Join(' ', messages.Select(e => e.Content));
+
+            return await _tokenizerService.GetTokenCountAsync(combinedText);
+        }
     }
 }

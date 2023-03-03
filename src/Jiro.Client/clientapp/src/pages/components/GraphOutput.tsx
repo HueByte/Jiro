@@ -61,41 +61,38 @@ export const GraphOutput = (props: { command: CommandResponse }) => {
   };
 
   return (
-    <div className="break-words">
-      <div className="text-accent">Jiro: </div>
-      <div className="w-full">
-        {data ? (
-          <div>
-            <ResponsiveContainer width="96%" height={500}>
-              <LineChart data={data}>
-                {members.map((member, index) => {
-                  let instance = data[0];
-                  let value = instance[member];
-                  if (!isNumeric(value)) return;
+    <div className="w-full">
+      {data ? (
+        <div>
+          <ResponsiveContainer width="96%" height={500}>
+            <LineChart data={data}>
+              {members.map((member, index) => {
+                let instance = data[0];
+                let value = instance[member];
+                if (!isNumeric(value)) return;
 
-                  return (
-                    <Line
-                      key={index}
-                      type="monotone"
-                      dataKey={member}
-                      unit={units[member]}
-                      stroke={getColor()}
-                    />
-                  );
-                })}
-                <CartesianGrid stroke="#FFF" />
-                <XAxis angle={-10} dataKey={(command.result as any)?.xAxis} />
-                <YAxis />
-                <Tooltip />
-                <Legend />
-              </LineChart>
-            </ResponsiveContainer>
-            <div className="text-center">{(command.result as any)?.note}</div>
-          </div>
-        ) : (
-          <></>
-        )}
-      </div>
+                return (
+                  <Line
+                    key={index}
+                    type="monotone"
+                    dataKey={member}
+                    unit={units[member]}
+                    stroke={getColor()}
+                  />
+                );
+              })}
+              <CartesianGrid stroke="#FFF" />
+              <XAxis angle={-10} dataKey={(command.result as any)?.xAxis} />
+              <YAxis />
+              <Tooltip />
+              <Legend />
+            </LineChart>
+          </ResponsiveContainer>
+          <div className="text-center">{(command.result as any)?.note}</div>
+        </div>
+      ) : (
+        <></>
+      )}
     </div>
   );
 };

@@ -1,7 +1,9 @@
+import MDEditor from "@uiw/react-md-editor";
 import { memo } from "react";
 import { GraphOutput, TextOutput } from ".";
 import { CommandType } from "../../api/CommandEnum";
 import { UserCommand } from "../Models";
+import "./styles/RendererStyles.css";
 
 export const CommandOutputRenderer = memo(
   (props: { command?: UserCommand }) => {
@@ -14,9 +16,7 @@ export const CommandOutputRenderer = memo(
         return <GraphOutput command={command.response} />;
       } else {
         return command?.isLoading ? (
-          <div>
-            <span className="animate-pulse text-accent">Jiro: </span>...
-          </div>
+          <div className="animate-pulse italic">Thinking...</div>
         ) : (
           <div>Something went wrong</div>
         );
@@ -25,10 +25,22 @@ export const CommandOutputRenderer = memo(
 
     return (
       <div className="flex flex-col">
-        <div className="w-full">
-          <span className="text-primary">Me: </span> {command?.prompt}
+        <div className="mb-4 w-full">
+          <span className="mb-2 grid w-14 place-items-center rounded-lg bg-backgroundColorLight p-2 text-accent7">
+            Me
+          </span>
+          <MDEditor.Markdown source={command?.prompt} style={{}} />
         </div>
-        <div className="w-full">{getComponent()}</div>
+        <div className="my-1 w-full break-words">
+          <span
+            className={`${
+              command?.isLoading ? "animate-pulse " : ""
+            }mb-2 grid w-14 place-items-center rounded-lg bg-backgroundColorLight p-2 text-accent`}
+          >
+            Jiro
+          </span>
+          {getComponent()}
+        </div>
       </div>
     );
   }

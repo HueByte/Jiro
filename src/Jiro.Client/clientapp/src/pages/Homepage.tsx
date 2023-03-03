@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { BiMailSend } from "react-icons/bi";
+import { FaGhost } from "react-icons/fa";
 import * as api from "../api";
 import { CommandType } from "../api/CommandEnum";
 import jiroAvatar from "../assets/Jiro.png";
@@ -135,14 +136,19 @@ const Homepage = () => {
           ref={chatContainer}
           className="mx-12 my-4 flex flex-1 flex-col overflow-y-auto overflow-x-hidden pr-2 md:mx-6"
         >
-          {commands?.length > 0 &&
+          {commands?.length > 0 ? (
             commands?.map((command, index) => {
               return (
                 <div key={index} className="my-2 break-words">
                   <CommandOutputRenderer command={command} />
                 </div>
               );
-            })}
+            })
+          ) : (
+            <div className="mt-10 h-full self-center text-8xl text-altBackgroundColorLight">
+              <FaGhost />
+            </div>
+          )}
           <div ref={dummy}></div>
         </div>
         <div className="relative grid h-24 place-items-center px-12 py-4 md:px-6">

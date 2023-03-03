@@ -26,6 +26,7 @@ namespace Jiro.Api.Configurator
             }
 
             services.AddSingleton<IChatGPTStorageService, ChatGPTStorageService>();
+            services.AddSingleton<ITokenizerService, TokenizerService>();
 
 
             services.AddScoped<IWeatherService, WeatherService>();
