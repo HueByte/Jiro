@@ -37,11 +37,11 @@ namespace Jiro.Core.Services.GPTService
 
             session.Request.Messages.Add(message);
 
-            await ReduceTokenCount(session);
-
             ChatGPTResponse? body;
             try
             {
+                await ReduceTokenCount(session);
+
                 var result = await _client.PostAsJsonAsync(ApiEndpoints.CHAT_GPT_COMPLETIONS, session.Request);
 
                 if (result.IsSuccessStatusCode)

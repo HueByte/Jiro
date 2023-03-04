@@ -25,7 +25,7 @@ async def tokenizer(input: TokenBody) -> List[Message]:
         num_tokens = len(encoding.encode(combinedText))
         print(f'Number of tokens: {num_tokens}')
 
-        if (num_tokens > 4096 and len(messages) > 3):
+        if (num_tokens > 3000 and len(messages) > 3):
             print('Too many tokens, attempting to reduce')
             messages.pop(2)
             messages.pop(1)
