@@ -4,6 +4,7 @@ namespace Jiro.Core.Constants
 {
     public class HttpClients
     {
+        public const string JIRO = "Jiro";
         public const string TOKENIZER = "Tokenizer";
         public const string CHAT_GPT_CLIENT = "ChatGPTClient";
         public const string GPT_CLIENT = "GPTClient";

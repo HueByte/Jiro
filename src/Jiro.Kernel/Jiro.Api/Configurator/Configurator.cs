@@ -99,6 +99,8 @@ namespace Jiro.Api.Configurator
                 httpClient.BaseAddress = new Uri(tokenizerUrl ?? "http://localhost:8000");
             });
 
+            services.AddHttpClient(HttpClients.JIRO);
+
             return services;
         }
     }
