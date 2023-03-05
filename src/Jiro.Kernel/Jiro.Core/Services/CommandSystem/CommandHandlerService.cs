@@ -9,13 +9,13 @@ namespace Jiro.Core.Services.CommandHandler
 {
     public partial class CommandHandlerService : ICommandHandlerService
     {
-        private readonly CommandsContainer _commandModule;
+        private readonly CommandsContainer _commandsModule;
         private readonly IServiceScopeFactory _scopeFactory;
         private readonly Regex pattern = RegexCommandParserPattern();
         public event Action<string, object[]>? OnLog;
         public CommandHandlerService(CommandsContainer commandModule, IServiceScopeFactory scopeFactory)
         {
-            _commandModule = commandModule;
+            _commandsModule = commandModule;
             _scopeFactory = scopeFactory;
         }
 
@@ -31,7 +31,7 @@ namespace Jiro.Core.Services.CommandHandler
 
             try
             {
-                result = await command.ExecuteAsync(scope, _commandModule, tokens);
+                result = await command.ExecuteAsync(scope, _commandsModule, tokens);
             }
             catch (CommandException)
             {
@@ -39,7 +39,11 @@ namespace Jiro.Core.Services.CommandHandler
             }
             catch (Exception exception)
             {
-                throw new CommandException(command.Name, exception.Message);
+                throw new AggregateException(new Exception[]
+                {
+                    new CommandException(command.Name, "Command failed to exectute"),
+                    exception
+                });
             }
             finally
             {
@@ -59,13 +63,13 @@ namespace Jiro.Core.Services.CommandHandler
                     return commandSeg[1..];
             }
 
-            return _commandModule.DefaultCommand;
+            return _commandsModule.DefaultCommand;
         }
 
         private CommandInfo GetCommand(string? commandName)
         {
-            if (string.IsNullOrEmpty(commandName) || !_commandModule.Commands.TryGetValue(commandName, out CommandInfo? commandInfo))
-                _commandModule.Commands.TryGetValue(_commandModule.DefaultCommand, out commandInfo);
+            if (string.IsNullOrEmpty(commandName) || !_commandsModule.Commands.TryGetValue(commandName, out CommandInfo? commandInfo))
+                _commandsModule.Commands.TryGetValue(_commandsModule.DefaultCommand, out commandInfo);
 
             if (commandInfo is null)
                 throw new Exception("Couldn't find this command, default command wasn't configured either");

@@ -15,10 +15,10 @@ public class CommandInfo
     public string? CommandDescription { get; }
     public bool IsAsync { get; } = false;
     public Type Module { get; } = default!;
-    public readonly Func<ICommandBase, object?[], Task> Descriptor = default!;
+    public Func<ICommandBase, object?[], Task> Descriptor { get; }
     public IReadOnlyList<ParameterInfo?>? Parameters { get; }
 
-    public CommandInfo(string name, CommandType commandType, bool isAsync, Type container, Func<ICommandBase, object[], Task> descriptor, IReadOnlyList<ParameterInfo> parameters, string? commandSyntax, string? commandDescription)
+    public CommandInfo(string name, CommandType commandType, bool isAsync, Type container, Func<ICommandBase, object?[], Task> descriptor, IReadOnlyList<ParameterInfo> parameters, string? commandSyntax, string? commandDescription)
     {
         Name = name;
         CommandType = commandType;
