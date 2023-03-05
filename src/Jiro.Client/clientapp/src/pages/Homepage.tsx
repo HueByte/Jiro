@@ -17,6 +17,14 @@ const Homepage = () => {
   const [isFetching, setIsFetching] = useState(false);
 
   useEffect(() => {
+    console.log(messageInputRef);
+    if (messageInputRef.current) {
+      console.log("Init", messageInputRef.current.scrollHeight);
+      messageInputRef.current.style.height = "auto";
+    }
+  }, []);
+
+  useEffect(() => {
     if (
       chatContainer &&
       chatContainer.current &&
@@ -51,13 +59,15 @@ const Homepage = () => {
     if (
       isFetching ||
       !messageInputRef ||
-      messageInputRef.current?.value.trim().length === 0
+      !messageInputRef.current ||
+      messageInputRef.current.value.trim().length === 0
     )
       return;
 
     // clear the input field
-    let promptValue = messageInputRef.current?.value.trim();
-    messageInputRef.current!.value = "";
+    let promptValue = messageInputRef.current.value.trim();
+    messageInputRef.current.value = "";
+    messageInputRef.current.style.height = "auto";
 
     if (promptValue?.toLowerCase() == "$clear") {
       await resetSession();
@@ -94,7 +104,7 @@ const Homepage = () => {
 
     setNewDataAvailable(data);
 
-    messageInputRef.current?.focus();
+    messageInputRef.current.focus();
   };
 
   const resetSession = async () => {
@@ -151,23 +161,33 @@ const Homepage = () => {
           )}
           <div ref={dummy}></div>
         </div>
-        <div className="relative grid h-24 place-items-center px-12 py-4 md:px-6">
+        <div className="relative mx-12 my-4 max-h-32 md:px-6">
           <textarea
             ref={messageInputRef}
             onKeyDown={(e) => {
-              if (e.key == "Enter" && !e.shiftKey) {
+              if (e.key === "Enter" && !e.shiftKey) {
                 e.preventDefault();
                 sendMessage();
               }
             }}
-            className="base-input max-h-full w-full"
+            className="base-input bottom-0 w-full resize-none"
             placeholder="Type a message or command..."
-            style={{ resize: "none" }}
             rows={1}
+            onChange={(e) => {
+              e.target.style.height = "auto";
+
+              let realHeight = Math.max(
+                e.target.offsetHeight,
+                e.target.scrollHeight
+              );
+
+              let height = Math.min(realHeight, 128);
+              e.target.style.height = height + "px";
+            }}
           ></textarea>
           <BiMailSend
             onClick={sendMessage}
-            className="absolute right-[56px] top-1/2 -translate-y-1/2 text-3xl hover:cursor-pointer hover:text-accent2"
+            className="absolute right-[12px] top-1/2 -translate-y-1/2 text-3xl hover:cursor-pointer hover:text-accent2"
           />
         </div>
       </div>
