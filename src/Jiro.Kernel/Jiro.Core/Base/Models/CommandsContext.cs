@@ -3,7 +3,7 @@ namespace Jiro.Core.Base.Models;
 /// <summary>
 /// Global container for all commands and modules
 /// </summary>
-public class CommandsContainer
+public class CommandsContext
 {
     public string DefaultCommand { get; private set; } = string.Empty;
     public Dictionary<string, CommandModuleInfo> CommandModules { get; private set; } = new();

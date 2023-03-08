@@ -17,9 +17,7 @@ const Homepage = () => {
   const [isFetching, setIsFetching] = useState(false);
 
   useEffect(() => {
-    console.log(messageInputRef);
     if (messageInputRef.current) {
-      console.log("Init", messageInputRef.current.scrollHeight);
       messageInputRef.current.style.height = "auto";
     }
   }, []);
@@ -68,6 +66,7 @@ const Homepage = () => {
     let promptValue = messageInputRef.current.value.trim();
     messageInputRef.current.value = "";
     messageInputRef.current.style.height = "auto";
+    console.log(promptValue);
 
     if (promptValue?.toLowerCase() == "$clear") {
       await resetSession();
@@ -77,7 +76,7 @@ const Homepage = () => {
     setIsFetching(true);
 
     let userCommand: UserCommand = {
-      prompt: promptValue,
+      prompt: promptValue.replace(/\n/g, "\n\n "),
       response: undefined,
       isLoading: true,
     };

@@ -9,11 +9,9 @@ namespace Jiro.Core.Commands.BaseCommands
     [CommandModule("BaseCommands")]
     public class BaseCommand : ICommandBase
     {
-        private readonly CommandsContainer _commandsContainer;
         private readonly IHelpService _helpService;
-        public BaseCommand(CommandsContainer commandsContainer, IHelpService helpService)
+        public BaseCommand(IHelpService helpService)
         {
-            _commandsContainer = commandsContainer;
             _helpService = helpService;
         }
 

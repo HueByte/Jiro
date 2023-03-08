@@ -7,9 +7,9 @@ namespace Jiro.Core.Services.CommandSystem
     public class HelpService : IHelpService
     {
         public string HelpMessage { get; private set; }
-        private readonly CommandsContainer _commandsContainer;
+        private readonly CommandsContext _commandsContainer;
 
-        public HelpService(CommandsContainer commandsContainer)
+        public HelpService(CommandsContext commandsContainer)
         {
             HelpMessage = "";
             _commandsContainer = commandsContainer;

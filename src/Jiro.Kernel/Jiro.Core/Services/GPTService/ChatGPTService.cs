@@ -47,6 +47,8 @@ namespace Jiro.Core.Services.GPTService
                 if (result.IsSuccessStatusCode)
                 {
                     body = await result.Content.ReadFromJsonAsync<ChatGPTResponse>();
+
+                    if (body is null) throw new CommandException("ChatGPT", "The interaction failed");
                 }
                 else
                 {

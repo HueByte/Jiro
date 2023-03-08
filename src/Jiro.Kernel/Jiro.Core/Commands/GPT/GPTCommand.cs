@@ -32,11 +32,5 @@ namespace Jiro.Core.Commands.GPT
 
             return Task.CompletedTask;
         }
-
-        [Command("loading-test")]
-        public async Task LoadingTest()
-        {
-            await Task.Delay(10000);
-        }
     }
 }

@@ -1,7 +1,6 @@
 using Jiro.Api;
 using Jiro.Api.Configurator;
 using Jiro.Api.Middlewares;
-using Jiro.Core.Base;
 using Jiro.Core.Base.Models;
 using Jiro.Core.Options;
 using Jiro.Core.Utils;
@@ -55,7 +54,7 @@ servicesRef.AddHttpClients(configRef);
 var app = builder.Build();
 
 // Log loaded modules
-var commandContainer = app.Services.GetRequiredService<CommandsContainer>();
+var commandContainer = app.Services.GetRequiredService<CommandsContext>();
 foreach (var module in commandContainer.CommandModules.Keys) Log.Information("Module {Module} loaded", module);
 
 var appConf = new AppConfigurator(app)

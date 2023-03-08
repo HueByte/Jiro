@@ -50,6 +50,8 @@ namespace Jiro.Core.Base
             var compiledMethod = CompileMethodInvoker<TBaseInstance, TReturn>(method);
             var args = GetParameters(method);
 
+            if (compiledMethod is null) return null;
+
             CommandInfo commandInfo = new(
                 commandName,
                 commandType,

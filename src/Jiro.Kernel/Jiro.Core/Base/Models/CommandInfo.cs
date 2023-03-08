@@ -1,12 +1,8 @@
-using Jiro.Core.Base.Models;
 using Jiro.Core.Base.Results;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Jiro.Core.Base.Models;
 
-/// <summary>
-/// Contains necessary information about a command to be executed
-/// </summary>
 public class CommandInfo
 {
     public string Name { get; } = string.Empty;
@@ -16,7 +12,7 @@ public class CommandInfo
     public bool IsAsync { get; } = false;
     public Type Module { get; } = default!;
     public Func<ICommandBase, object?[], Task> Descriptor { get; }
-    public IReadOnlyList<ParameterInfo?>? Parameters { get; }
+    public IReadOnlyList<ParameterInfo?> Parameters { get; }
 
     public CommandInfo(string name, CommandType commandType, bool isAsync, Type container, Func<ICommandBase, object?[], Task> descriptor, IReadOnlyList<ParameterInfo> parameters, string? commandSyntax, string? commandDescription)
     {
@@ -30,7 +26,7 @@ public class CommandInfo
         CommandDescription = commandDescription;
     }
 
-    public async Task<CommandResponse> ExecuteAsync(IServiceScope scope, CommandsContainer commandModule, string[] tokens)
+    public async Task<CommandResponse> ExecuteAsync(IServiceScope scope, CommandsContext commandModule, string[] tokens)
     {
         CommandResponse commandResult = new()
         {
@@ -67,7 +63,7 @@ public class CommandInfo
         return commandResult;
     }
 
-    private object?[] ParseArgs(CommandsContainer commandModule, string[] tokens)
+    private object?[] ParseArgs(CommandsContext commandModule, string[] tokens)
     {
         object?[] args;
 

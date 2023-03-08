@@ -1,6 +1,6 @@
 using Jiro.Core.Services.GPTService.Models.ChatGPT;
 
-namespace Jiro.Core.Services.GPTService
+namespace Jiro.Core.Services.GPTService.Models
 {
     public class TokenizeReduceRequest
     {

@@ -1,6 +1,5 @@
 using System.Diagnostics;
 using System.Text.RegularExpressions;
-using Jiro.Core.Base;
 using Jiro.Core.Base.Models;
 using Jiro.Core.Interfaces.IServices;
 using Microsoft.Extensions.DependencyInjection;
@@ -9,11 +8,11 @@ namespace Jiro.Core.Services.CommandHandler
 {
     public partial class CommandHandlerService : ICommandHandlerService
     {
-        private readonly CommandsContainer _commandsModule;
+        private readonly CommandsContext _commandsModule;
         private readonly IServiceScopeFactory _scopeFactory;
         private readonly Regex pattern = RegexCommandParserPattern();
         public event Action<string, object[]>? OnLog;
-        public CommandHandlerService(CommandsContainer commandModule, IServiceScopeFactory scopeFactory)
+        public CommandHandlerService(CommandsContext commandModule, IServiceScopeFactory scopeFactory)
         {
             _commandsModule = commandModule;
             _scopeFactory = scopeFactory;
@@ -22,6 +21,7 @@ namespace Jiro.Core.Services.CommandHandler
         public async Task<CommandResponse> ExecuteCommandAsync(string prompt)
         {
             await using var scope = _scopeFactory.CreateAsyncScope();
+
             var watch = Stopwatch.StartNew();
             var tokens = ParseTokens(prompt);
             var commandName = GetCommandName(tokens);
@@ -72,7 +72,7 @@ namespace Jiro.Core.Services.CommandHandler
                 _commandsModule.Commands.TryGetValue(_commandsModule.DefaultCommand, out commandInfo);
 
             if (commandInfo is null)
-                throw new Exception("Couldn't find this command, default command wasn't configured either");
+                throw new Exception("Couldn't find any command that meets the requirements");
 
             return commandInfo;
         }

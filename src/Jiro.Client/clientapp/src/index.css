@@ -34,7 +34,7 @@
   }
 
   .base-border-gradient-r {
-    @apply rounded-xl border-4 border-transparent bg-gradient-to-r from-neutralDarker to-primary bg-clip-border bg-origin-border;
+    @apply rounded-xl border-4 border-transparent bg-gradient-to-r from-primary to-secondaryLight bg-clip-border bg-origin-border;
   }
 
   .menu-active {
