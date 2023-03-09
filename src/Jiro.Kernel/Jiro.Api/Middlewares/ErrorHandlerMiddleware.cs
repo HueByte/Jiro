@@ -1,4 +1,5 @@
 using System.Net;
+using Jiro.Commands.Exceptions;
 using Jiro.Core;
 
 namespace Jiro.Api.Middlewares
