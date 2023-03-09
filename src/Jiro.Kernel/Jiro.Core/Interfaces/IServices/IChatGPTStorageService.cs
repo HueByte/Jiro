@@ -1,4 +1,3 @@
-using System.Collections.Concurrent;
 using Jiro.Core.Services.GPTService.Models.ChatGPT;
 
 namespace Jiro.Core.Interfaces.IServices

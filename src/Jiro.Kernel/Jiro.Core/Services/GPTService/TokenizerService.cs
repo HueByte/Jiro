@@ -1,6 +1,5 @@
 using System.Net.Http.Json;
 using Jiro.Core.Constants;
-using Jiro.Core.Interfaces.IServices;
 using Jiro.Core.Services.GPTService.Models;
 using Jiro.Core.Services.GPTService.Models.ChatGPT;
 

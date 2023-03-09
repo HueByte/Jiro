@@ -18,12 +18,3 @@ public class TokenException : Exception
 {
     public TokenException(string exceptionMessage) : base(exceptionMessage) { }
 }
-
-public class CommandException : Exception
-{
-    public string CommandName { get; set; }
-    public CommandException(string commandName, string exceptionMessage) : base(exceptionMessage)
-    {
-        CommandName = commandName;
-    }
-}

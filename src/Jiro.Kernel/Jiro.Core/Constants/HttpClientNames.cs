@@ -1,5 +1,3 @@
-using System.ComponentModel.Design.Serialization;
-
 namespace Jiro.Core.Constants
 {
     public class HttpClients

@@ -1,9 +1,6 @@
 using System.Collections.Concurrent;
-using Jiro.Core.Interfaces.IServices;
-using Jiro.Core.Options;
 using Jiro.Core.Services.GPTService.Models.ChatGPT;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 
 namespace Jiro.Core.Services.GPTService
 {

@@ -7,6 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Jiro.Commands" Version="1.0.1" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Abstractions" Version="2.2.0" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="7.0.2" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="7.0.0" />
@@ -24,7 +25,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Jiro.Core\Jiro.Core.csproj" />
-    <ProjectReference Include="..\Jiro.ModularBase\Jiro.ModularBase.csproj" />
   </ItemGroup>
 
   <Target Name="CreateLogFolder" AfterTargets="Build">

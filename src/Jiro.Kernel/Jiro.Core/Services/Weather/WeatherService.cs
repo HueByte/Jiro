@@ -1,6 +1,5 @@
 using System.Net.Http.Json;
 using Jiro.Core.Constants;
-using Jiro.Core.Interfaces.IServices;
 using Jiro.Core.Services.Weather.Models;
 
 namespace Jiro.Core.Services.WeatherService

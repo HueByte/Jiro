@@ -1,5 +1,3 @@
-using System.Text.Json.Serialization;
-
 namespace Jiro.Core.Services.GPTService.Models.ChatGPT
 {
     public class ChatGPTRequest

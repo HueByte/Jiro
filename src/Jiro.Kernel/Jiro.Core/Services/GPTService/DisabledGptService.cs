@@ -1,5 +1,3 @@
-using Jiro.Core.Interfaces.IServices;
-
 namespace Jiro.Core.Services.GPTService
 {
     public class DisabledGptService : IChatService

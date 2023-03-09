@@ -1,6 +1,3 @@
-using Jiro.Core.Interfaces.IServices;
-using Jiro.Core.Services.CommandHandler;
-
 namespace Jiro.Api.Configurator
 {
     public class EventsConfigurator

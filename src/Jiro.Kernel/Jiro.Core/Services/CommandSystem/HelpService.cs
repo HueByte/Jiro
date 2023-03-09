@@ -1,6 +1,4 @@
 using System.Text;
-using Jiro.Core.Base.Models;
-using Jiro.Core.Interfaces.IServices;
 
 namespace Jiro.Core.Services.CommandSystem
 {

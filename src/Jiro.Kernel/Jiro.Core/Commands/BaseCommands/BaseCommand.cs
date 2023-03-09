@@ -1,9 +1,3 @@
-using Jiro.Core.Base;
-using Jiro.Core.Base.Attributes;
-using Jiro.Core.Base.Models;
-using Jiro.Core.Base.Results;
-using Jiro.Core.Interfaces.IServices;
-
 namespace Jiro.Core.Commands.BaseCommands
 {
     [CommandModule("BaseCommands")]

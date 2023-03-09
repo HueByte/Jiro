@@ -1,9 +1,6 @@
 using System.Linq.Expressions;
 using System.Reflection;
-using System.Runtime.CompilerServices;
-using Jiro.Core.Base.Attributes;
-using Jiro.Core.Base.Models;
-using Jiro.Core.Base.TypeParsers;
+using Jiro.Commands.TypeParsers;
 
 namespace Jiro.Core.Base
 {
@@ -91,15 +88,15 @@ namespace Jiro.Core.Base
             return lambda.Compile();
         }
 
-        internal static IReadOnlyList<Models.ParameterInfo> GetParameters(MethodInfo methodInfo)
+        internal static IReadOnlyList<Jiro.Commands.Models.ParameterInfo> GetParameters(MethodInfo methodInfo)
         {
-            List<Models.ParameterInfo> parameterInfos = new();
+            List<Jiro.Commands.Models.ParameterInfo> parameterInfos = new();
 
             var parameters = methodInfo.GetParameters();
 
             foreach (var parameter in parameters)
             {
-                Models.ParameterInfo parameterInfo = new(parameter.ParameterType, GetParser(parameter.ParameterType)!);
+                Jiro.Commands.Models.ParameterInfo parameterInfo = new(parameter.ParameterType, GetParser(parameter.ParameterType)!);
                 parameterInfos.Add(parameterInfo);
             }
 

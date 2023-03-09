@@ -1,12 +1,9 @@
 using System.Net.Http.Json;
 using System.Text.Json;
-using System.Xml;
 using Jiro.Core.Constants;
-using Jiro.Core.Interfaces.IServices;
 using Jiro.Core.Options;
 using Jiro.Core.Services.GPTService.Models;
 using Jiro.Core.Services.GPTService.Models.GPT;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 

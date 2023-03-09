@@ -1,6 +1,6 @@
 using System.Net.Http.Json;
+using Jiro.Commands.Exceptions;
 using Jiro.Core.Constants;
-using Jiro.Core.Interfaces.IServices;
 using Jiro.Core.Options;
 using Jiro.Core.Services.GPTService.Models.ChatGPT;
 using Microsoft.Extensions.Logging;
