@@ -1,12 +1,4 @@
 ﻿{
-  "iisSettings": {
-    "windowsAuthentication": false,
-    "anonymousAuthentication": true,
-    "iisExpress": {
-      "applicationUrl": "http://localhost:36431",
-      "sslPort": 44356
-    }
-  },
   "profiles": {
     "Jiro.Client": {
       "commandName": "Project",
