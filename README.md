@@ -7,6 +7,9 @@
 This combination of ChatGPT's powerful AI capabilities and custom plugins enables Jiro to provide a wide range of services and support, including answering questions, assisting with tasks, providing recommendations, and much more. Whether users need help with work, school, or just day-to-day life, Jiro is there to lend a helping hand.
 
 # ⚗️ Dev
+## `Plugin creation`
+To create plugins, refer to [github](https://github.com/HueByte/Jiro.Libs) https://www.nuget.org/packages/Jiro.Commands/
+
 ## `Requirements`
 - dotnet SDK
 - Python
