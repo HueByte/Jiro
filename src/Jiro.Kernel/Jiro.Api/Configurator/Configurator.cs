@@ -48,13 +48,6 @@ namespace Jiro.Api.Configurator
             return services;
         }
 
-        public static IServiceCollection RegisterCommandModules(this IServiceCollection services)
-        {
-            services.RegisterCommands();
-
-            return services;
-        }
-
         public static IServiceCollection AddHttpClients(this IServiceCollection services, IConfiguration configuration)
         {
             services.AddHttpClient(HttpClients.GPT_CLIENT, (provider, httpClient) =>
