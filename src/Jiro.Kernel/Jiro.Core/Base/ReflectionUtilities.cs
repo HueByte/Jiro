@@ -4,6 +4,7 @@ using Jiro.Commands.TypeParsers;
 
 namespace Jiro.Core.Base
 {
+    [Obsolete]
     internal static class ReflectionUtilities
     {
         internal static Assembly[]? GetDomainAssemblies() => AppDomain.CurrentDomain.GetAssemblies();

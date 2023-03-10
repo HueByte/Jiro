@@ -1,10 +1,12 @@
-using Jiro.Api;
 using Jiro.Api.Configurator;
 using Jiro.Api.Middlewares;
+using Jiro.Commands.Base;
+using Jiro.Core.Commands.GPT;
 using Jiro.Core.Options;
 using Jiro.Core.Utils;
 using Serilog;
 using Serilog.Events;
+using Serilog.Extensions.Logging;
 using Serilog.Sinks.SystemConsole.Themes;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -14,6 +16,9 @@ Log.Logger = new LoggerConfiguration()
     .WriteTo.Console()
     .Enrich.FromLogContext()
     .CreateBootstrapLogger();
+
+var logger = new SerilogLoggerProvider(Log.Logger)
+    .CreateLogger(nameof(Program));
 
 LogOptions loggerOptions = new();
 configRef.GetSection(LogOptions.Log).Bind(loggerOptions);
@@ -32,23 +37,23 @@ builder.Host.UseSerilog((context, services, configuration) => configuration
     .ReadFrom.Configuration(builder.Configuration)
     .ReadFrom.Services(services));
 
-ModuleManager moduleManager = new(builder.Services, configRef);
+var modulePaths = configRef.GetSection("Modules").Get<string[]>();
+PluginManager pluginManager = new(builder.Services, configRef, logger);
 
-if (AppUtils.IsDebug()) moduleManager.BuildDevModules();
-moduleManager.LoadModuleAssemblies();
-moduleManager.LoadModuleControllers();
-moduleManager.RegisterModuleServices();
-moduleManager.ValidateModules();
+if (AppUtils.IsDebug()) pluginManager.BuildDevModules(modulePaths);
+pluginManager.LoadModuleAssemblies();
+pluginManager.LoadModuleControllers();
+pluginManager.RegisterModuleServices();
 
 var servicesRef = builder.Services;
-servicesRef.AddOptions(configRef);
 servicesRef.AddControllers();
 servicesRef.AddEndpointsApiExplorer();
 servicesRef.AddSwaggerGen();
 
 servicesRef.AddServices(configRef);
-servicesRef.RegisterCommandModules();
+servicesRef.RegisterCommands(nameof(GPTCommand.Chat));
 servicesRef.AddHttpClients(configRef);
+servicesRef.AddOptions(configRef);
 
 var app = builder.Build();
 
@@ -64,6 +69,7 @@ if (app.Environment.IsDevelopment())
     appConf.UseJiroSwagger();
 }
 
+pluginManager.RegisterAppExtensions(app);
 app.UseStaticFiles();
 app.UseErrorHandler();
 app.UseHttpsRedirection();

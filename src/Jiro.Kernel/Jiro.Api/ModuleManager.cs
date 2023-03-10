@@ -1,12 +1,15 @@
 using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Text;
+using Jiro.Commands.Base;
 using Microsoft.AspNetCore.Mvc.ApplicationParts;
 using Serilog;
 
 namespace Jiro.Api
 {
+    [Obsolete]
     public class ModuleManager
     {
         private readonly IConfiguration _configuration;
@@ -34,7 +37,7 @@ namespace Jiro.Api
 
             if (modules is null) return;
 
-            Log.Logger.Information($"Build {modules.Length} module(s)");
+            Log.Logger.Information($"Building {modules.Length} module(s)");
 
             Task[] buildTasks = new Task[modules.Length];
             for (int i = 0; i < buildTasks.Length; i++)
@@ -65,8 +68,14 @@ namespace Jiro.Api
         /// <returns></returns>
         private static async Task RunBuildCommandAsync(string path)
         {
+            var os = RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
+                ? "windows"
+                : RuntimeInformation.IsOSPlatform(OSPlatform.Linux)
+                    ? "linux"
+                    : "osx";
+
             Process cmd = new();
-            cmd.StartInfo.FileName = "cmd.exe";
+            cmd.StartInfo.FileName = GetTerminal(os);
             cmd.StartInfo.RedirectStandardInput = true;
             cmd.StartInfo.RedirectStandardOutput = true;
             cmd.StartInfo.CreateNoWindow = true;
@@ -81,6 +90,14 @@ namespace Jiro.Api
 
             Log.Logger.Information(cmd.StandardOutput.ReadToEnd());
         }
+
+        private static string GetTerminal(string platform) => platform switch
+        {
+            "windows" => "cmd.exe",
+            "linux" => "bash",
+            "osx" => "zsh",
+            _ => throw new Exception($"Couldn't find terminal to use for {platform}")
+        };
 
         public void LoadModuleAssemblies()
         {
@@ -155,16 +172,16 @@ namespace Jiro.Api
             {
                 var serviceConfigurators = _assemblies
                     .SelectMany(e => e.GetTypes())
-                        .Where(type => !type.IsInterface && typeof(IServiceConfigurator).IsAssignableFrom(type));
+                        .Where(type => !type.IsInterface && typeof(IPlugin).IsAssignableFrom(type));
 
                 foreach (var serviceConfigurator in serviceConfigurators)
                 {
-                    if (Activator.CreateInstance(serviceConfigurator) is not IServiceConfigurator configurator) continue;
+                    if (Activator.CreateInstance(serviceConfigurator) is not IPlugin configurator) continue;
 
-                    Log.Logger.Information($"Running {configurator.ConfiguratorName} service configurator");
+                    Log.Logger.Information($"Running {configurator.PluginName} service configurator");
 
                     configurator.RegisterServices(_services);
-                    _moduleNames.Add(configurator.ConfiguratorName);
+                    _moduleNames.Add(configurator.PluginName);
                 }
             }
             catch (ReflectionTypeLoadException ex)

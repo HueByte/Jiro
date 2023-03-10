@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Jiro.Core.Base;
 
+[Obsolete]
 public static class CommandRegistrator
 {
     public static IServiceCollection RegisterCommands(this IServiceCollection services)
