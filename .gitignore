@@ -9,6 +9,8 @@ appsettings.json
 appsettings.development.json
 .env
 .env.development
+**/build/*
+
 # User-specific files
 *.rsuser
 *.suo
