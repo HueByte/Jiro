@@ -62,7 +62,8 @@ var commandContainer = app.Services.GetRequiredService<CommandsContext>();
 foreach (var module in commandContainer.CommandModules.Keys) Log.Information("Module {Module} loaded", module);
 
 var appConf = new AppConfigurator(app)
-    .ConfigureEvents();
+    .ConfigureEvents()
+    .ConfigureCors();
 
 if (app.Environment.IsDevelopment())
 {
@@ -70,6 +71,7 @@ if (app.Environment.IsDevelopment())
 }
 
 pluginManager.RegisterAppExtensions(app);
+
 app.UseStaticFiles();
 app.UseErrorHandler();
 app.UseHttpsRedirection();

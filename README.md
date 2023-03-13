@@ -26,7 +26,9 @@ To create plugins, refer to [github](https://github.com/HueByte/Jiro.Libs) https
 ### **Jiro Tokenizer API**
 1. navigate to `src/Jiro.TokenApi`
 2. run `pip install -r requirements.txt`
-3. run `uvicorn main:app --reload`
+3. run `python main.py` or `uvicorn main:app --reload`
+
+> You can change the port either via running it with `python main.py` and modifying `config.json` or by specifying `--host` and `--port` args for `uvicorn`
 
 ### **Jiro Web App**
 1. navigate to `src/Jiro.Client`

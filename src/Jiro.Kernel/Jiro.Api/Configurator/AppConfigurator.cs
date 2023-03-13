@@ -17,6 +17,20 @@ namespace Jiro.Api.Configurator
             return this;
         }
 
+        public AppConfigurator ConfigureCors()
+        {
+            // TODO:
+            // temporary, will be replaced with a more secure solution once auth system is finished
+            _app.UseCors(builder =>
+            {
+                builder.AllowAnyOrigin();
+                builder.AllowAnyHeader();
+                builder.AllowAnyMethod();
+            });
+
+            return this;
+        }
+
         public AppConfigurator UseJiroSwagger()
         {
             _app.UseSwagger();

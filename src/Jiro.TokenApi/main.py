@@ -5,10 +5,9 @@ from models import Counter
 from models import Message
 import uvicorn
 import tiktoken
+import init
 
 app = FastAPI()
-if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8000)
 
 
 @app.post("/reduce")
@@ -41,3 +40,7 @@ async def tokenizer(input: Counter) -> int:
     print(f'Number of tokens: {num_tokens}')
 
     return num_tokens
+
+
+if __name__ == "__main__":
+    uvicorn.run(app, host="0.0.0.0", port=init.config.port)
