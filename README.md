@@ -62,6 +62,7 @@ Read more about it [here](https://learn.microsoft.com/en-us/aspnet/core/client-s
 | Key | Description | Default Value |
 | --- | --- | --- |
 | urls | The urls used for web server | http://localhost:5000;https://localhost:5001 |
+| JiroApiUrl | The url used for API | https://localhost:18091 |
 
 > Properties/launchSettings.json (for VisualStudio)
 
@@ -73,7 +74,7 @@ Read more about it [here](https://learn.microsoft.com/en-us/aspnet/core/client-s
  
 | Key | Description | Default Value |
 | --- | --- | --- |
-| API_URL | url for proxy that targets API | https://localhost:18091 |
+| JIRO_WEB | url for proxy that targets Web server | https://localhost:18091 |
 
 
 > clientapp/.env.development
@@ -91,4 +92,5 @@ Read more about it [here](https://learn.microsoft.com/en-us/aspnet/core/client-s
 ### Matching values
 - (API)`TokenizerUrl` must match url configured for Tokenizer API
 - (Web)`SpaProxyServerUrl` must match resulting url from (clientapp)`PORT`
-- (clientapp)`API_URL` must match one of the urls configured in (API)`urls`
+- (Web)`JiroApiUrl` must match one of the urls configured in (API)`urls`
+- (clientapp)`JIRO_WEB` must match one of the urls configured in (Web)`urls`

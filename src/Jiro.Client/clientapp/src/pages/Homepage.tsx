@@ -66,7 +66,6 @@ const Homepage = () => {
     let promptValue = messageInputRef.current.value.trim();
     messageInputRef.current.value = "";
     messageInputRef.current.style.height = "auto";
-    console.log(promptValue);
 
     if (promptValue?.toLowerCase() == "$clear") {
       await resetSession();
