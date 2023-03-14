@@ -10,7 +10,7 @@ using Microsoft.Extensions.Options;
 
 namespace Jiro.Core.Services.Auth;
 
-public class UserService
+public class UserService : IUserService
 {
     private readonly UserManager<AppUser> _userManager;
     private readonly SignInManager<AppUser> _signInManager;
@@ -18,15 +18,13 @@ public class UserService
     private readonly JWTOptions _jwtOptions;
     private readonly IRefreshTokenService _refreshTokenService;
     private readonly ICurrentUserService _currentUser;
-    private readonly IServiceScopeFactory _serviceScopeFactory;
     public UserService(
         UserManager<AppUser> userManager,
         SignInManager<AppUser> signInManager,
         ICurrentUserService currentUser,
         IJWTService jwtAuthentication,
         IOptions<JWTOptions> jwtOptions,
-        IRefreshTokenService refreshTokenService,
-        IServiceScopeFactory serviceScopeFactory)
+        IRefreshTokenService refreshTokenService)
     {
         _userManager = userManager;
         _signInManager = signInManager;
@@ -34,7 +32,6 @@ public class UserService
         _currentUser = currentUser;
         _jwtOptions = jwtOptions.Value;
         _refreshTokenService = refreshTokenService;
-        _serviceScopeFactory = serviceScopeFactory;
     }
 
     public async Task<bool> ChangeUsernameAsync(string username, string password)
