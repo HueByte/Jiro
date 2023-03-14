@@ -12,21 +12,6 @@ const Menu = () => {
       path: "/",
       value: "Home",
     },
-    {
-      icon: <HiOutlineX className="inline" />,
-      path: "/1",
-      value: "Home",
-    },
-    {
-      icon: <HiOutlineX className="inline" />,
-      path: "/2",
-      value: "Home",
-    },
-    {
-      icon: <HiOutlineX className="inline" />,
-      path: "/3",
-      value: "Home",
-    },
   ];
   return (
     <>
