@@ -1,3 +1,6 @@
+using Jiro.Infrastructure;
+using Microsoft.EntityFrameworkCore;
+
 namespace Jiro.Api.Configurator
 {
     public class AppConfigurator
@@ -39,6 +42,19 @@ namespace Jiro.Api.Configurator
                 c.SwaggerEndpoint("/swagger/v1/swagger.json", "Jiro API V1");
                 c.InjectStylesheet("/swagger-ui/SwaggerDark.css");
             });
+
+            return this;
+        }
+
+        public AppConfigurator Migrate()
+        {
+            if (!Directory.Exists(Path.Join(AppContext.BaseDirectory, "save")))
+                Directory.CreateDirectory(Path.Join(AppContext.BaseDirectory, "save"));
+
+            using var scope = _app.Services.CreateScope();
+            var context = scope.ServiceProvider.GetRequiredService<JiroContext>();
+
+            context.Database.Migrate();
 
             return this;
         }

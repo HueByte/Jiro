@@ -15,6 +15,10 @@ Project("{888888A0-9F3D-457C-B088-3A5042F75D52}") = "Jiro.TokenApi", "Jiro.Token
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Jiro.Client", "Jiro.Client\Jiro.Client.csproj", "{C6FF2CC5-A1EC-4EAB-9762-63F917C05E2E}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Jiro.Kernel", "Jiro.Kernel", "{9FBCFB64-C4F4-4326-B675-909B4A410AA5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jiro.Infrastructure", "Jiro.Kernel\Jiro.Infrastructure\Jiro.Infrastructure.csproj", "{CF977FF7-5B3B-432D-90E7-116A30FB2B52}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -35,6 +39,10 @@ Global
 		{C6FF2CC5-A1EC-4EAB-9762-63F917C05E2E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C6FF2CC5-A1EC-4EAB-9762-63F917C05E2E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C6FF2CC5-A1EC-4EAB-9762-63F917C05E2E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CF977FF7-5B3B-432D-90E7-116A30FB2B52}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CF977FF7-5B3B-432D-90E7-116A30FB2B52}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CF977FF7-5B3B-432D-90E7-116A30FB2B52}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CF977FF7-5B3B-432D-90E7-116A30FB2B52}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -44,5 +52,6 @@ Global
 		{3EEA2DA8-B5FC-4F35-93F2-D33209A23845} = {5F5E36D0-8058-42B5-9BA2-CB48EC8ED02E}
 		{01807A8C-3086-4268-A4B5-187538464B7F} = {5F5E36D0-8058-42B5-9BA2-CB48EC8ED02E}
 		{C6FF2CC5-A1EC-4EAB-9762-63F917C05E2E} = {5DA24598-4A74-462F-BA6A-33E5A91D87B1}
+		{CF977FF7-5B3B-432D-90E7-116A30FB2B52} = {9FBCFB64-C4F4-4326-B675-909B4A410AA5}
 	EndGlobalSection
 EndGlobal

@@ -1,10 +1,13 @@
 using Jiro.Core.Base;
 using Jiro.Core.Constants;
+using Jiro.Core.Models;
 using Jiro.Core.Options;
 using Jiro.Core.Services.CommandHandler;
 using Jiro.Core.Services.CommandSystem;
 using Jiro.Core.Services.GPTService;
 using Jiro.Core.Services.WeatherService;
+using Jiro.Infrastructure;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
 
 namespace Jiro.Api.Configurator
@@ -44,6 +47,15 @@ namespace Jiro.Api.Configurator
             services.Configure<ChatGptOptions>(configuration.GetSection($"{GptOptions.Gpt}:{ChatGptOptions.ChatGpt}"));
             services.Configure<SingleGptOptions>(configuration.GetSection($"{GptOptions.Gpt}:{SingleGptOptions.SingleGpt}"));
             services.Configure<LogOptions>(configuration.GetSection(LogOptions.Log));
+
+            return services;
+        }
+
+        public static IServiceCollection AddSecurity(this IServiceCollection services, IConfiguration configuration)
+        {
+            services.AddIdentity<AppUser, AppRole>()
+                .AddEntityFrameworkStores<JiroContext>()
+                .AddDefaultTokenProviders();
 
             return services;
         }

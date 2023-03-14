@@ -7,6 +7,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Jiro.Api", "Jiro.Api\Jiro.A
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Jiro.Core", "Jiro.Core\Jiro.Core.csproj", "{A6B68289-90F8-404A-ADF3-A0E7F14F7DE3}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jiro.Infrastructure", "Jiro.Infrastructure\Jiro.Infrastructure.csproj", "{09756449-462D-4F25-96D1-8C2F85E84116}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -25,6 +27,10 @@ Global
 		{FE7CEE67-5622-4031-99F7-136694F2820A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FE7CEE67-5622-4031-99F7-136694F2820A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FE7CEE67-5622-4031-99F7-136694F2820A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{09756449-462D-4F25-96D1-8C2F85E84116}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{09756449-462D-4F25-96D1-8C2F85E84116}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{09756449-462D-4F25-96D1-8C2F85E84116}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{09756449-462D-4F25-96D1-8C2F85E84116}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -4,6 +4,7 @@ using Jiro.Commands.Base;
 using Jiro.Core.Commands.GPT;
 using Jiro.Core.Options;
 using Jiro.Core.Utils;
+using Jiro.Infrastructure;
 using Serilog;
 using Serilog.Events;
 using Serilog.Extensions.Logging;
@@ -50,10 +51,12 @@ servicesRef.AddControllers();
 servicesRef.AddEndpointsApiExplorer();
 servicesRef.AddSwaggerGen();
 
+servicesRef.AddJiroSQLiteContext(configRef.GetConnectionString("JiroContext")!);
 servicesRef.AddServices(configRef);
 servicesRef.RegisterCommands(nameof(GPTCommand.Chat));
 servicesRef.AddHttpClients(configRef);
 servicesRef.AddOptions(configRef);
+servicesRef.AddSecurity(configRef);
 
 var app = builder.Build();
 
@@ -63,7 +66,8 @@ foreach (var module in commandContainer.CommandModules.Keys) Log.Information("Mo
 
 var appConf = new AppConfigurator(app)
     .ConfigureEvents()
-    .ConfigureCors();
+    .ConfigureCors()
+    .Migrate();
 
 if (app.Environment.IsDevelopment())
 {
