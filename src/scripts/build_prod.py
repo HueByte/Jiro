@@ -75,6 +75,6 @@ print("Building Tokenizer")
 buildId = os.system('pip install pyinstaller')
 
 buildId = os.system(
-    f'pyinstaller -F {tokenizerPath}/main.py --distpath {os.path.join(outputPath, "tokenizer")}')
+    f'pyinstaller -F {tokenizerPath}/main.py --hidden-import=tiktoken_ext.openai_public --hidden-import=tiktoken_ext')
 
 print("Done!")
