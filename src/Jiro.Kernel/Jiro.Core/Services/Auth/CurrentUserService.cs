@@ -1,6 +1,7 @@
-namespace Jiro.Core.Services.Auth;
-
-public class CurrentUserService : ICurrentUserService
+namespace Jiro.Core.Services.Auth
 {
-    public string UserId { get; init; } = default!;
+    public class CurrentUserService : ICurrentUserService
+    {
+        public string UserId { get; init; } = default!;
+    }
 }
