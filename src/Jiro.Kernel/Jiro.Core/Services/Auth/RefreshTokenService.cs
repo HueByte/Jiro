@@ -8,7 +8,7 @@ using Microsoft.Extensions.Options;
 
 namespace Jiro.Core.Services.Auth;
 
-public class RefreshTokenService
+public class RefreshTokenService : IRefreshTokenService
 {
     private readonly JWTOptions _jwtOptions;
     private readonly UserManager<AppUser> _userManager;
