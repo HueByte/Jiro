@@ -4,5 +4,5 @@ namespace Jiro.Api.Base
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class BaseController : Controller { }
+    public abstract class BaseController : Controller { }
 }
