@@ -1,3 +1,4 @@
+using Jiro.Api;
 using Jiro.Api.Configurator;
 using Jiro.Api.Middlewares;
 using Jiro.Commands.Base;
@@ -68,6 +69,8 @@ var appConf = new AppConfigurator(app)
     .ConfigureEvents()
     .ConfigureCors()
     .Migrate();
+
+await DataSeed.SeedAsync(app);
 
 if (app.Environment.IsDevelopment())
 {
