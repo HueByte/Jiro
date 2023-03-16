@@ -16,7 +16,6 @@ public class JWTService : IJWTService
         _jwtOptions = options.Value;
     }
 
-    // TODO: consider email/username choice system configurable
     public string GenerateJsonWebToken(AppUser user, IList<string> roles)
     {
         if (user is null)

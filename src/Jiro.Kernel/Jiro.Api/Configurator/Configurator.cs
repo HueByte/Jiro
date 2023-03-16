@@ -2,6 +2,7 @@ using Jiro.Core.Base;
 using Jiro.Core.Constants;
 using Jiro.Core.Models;
 using Jiro.Core.Options;
+using Jiro.Core.Services.Auth;
 using Jiro.Core.Services.CommandHandler;
 using Jiro.Core.Services.CommandSystem;
 using Jiro.Core.Services.GPTService;
@@ -28,15 +29,21 @@ namespace Jiro.Api.Configurator
                 services.AddScoped<IChatService, DisabledGptService>();
             }
 
+            // services
             services.AddSingleton<IChatGPTStorageService, ChatGPTStorageService>();
             services.AddSingleton<ITokenizerService, TokenizerService>();
-
-
-            services.AddScoped<IWeatherService, WeatherService>();
-
             services.AddSingleton<ICommandHandlerService, CommandHandlerService>();
             services.AddSingleton<IHelpService, HelpService>();
             services.AddSingleton<EventsConfigurator>();
+
+            services.AddScoped<IWeatherService, WeatherService>();
+            services.AddScoped<IUserService, UserService>();
+            services.AddScoped<ICurrentUserService, CurrentUserService>();
+            services.AddScoped<IJWTService, JWTService>();
+            services.AddScoped<IRefreshTokenService, RefreshTokenService>();
+
+            // repositories
+
 
             return services;
         }

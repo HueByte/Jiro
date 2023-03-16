@@ -76,7 +76,7 @@ public class UserService : IUserService
         return true;
     }
 
-    public async Task<IdentityResult> CreateUser(RegisterDTO registerUser)
+    public async Task<IdentityResult> CreateUserAsync(RegisterDTO registerUser)
     {
         if (registerUser is null)
             throw new HandledException("Register User model cannot be empty");
@@ -89,7 +89,7 @@ public class UserService : IUserService
             AccountCreatedDate = DateTime.UtcNow
         };
 
-        var result = await _userManager.CreateAsync(user, registerUser!.Password!);
+        var result = await _userManager.CreateAsync(user, registerUser?.Password!);
 
         if (!result.Succeeded)
             throw new HandledExceptionList(result.Errors.Select(errors => errors.Description).ToList());
@@ -100,7 +100,18 @@ public class UserService : IUserService
         return result;
     }
 
-    public async Task<VerifiedUserDTO> LoginUser(LoginUsernameDTO userDto, string IpAddress)
+    public async Task<IdentityResult> DeleteUserAsync(string userId)
+    {
+        var user = await _userManager.FindByIdAsync(userId);
+        if (user is null)
+            throw new HandledException("Couldn't find this user");
+
+        var result = await _userManager.DeleteAsync(user);
+
+        return result;
+    }
+
+    public async Task<VerifiedUserDTO> LoginUserAsync(LoginUsernameDTO userDto, string IpAddress)
     {
         if (userDto is null && string.IsNullOrEmpty(IpAddress))
             throw new HandledException("User model and Ip address cannot be empty");
@@ -109,7 +120,7 @@ public class UserService : IUserService
             .Where(u => u.UserName == userDto!.Username)
             .Include(e => e.UserRoles)
             .ThenInclude(e => e.Role)
-            .Include(e => e.RefreshTokens) // consider .Take(n)
+            .Include(e => e.RefreshTokens)
             .FirstOrDefaultAsync();
 
         return await HandleLogin(user!, userDto!.Password!, IpAddress);
