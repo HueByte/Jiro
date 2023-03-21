@@ -8,6 +8,7 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     scroll-behavior: smooth;
+    font-family: iosevka, sans-serif;
   }
 
   code {
