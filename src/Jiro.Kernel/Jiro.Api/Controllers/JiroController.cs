@@ -1,8 +1,10 @@
 using Jiro.Core.Base.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Jiro.Api.Controllers;
 
+[Authorize]
 public class JiroController : BaseController
 {
     private readonly ICommandHandlerService _commandHandlerService;

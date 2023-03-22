@@ -85,6 +85,8 @@ app.UseHttpsRedirection();
 app.UseAuthorization();
 app.MapControllers();
 app.UseSerilogRequestLogging();
+app.UseCookiePolicy();
+app.MapFallbackToFile("index.html");
 
 if (AppUtils.IsDebug()) app.Map("/", () => Results.Redirect("/swagger"));
 
