@@ -1,3 +1,4 @@
+using System.Text;
 using Jiro.Core.Base;
 using Jiro.Core.Constants;
 using Jiro.Core.Models;
@@ -8,8 +9,10 @@ using Jiro.Core.Services.CommandSystem;
 using Jiro.Core.Services.GPTService;
 using Jiro.Core.Services.WeatherService;
 using Jiro.Infrastructure;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
 
 namespace Jiro.Api.Configurator
 {
@@ -54,16 +57,67 @@ namespace Jiro.Api.Configurator
             services.Configure<ChatGptOptions>(configuration.GetSection($"{GptOptions.Gpt}:{ChatGptOptions.ChatGpt}"));
             services.Configure<SingleGptOptions>(configuration.GetSection($"{GptOptions.Gpt}:{SingleGptOptions.SingleGpt}"));
             services.Configure<LogOptions>(configuration.GetSection(LogOptions.Log));
+            services.Configure<JWTOptions>(configuration.GetSection(JWTOptions.JWT));
 
             return services;
         }
 
         public static IServiceCollection AddSecurity(this IServiceCollection services, IConfiguration configuration)
         {
+            var jwtOptions = configuration.GetSection(JWTOptions.JWT).Get<JWTOptions>();
+
             services.AddIdentity<AppUser, AppRole>()
                 .AddEntityFrameworkStores<JiroContext>()
                 .AddDefaultTokenProviders();
 
+            services.Configure<IdentityOptions>(options =>
+            {
+                // password options
+                options.Password.RequireDigit = true;
+                options.Password.RequireLowercase = true;
+                options.Password.RequireNonAlphanumeric = false;
+                options.Password.RequireUppercase = true;
+                options.Password.RequiredLength = 6;
+                options.Password.RequiredUniqueChars = 1;
+                options.Lockout.MaxFailedAccessAttempts = 5;
+                options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(15);
+
+                // user settings
+                options.User.AllowedUserNameCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+";
+                options.User.RequireUniqueEmail = true;
+            });
+
+            services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
+            .AddJwtBearer(options =>
+            {
+                options.RequireHttpsMetadata = false;
+                options.SaveToken = true;
+
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateAudience = true,
+                    ValidateIssuer = true,
+                    RequireExpirationTime = true,
+                    ValidIssuer = jwtOptions.Issuer,
+                    ValidAudience = jwtOptions.Audience,
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtOptions.Secret)),
+                    ClockSkew = TimeSpan.Zero
+                };
+
+                options.Events = new JwtBearerEvents
+                {
+                    OnMessageReceived = context =>
+                    {
+                        context.Token = context.Request.Cookies["X-Access-Token"];
+                        return Task.CompletedTask;
+                    },
+                };
+            });
             return services;
         }
 
