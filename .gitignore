@@ -9,7 +9,15 @@ appsettings.json
 appsettings.development.json
 .env
 .env.development
+.env.development.local
 **/build/*
+
+# generated client
+**/api/core
+**/api/models
+**/api/services
+**/api/index.ts
+**/api/swagger.json
 
 # User-specific files
 *.rsuser

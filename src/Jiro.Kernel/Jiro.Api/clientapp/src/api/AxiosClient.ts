@@ -1,12 +1,6 @@
 import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
 import { AuthService } from "./services/AuthService";
 
-interface ApiResponse {
-  data: any;
-  errors: string[];
-  isSuccess: boolean;
-}
-
 const axiosApiInstance = axios.create();
 
 axios.interceptors.response.use(
@@ -15,6 +9,7 @@ axios.interceptors.response.use(
 );
 
 let isRefreshing = false;
+let tokenApproved = true;
 let failedQueue: any[] = [];
 
 const processQueue = (error: any) => {
@@ -90,4 +85,10 @@ function redirectToLogout() {
   window.location.replace(
     `${window.location.protocol}//${window.location.host}/logout`
   );
+}
+
+interface ApiResponse {
+  data: any;
+  errors: string[];
+  isSuccess: boolean;
 }

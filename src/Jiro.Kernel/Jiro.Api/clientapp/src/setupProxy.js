@@ -5,7 +5,7 @@ const onError = (err, req, resp, target) => {
   console.error(`${err.message}`);
 };
 
-const target = env.JIRO_WEB ?? "https://localhost:5001";
+const target = env.JIRO_API ?? "https://localhost:18091";
 
 const context = ["/api"];
 

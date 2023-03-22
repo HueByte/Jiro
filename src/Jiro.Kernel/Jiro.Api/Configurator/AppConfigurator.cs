@@ -12,6 +12,20 @@ namespace Jiro.Api.Configurator
             _app = app;
             _eventsConfigurator = app.Services.GetRequiredService<EventsConfigurator>();
         }
+        public AppConfigurator ConfigureSPA()
+        {
+            var cacheMaxAgeOneWeek = (60 * 60 * 24 * 7).ToString();
+            _app.UseStaticFiles(new StaticFileOptions
+            {
+                OnPrepareResponse = ctx =>
+                {
+                    ctx.Context.Response.Headers.Append(
+                         "Cache-Control", $"public, max-age={cacheMaxAgeOneWeek}");
+                }
+            });
+
+            return this;
+        }
 
         public AppConfigurator ConfigureEvents()
         {
