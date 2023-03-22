@@ -3,7 +3,7 @@ import Menu from "./Menu";
 
 const MainLayout = () => {
   return (
-    <div className="flex h-screen w-full max-w-full flex-row">
+    <div className="z-50 flex h-screen w-full max-w-full flex-row">
       <Menu />
       <Outlet />
     </div>

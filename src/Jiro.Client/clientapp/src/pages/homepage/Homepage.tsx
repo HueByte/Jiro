@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { BiMailSend } from "react-icons/bi";
 import { FaGhost } from "react-icons/fa";
-import * as api from "../api";
-import { CommandType } from "../api/CommandEnum";
-import jiroAvatar from "../assets/Jiro.png";
-import { CommandOutputRenderer } from "./components";
-import { UserCommand } from "./Models";
+import * as api from "../../api";
+import { CommandType } from "../../api/CommandEnum";
+import { CommandOutputRenderer } from "../components";
+import { UserCommand } from "../Models";
+import MorphAvatar from "./MorphContainer";
 
 const Homepage = () => {
   const messageInputRef = React.useRef<HTMLTextAreaElement | null>(null);
@@ -128,18 +128,8 @@ const Homepage = () => {
 
   return (
     <div className="flex w-full flex-row justify-center gap-6 px-8 py-8 lg:flex-col md:px-4 md:py-0">
-      <div
-        className={`${
-          isFetching ? "shadow-lg shadow-accent3 " : ""
-        }base-border-gradient-r h-fit w-[256px] flex-shrink-0 overflow-hidden rounded-full transition duration-1000 lg:mx-auto lg:w-[196px] md:w-[128px]`}
-      >
-        <img
-          className="rounded-full bg-elementLight"
-          src={jiroAvatar}
-          alt="temp image"
-        />
-      </div>
-      <div className="flex h-[100%] w-[1024px] min-w-[700px] flex-col rounded-xl bg-altBackgroundColor shadow-lg shadow-element lg:h-[calc(90%_-_196px)] lg:w-full lg:min-w-full md:h-[calc(90%_-_128px)]">
+      <MorphAvatar />
+      <div className="flex h-[100%] w-[1024px] min-w-[700px] flex-col rounded-xl bg-element shadow-lg shadow-element lg:h-[calc(90%_-_196px)] lg:w-full lg:min-w-full md:h-[calc(90%_-_128px)]">
         <div
           ref={chatContainer}
           className="mx-12 my-4 flex flex-1 flex-col overflow-y-auto overflow-x-hidden pr-2 md:mx-6"

@@ -35,7 +35,7 @@
   }
 
   .base-border-gradient-r {
-    @apply rounded-xl border-4 border-transparent bg-gradient-to-r from-primary to-secondaryLight bg-clip-border bg-origin-border;
+    @apply border-4 border-transparent bg-gradient-to-r from-primary to-secondaryLight bg-clip-border bg-origin-border;
   }
 
   .menu-active {
@@ -81,4 +81,14 @@
 ::-webkit-scrollbar-thumb:hover {
   background: #c62368;
   cursor: pointer;
+}
+
+:-webkit-autofill,
+:-webkit-autofill:hover,
+:-webkit-autofill:focus {
+  border: 2px solid inherit;
+  -webkit-text-fill-color: #fff;
+  -webkit-box-shadow: 0 0 0px 1000px #001829 inset;
+  transition: inherit;
+  background-color: inherit;
 }

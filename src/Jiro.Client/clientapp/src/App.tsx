@@ -4,11 +4,13 @@ import ClientRouter from "./routes/ClientRouter";
 import { ReactNode, Suspense, useEffect } from "react";
 import "./api/AxiosClient";
 import { OpenAPI } from "./api";
+import { AuthProvider } from "./contexts/AuthContext";
+import Morph from "./components/Morph";
 
 function App() {
   useEffect(() => {
     (async () => {
-      let response = await fetch("api/target");
+      let response = await fetch("/api/target");
       let result = await response.json();
       OpenAPI.BASE = result.apiUrl;
     })();
@@ -16,11 +18,14 @@ function App() {
 
   return (
     <BrowserRouter>
-      <Suspense fallback={<div>Loading...</div>}>
-        <ErrorBoundary>
-          <ClientRouter />
-        </ErrorBoundary>
-      </Suspense>
+      <ErrorBoundary>
+        <AuthProvider>
+          <Suspense fallback={<div>Loading...</div>}>
+            <ClientRouter />
+            <Morph />
+          </Suspense>
+        </AuthProvider>
+      </ErrorBoundary>
     </BrowserRouter>
   );
 }

@@ -3,6 +3,7 @@ import { GiHamburgerMenu } from "react-icons/gi";
 import { HiOutlineX } from "react-icons/hi";
 import { NavLink } from "react-router-dom";
 import { AiFillFire } from "react-icons/ai";
+import { MdLogout } from "react-icons/md";
 
 const Menu = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -11,6 +12,11 @@ const Menu = () => {
       icon: <AiFillFire className="inline" />,
       path: "/",
       value: "Home",
+    },
+    {
+      icon: <MdLogout className="inline" />,
+      path: "/logout",
+      value: "Logout",
     },
   ];
   return (
