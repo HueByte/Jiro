@@ -33,7 +33,7 @@ namespace Jiro.Api.Middlewares
                     CommandException => (int)HttpStatusCode.BadRequest,
                     HandledException => (int)HttpStatusCode.BadRequest,
                     HandledExceptionList => (int)HttpStatusCode.BadRequest,
-                    TokenException => (int)HttpStatusCode.Unauthorized,
+                    TokenException => (int)HttpStatusCode.OK,
                     _ => (int)HttpStatusCode.BadRequest
                 };
 
