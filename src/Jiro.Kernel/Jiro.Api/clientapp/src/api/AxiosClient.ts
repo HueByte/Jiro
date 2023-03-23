@@ -38,50 +38,49 @@ function errorHandler(error: {
 }): Promise<any> {
   const originalRequest = error.config;
 
-  if (error.response.status === 401) {
-    // add to queue to resolve after refresh token succeeded
-    if (isRefreshing) {
-      return new Promise((resolve, reject) => {
-        failedQueue.push({ resolve, reject });
-      })
-        .then((result) => {
-          return axios(originalRequest);
-        })
-        .catch((err) => {
-          return Promise.reject(err);
-        });
-    }
-
-    isRefreshing = true;
-
-    // attempt to refresh token
-    return new Promise((resolve, reject) => {
-      return AuthService.postApiAuthRefreshToken()
-        .then((result) => {
-          if (result?.isSuccess) {
-            // retry request if refresh token succeeded
-            processQueue(null);
-            resolve(axios(error.config));
-          } else {
-            // logout if refresh token failed
-            redirectToLogout();
-            reject(error);
-          }
-        })
-        .catch((err) => {
-          processQueue(err);
-          return reject(err);
-        })
-        .then(() => {
-          isRefreshing = false;
-        });
-    });
+  if (error.response.status !== 401) {
+    return Promise.reject(error);
   }
 
-  return Promise.reject(error);
+  if (isRefreshing) {
+    return new Promise((resolve, reject) => {
+      failedQueue.push({ resolve, reject });
+    })
+      .then((result) => {
+        return axios(originalRequest);
+      })
+      .catch((err) => {
+        return Promise.reject(err);
+      });
+  }
+
+  isRefreshing = true;
+
+  return new Promise((resolve, reject) => {
+    AuthService.postApiAuthRefreshToken()
+      .then((result) => {
+        if (result.isSuccess) {
+          processQueue(null);
+          resolve(axios(originalRequest));
+        } else {
+          processQueue(null);
+          redirectToLogout();
+          reject(error);
+        }
+      })
+      .catch((err) => {
+        processQueue(err);
+        redirectToLogout();
+        reject(err);
+      })
+      .then(() => {
+        isRefreshing = false;
+      });
+  });
 }
 
 function redirectToLogout() {
+  isRefreshing = false;
   window.location.replace(
     `${window.location.protocol}//${window.location.host}/logout`
   );
