@@ -1,4 +1,4 @@
-import jiroAvatar from "../../assets/Jiro.png";
+import jiroAvatar from "../../../assets/Jiro.png";
 
 const MorphAvatar = () => {
   return (

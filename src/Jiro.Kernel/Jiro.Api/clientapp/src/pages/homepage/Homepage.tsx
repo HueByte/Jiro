@@ -5,7 +5,7 @@ import * as api from "../../api";
 import { CommandType } from "../../api/CommandEnum";
 import { CommandOutputRenderer } from "../components";
 import { UserCommand } from "../Models";
-import MorphAvatar from "./MorphContainer";
+import MorphAvatar from "./components/MorphContainer";
 
 const Homepage = () => {
   const messageInputRef = React.useRef<HTMLTextAreaElement | null>(null);
