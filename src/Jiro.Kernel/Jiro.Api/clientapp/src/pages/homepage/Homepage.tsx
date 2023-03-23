@@ -75,7 +75,8 @@ const Homepage = () => {
     setIsFetching(true);
 
     let userCommand: UserCommand = {
-      prompt: promptValue.replace(/\n/g, "\n\n "),
+      // prompt: promptValue.replace(/\n/g, "\n\n "),
+      prompt: promptValue,
       response: undefined,
       isLoading: true,
     };
