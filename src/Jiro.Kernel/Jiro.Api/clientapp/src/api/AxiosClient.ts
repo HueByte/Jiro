@@ -1,15 +1,12 @@
 import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
 import { AuthService } from "./services/AuthService";
 
-const axiosApiInstance = axios.create();
-
 axios.interceptors.response.use(
   (Response) => responseHandler(Response),
   (Error) => errorHandler(Error)
 );
 
 let isRefreshing = false;
-let tokenApproved = true;
 let failedQueue: any[] = [];
 
 const processQueue = (error: any) => {
@@ -34,49 +31,51 @@ function responseHandler(response: AxiosResponse) {
 
 function errorHandler(error: {
   response: { status: any; data: any };
-  config: AxiosRequestConfig<any>;
+  config: AxiosRequestConfigWithRetry;
 }): Promise<any> {
+  const _axios = axios;
   const originalRequest = error.config;
 
-  if (error.response.status !== 401) {
-    return Promise.reject(error);
-  }
+  if (error.response.status === 401 && !originalRequest._retry) {
+    if (isRefreshing) {
+      return new Promise(function (resolve, reject) {
+        failedQueue.push({ resolve, reject });
+      })
+        .then(() => {
+          return _axios.request(originalRequest);
+        })
+        .catch((err) => {
+          return Promise.reject(err);
+        });
+    }
 
-  if (isRefreshing) {
+    originalRequest._retry = true;
+    isRefreshing = true;
+
     return new Promise((resolve, reject) => {
-      failedQueue.push({ resolve, reject });
-    })
-      .then((result) => {
-        return axios(originalRequest);
-      })
-      .catch((err) => {
-        return Promise.reject(err);
-      });
+      AuthService.postApiAuthRefreshToken()
+        .then((result) => {
+          if (result.isSuccess) {
+            processQueue(null);
+            resolve(_axios(originalRequest));
+          } else {
+            processQueue(null);
+            redirectToLogout();
+            reject(error);
+          }
+        })
+        .catch((err) => {
+          processQueue(err);
+          reject(err);
+          redirectToLogout();
+        })
+        .then(() => {
+          isRefreshing = false;
+        });
+    });
   }
 
-  isRefreshing = true;
-
-  return new Promise((resolve, reject) => {
-    AuthService.postApiAuthRefreshToken()
-      .then((result) => {
-        if (result.isSuccess) {
-          processQueue(null);
-          resolve(axios(originalRequest));
-        } else {
-          processQueue(null);
-          redirectToLogout();
-          reject(error);
-        }
-      })
-      .catch((err) => {
-        processQueue(err);
-        redirectToLogout();
-        reject(err);
-      })
-      .then(() => {
-        isRefreshing = false;
-      });
-  });
+  return Promise.reject(error);
 }
 
 function redirectToLogout() {
@@ -84,6 +83,10 @@ function redirectToLogout() {
   window.location.replace(
     `${window.location.protocol}//${window.location.host}/logout`
   );
+}
+
+interface AxiosRequestConfigWithRetry extends AxiosRequestConfig<any> {
+  _retry?: boolean;
 }
 
 interface ApiResponse {
