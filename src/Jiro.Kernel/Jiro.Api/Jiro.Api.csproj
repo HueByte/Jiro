@@ -42,19 +42,20 @@
   <Target Name="CreateLogFolder" AfterTargets="Build">
     <MakeDir Directories="$(OutDir)logs" Condition="!Exists('$(OutDir)Database')" />
   </Target>
+  
+  <Target Name="CreateLogFolder" AfterTargets="AfterPublish">
+   <MakeDir Directories="$(PublishDir)logs" Condition="!Exists('$(PublishDir)Database')" />
+  </Target>
 
   <Target Name="CreateModulesFolder" AfterTargets="Build">
      <MakeDir Directories="$(OutDir)modules" Condition="!Exists('$(OutDir)Database')" />
-  </Target>
-
-  <Target Name="CreateLogFolder" AfterTargets="AfterPublish">
-   <MakeDir Directories="$(PublishDir)logs" Condition="!Exists('$(PublishDir)Database')" />
   </Target>
 
   <Target Name="CreateModulesFolder" AfterTargets="AfterPublish">
      <MakeDir Directories="$(PublishDir)modules" Condition="!Exists('$(PublishDir)Database')" />
   </Target>
 
+  <!-- Create API client -->
   <Target Name="OpenAPI" AfterTargets="Build" Condition="$(Configuration)=='Debug'">
     <Exec Command="dotnet swagger tofile --output clientapp/src/api/swagger.json $(OutputPath)$(AssemblyName).dll v1" WorkingDirectory="$(ProjectDir)" />
     <Exec Command="npx openapi --input src/api/swagger.json --output src/api/ --client axios --postfix Service --useOptions --useUnionTypes" WorkingDirectory="$(ProjectDir)/clientapp" />

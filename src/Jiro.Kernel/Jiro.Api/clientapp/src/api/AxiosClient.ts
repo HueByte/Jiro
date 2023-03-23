@@ -56,7 +56,7 @@ function errorHandler(error: {
 
     // attempt to refresh token
     return new Promise((resolve, reject) => {
-      AuthService.postApiAuthRefreshToken()
+      return AuthService.postApiAuthRefreshToken()
         .then((result) => {
           if (result?.isSuccess) {
             // retry request if refresh token succeeded
