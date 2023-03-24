@@ -1,6 +1,8 @@
+using Jiro.Core.Abstraction;
+
 namespace Jiro.Core.Models
 {
-    public class WhiteListEntry
+    public class WhiteListEntry : DbModel<string>
     {
         public string Id { get; set; } = default!;
         public DateTime AddedDate { get; set; }

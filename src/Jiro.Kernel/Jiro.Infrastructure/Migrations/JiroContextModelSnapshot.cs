@@ -162,6 +162,25 @@ namespace Jiro.Infrastructure.Migrations
                     b.ToTable("RefreshToken");
                 });
 
+            modelBuilder.Entity("Jiro.Core.Models.WhiteListEntry", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("AddedDate")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("WhiteListEntries");
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
                     b.Property<int>("Id")
@@ -273,6 +292,17 @@ namespace Jiro.Infrastructure.Migrations
                     b.HasOne("Jiro.Core.Models.AppUser", null)
                         .WithMany("RefreshTokens")
                         .HasForeignKey("AppUserId");
+                });
+
+            modelBuilder.Entity("Jiro.Core.Models.WhiteListEntry", b =>
+                {
+                    b.HasOne("Jiro.Core.Models.AppUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
