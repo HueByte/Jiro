@@ -36,7 +36,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Jiro.Core\Jiro.Core.csproj" />
-    <ProjectReference Include="..\Jiro.Infrastructure\Jiro.Infrastructure.csproj" />
+	  <ProjectReference Include="..\Jiro.Infrastructure\Jiro.Infrastructure.csproj" />
   </ItemGroup>
 
   <Target Name="CreateLogFolder" AfterTargets="Build">
