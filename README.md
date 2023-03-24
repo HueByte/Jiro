@@ -23,8 +23,9 @@ To create plugins, refer to [github](https://github.com/HueByte/Jiro.Libs) https
 3. navigate to `src/Jiro.Kernel/Jiro.Api`
 4. rename `appsettings.example.json` to `appsettings.json`
 5. Configure `appsettings.json`, especially `Gpt:AuthToken` for enabling conversations (can be obtained from https://platform.openai.com/account/api-keys)
-6. run `dotnet run`
-7. to run Client App, open the web app (by default `https://localhost:5001`) and wait for proxy to start 
+6. run `dotnet tool restore`
+7. run `dotnet run`
+8. to run Client App, open the web app (by default `https://localhost:5001`) and wait for proxy to start 
   
 ### **Jiro Tokenizer API**
 1. navigate to `src/Jiro.TokenApi`
