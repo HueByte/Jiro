@@ -1,6 +1,8 @@
 using System.Text;
-using Jiro.Core.Base;
+using Jiro.Api.Authorization;
+using Jiro.Api.Authorization.Requirements;
 using Jiro.Core.Constants;
+using Jiro.Core.Interfaces.IRepositories;
 using Jiro.Core.Models;
 using Jiro.Core.Options;
 using Jiro.Core.Services.Auth;
@@ -8,8 +10,11 @@ using Jiro.Core.Services.CommandHandler;
 using Jiro.Core.Services.CommandSystem;
 using Jiro.Core.Services.GPTService;
 using Jiro.Core.Services.WeatherService;
+using Jiro.Core.Services.Whitelist;
 using Jiro.Infrastructure;
+using Jiro.Infrastructure.Repositories;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
@@ -44,9 +49,10 @@ namespace Jiro.Api.Configurator
             services.AddScoped<ICurrentUserService, CurrentUserService>();
             services.AddScoped<IJWTService, JWTService>();
             services.AddScoped<IRefreshTokenService, RefreshTokenService>();
+            services.AddScoped<IWhitelistService, WhitelistService>();
 
             // repositories
-
+            services.AddScoped<IWhitelistRepository, WhitelistRepository>();
 
             return services;
         }
@@ -65,6 +71,7 @@ namespace Jiro.Api.Configurator
         public static IServiceCollection AddSecurity(this IServiceCollection services, IConfiguration configuration)
         {
             var jwtOptions = configuration.GetSection(JWTOptions.JWT).Get<JWTOptions>();
+            var isWhitelistEnabled = configuration.GetSection("Whitelist").Get<bool>();
 
             services.AddIdentity<AppUser, AppRole>()
                 .AddEntityFrameworkStores<JiroContext>()
@@ -99,13 +106,13 @@ namespace Jiro.Api.Configurator
 
                 options.TokenValidationParameters = new TokenValidationParameters
                 {
-                    ValidateAudience = true,
-                    ValidateIssuer = true,
+                    ValidateAudience = false,
+                    ValidateIssuer = false,
                     RequireExpirationTime = true,
-                    ValidIssuer = jwtOptions.Issuer,
-                    ValidAudience = jwtOptions.Audience,
+                    ValidIssuer = jwtOptions?.Issuer,
+                    ValidAudience = jwtOptions?.Audience,
                     ValidateIssuerSigningKey = true,
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtOptions.Secret)),
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtOptions?.Secret!)),
                     ClockSkew = TimeSpan.Zero
                 };
 
@@ -118,6 +125,18 @@ namespace Jiro.Api.Configurator
                     },
                 };
             });
+
+            services.AddScoped<IAuthorizationHandler, WhitelistAuthorizationHandler>();
+
+            services.AddAuthorization(options =>
+            {
+                options.AddPolicy(Jiro.Core.Constants.Policies.WHITE_LIST, policy =>
+                {
+                    policy.RequireAuthenticatedUser();
+                    policy.Requirements.Add(new WhitelistRequirement(isWhitelistEnabled));
+                });
+            });
+
             return services;
         }
 
