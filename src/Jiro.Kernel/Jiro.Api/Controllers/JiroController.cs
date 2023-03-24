@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Jiro.Api.Controllers;
 
-[Authorize]
+[Authorize(Policy = Jiro.Core.Constants.Policies.WHITE_LIST)]
 public class JiroController : BaseController
 {
     private readonly ICommandHandlerService _commandHandlerService;
