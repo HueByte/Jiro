@@ -1,6 +1,8 @@
 using System.Collections.Concurrent;
+using Jiro.Core.Options;
 using Jiro.Core.Services.GPTService.Models.ChatGPT;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace Jiro.Core.Services.GPTService
 {
@@ -8,9 +10,11 @@ namespace Jiro.Core.Services.GPTService
     {
         private readonly ILogger _logger;
         private readonly ConcurrentDictionary<string, ChatGPTSession> _sessions = new();
-        public ChatGPTStorageService(ILogger<ChatGPTStorageService> logger)
+        private readonly ChatGptOptions _options;
+        public ChatGPTStorageService(ILogger<ChatGPTStorageService> logger, IOptions<ChatGptOptions> options)
         {
             _logger = logger;
+            _options = options.Value;
         }
 
         public ChatGPTSession GetOrCreateSession(string userId)
@@ -21,7 +25,7 @@ namespace Jiro.Core.Services.GPTService
             ChatMessage systemMessage = new()
             {
                 Role = "system",
-                Content = "You are AI chatting bot called Jiro"
+                Content = _options.SystemMessage
             };
 
             ChatGPTRequest req = new()
