@@ -13,7 +13,7 @@ namespace Jiro.Api
             var context = scope.ServiceProvider.GetRequiredService<JiroContext>();
             var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<AppRole>>();
 
-            string[] roles = { Roles.USER, Roles.ADMIN };
+            string[] roles = { Roles.USER, Roles.ADMIN, Roles.SERVER };
 
             foreach (var role in roles)
             {
