@@ -27,12 +27,13 @@ namespace Jiro.Infrastructure
                    .HasForeignKey(e => e.UserId)
                    .IsRequired();
 
-
             builder.Entity<AppRole>()
                    .HasMany(e => e.UserRoles)
                    .WithOne(e => e.Role)
                    .HasForeignKey(e => e.RoleId)
                    .IsRequired();
         }
+
+        public DbSet<WhiteListEntry> WhiteListEntries { get; set; }
     }
 }
