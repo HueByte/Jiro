@@ -53,6 +53,7 @@ namespace Jiro.Api.Configurator
 
             // repositories
             services.AddScoped<IWhitelistRepository, WhitelistRepository>();
+            services.AddScoped<IJiroInstanceRepository, JiroInstanceRepository>();
 
             return services;
         }
