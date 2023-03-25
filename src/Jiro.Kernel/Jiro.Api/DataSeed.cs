@@ -14,10 +14,31 @@ namespace Jiro.Api
             var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<AppRole>>();
             var userManager = scope.ServiceProvider.GetRequiredService<UserManager<AppUser>>();
             var whitelistService = scope.ServiceProvider.GetRequiredService<IWhitelistService>();
+            var IJiroInstanceService = scope.ServiceProvider.GetRequiredService<IJiroInstanceService>();
             var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
 
+            await SeedMainInstanceAsync(logger, IJiroInstanceService);
             await SeedRolesAsync(logger, roleManager);
             await SeedManagementAsync(logger, userManager, whitelistService);
+        }
+
+        private async static Task SeedMainInstanceAsync(ILogger logger, IJiroInstanceService jiroInstanceService)
+        {
+            if (await jiroInstanceService.GetJiroInstanceAsync() is not null)
+            {
+                return;
+            }
+
+            logger.LogInformation("Seeding main Jiro instance...");
+
+            var jiroInstance = new JiroInstance()
+            {
+                InstanceName = "Default Jiro Instance",
+                IsActive = true,
+                IsConfigured = false
+            };
+
+            await jiroInstanceService.CreateJiroInstanceAsync(jiroInstance);
         }
 
         private async static Task SeedRolesAsync(ILogger logger, RoleManager<AppRole> roleManager)
@@ -36,29 +57,30 @@ namespace Jiro.Api
 
         private async static Task SeedManagementAsync(ILogger logger, UserManager<AppUser> userManager, IWhitelistService whitelistService)
         {
-            Tuple<AppUser, string>[] managementUsers = {
-                new Tuple<AppUser, string>(new AppUser()
+            Tuple<AppUser, string[]>[] managementUsers = {
+                new Tuple<AppUser, string[]>(new AppUser()
                 {
                     UserName = "admin",
                     Email = "admin@heaven.org"
-                }, Roles.ADMIN),
-                new Tuple<AppUser, string>(new AppUser()
+                }, new string[] { Roles.ADMIN }),
+                new Tuple<AppUser, string[]>(new AppUser()
                 {
                     UserName = "server",
                     Email = "server@heaven.org"
-                }, Roles.SERVER)
+                }, new string[] { Roles.SERVER, Roles.ADMIN })
             };
 
-            foreach ((var user, var role) in managementUsers)
+            foreach ((var user, var roles) in managementUsers)
             {
                 if (await userManager.FindByNameAsync(user.UserName!) is null)
                 {
-                    logger.LogInformation("Seeding {user} with role {role}", user.UserName, role);
+                    logger.LogInformation("Seeding {user} with roles {role}", user.UserName, string.Join(';', roles));
 
                     var result = await userManager.CreateAsync(user, "TempPassword12");
                     if (result.Succeeded)
                     {
-                        await userManager.AddToRoleAsync(user, role);
+                        foreach (var role in roles)
+                            await userManager.AddToRoleAsync(user, role);
                         await whitelistService.AddUserToWhitelist(user);
                     }
                 }
