@@ -1,22 +1,40 @@
-import { useState } from "react";
+import { useEffect, useState, useContext } from "react";
 import { GiHamburgerMenu } from "react-icons/gi";
 import { HiOutlineX } from "react-icons/hi";
 import { NavLink } from "react-router-dom";
 import { AiFillFire } from "react-icons/ai";
 import { MdLogout } from "react-icons/md";
+import { Roles } from "../api/Roles";
+import { AuthContext } from "../contexts/AuthContext";
 
 const Menu = () => {
+  const auth = useContext(AuthContext);
   const [isOpen, setIsOpen] = useState(false);
+
   const menuItems = [
     {
       icon: <AiFillFire className="inline" />,
       path: "/",
       value: "Home",
+      roles: [],
+    },
+    {
+      icon: <AiFillFire className="inline" />,
+      path: "/admin",
+      value: "Admin Panel",
+      roles: [Roles.ADMIN],
+    },
+    {
+      icon: <AiFillFire className="inline" />,
+      path: "/server",
+      value: "Server Panel",
+      roles: [Roles.SERVER],
     },
     {
       icon: <MdLogout className="inline" />,
       path: "/logout",
       value: "Logout",
+      roles: [],
     },
   ];
   return (
@@ -27,19 +45,24 @@ const Menu = () => {
         }`}
       >
         <div className="relative flex w-full flex-col gap-2 pt-14 md:items-center">
-          {menuItems.map((item, index) => (
-            <NavLink
-              to={item.path}
-              className={(navData) =>
-                `${
-                  navData.isActive ? "menu-active " : ""
-                }p-4 text-xl font-bold transition duration-300 hover:bg-accent6 md:w-full md:text-center md:text-3xl`
-              }
-              key={index}
-            >
-              {item.icon} {item.value}
-            </NavLink>
-          ))}
+          {menuItems.map((item, index) =>
+            auth?.isInRole(item.roles) ? (
+              <NavLink
+                to={item.path}
+                onClick={() => setIsOpen(!isOpen)}
+                className={(navData) =>
+                  `${
+                    navData.isActive ? "menu-active " : ""
+                  }p-4 text-xl font-bold transition duration-300 hover:bg-accent6 md:w-full md:text-center md:text-3xl`
+                }
+                key={index}
+              >
+                {item.icon} {item.value}
+              </NavLink>
+            ) : (
+              <></>
+            )
+          )}
           <div
             className="absolute top-4 right-4 text-3xl transition duration-150 hover:scale-125 hover:cursor-pointer"
             onClick={() => setIsOpen(!isOpen)}
