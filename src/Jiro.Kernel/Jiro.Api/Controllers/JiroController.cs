@@ -1,4 +1,5 @@
 using Jiro.Core.Base.Models;
+using Jiro.Core.DTO;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 

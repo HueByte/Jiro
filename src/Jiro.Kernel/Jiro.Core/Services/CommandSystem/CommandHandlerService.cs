@@ -9,17 +9,22 @@ namespace Jiro.Core.Services.CommandHandler
     public partial class CommandHandlerService : ICommandHandlerService
     {
         private readonly CommandsContext _commandsModule;
+        private readonly ICurrentInstanceService _currentInstanceService;
         private readonly IServiceScopeFactory _scopeFactory;
         private readonly Regex pattern = RegexCommandParserPattern();
         public event Action<string, object[]>? OnLog;
-        public CommandHandlerService(CommandsContext commandModule, IServiceScopeFactory scopeFactory)
+        public CommandHandlerService(CommandsContext commandModule, IServiceScopeFactory scopeFactory, ICurrentInstanceService currentInstanceService)
         {
             _commandsModule = commandModule;
             _scopeFactory = scopeFactory;
+            _currentInstanceService = currentInstanceService;
         }
 
         public async Task<CommandResponse> ExecuteCommandAsync(string prompt)
         {
+            if (!_currentInstanceService.IsConfigured())
+                throw new CommandException("Jiro", "Jiro is not configured yet. Please login on server account and configure Jiro in Server Panel.");
+
             await using var scope = _scopeFactory.CreateAsyncScope();
 
             var watch = Stopwatch.StartNew();

@@ -14,12 +14,12 @@ using Serilog.Sinks.SystemConsole.Themes;
 var builder = WebApplication.CreateBuilder(args);
 var configRef = builder.Configuration;
 
-Log.Logger = new LoggerConfiguration()
+Serilog.Log.Logger = new LoggerConfiguration()
     .WriteTo.Console()
     .Enrich.FromLogContext()
     .CreateBootstrapLogger();
 
-var logger = new SerilogLoggerProvider(Log.Logger)
+var logger = new SerilogLoggerProvider(Serilog.Log.Logger)
     .CreateLogger(nameof(Program));
 
 LogOptions loggerOptions = new();
@@ -63,7 +63,7 @@ var app = builder.Build();
 
 // Log loaded modules
 var commandContainer = app.Services.GetRequiredService<CommandsContext>();
-foreach (var module in commandContainer.CommandModules.Keys) Log.Information("Module {Module} loaded", module);
+foreach (var module in commandContainer.CommandModules.Keys) Serilog.Log.Information("Module {Module} loaded", module);
 
 var appConf = new AppConfigurator(app)
     .ConfigureEvents()
@@ -71,6 +71,9 @@ var appConf = new AppConfigurator(app)
     .Migrate();
 
 await DataSeed.SeedAsync(app);
+
+var instance = app.Services.GetRequiredService<ICurrentInstanceService>();
+await instance.SetCurrentInstance();
 
 if (app.Environment.IsDevelopment())
 {

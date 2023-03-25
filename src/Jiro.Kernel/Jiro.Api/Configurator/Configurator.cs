@@ -9,6 +9,7 @@ using Jiro.Core.Services.Auth;
 using Jiro.Core.Services.CommandHandler;
 using Jiro.Core.Services.CommandSystem;
 using Jiro.Core.Services.GPTService;
+using Jiro.Core.Services.Instance;
 using Jiro.Core.Services.WeatherService;
 using Jiro.Core.Services.Whitelist;
 using Jiro.Infrastructure;
@@ -43,6 +44,7 @@ namespace Jiro.Api.Configurator
             services.AddSingleton<ICommandHandlerService, CommandHandlerService>();
             services.AddSingleton<IHelpService, HelpService>();
             services.AddSingleton<EventsConfigurator>();
+            services.AddSingleton<ICurrentInstanceService, CurrentInstanceService>();
 
             services.AddScoped<IWeatherService, WeatherService>();
             services.AddScoped<IUserService, UserService>();
@@ -50,6 +52,7 @@ namespace Jiro.Api.Configurator
             services.AddScoped<IJWTService, JWTService>();
             services.AddScoped<IRefreshTokenService, RefreshTokenService>();
             services.AddScoped<IWhitelistService, WhitelistService>();
+            services.AddScoped<IJiroInstanceService, JiroInstanceService>();
 
             // repositories
             services.AddScoped<IWhitelistRepository, WhitelistRepository>();

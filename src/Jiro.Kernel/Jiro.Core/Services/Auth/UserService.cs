@@ -1,3 +1,4 @@
+using System.Formats.Asn1;
 using Jiro.Core.Constants;
 using Jiro.Core.DTO;
 using Jiro.Core.Models;
@@ -152,6 +153,17 @@ public class UserService : IUserService
             throw new HandledExceptionList(result.Errors.Select(errors => errors.Description).ToList());
 
         return result.Succeeded;
+    }
+
+    public async Task<IdentityResult> AssignRoleAsync(string userId, string role)
+    {
+        var user = await _userManager.FindByIdAsync(userId);
+        if (user is null)
+            throw new HandledException("Couldn't find this user");
+
+        var result = await _userManager.AddToRoleAsync(user, role);
+
+        return result;
     }
 
     private async Task<VerifiedUserDTO> HandleLogin(AppUser user, string password, string ipAddress)

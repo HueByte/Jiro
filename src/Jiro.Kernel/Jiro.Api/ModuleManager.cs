@@ -37,7 +37,7 @@ namespace Jiro.Api
 
             if (modules is null) return;
 
-            Log.Logger.Information($"Building {modules.Length} module(s)");
+            Serilog.Log.Logger.Information($"Building {modules.Length} module(s)");
 
             Task[] buildTasks = new Task[modules.Length];
             for (int i = 0; i < buildTasks.Length; i++)
@@ -45,14 +45,14 @@ namespace Jiro.Api
                 int localScope = i;
                 buildTasks[i] = Task.Run(async () =>
                 {
-                    Log.Logger.Information($"{modules[localScope]} => build...");
+                    Serilog.Log.Logger.Information($"{modules[localScope]} => build...");
                     var path = modules[localScope];
 
                     await RunBuildCommandAsync(path);
 
                     var completepath = Path.Combine(path, debugPath);
                     var outputFolder = Directory.GetDirectories(completepath, "net*").First();
-                    Log.Logger.Information($"{modules[localScope]} => build done. Output folder: {outputFolder}");
+                    Serilog.Log.Logger.Information($"{modules[localScope]} => build done. Output folder: {outputFolder}");
 
                     _modulePaths.Add(outputFolder);
                 });
@@ -88,7 +88,7 @@ namespace Jiro.Api
             cmd.StandardInput.Close();
             await cmd.WaitForExitAsync();
 
-            Log.Logger.Information(cmd.StandardOutput.ReadToEnd());
+            Serilog.Log.Logger.Information(cmd.StandardOutput.ReadToEnd());
         }
 
         private static string GetTerminal(string platform) => platform switch
@@ -119,7 +119,7 @@ namespace Jiro.Api
 
             foreach (var dll in dllFiles)
             {
-                Log.Logger.Information($"Loading {dll}");
+                Serilog.Log.Logger.Information($"Loading {dll}");
 
                 _assemblies.Add(Assembly.LoadFile(dll));
             }
@@ -159,7 +159,7 @@ namespace Jiro.Api
                 }
 
                 string errorMessage = sb.ToString();
-                Log.Logger.Error(errorMessage);
+                Serilog.Log.Logger.Error(errorMessage);
             }
         }
 
@@ -178,7 +178,7 @@ namespace Jiro.Api
                 {
                     if (Activator.CreateInstance(serviceConfigurator) is not IPlugin configurator) continue;
 
-                    Log.Logger.Information($"Running {configurator.PluginName} service configurator");
+                    Serilog.Log.Logger.Information($"Running {configurator.PluginName} service configurator");
 
                     configurator.RegisterServices(_services);
                     _moduleNames.Add(configurator.PluginName);
@@ -202,7 +202,7 @@ namespace Jiro.Api
                 }
 
                 string errorMessage = sb.ToString();
-                Log.Logger.Error(errorMessage);
+                Serilog.Log.Logger.Error(errorMessage);
             }
         }
 
@@ -235,7 +235,7 @@ namespace Jiro.Api
                 res = _assemblies.FirstOrDefault(asm => asm.FullName!.Contains(args[0]));
 
                 // if (res is null)
-                // Log.Logger.Warning("Asm: {reqAsm} couldn't find {dep} dependency", e.RequestingAssembly, e.Name);
+                // Serilog.Log.Logger.Warning("Asm: {reqAsm} couldn't find {dep} dependency", e.RequestingAssembly, e.Name);
             }
 
             return res;

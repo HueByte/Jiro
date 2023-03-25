@@ -10,5 +10,6 @@ public interface IUserService
     Task<bool> ChangeUsernameAsync(string username, string password);
     Task<IdentityResult> CreateUserAsync(RegisterDTO registerUser);
     Task<IdentityResult> DeleteUserAsync(string userId);
+    Task<IdentityResult> AssignRoleAsync(string userId, string role);
     Task<VerifiedUserDTO> LoginUserAsync(LoginUsernameDTO userDto, string IpAddress);
 }
