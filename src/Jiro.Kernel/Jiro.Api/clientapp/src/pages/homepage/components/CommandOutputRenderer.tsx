@@ -1,8 +1,8 @@
 import MDEditor from "@uiw/react-md-editor";
 import { memo } from "react";
 import { GraphOutput, TextOutput } from ".";
-import { CommandType } from "../../api/CommandEnum";
-import { UserCommand } from "../Models";
+import { CommandType } from "../../../api/CommandEnum";
+import { UserCommand } from "../../Models";
 import "./styles/RendererStyles.css";
 
 export const CommandOutputRenderer = memo(

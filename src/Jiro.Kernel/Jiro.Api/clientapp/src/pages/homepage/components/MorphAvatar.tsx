@@ -1,6 +1,6 @@
 import jiroAvatar from "../../../assets/Jiro.png";
 
-const MorphAvatar = () => {
+export const MorphAvatar = () => {
   return (
     <div
       className={`relative h-fit w-[256px] flex-shrink-0 overflow-visible rounded-full transition duration-1000 lg:mx-auto lg:w-[196px] md:w-[128px]`}
@@ -33,5 +33,3 @@ const MorphAvatar = () => {
     </div>
   );
 };
-
-export default MorphAvatar;

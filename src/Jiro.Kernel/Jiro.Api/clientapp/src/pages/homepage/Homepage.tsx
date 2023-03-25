@@ -3,11 +3,10 @@ import { BiMailSend } from "react-icons/bi";
 import { FaGhost } from "react-icons/fa";
 import * as api from "../../api";
 import { CommandType } from "../../api/CommandEnum";
-import { CommandOutputRenderer } from "../components";
+import { CommandOutputRenderer, MorphAvatar } from "./components";
 import { UserCommand } from "../Models";
-import MorphAvatar from "./components/MorphContainer";
 
-const Homepage = () => {
+const HomePage = () => {
   const messageInputRef = React.useRef<HTMLTextAreaElement | null>(null);
   const dummy = React.useRef<HTMLInputElement | null>(null);
   const chatContainer = React.useRef<HTMLInputElement | null>(null);
@@ -94,9 +93,11 @@ const Homepage = () => {
 
       data = result.data;
     } catch (err: any) {
+      let errBody = err.body;
+
       data = {
-        commandName: err.data,
-        result: { response: err.errors.join(", ") },
+        commandName: errBody.data,
+        result: { response: errBody?.errors?.join(", ") },
         commandType: CommandType.Text,
       };
     }
@@ -185,4 +186,4 @@ const Homepage = () => {
   );
 };
 
-export default Homepage;
+export default HomePage;
