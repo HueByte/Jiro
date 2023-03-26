@@ -11,86 +11,109 @@ using Serilog.Events;
 using Serilog.Extensions.Logging;
 using Serilog.Sinks.SystemConsole.Themes;
 
-var builder = WebApplication.CreateBuilder(args);
-var configRef = builder.Configuration;
-
-Serilog.Log.Logger = new LoggerConfiguration()
-    .WriteTo.Console()
-    .Enrich.FromLogContext()
-    .CreateBootstrapLogger();
-
-var logger = new SerilogLoggerProvider(Serilog.Log.Logger)
-    .CreateLogger(nameof(Program));
-
-LogOptions loggerOptions = new();
-configRef.GetSection(LogOptions.Log).Bind(loggerOptions);
-LogEventLevel logLevelSystem = SerilogConfigurator.GetLogEventLevel(loggerOptions.SystemLevel);
-LogEventLevel logLevelAspNetCore = SerilogConfigurator.GetLogEventLevel(loggerOptions.AspNetCoreLevel);
-LogEventLevel logLevelDatabase = SerilogConfigurator.GetLogEventLevel(loggerOptions.DatabaseLevel);
-LogEventLevel logLevel = SerilogConfigurator.GetLogEventLevel(loggerOptions.LogLevel);
-RollingInterval logInterval = SerilogConfigurator.GetRollingInterval(loggerOptions.TimeInterval);
-
-builder.Host.UseSerilog((context, services, configuration) => configuration
-    .MinimumLevel.Override("System", logLevelSystem)
-    .MinimumLevel.Override("Microsoft.AspNetCore", logLevelAspNetCore)
-    .MinimumLevel.Override("Microsoft.EntityFrameworkCore.Database.Command", logLevelDatabase)
-    .WriteTo.Async(e => e.Console(theme: AnsiConsoleTheme.Code))
-    .WriteTo.Async(e => e.File(Path.Combine(AppContext.BaseDirectory, "logs/jiro.log"), rollingInterval: logInterval))
-    .ReadFrom.Configuration(builder.Configuration)
-    .ReadFrom.Services(services));
-
-var modulePaths = configRef.GetSection("Modules").Get<string[]>();
-PluginManager pluginManager = new(builder.Services, configRef, logger);
-
-if (AppUtils.IsDebug()) pluginManager.BuildDevModules(modulePaths);
-pluginManager.LoadModuleAssemblies();
-pluginManager.LoadModuleControllers();
-pluginManager.RegisterModuleServices();
-
-var servicesRef = builder.Services;
-servicesRef.AddControllers();
-servicesRef.AddEndpointsApiExplorer();
-servicesRef.AddSwaggerGen();
-
-servicesRef.AddJiroSQLiteContext(configRef.GetConnectionString("JiroContext")!);
-servicesRef.AddServices(configRef);
-servicesRef.RegisterCommands(nameof(GPTCommand.Chat));
-servicesRef.AddHttpClients(configRef);
-servicesRef.AddOptions(configRef);
-servicesRef.AddSecurity(configRef);
-
-var app = builder.Build();
-
-// Log loaded modules
-var commandContainer = app.Services.GetRequiredService<CommandsContext>();
-foreach (var module in commandContainer.CommandModules.Keys) Serilog.Log.Information("Module {Module} loaded", module);
-
-var appConf = new AppConfigurator(app)
-    .ConfigureEvents()
-    .ConfigureCors()
-    .Migrate();
-
-await DataSeed.SeedAsync(app);
-
-var instance = app.Services.GetRequiredService<ICurrentInstanceService>();
-await instance.SetCurrentInstance();
-
-if (app.Environment.IsDevelopment())
+while (true)
 {
-    appConf.UseJiroSwagger();
+    var builder = WebApplication.CreateBuilder(args);
+    var configRef = builder.Configuration;
+
+    Serilog.Log.Logger = new LoggerConfiguration()
+        .WriteTo.Console()
+        .Enrich.FromLogContext()
+        .CreateBootstrapLogger();
+
+    var logger = new SerilogLoggerProvider(Serilog.Log.Logger)
+        .CreateLogger(nameof(Program));
+
+    LogOptions loggerOptions = new();
+    configRef.GetSection(LogOptions.Log).Bind(loggerOptions);
+    LogEventLevel logLevelSystem = SerilogConfigurator.GetLogEventLevel(loggerOptions.SystemLevel);
+    LogEventLevel logLevelAspNetCore = SerilogConfigurator.GetLogEventLevel(loggerOptions.AspNetCoreLevel);
+    LogEventLevel logLevelDatabase = SerilogConfigurator.GetLogEventLevel(loggerOptions.DatabaseLevel);
+    LogEventLevel logLevel = SerilogConfigurator.GetLogEventLevel(loggerOptions.LogLevel);
+    RollingInterval logInterval = SerilogConfigurator.GetRollingInterval(loggerOptions.TimeInterval);
+
+    builder.Host.UseSerilog((context, services, configuration) => configuration
+        .MinimumLevel.Override("System", logLevelSystem)
+        .MinimumLevel.Override("Microsoft.AspNetCore", logLevelAspNetCore)
+        .MinimumLevel.Override("Microsoft.EntityFrameworkCore.Database.Command", logLevelDatabase)
+        .WriteTo.Async(e => e.Console(theme: AnsiConsoleTheme.Code))
+        .WriteTo.Async(e => e.File(Path.Combine(AppContext.BaseDirectory, "logs/jiro.log"), rollingInterval: logInterval))
+        .ReadFrom.Configuration(builder.Configuration)
+        .ReadFrom.Services(services));
+
+    var modulePaths = configRef.GetSection("Modules").Get<string[]>();
+    PluginManager pluginManager = new(builder.Services, configRef, logger);
+
+    if (AppUtils.IsDebug()) pluginManager.BuildDevModules(modulePaths);
+    pluginManager.LoadModuleAssemblies();
+    pluginManager.LoadModuleControllers();
+    pluginManager.RegisterModuleServices();
+
+    var servicesRef = builder.Services;
+    servicesRef.AddControllers();
+    servicesRef.AddEndpointsApiExplorer();
+    servicesRef.AddSwaggerGen();
+
+    servicesRef.AddJiroSQLiteContext(configRef.GetConnectionString("JiroContext")!);
+    servicesRef.AddServices(configRef);
+    servicesRef.RegisterCommands(nameof(GPTCommand.Chat));
+    servicesRef.AddHttpClients(configRef);
+    servicesRef.AddOptions(configRef);
+    servicesRef.AddSecurity(configRef);
+
+    var app = builder.Build();
+
+    // Log loaded modules
+    var commandContainer = app.Services.GetRequiredService<CommandsContext>();
+    foreach (var module in commandContainer.CommandModules.Keys) Serilog.Log.Information("Module {Module} loaded", module);
+
+    var appConf = new AppConfigurator(app)
+        .ConfigureEvents()
+        .ConfigureCors()
+        .Migrate();
+
+    await DataSeed.SeedAsync(app);
+
+    var instance = app.Services.GetRequiredService<ICurrentInstanceService>();
+    await instance.SetCurrentInstance();
+
+    if (app.Environment.IsDevelopment())
+    {
+        appConf.UseJiroSwagger();
+    }
+
+    pluginManager.RegisterAppExtensions(app);
+
+    app.UseStaticFiles();
+    app.UseErrorHandler();
+    app.UseHttpsRedirection();
+    app.UseAuthorization();
+    app.MapControllers();
+    app.UseSerilogRequestLogging();
+    app.UseCookiePolicy();
+    app.MapFallbackToFile("index.html");
+
+    if (AppUtils.IsDebug()) app.Map("/", () => Results.Redirect("/swagger"));
+
+    try
+    {
+        await app.RunAsync(_cts.Token);
+    }
+    catch (Exception ex)
+    {
+        if (ex is TaskCanceledException || ex is OperationCanceledException)
+            continue;
+    }
 }
 
-pluginManager.RegisterAppExtensions(app);
+public partial class Program
+{
+    private static CancellationTokenSource _cts = new();
 
-app.UseStaticFiles();
-app.UseErrorHandler();
-app.UseHttpsRedirection();
-app.UseAuthorization();
-app.MapControllers();
-app.UseSerilogRequestLogging();
-app.UseCookiePolicy();
-app.MapFallbackToFile("index.html");
+    public static void Restart()
+    {
+        _cts.Cancel();
+        _cts = new CancellationTokenSource();
+    }
 
-if (AppUtils.IsDebug()) app.Map("/", () => Results.Redirect("/swagger"));
-
-app.Run();
+}

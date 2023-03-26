@@ -76,8 +76,6 @@ namespace Jiro.Core.Services.Instance
             _currentInstanceService.SetCurrentInstance(jiroInstance);
             await WriteConfigAsyncInternal(instanceConfig);
 
-            // restart instance here with fire and forget task with delay...
-
             _logger.LogInformation("Jiro instance configuration complete. Using {InstanceName} as current instance.", jiroInstance.InstanceName);
         }
 
