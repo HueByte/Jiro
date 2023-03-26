@@ -42,5 +42,13 @@ namespace Jiro.Api.Controllers
 
             return ApiResponseCreator.ValueType(true);
         }
+
+        [HttpGet("restart")]
+        [ProducesResponseType(typeof(ApiResponse<bool>), 200)]
+        [ProducesResponseType(typeof(ApiResponse<object>), 400)]
+        public void Restart()
+        {
+            Program.Restart();
+        }
     }
 }
