@@ -16,9 +16,9 @@ namespace Jiro.Api.Controllers
         [HttpPost]
         [ProducesResponseType(typeof(ApiResponse<object>), 200)]
         [ProducesResponseType(typeof(ApiResponse<object>), 400)]
-        public async Task<IActionResult> AddUserToWhitelist([FromBody] string userId)
+        public async Task<IActionResult> AddUserToWhitelist([FromBody] UserIdDTO user)
         {
-            var result = await _whitelistService.AddUserToWhitelist(userId);
+            var result = await _whitelistService.AddUserToWhitelist(user.UserId);
 
             return Ok(result);
         }
@@ -26,9 +26,9 @@ namespace Jiro.Api.Controllers
         [HttpDelete]
         [ProducesResponseType(typeof(ApiResponse<object>), 200)]
         [ProducesResponseType(typeof(ApiResponse<object>), 400)]
-        public async Task<IActionResult> RemoveUserToWhitelist([FromBody] string userId)
+        public async Task<IActionResult> RemoveUserToWhitelist([FromBody] UserIdDTO user)
         {
-            var result = await _whitelistService.RemoveUserToWhitelist(userId);
+            var result = await _whitelistService.RemoveUserToWhitelist(user.UserId);
 
             return Ok(result);
         }
