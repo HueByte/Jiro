@@ -18,11 +18,9 @@ public class UserService : IUserService
     private readonly IJWTService _jwtAuthentication;
     private readonly JWTOptions _jwtOptions;
     private readonly IRefreshTokenService _refreshTokenService;
-    private readonly ICurrentUserService _currentUser;
     public UserService(
         UserManager<AppUser> userManager,
         SignInManager<AppUser> signInManager,
-        ICurrentUserService currentUser,
         IJWTService jwtAuthentication,
         IOptions<JWTOptions> jwtOptions,
         IRefreshTokenService refreshTokenService)
@@ -30,42 +28,41 @@ public class UserService : IUserService
         _userManager = userManager;
         _signInManager = signInManager;
         _jwtAuthentication = jwtAuthentication;
-        _currentUser = currentUser;
         _jwtOptions = jwtOptions.Value;
         _refreshTokenService = refreshTokenService;
     }
 
-    public async Task<bool> ChangeUsernameAsync(string username, string password)
+    public async Task<bool> ChangeUsernameAsync(string userId, string newUsername, string password)
     {
-        var user = await _userManager.FindByIdAsync(_currentUser?.UserId!);
+        if (string.IsNullOrEmpty(newUsername))
+            throw new HandledException("Username cannot be empty");
+
+        var user = await _userManager.FindByIdAsync(userId);
         if (user is null)
             throw new HandledException("Couldn't find this user");
 
-        if (string.IsNullOrEmpty(username))
-            throw new HandledException("Username cannot be empty");
-
-        if (user.UserName == username)
+        if (user.UserName == newUsername)
             return true;
 
         var passwordVerification = await _userManager.CheckPasswordAsync(user, password);
         if (!passwordVerification)
             throw new HandledException("Wrong password");
 
-        var duplicateUser = await _userManager.FindByNameAsync(username);
+        var duplicateUser = await _userManager.FindByNameAsync(newUsername);
         if (duplicateUser is not null)
             throw new HandledException("This username is already taken");
 
-        await _userManager.SetUserNameAsync(user, username);
+        await _userManager.SetUserNameAsync(user, newUsername);
 
         return true;
     }
 
-    public async Task<bool> ChangePasswordAsync(string currentPassword, string newPassword)
+    public async Task<bool> ChangePasswordAsync(string userId, string currentPassword, string newPassword)
     {
         if (string.IsNullOrEmpty(currentPassword) || string.IsNullOrEmpty(newPassword))
             throw new HandledException("New and old password can't be empty");
 
-        var user = await _userManager.FindByIdAsync(_currentUser?.UserId!);
+        var user = await _userManager.FindByIdAsync(userId);
         if (user is null)
             throw new HandledException("Couldn't find this user");
 
@@ -127,9 +124,9 @@ public class UserService : IUserService
         return await HandleLogin(user!, userDto!.Password!, IpAddress);
     }
 
-    public async Task<bool> ChangeEmailAsync(string email, string password)
+    public async Task<bool> ChangeEmailAsync(string userId, string email, string password)
     {
-        var user = await _userManager.FindByIdAsync(_currentUser?.UserId!);
+        var user = await _userManager.FindByIdAsync(userId);
         if (user is null)
             throw new HandledException("Couldn't find this user");
 
