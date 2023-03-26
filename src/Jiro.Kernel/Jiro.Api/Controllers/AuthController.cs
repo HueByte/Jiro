@@ -9,10 +9,12 @@ namespace Jiro.Api.Controllers
     {
         private readonly IUserService _userService;
         private readonly IRefreshTokenService _refreshTokenService;
-        public AuthController(IUserService userService, IRefreshTokenService refreshTokenService)
+        private readonly ICurrentUserService _currentUserService;
+        public AuthController(IUserService userService, IRefreshTokenService refreshTokenService, ICurrentUserService currentUserService)
         {
             _userService = userService;
             _refreshTokenService = refreshTokenService;
+            _currentUserService = currentUserService;
         }
 
         [HttpPost("create")]
@@ -90,6 +92,26 @@ namespace Jiro.Api.Controllers
             Response.Cookies.Delete(CookieNames.ACCESS_TOKEN);
 
             return ApiResponseCreator.Empty();
+        }
+
+        [HttpPost("changePassword")]
+        [Authorize]
+        [ProducesResponseType(typeof(ApiResponse<bool>), 200)]
+        public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordDTO changePasswordDTO)
+        {
+            var data = await _userService.ChangePasswordAsync(_currentUserService.UserId, changePasswordDTO.CurrentPassword, changePasswordDTO.NewPassword);
+
+            return ApiResponseCreator.ValueType(data);
+        }
+
+        [HttpPost("changeEmail")]
+        [Authorize]
+        [ProducesResponseType(typeof(ApiResponse<bool>), 200)]
+        public async Task<IActionResult> ChangeEmail([FromBody] ChangeEmailDTO changeEmailDTO)
+        {
+            var data = await _userService.ChangeEmailAsync(_currentUserService.UserId, changeEmailDTO.Password, changeEmailDTO.NewEmail);
+
+            return ApiResponseCreator.ValueType(data);
         }
 
         private string GetIpAddress()
