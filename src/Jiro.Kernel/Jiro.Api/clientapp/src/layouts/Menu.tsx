@@ -1,12 +1,13 @@
 import { useState, useContext } from "react";
 import { GiHamburgerMenu } from "react-icons/gi";
-import { HiOutlineX } from "react-icons/hi";
+import { HiOutlineX, HiServer } from "react-icons/hi";
 import { NavLink } from "react-router-dom";
 import { AiFillFire } from "react-icons/ai";
 import { MdLogout } from "react-icons/md";
 import { Roles } from "../api/Roles";
 import { AuthContext } from "../contexts/AuthContext";
 import { BiUser } from "react-icons/bi";
+import { RiAdminLine } from "react-icons/ri";
 
 const Menu = () => {
   const auth = useContext(AuthContext);
@@ -20,13 +21,13 @@ const Menu = () => {
       roles: [],
     },
     {
-      icon: <AiFillFire className="inline" />,
+      icon: <RiAdminLine className="inline" />,
       path: "/admin",
       value: "Admin Panel",
       roles: [Roles.ADMIN],
     },
     {
-      icon: <AiFillFire className="inline" />,
+      icon: <HiServer className="inline" />,
       path: "/server",
       value: "Server Panel",
       roles: [Roles.SERVER],
