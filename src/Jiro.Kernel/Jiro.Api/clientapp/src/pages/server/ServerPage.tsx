@@ -7,6 +7,7 @@ import {
   successToast,
   updatePromiseToast,
 } from "../../lib";
+import { infoToast } from "../../lib/notifications";
 
 const ServerPage = () => {
   const [defaultValue, setDefaultValue] = useState<InstanceConfigDTO | null>(
@@ -31,12 +32,14 @@ const ServerPage = () => {
       let result = await ServerService.putApiServer({ requestBody: config });
       if (result.isSuccess) {
         setDefaultValue(config);
+
         updatePromiseToast(
           promiseId,
           "Server settings updated successfully",
           "success"
         );
-        successToast("🦄 Restarting server...");
+
+        infoToast("🦄 Restarting server...");
       } else {
         updatePromiseToast(
           promiseId,
@@ -379,7 +382,6 @@ const ServerCheckboxInput = ({
   note,
   onChange,
 }: ServerCheckboxInputProps) => {
-  console.log(currValue);
   return (
     <div className="flex items-center gap-2">
       <label className="text-gray-900 dark:text-gray-300 ml-2 text-sm font-medium">

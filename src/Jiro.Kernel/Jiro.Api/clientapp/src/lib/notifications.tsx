@@ -1,5 +1,23 @@
 import { Id, toast } from "react-toastify";
 
+export const infoToast = (
+  message: string,
+  autoClose: number | false = 10000
+) => {
+  toast(message, {
+    position: toast.POSITION.TOP_RIGHT,
+    autoClose: autoClose,
+    hideProgressBar: false,
+    closeOnClick: true,
+    pauseOnHover: true,
+    draggable: true,
+    progress: undefined,
+    style: {
+      background: "#000c14",
+    },
+  });
+};
+
 export const promiseToast = (
   message: string,
   autoClose: number | false = 10000
