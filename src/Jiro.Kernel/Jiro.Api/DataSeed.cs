@@ -74,17 +74,58 @@ namespace Jiro.Api
             {
                 if (await userManager.FindByNameAsync(user.UserName!) is null)
                 {
-                    logger.LogInformation("Seeding {user} with roles {role}", user.UserName, string.Join(';', roles));
-
-                    var result = await userManager.CreateAsync(user, "TempPassword12");
-                    if (result.Succeeded)
+                    try
                     {
-                        foreach (var role in roles)
-                            await userManager.AddToRoleAsync(user, role);
-                        await whitelistService.AddUserToWhitelist(user);
+                        logger.LogInformation("Seeding {username} with roles {roles}", user.UserName, string.Join(';', roles));
+                        var pass = PasswordPrompt(user!.UserName!);
+
+                        var result = await userManager.CreateAsync(user, pass);
+                        if (result.Succeeded)
+                        {
+                            foreach (var role in roles)
+                                await userManager.AddToRoleAsync(user, role);
+
+                            await whitelistService.AddUserToWhitelist(user);
+                        }
+                    }
+                    catch (InvalidOperationException)
+                    {
+                        // for swagger gen?
+                        logger.LogWarning("Skipping {user} seeding", user.UserName);
                     }
                 }
             }
+        }
+
+        private static string PasswordPrompt(string username)
+        {
+            Console.WriteLine();
+            Console.WriteLine("Please Provide a password for {0}", username);
+            Console.WriteLine("It should contain at least 6 characters, 1 unique character and 1 uppercase letter");
+            Console.Write("Password: ");
+
+            var pass = string.Empty;
+            ConsoleKey key;
+            do
+            {
+                var keyInfo = Console.ReadKey(intercept: true);
+                key = keyInfo.Key;
+
+                if (key == ConsoleKey.Backspace && pass.Length > 0)
+                {
+                    Console.Write("\b \b");
+                    pass = pass[0..^1];
+                }
+                else if (!char.IsControl(keyInfo.KeyChar))
+                {
+                    Console.Write("*");
+                    pass += keyInfo.KeyChar;
+                }
+            } while (key != ConsoleKey.Enter);
+
+            Console.WriteLine();
+
+            return pass;
         }
     }
 }
