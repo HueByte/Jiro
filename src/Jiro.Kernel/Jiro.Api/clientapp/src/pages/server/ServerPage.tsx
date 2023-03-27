@@ -36,8 +36,8 @@ const ServerPage = () => {
 
   return (
     <div className="flex h-full w-full justify-center px-8 py-8">
-      <div className="flex h-full w-5/6 flex-col rounded-xl bg-element p-2 pt-6 shadow-lg shadow-element">
-        <div className="flex-1 overflow-y-scroll p-2">
+      <div className="flex h-full w-5/6 max-w-[1024px] flex-col rounded-xl bg-element p-2 pt-6 shadow-lg shadow-element">
+        <div className="flex-1 overflow-y-auto p-2">
           <div className="flex w-full flex-row flex-wrap gap-4 ">
             <ServerSettingBox name="Main Settings">
               <ServerSettingInput
@@ -225,9 +225,9 @@ const ServerPage = () => {
                   }))
                 }
               />
-              <ServerSettingInput
+              <ServerTextAreaInput
                 label="ChatGPT System Message"
-                currValue={config?.Gpt?.ChatGpt?.SystemMessage}
+                currValue={config?.Gpt?.ChatGpt?.SystemMessage ?? ""}
                 onChange={(val) =>
                   setConfig((prev) => ({
                     ...prev,
@@ -300,6 +300,7 @@ const ServerSettingInput = ({
     </>
   );
 };
+
 type NumericServerSettingInputProps = {
   currValue: string | number | undefined | null;
   label: string;
@@ -370,6 +371,31 @@ const ServerCheckboxInput = ({
         onChange={(val) => onChange(val.target.checked)}
         className="text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:bg-gray-700 dark:border-gray-600 h-4 w-4 rounded focus:ring-2"
       />
+    </>
+  );
+};
+
+type ServerTextAreaInputProps = {
+  currValue: string | number | readonly string[];
+  label: string;
+  note?: string;
+  onChange: (value: string) => void;
+};
+
+const ServerTextAreaInput = ({
+  currValue,
+  label,
+  note,
+  onChange,
+}: ServerTextAreaInputProps) => {
+  return (
+    <>
+      <label>{label}</label>
+      <textarea
+        defaultValue={currValue}
+        className="base-input w-full"
+        onChange={(val) => onChange(val.target.value)}
+      ></textarea>
     </>
   );
 };
