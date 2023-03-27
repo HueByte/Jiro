@@ -1,26 +1,32 @@
 import { ChangeEvent, useEffect, useState } from "react";
-import { toast } from "react-toastify";
-import { InstanceConfigDTO, ServerService } from "../../api";
 import {
-  errorToast,
-  promiseToast,
-  successToast,
-  updatePromiseToast,
-} from "../../lib";
+  AiFillEye,
+  AiFillEyeInvisible,
+  AiOutlineBlock,
+  AiOutlineBug,
+} from "react-icons/ai";
+import { InstanceConfigDTO, ServerService } from "../../api";
+import { promiseToast, updatePromiseToast } from "../../lib";
 import { infoToast } from "../../lib/notifications";
+import { TbShieldLock } from "react-icons/tb";
+import { BsFillCloudHazeFill } from "react-icons/bs";
 
 const ServerPage = () => {
-  const [defaultValue, setDefaultValue] = useState<InstanceConfigDTO | null>(
+  const [initialValue, setInitialValue] = useState<InstanceConfigDTO | null>(
     null
   );
   const [config, setConfig] = useState<InstanceConfigDTO | null>(null);
 
   useEffect(() => {
     (async () => {
+      let id = promiseToast("Loading server settings...");
       let config = await ServerService.getApiServer();
-      if (config.data) {
-        setDefaultValue(config.data);
+      if (config.isSuccess && config.data) {
+        updatePromiseToast(id, "Server settings loaded", "success", 2000);
+        setInitialValue(config.data);
         setConfig(config.data);
+      } else {
+        updatePromiseToast(id, "Server settings failed to load", "error");
       }
     })();
   }, []);
@@ -31,7 +37,7 @@ const ServerPage = () => {
 
       let result = await ServerService.putApiServer({ requestBody: config });
       if (result.isSuccess) {
-        setDefaultValue(config);
+        setInitialValue(config);
 
         updatePromiseToast(
           promiseId,
@@ -51,16 +57,19 @@ const ServerPage = () => {
   };
 
   const resetToDefaults = () => {
-    successToast("Server settings reset to defaults");
-    setConfig(defaultValue);
+    infoToast("Server settings reset to defaults");
+    setConfig(initialValue);
   };
 
   return (
-    <div className="flex h-full w-full justify-center px-8 py-8">
-      <div className="flex h-full w-5/6 max-w-[1024px] flex-col rounded-xl bg-element p-2 pt-6 shadow-lg shadow-element">
+    <div className="flex h-full w-full justify-center px-8 py-8 lg:px-0">
+      <div className="flex h-full w-5/6 max-w-[1024px] flex-col rounded-xl bg-element p-2 pt-6 shadow-lg shadow-element lg:w-11/12">
         <div className="flex-1 overflow-y-auto p-2">
-          <div className="flex w-full flex-row flex-wrap gap-4 ">
-            <ServerSettingBox name="Main Settings">
+          <div className="flex w-full flex-row flex-wrap gap-4 text-lg">
+            <ServerSettingBox
+              icon={<AiOutlineBlock className="inline" />}
+              name="Main Settings"
+            >
               <ServerSettingInput
                 label="urls"
                 currValue={config?.urls}
@@ -91,7 +100,10 @@ const ServerPage = () => {
               />
             </ServerSettingBox>
 
-            <ServerSettingBox name="Authentication Settings">
+            <ServerSettingBox
+              icon={<TbShieldLock className="inline" />}
+              name="Authentication Settings"
+            >
               <ServerSettingInput
                 label="Issuer"
                 currValue={config?.JWT?.Issuer}
@@ -115,6 +127,7 @@ const ServerPage = () => {
               <ServerSettingInput
                 label="Secret"
                 currValue={config?.JWT?.Secret}
+                isSecret={true}
                 onChange={(val) =>
                   setConfig((prev) => ({
                     ...prev,
@@ -152,7 +165,10 @@ const ServerPage = () => {
               />
             </ServerSettingBox>
 
-            <ServerSettingBox name="Logger Settings">
+            <ServerSettingBox
+              icon={<AiOutlineBug className="inline" />}
+              name="Logger Settings"
+            >
               <ServerSettingInput
                 label="Time Interval"
                 currValue={config?.Log?.TimeInterval}
@@ -205,7 +221,10 @@ const ServerPage = () => {
               />
             </ServerSettingBox>
 
-            <ServerSettingBox name="GPT">
+            <ServerSettingBox
+              icon={<BsFillCloudHazeFill className="inline" />}
+              name="GPT"
+            >
               <ServerCheckboxInput
                 label="Enable GPT Chat"
                 currValue={config?.Gpt?.Enable}
@@ -229,6 +248,7 @@ const ServerPage = () => {
               <ServerSettingInput
                 label="OpenAI Authentication Token"
                 currValue={config?.Gpt?.AuthToken}
+                isSecret={true}
                 onChange={(val) =>
                   setConfig((prev) => ({
                     ...prev,
@@ -252,24 +272,27 @@ const ServerPage = () => {
                 onChange={(val) =>
                   setConfig((prev) => ({
                     ...prev,
-                    Gpt: { ...prev?.Gpt, Organization: val },
+                    Gpt: {
+                      ...prev?.Gpt,
+                      ChatGpt: { ...prev?.Gpt?.ChatGpt, SystemMessage: val },
+                    },
                   }))
                 }
               />
             </ServerSettingBox>
           </div>
         </div>
-        <div className="flex gap-2 self-end p-2">
+        <div className="flex gap-2 self-end p-2 md:w-full md:flex-col">
           <button
             type="button"
-            className="base-bg-gradient-r rounded-lg p-3 text-xl font-bold duration-150 hover:scale-105"
+            className="rounded-lg bg-elementLight p-3 text-xl font-bold duration-150 hover:scale-105"
             onClick={resetToDefaults}
           >
             Reset Changes
           </button>
           <button
             type="button"
-            className="base-bg-gradient-r rounded-lg p-3 text-xl font-bold duration-150 hover:scale-105"
+            className="rounded-lg bg-elementLight p-3 text-xl font-bold duration-150 hover:scale-105"
             onClick={updateServer}
           >
             Update Server
@@ -281,15 +304,16 @@ const ServerPage = () => {
 };
 
 type ServerSettingBoxProps = {
+  icon: JSX.Element;
   name: string;
   children: string | JSX.Element | JSX.Element[];
 };
 
-const ServerSettingBox = ({ name, children }: ServerSettingBoxProps) => {
+const ServerSettingBox = ({ icon, name, children }: ServerSettingBoxProps) => {
   return (
-    <div className="relative flex flex-[40%] flex-col gap-2 rounded bg-backgroundColor p-2 pt-8">
-      <div className="absolute -top-4 left-10 rounded bg-element p-2">
-        {name}
+    <div className="relative flex flex-[40%] flex-col gap-2 rounded bg-backgroundColor p-2 pt-8 md:flex-[100%]">
+      <div className="absolute -top-4 left-10 rounded bg-element px-2 py-1 font-bold text-accent7">
+        {icon} {name}
       </div>
       {children}
     </div>
@@ -300,6 +324,7 @@ type ServerSettingInputProps = {
   currValue: string | number | undefined | null;
   label: string;
   note?: string;
+  isSecret?: boolean;
   onChange: (value: string) => void;
 };
 
@@ -307,17 +332,33 @@ const ServerSettingInput = ({
   currValue,
   label,
   note,
+  isSecret = false,
   onChange,
 }: ServerSettingInputProps) => {
+  const [isVisible, setIsVisible] = useState(false);
   return (
     <>
       <label>{label}</label>
-      <input
-        type="text"
-        className="base-input w-full"
-        defaultValue={currValue ?? ""}
-        onChange={(val) => onChange(val.target.value)}
-      />
+      <div className="relative">
+        <input
+          type={isSecret ? (isVisible ? "text" : "password") : "text"}
+          className={`base-input w-full${isSecret ? " pr-10" : ""}`}
+          defaultValue={currValue ?? ""}
+          onChange={(val) => onChange(val.target.value)}
+        />
+        {isSecret &&
+          (isVisible ? (
+            <AiFillEye
+              onClick={() => setIsVisible(!isVisible)}
+              className="absolute top-1/2 right-2 inline -translate-y-1/2 cursor-pointer"
+            />
+          ) : (
+            <AiFillEyeInvisible
+              onClick={() => setIsVisible(!isVisible)}
+              className="absolute top-1/2 right-2 inline -translate-y-1/2 cursor-pointer"
+            />
+          ))}
+      </div>
     </>
   );
 };
@@ -384,14 +425,14 @@ const ServerCheckboxInput = ({
 }: ServerCheckboxInputProps) => {
   return (
     <div className="flex items-center gap-2">
-      <label className="text-gray-900 dark:text-gray-300 ml-2 text-sm font-medium">
+      <label className="text-gray-900 dark:text-gray-300 font-medium">
         {label}
       </label>
       <input
         type="checkbox"
         checked={currValue ?? false}
         onChange={(val) => onChange(val.target.checked)}
-        className="text-secondaryLight-600 bg-gray-100 border-gray-300 focus:ring-accent-500 dark:ring-offset-gray-800 dark:bg-gray-700 dark:border-gray-600 h-4 w-4 rounded focus:ring-2"
+        className="text-secondaryLight-600 bg-gray-100 border-gray-300 focus:ring-accent-500 dark:ring-offset-gray-800 dark:bg-gray-700 dark:border-gray-600 h-4 w-4 rounded hover:cursor-pointer focus:ring-2"
       />
     </div>
   );
