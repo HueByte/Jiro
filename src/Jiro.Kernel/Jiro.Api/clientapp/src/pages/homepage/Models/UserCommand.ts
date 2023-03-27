@@ -1,4 +1,4 @@
-import { CommandResponse } from "../../api";
+import { CommandResponse } from "../../../api";
 
 export interface UserCommand {
   prompt?: string;

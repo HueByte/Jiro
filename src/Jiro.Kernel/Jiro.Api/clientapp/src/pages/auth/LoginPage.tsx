@@ -52,11 +52,7 @@ const LoginPage = (): JSX.Element => {
   return (
     <div className="grid h-screen w-full place-items-center">
       <div className="md:base-border-gradient-r relative flex h-full max-h-[624px] w-full max-w-[400px] flex-col rounded-xl rounded-t-xl bg-element shadow-lg shadow-element md:max-h-full md:max-w-full md:rounded-none">
-        <div className="h-[160px] w-full overflow-hidden rounded-t-xl">
-          <div className="grid h-full w-full place-items-center bg-textColorLight">
-            <img src={banner} className="h-[160px]" alt="Jiro Banner" />
-          </div>
-        </div>
+        <Banner />
         <div className="flex w-full flex-1 flex-col gap-6 rounded-b-xl bg-element bg-cover p-4 md:pt-16">
           <h1 className="text-center text-3xl font-bold">Sign in</h1>
           <div className="flex w-full flex-col gap-2">
@@ -105,6 +101,16 @@ const LoginPage = (): JSX.Element => {
           </div>
         </div>
         {isLoading && <Loader isOverlay={true} />}
+      </div>
+    </div>
+  );
+};
+
+const Banner = () => {
+  return (
+    <div className="h-[160px] w-full overflow-hidden rounded-t-xl">
+      <div className="grid h-full w-full place-items-center bg-textColorLight">
+        <img src={banner} className="h-[160px]" alt="Jiro Banner" />
       </div>
     </div>
   );

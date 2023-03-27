@@ -4,7 +4,7 @@ import { FaGhost } from "react-icons/fa";
 import * as api from "../../api";
 import { CommandType } from "../../api/CommandEnum";
 import { CommandOutputRenderer, MorphAvatar } from "./components";
-import { UserCommand } from "../Models";
+import { UserCommand } from "./Models";
 
 const HomePage = () => {
   const messageInputRef = React.useRef<HTMLTextAreaElement | null>(null);

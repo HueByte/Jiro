@@ -162,7 +162,6 @@ namespace Jiro.Api.Configurator
                 httpClient.BaseAddress = new Uri("https://api.open-meteo.com/v1/");
             });
 
-
             services.AddHttpClient(HttpClients.GEOLOCATION_CLIENT, httpClient =>
             {
                 httpClient.BaseAddress = new Uri("https://nominatim.openstreetmap.org/");

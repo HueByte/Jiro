@@ -3,7 +3,7 @@ import { memo } from "react";
 import { BsFillCloudHazeFill } from "react-icons/bs";
 import { GraphOutput, TextOutput } from ".";
 import { CommandType } from "../../../api/CommandEnum";
-import { UserCommand } from "../../Models";
+import { UserCommand } from "../Models";
 import "./styles/RendererStyles.css";
 
 export const CommandOutputRenderer = memo(
