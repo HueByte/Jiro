@@ -6,14 +6,17 @@ import { AuthContext } from "../../contexts/AuthContext";
 import { Navigate } from "react-router-dom";
 import { AiFillEye, AiFillEyeInvisible } from "react-icons/ai";
 import { promiseToast, updatePromiseToast } from "../../lib";
+import Loader from "../../components/Loader";
 
 const LoginPage = (): JSX.Element => {
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [username, setUsername] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [isVisible, setIsVisible] = useState<boolean>(false);
   const auth = useContext(AuthContext);
 
   const submitLogin = async () => {
+    setIsLoading(true);
     let id = promiseToast("Logging in...");
     try {
       let result = await AuthService.postApiAuthLogin({
@@ -41,13 +44,14 @@ const LoginPage = (): JSX.Element => {
         "error"
       );
     }
+    setIsLoading(false);
   };
 
   if (auth?.isAuthenticated()) return <Navigate to="/" />;
 
   return (
     <div className="grid h-screen w-full place-items-center">
-      <div className="md:base-border-gradient-r flex h-full max-h-[624px] w-full max-w-[400px] flex-col rounded-xl rounded-t-xl bg-element shadow-lg shadow-element md:max-h-full md:max-w-full md:rounded-none">
+      <div className="md:base-border-gradient-r relative flex h-full max-h-[624px] w-full max-w-[400px] flex-col rounded-xl rounded-t-xl bg-element shadow-lg shadow-element md:max-h-full md:max-w-full md:rounded-none">
         <div className="h-[160px] w-full overflow-hidden rounded-t-xl">
           <div className="grid h-full w-full place-items-center bg-textColorLight">
             <img src={banner} className="h-[160px]" alt="Jiro Banner" />
@@ -100,6 +104,7 @@ const LoginPage = (): JSX.Element => {
             <span className="font-bold text-accent3">Sing up</span>
           </div>
         </div>
+        {isLoading && <Loader isOverlay={true} />}
       </div>
     </div>
   );

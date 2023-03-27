@@ -321,7 +321,7 @@ const ServerPage = () => {
             </div>
           </>
         ) : (
-          <Loader />
+          <Loader isOverlay={false} />
         )}
       </div>
     </div>
