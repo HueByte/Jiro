@@ -42,20 +42,50 @@
     @apply bg-gradient-to-r from-primary hover:bg-transparent md:from-transparent md:via-primary md:to-transparent;
   }
 
-  .glow {
-    box-shadow: 0 0 10px 5px #ffa69e;
+  .jiro-loader {
+    display: inline-block;
+    position: relative;
+    width: 80px;
+    height: 80px;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
+
+  .jiro-loader div {
+    display: inline-block;
+    position: absolute;
+    left: 8px;
+    width: 16px;
+    background: #fff;
+    animation: lds-facebook 1.2s cubic-bezier(0, 0.5, 0.5, 1) infinite;
+  }
+
+  .jiro-loader div:nth-child(1) {
+    left: 8px;
+    animation-delay: -0.24s;
+  }
+
+  .jiro-loader div:nth-child(2) {
+    left: 32px;
+    animation-delay: -0.12s;
+  }
+
+  .jiro-loader div:nth-child(3) {
+    left: 56px;
+    animation-delay: 0;
   }
 }
 
-@keyframes glow {
+@keyframes lds-facebook {
   0% {
-    box-shadow: 0 0 10px 5px #ffa69e;
+    top: 8px;
+    height: 64px;
   }
-  50% {
-    box-shadow: none;
-  }
+  50%,
   100% {
-    box-shadow: 0 0 10px 5px #ffa69e;
+    top: 24px;
+    height: 32px;
   }
 }
 
