@@ -15,18 +15,27 @@ namespace Jiro.Core.Services.GPTService
         private readonly HttpClient _client;
         private readonly IChatGPTStorageService _storageService;
         private readonly ITokenizerService _tokenizerService;
-        public ChatGPTService(ILogger<ChatGPTService> logger, IChatGPTStorageService storageService, IHttpClientFactory clientFactory, IOptions<ChatGptOptions> chatGptOptions, ITokenizerService tokenizerService)
+        private readonly ICurrentUserService _currentUserService;
+        public ChatGPTService(ILogger<ChatGPTService> logger, IChatGPTStorageService storageService, IHttpClientFactory clientFactory, IOptions<ChatGptOptions> chatGptOptions, ITokenizerService tokenizerService, ICurrentUserService currentUserService)
         {
             _logger = logger;
             _storageService = storageService;
             _client = clientFactory.CreateClient(HttpClients.CHAT_GPT_CLIENT);
             _chatGptOptions = chatGptOptions.Value;
             _tokenizerService = tokenizerService;
+            _currentUserService = currentUserService;
         }
 
         public async Task<string> ChatAsync(string prompt)
         {
-            string userId = "tempUser";
+            if (string.IsNullOrWhiteSpace(prompt))
+                throw new Exception("The prompt cannot be empty");
+
+            if (string.IsNullOrEmpty(_currentUserService.UserId))
+                throw new Exception("You must be logged in to use this command");
+
+            string userId = _currentUserService.UserId;
+
             var session = _storageService.GetOrCreateSession(userId);
 
             ChatMessage message = new()
