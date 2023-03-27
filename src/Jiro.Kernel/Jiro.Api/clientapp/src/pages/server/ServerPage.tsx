@@ -1,5 +1,12 @@
 import { ChangeEvent, useEffect, useState } from "react";
+import { toast } from "react-toastify";
 import { InstanceConfigDTO, ServerService } from "../../api";
+import {
+  errorToast,
+  promiseToast,
+  successToast,
+  updatePromiseToast,
+} from "../../lib";
 
 const ServerPage = () => {
   const [defaultValue, setDefaultValue] = useState<InstanceConfigDTO | null>(
@@ -10,7 +17,6 @@ const ServerPage = () => {
   useEffect(() => {
     (async () => {
       let config = await ServerService.getApiServer();
-      console.log(config);
       if (config.data) {
         setDefaultValue(config.data);
         setConfig(config.data);
@@ -18,19 +24,31 @@ const ServerPage = () => {
     })();
   }, []);
 
-  useEffect(() => console.log(config), [config]);
-
   const updateServer = async () => {
     if (config) {
+      let promiseId = promiseToast("Updating server settings...");
+
       let result = await ServerService.putApiServer({ requestBody: config });
       if (result.isSuccess) {
         setDefaultValue(config);
-        // TODO success modal
+        updatePromiseToast(
+          promiseId,
+          "Server settings updated successfully",
+          "success"
+        );
+        successToast("🦄 Restarting server...");
+      } else {
+        updatePromiseToast(
+          promiseId,
+          result.errors?.join(", ") ?? "Uknown error occured",
+          "error"
+        );
       }
     }
   };
 
   const resetToDefaults = () => {
+    successToast("Server settings reset to defaults");
     setConfig(defaultValue);
   };
 
@@ -191,7 +209,7 @@ const ServerPage = () => {
                 onChange={(val) =>
                   setConfig((prev) => ({
                     ...prev,
-                    Gpt: { ...prev?.Log, Enable: val },
+                    Gpt: { ...prev?.Gpt, Enable: val },
                   }))
                 }
               />
@@ -201,7 +219,7 @@ const ServerPage = () => {
                 onChange={(val) =>
                   setConfig((prev) => ({
                     ...prev,
-                    Gpt: { ...prev?.Log, BaseUrl: val },
+                    Gpt: { ...prev?.Gpt, BaseUrl: val },
                   }))
                 }
               />
@@ -211,7 +229,7 @@ const ServerPage = () => {
                 onChange={(val) =>
                   setConfig((prev) => ({
                     ...prev,
-                    Gpt: { ...prev?.Log, AuthToken: val },
+                    Gpt: { ...prev?.Gpt, AuthToken: val },
                   }))
                 }
               />
@@ -221,7 +239,7 @@ const ServerPage = () => {
                 onChange={(val) =>
                   setConfig((prev) => ({
                     ...prev,
-                    Gpt: { ...prev?.Log, Organization: val },
+                    Gpt: { ...prev?.Gpt, Organization: val },
                   }))
                 }
               />
@@ -231,7 +249,7 @@ const ServerPage = () => {
                 onChange={(val) =>
                   setConfig((prev) => ({
                     ...prev,
-                    Gpt: { ...prev?.Log, Organization: val },
+                    Gpt: { ...prev?.Gpt, Organization: val },
                   }))
                 }
               />
@@ -361,17 +379,19 @@ const ServerCheckboxInput = ({
   note,
   onChange,
 }: ServerCheckboxInputProps) => {
+  console.log(currValue);
   return (
-    <>
-      <label>{label}</label>
+    <div className="flex items-center gap-2">
+      <label className="text-gray-900 dark:text-gray-300 ml-2 text-sm font-medium">
+        {label}
+      </label>
       <input
-        id="default-checkbox"
         type="checkbox"
-        defaultChecked={currValue ?? false}
+        checked={currValue ?? false}
         onChange={(val) => onChange(val.target.checked)}
-        className="text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:bg-gray-700 dark:border-gray-600 h-4 w-4 rounded focus:ring-2"
+        className="text-secondaryLight-600 bg-gray-100 border-gray-300 focus:ring-accent-500 dark:ring-offset-gray-800 dark:bg-gray-700 dark:border-gray-600 h-4 w-4 rounded focus:ring-2"
       />
-    </>
+    </div>
   );
 };
 
@@ -394,6 +414,7 @@ const ServerTextAreaInput = ({
       <textarea
         defaultValue={currValue}
         className="base-input w-full"
+        rows={3}
         onChange={(val) => onChange(val.target.value)}
       ></textarea>
     </>
