@@ -72,7 +72,7 @@ const Menu = () => {
             <HiOutlineX />
           </div>
         </div>
-        <div className="grid place-items-center bg-element p-4 text-3xl">
+        <div className="grid place-items-center bg-element p-4 text-2xl">
           <div className="text-ellipsis font-bold">
             <BiUser className="inline" /> {auth?.authState?.username}
           </div>

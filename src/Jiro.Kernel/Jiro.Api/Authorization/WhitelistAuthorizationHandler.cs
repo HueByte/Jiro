@@ -24,6 +24,7 @@ namespace Jiro.Api.Authorization
 
             var userId = context.User.FindFirstValue(ClaimTypes.NameIdentifier)!;
 
+            // todo implement caching for whitelist
             var isWhitelisted = await _whitelistService.IsWhitelisted(userId);
 
             if (isWhitelisted)
