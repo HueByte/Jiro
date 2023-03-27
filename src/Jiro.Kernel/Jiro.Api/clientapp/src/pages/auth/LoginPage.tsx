@@ -4,22 +4,42 @@ import { AuthService } from "../../api";
 import { useContext, useState } from "react";
 import { AuthContext } from "../../contexts/AuthContext";
 import { Navigate } from "react-router-dom";
+import { AiFillEye, AiFillEyeInvisible } from "react-icons/ai";
+import { promiseToast, updatePromiseToast } from "../../lib";
 
 const LoginPage = (): JSX.Element => {
   const [username, setUsername] = useState<string>("");
   const [password, setPassword] = useState<string>("");
+  const [isVisible, setIsVisible] = useState<boolean>(false);
   const auth = useContext(AuthContext);
 
   const submitLogin = async () => {
-    let result = await AuthService.postApiAuthLogin({
-      requestBody: {
-        username: username,
-        password: password,
-      },
-    });
+    let id = promiseToast("Logging in...");
+    try {
+      let result = await AuthService.postApiAuthLogin({
+        requestBody: {
+          username: username,
+          password: password,
+        },
+      });
 
-    if (result.isSuccess) {
-      if (result.data) auth?.setAuthState(result.data);
+      if (result.isSuccess) {
+        updatePromiseToast(id, "Logged in!", "success");
+        if (result.data) auth?.setAuthState(result.data);
+      } else {
+        updatePromiseToast(
+          id,
+          result.errors?.join("\n") ?? "An error occurred!",
+          "error"
+        );
+      }
+    } catch (err: any) {
+      let errBody = err.body;
+      updatePromiseToast(
+        id,
+        errBody.errors?.join("\n") ?? "An error occurred!",
+        "error"
+      );
     }
   };
 
@@ -50,11 +70,22 @@ const LoginPage = (): JSX.Element => {
             <div className="relative w-full">
               <input
                 placeholder="password"
-                type="password"
-                className="base-input w-full pl-8"
+                type={isVisible ? "text" : "password"}
+                className="base-input w-full pl-8 pr-10"
                 onInput={(e) => setPassword(e.currentTarget.value)}
               />
               <MdLockOutline className="absolute top-1/2 left-2 -translate-y-1/2" />
+              {isVisible ? (
+                <AiFillEye
+                  onClick={() => setIsVisible(!isVisible)}
+                  className="absolute top-1/2 right-2 inline -translate-y-1/2 cursor-pointer"
+                />
+              ) : (
+                <AiFillEyeInvisible
+                  onClick={() => setIsVisible(!isVisible)}
+                  className="absolute top-1/2 right-2 inline -translate-y-1/2 cursor-pointer"
+                />
+              )}
             </div>
           </div>
           <button
