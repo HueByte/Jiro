@@ -10,9 +10,6 @@ namespace Jiro.Core.DTO
         [JsonPropertyName("TokenizerUrl")]
         public string TokenizerUrl { get; set; }
 
-        [JsonPropertyName("Logging")]
-        public Logging Logging { get; set; }
-
         [JsonPropertyName("ConnectionStrings")]
         public ConnectionStrings ConnectionStrings { get; set; }
 
@@ -105,27 +102,6 @@ namespace Jiro.Core.DTO
 
         [JsonPropertyName("SystemLevel")]
         public string SystemLevel { get; set; }
-    }
-
-    public class Logging
-    {
-        [JsonPropertyName("LogLevel")]
-        public LogLevel LogLevel { get; set; }
-    }
-
-    public class LogLevel
-    {
-        [JsonPropertyName("Default")]
-        public string Default { get; set; }
-
-        [JsonPropertyName("Microsoft.AspNetCore")]
-        public string MicrosoftAspNetCore { get; set; }
-
-        [JsonPropertyName("System")]
-        public string System { get; set; }
-
-        [JsonPropertyName("Microsoft.EntityFrameworkCore.Database.Command")]
-        public string MicrosoftEntityFrameworkCoreDatabaseCommand { get; set; }
     }
 
     public class SingleGpt

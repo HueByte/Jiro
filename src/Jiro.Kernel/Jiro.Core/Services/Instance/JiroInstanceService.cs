@@ -87,7 +87,12 @@ namespace Jiro.Core.Services.Instance
 
         private static async Task WriteConfigAsyncInternal(InstanceConfigDTO instanceConfig)
         {
-            var json = JsonSerializer.Serialize(instanceConfig);
+            JsonSerializerOptions options = new()
+            {
+                WriteIndented = true,
+            };
+
+            var json = JsonSerializer.Serialize(instanceConfig, options);
             await File.WriteAllTextAsync(Path.Join(AppContext.BaseDirectory, "appsettings.json"), json);
         }
 

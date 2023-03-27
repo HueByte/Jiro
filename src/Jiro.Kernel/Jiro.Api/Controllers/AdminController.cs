@@ -16,6 +16,7 @@ namespace Jiro.Api.Controllers
 
         [HttpPost("assingRole")]
         [ProducesResponseType(typeof(ApiResponse<IdentityResult>), 200)]
+        [ProducesResponseType(typeof(ApiResponse<IdentityResult>), 400)]
         public async Task<IActionResult> AssingRole([FromBody] AssignRoleDTO assignRoleDTO)
         {
             var data = await _userService.AssignRoleAsync(assignRoleDTO.UserId, assignRoleDTO.Role);
