@@ -2,6 +2,7 @@ using System.Diagnostics;
 using System.Text.RegularExpressions;
 using Jiro.Commands.Exceptions;
 using Jiro.Core.Base.Models;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Jiro.Core.Services.CommandHandler
@@ -10,22 +11,18 @@ namespace Jiro.Core.Services.CommandHandler
     {
         private readonly CommandsContext _commandsModule;
         private readonly ICurrentInstanceService _currentInstanceService;
-        private readonly IServiceScopeFactory _scopeFactory;
         private readonly Regex pattern = RegexCommandParserPattern();
         public event Action<string, object[]>? OnLog;
-        public CommandHandlerService(CommandsContext commandModule, IServiceScopeFactory scopeFactory, ICurrentInstanceService currentInstanceService)
+        public CommandHandlerService(CommandsContext commandModule, ICurrentInstanceService currentInstanceService)
         {
             _commandsModule = commandModule;
-            _scopeFactory = scopeFactory;
             _currentInstanceService = currentInstanceService;
         }
 
-        public async Task<CommandResponse> ExecuteCommandAsync(string prompt)
+        public async Task<CommandResponse> ExecuteCommandAsync(IServiceProvider scopedProvider, string prompt)
         {
             if (!_currentInstanceService.IsConfigured())
                 throw new CommandException("Jiro", "Jiro is not configured yet. Please login on server account and configure Jiro in Server Panel.");
-
-            await using var scope = _scopeFactory.CreateAsyncScope();
 
             var watch = Stopwatch.StartNew();
             var tokens = ParseTokens(prompt);
@@ -33,10 +30,9 @@ namespace Jiro.Core.Services.CommandHandler
             var command = GetCommand(commandName);
 
             CommandResponse? result = null;
-
             try
             {
-                result = await command.ExecuteAsync(scope, _commandsModule, tokens);
+                result = await command.ExecuteAsync(scopedProvider, _commandsModule, tokens);
             }
             catch (CommandException)
             {

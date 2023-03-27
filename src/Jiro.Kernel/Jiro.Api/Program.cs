@@ -15,6 +15,8 @@ while (true)
 {
     var builder = WebApplication.CreateBuilder(args);
     var configRef = builder.Configuration;
+    configRef.SetBasePath(AppContext.BaseDirectory)
+        .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
 
     Serilog.Log.Logger = new LoggerConfiguration()
         .WriteTo.Console()
@@ -53,6 +55,7 @@ while (true)
     servicesRef.AddControllers();
     servicesRef.AddEndpointsApiExplorer();
     servicesRef.AddSwaggerGen();
+    servicesRef.AddHttpContextAccessor();
 
     servicesRef.AddJiroSQLiteContext(configRef.GetConnectionString("JiroContext")!);
     servicesRef.AddServices(configRef);
@@ -86,6 +89,7 @@ while (true)
 
     app.UseStaticFiles();
     app.UseErrorHandler();
+    app.UseCurrentUser();
     app.UseHttpsRedirection();
     app.UseAuthorization();
     app.MapControllers();
