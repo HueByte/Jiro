@@ -20,12 +20,16 @@ const ServerPage = () => {
   useEffect(() => {
     (async () => {
       let id = promiseToast("Loading server settings...");
-      let config = await ServerService.getApiServer();
-      if (config.isSuccess && config.data) {
-        updatePromiseToast(id, "Server settings loaded", "success", 2000);
-        setInitialValue(config.data);
-        setConfig(config.data);
-      } else {
+      try {
+        let config = await ServerService.getApiServer();
+        if (config.isSuccess && config.data) {
+          updatePromiseToast(id, "Server settings loaded", "success", 2000);
+          setInitialValue(config.data);
+          setConfig(config.data);
+        } else {
+          updatePromiseToast(id, "Server settings failed to load", "error");
+        }
+      } catch (err: any) {
         updatePromiseToast(id, "Server settings failed to load", "error");
       }
     })();
@@ -35,21 +39,29 @@ const ServerPage = () => {
     if (config) {
       let promiseId = promiseToast("Updating server settings...");
 
-      let result = await ServerService.putApiServer({ requestBody: config });
-      if (result.isSuccess) {
-        setInitialValue(config);
+      try {
+        let result = await ServerService.putApiServer({ requestBody: config });
+        if (result.isSuccess) {
+          setInitialValue(config);
 
+          updatePromiseToast(
+            promiseId,
+            "Server settings updated successfully",
+            "success"
+          );
+
+          infoToast("🦄 Restarting server...");
+        } else {
+          updatePromiseToast(
+            promiseId,
+            result.errors?.join(", ") ?? "Uknown error occured",
+            "error"
+          );
+        }
+      } catch (err: any) {
         updatePromiseToast(
           promiseId,
-          "Server settings updated successfully",
-          "success"
-        );
-
-        infoToast("🦄 Restarting server...");
-      } else {
-        updatePromiseToast(
-          promiseId,
-          result.errors?.join(", ") ?? "Uknown error occured",
+          err.body?.errors?.join(", ") ?? "Uknown error occured",
           "error"
         );
       }
