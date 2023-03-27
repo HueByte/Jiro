@@ -1,4 +1,4 @@
-import { useEffect, useState, useContext } from "react";
+import { useState, useContext } from "react";
 import { GiHamburgerMenu } from "react-icons/gi";
 import { HiOutlineX } from "react-icons/hi";
 import { NavLink } from "react-router-dom";
@@ -6,6 +6,7 @@ import { AiFillFire } from "react-icons/ai";
 import { MdLogout } from "react-icons/md";
 import { Roles } from "../api/Roles";
 import { AuthContext } from "../contexts/AuthContext";
+import { BiUser } from "react-icons/bi";
 
 const Menu = () => {
   const auth = useContext(AuthContext);
@@ -44,7 +45,7 @@ const Menu = () => {
           isOpen ? "" : " translate-x-[-400px] md:-translate-x-full"
         }`}
       >
-        <div className="relative flex w-full flex-col gap-2 pt-14 md:items-center">
+        <div className="relative flex w-full flex-1 flex-col gap-2 pt-14 md:items-center">
           {menuItems.map((item, index) =>
             auth?.isInRole(item.roles) ? (
               <NavLink
@@ -68,6 +69,11 @@ const Menu = () => {
             onClick={() => setIsOpen(!isOpen)}
           >
             <HiOutlineX />
+          </div>
+        </div>
+        <div className="grid place-items-center bg-element p-4 text-3xl">
+          <div className="text-ellipsis font-bold">
+            <BiUser className="inline" /> {auth?.authState?.username}
           </div>
         </div>
       </div>
