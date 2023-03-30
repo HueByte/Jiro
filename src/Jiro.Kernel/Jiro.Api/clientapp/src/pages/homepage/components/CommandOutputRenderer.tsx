@@ -1,13 +1,15 @@
 import MDEditor from "@uiw/react-md-editor";
-import { memo } from "react";
+import { memo, useContext } from "react";
 import { BsFillCloudHazeFill } from "react-icons/bs";
 import { GraphOutput, TextOutput } from ".";
 import { CommandType } from "../../../api/CommandEnum";
+import { AuthContext } from "../../../contexts/AuthContext";
 import { UserCommand } from "../Models";
 import "./styles/RendererStyles.css";
 
 export const CommandOutputRenderer = memo(
   (props: { command?: UserCommand }) => {
+    const auth = useContext(AuthContext);
     const { command } = props;
 
     const getComponent: any = () => {
@@ -27,8 +29,8 @@ export const CommandOutputRenderer = memo(
     return (
       <div className="flex flex-col">
         <div className="mb-4 w-full">
-          <span className="mb-2 grid w-20 place-items-center rounded-lg bg-backgroundColorLight p-2 text-accent7">
-            Me
+          <span className="mb-2 grid w-20 place-items-center text-ellipsis rounded-lg bg-backgroundColorLight p-2 font-bold text-accent7">
+            {auth?.authState?.username}
           </span>
           <MDEditor.Markdown source={command?.prompt} style={{}} />
         </div>
@@ -36,7 +38,7 @@ export const CommandOutputRenderer = memo(
           <div
             className={`${
               command?.isLoading ? "animate-pulse " : ""
-            }mb-2 flex w-20 items-center justify-center gap-1 rounded-lg bg-backgroundColorLight p-2 text-accent`}
+            }mb-2 flex w-20 items-center justify-center gap-1 rounded-lg bg-backgroundColorLight p-2 font-bold text-accent`}
           >
             <BsFillCloudHazeFill className="inline" /> Jiro
           </div>
