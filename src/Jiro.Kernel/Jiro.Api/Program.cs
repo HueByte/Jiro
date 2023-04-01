@@ -102,22 +102,19 @@ while (true)
     try
     {
         await app.RunAsync(_cts.Token);
+
+        if (_cts.IsCancellationRequested) _cts = new CancellationTokenSource();
+        else break;
     }
     catch (Exception ex)
     {
-        if (ex is TaskCanceledException || ex is OperationCanceledException)
-            continue;
+        Serilog.Log.Logger.Error(ex, "An error occurred while running the application");
+        break;
     }
 }
 
 public partial class Program
 {
     private static CancellationTokenSource _cts = new();
-
-    public static void Restart()
-    {
-        _cts.Cancel();
-        _cts = new CancellationTokenSource();
-    }
-
+    public static void Restart() => _cts.Cancel();
 }
