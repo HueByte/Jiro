@@ -1,5 +1,5 @@
 import { lazy } from "react";
-
+export { MorphAvatar } from "./MorphAvatar";
 export { TextOutput } from "./TextOutput";
 export { CommandOutputRenderer } from "./CommandOutputRenderer";
 

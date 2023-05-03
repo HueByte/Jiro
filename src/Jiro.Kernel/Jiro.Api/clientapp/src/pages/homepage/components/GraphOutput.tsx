@@ -9,7 +9,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { CommandResponse } from "../../api";
+import { CommandResponse } from "../../../api";
 
 export const GraphOutput = (props: { command: CommandResponse }) => {
   const { command } = props;

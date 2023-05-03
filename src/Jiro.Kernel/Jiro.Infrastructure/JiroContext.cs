@@ -35,5 +35,6 @@ namespace Jiro.Infrastructure
         }
 
         public DbSet<WhiteListEntry> WhiteListEntries { get; set; }
+        public DbSet<JiroInstance> JiroInstances { get; set; }
     }
 }

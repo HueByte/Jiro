@@ -1,7 +1,8 @@
 import MDEditor from "@uiw/react-md-editor";
 import { memo } from "react";
+import { BsFillCloudHazeFill } from "react-icons/bs";
 import { GraphOutput, TextOutput } from ".";
-import { CommandType } from "../../api/CommandEnum";
+import { CommandType } from "../../../api/CommandEnum";
 import { UserCommand } from "../Models";
 import "./styles/RendererStyles.css";
 
@@ -26,19 +27,19 @@ export const CommandOutputRenderer = memo(
     return (
       <div className="flex flex-col">
         <div className="mb-4 w-full">
-          <span className="mb-2 grid w-14 place-items-center rounded-lg bg-backgroundColorLight p-2 text-accent7">
+          <span className="mb-2 grid w-20 place-items-center rounded-lg bg-backgroundColorLight p-2 text-accent7">
             Me
           </span>
           <MDEditor.Markdown source={command?.prompt} style={{}} />
         </div>
         <div className="my-1 w-full break-words">
-          <span
+          <div
             className={`${
               command?.isLoading ? "animate-pulse " : ""
-            }mb-2 grid w-14 place-items-center rounded-lg bg-backgroundColorLight p-2 text-accent`}
+            }mb-2 flex w-20 items-center justify-center gap-1 rounded-lg bg-backgroundColorLight p-2 text-accent`}
           >
-            Jiro
-          </span>
+            <BsFillCloudHazeFill className="inline" /> Jiro
+          </div>
           {getComponent()}
         </div>
       </div>
