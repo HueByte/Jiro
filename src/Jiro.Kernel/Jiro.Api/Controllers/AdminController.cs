@@ -22,5 +22,15 @@ namespace Jiro.Api.Controllers
             var data = await _userService.AssignRoleAsync(assignRoleDTO.UserId, assignRoleDTO.Role);
             return ApiResponseCreator.Data(data);
         }
+
+        [HttpGet("users")]
+        [ProducesResponseType(typeof(ApiResponse<List<UserInfoDTO>>), 200)]
+        [ProducesResponseType(typeof(ApiResponse<object>), 400)]
+        public async Task<IActionResult> GetUsers()
+        {
+            var data = await _userService.GetUsersAsync();
+
+            return ApiResponseCreator.Data(data);
+        }
     }
 }

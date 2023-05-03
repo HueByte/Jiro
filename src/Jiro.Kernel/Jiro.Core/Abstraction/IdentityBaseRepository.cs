@@ -36,14 +36,14 @@ public class IdentityBaseRepository<TKeyType, TEntity, TContext> : IIdentityRepo
         return true;
     }
 
-    public virtual async Task<bool> AddRangeAsync(IEnumerable<TEntity> entities)
+    public virtual Task<bool> AddRangeAsync(IEnumerable<TEntity> entities)
     {
-        if (entities is null) return false;
+        if (entities is null) return Task.FromResult(false);
 
-        await _context.Set<TEntity>()
-            .AddRangeAsync(entities);
+        _context.Set<TEntity>()
+            .AddRange(entities);
 
-        return true;
+        return Task.FromResult(true);
     }
 
     public virtual IQueryable<TEntity> AsQueryable()
@@ -109,5 +109,16 @@ public class IdentityBaseRepository<TKeyType, TEntity, TContext> : IIdentityRepo
     public virtual async Task SaveChangesAsync()
     {
         await _context.SaveChangesAsync();
+    }
+
+    public Task<bool> RemoveRangeAsync(IEnumerable<TEntity> entity)
+    {
+        if (entity is null) return Task.FromResult(true);
+
+        _context
+            .Set<TEntity>()
+            .RemoveRange(entity);
+
+        return Task.FromResult(true);
     }
 }

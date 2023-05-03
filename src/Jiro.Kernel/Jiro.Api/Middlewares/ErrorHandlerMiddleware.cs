@@ -53,30 +53,15 @@ namespace Jiro.Api.Middlewares
                     Errors = new string[] { exception.Message },
                     IsSuccess = false
                 },
-                HandledException => new()
-                {
-                    Data = default,
-                    Errors = new string[] { exception.Message },
-                    IsSuccess = false
-                },
-                HandledExceptionList list => new()
-                {
-                    Data = default,
-                    Errors = list!.ExceptionMessages!,
-                    IsSuccess = false
-                },
-                TokenException => new()
-                {
-                    Data = default,
-                    Errors = new string[] { exception.Message },
-                    IsSuccess = false
-                },
+                HandledException or
+                HandledExceptionList or
+                TokenException or
                 _ => new()
                 {
                     Data = default,
                     Errors = new string[] { exception.Message },
                     IsSuccess = false
-                },
+                }
             };
 
             return errorResult;

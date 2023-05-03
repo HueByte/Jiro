@@ -1,6 +1,7 @@
 using System.Formats.Asn1;
 using Jiro.Core.Constants;
 using Jiro.Core.DTO;
+using Jiro.Core.Interfaces.IRepositories;
 using Jiro.Core.Models;
 using Jiro.Core.Options;
 using Microsoft.AspNetCore.Identity;
@@ -18,18 +19,21 @@ public class UserService : IUserService
     private readonly IJWTService _jwtAuthentication;
     private readonly JWTOptions _jwtOptions;
     private readonly IRefreshTokenService _refreshTokenService;
+    private readonly IWhitelistRepository _whitelistRepository;
     public UserService(
         UserManager<AppUser> userManager,
         SignInManager<AppUser> signInManager,
         IJWTService jwtAuthentication,
         IOptions<JWTOptions> jwtOptions,
-        IRefreshTokenService refreshTokenService)
+        IRefreshTokenService refreshTokenService,
+        IWhitelistRepository whitelistRepository)
     {
         _userManager = userManager;
         _signInManager = signInManager;
         _jwtAuthentication = jwtAuthentication;
         _jwtOptions = jwtOptions.Value;
         _refreshTokenService = refreshTokenService;
+        _whitelistRepository = whitelistRepository;
     }
 
     public async Task<bool> ChangeUsernameAsync(string userId, string newUsername, string password)
@@ -161,6 +165,28 @@ public class UserService : IUserService
         var result = await _userManager.AddToRoleAsync(user, role);
 
         return result;
+    }
+
+    public async Task<List<UserInfoDTO>> GetUsersAsync()
+    {
+        var users = await _userManager.Users
+            .Include(usr => usr.UserRoles)
+                .ThenInclude(usr => usr.Role)
+            .Join(_whitelistRepository.AsQueryable(),
+                user => user.Id,
+                wle => wle.UserId,
+                (user, wle) => new { User = user, IsWhitelisted = true })
+            .Select(usr => new UserInfoDTO()
+            {
+                Id = usr.User.Id,
+                Username = usr.User.UserName!,
+                Email = usr.User.Email!,
+                Roles = usr.User.UserRoles.Select(e => e.Role.Name).ToArray()!,
+                IsWhitelisted = usr.IsWhitelisted
+            })
+            .ToListAsync();
+
+        return users;
     }
 
     private async Task<VerifiedUserDTO> HandleLogin(AppUser user, string password, string ipAddress)
