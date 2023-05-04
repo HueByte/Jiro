@@ -111,4 +111,15 @@ public class BaseRepository<TKeyType, TEntity, TContext> : IRepository<TKeyType,
     {
         return _context.SaveChangesAsync();
     }
+
+    public Task<bool> RemoveRangeAsync(IEnumerable<TEntity> entity)
+    {
+        if (entity is null) return Task.FromResult(false);
+
+        _context
+            .Set<TEntity>()
+            .RemoveRange(entity);
+
+        return Task.FromResult(true);
+    }
 }

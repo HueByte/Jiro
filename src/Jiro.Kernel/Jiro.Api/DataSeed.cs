@@ -76,7 +76,7 @@ namespace Jiro.Api
                 {
                     try
                     {
-                        logger.LogInformation("Seeding {username} with roles {roles}", user.UserName, string.Join(';', roles));
+                        logger.LogInformation("Seeding {username} with roles {roles}\n", user.UserName, string.Join(';', roles));
                         var pass = PasswordPrompt(user!.UserName!);
 
                         var result = await userManager.CreateAsync(user, pass);
@@ -85,7 +85,7 @@ namespace Jiro.Api
                             foreach (var role in roles)
                                 await userManager.AddToRoleAsync(user, role);
 
-                            await whitelistService.AddUserToWhitelist(user);
+                            await whitelistService.AddUserToWhitelistAsync(user);
                         }
                     }
                     catch (InvalidOperationException)
@@ -99,7 +99,7 @@ namespace Jiro.Api
 
         private static string PasswordPrompt(string username)
         {
-            Console.WriteLine();
+            Console.WriteLine("\n\n");
             Console.WriteLine("Please Provide a password for {0}", username);
             Console.WriteLine("It should contain at least 6 characters, 1 unique character and 1 uppercase letter");
             Console.Write("Password: ");
@@ -123,7 +123,7 @@ namespace Jiro.Api
                 }
             } while (key != ConsoleKey.Enter);
 
-            Console.WriteLine();
+            Console.WriteLine("\n\n");
 
             return pass;
         }

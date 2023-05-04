@@ -1,13 +1,17 @@
+using Jiro.Core.DTO;
 using Jiro.Core.Models;
 
 namespace Jiro.Core.Interfaces.IServices
 {
     public interface IWhitelistService
     {
-        Task<bool> AddUserToWhitelist(string userId);
-        Task<bool> AddUserToWhitelist(AppUser user);
-        Task<bool> IsWhitelisted(string userId);
-        Task<bool> RemoveUserToWhitelist(string userId);
-        Task<bool> RemoveUserToWhitelist(AppUser user);
+        Task<bool> AddUserToWhitelistAsync(string userId);
+        Task<bool> AddUserToWhitelistAsync(AppUser user);
+        Task<bool> IsWhitelistedAsync(string userId);
+        Task<bool> RemoveUserFromWhitelistAsync(string userId);
+        Task<bool> RemoveUserFromWhitelistAsync(AppUser user);
+        Task<bool> UpdateWhitelistRangeAsync(IEnumerable<WhitelistedUserDTO> users);
+        Task<List<WhitelistedUserDTO>> GetWhiteListUsersAsync();
+        Task<List<WhitelistedUserDTO>> GetUsersWithWhitelistFlagAsync();
     }
 }

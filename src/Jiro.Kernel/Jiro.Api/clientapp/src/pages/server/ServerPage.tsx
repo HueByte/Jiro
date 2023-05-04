@@ -11,6 +11,13 @@ import { infoToast } from "../../lib/notifications";
 import { TbShieldLock } from "react-icons/tb";
 import { BsFillCloudHazeFill } from "react-icons/bs";
 import Loader from "../../components/Loader";
+import {
+  NumericServerSettingInput,
+  ServerCheckboxInput,
+  ServerSettingBox,
+  ServerSettingInput,
+  ServerTextAreaInput,
+} from "./Components";
 
 const ServerPage = () => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -325,168 +332,6 @@ const ServerPage = () => {
         )}
       </div>
     </div>
-  );
-};
-
-type ServerSettingBoxProps = {
-  icon: JSX.Element;
-  name: string;
-  children: string | JSX.Element | JSX.Element[];
-};
-
-const ServerSettingBox = ({ icon, name, children }: ServerSettingBoxProps) => {
-  return (
-    <div className="relative flex flex-[40%] flex-col gap-2 rounded bg-backgroundColor p-2 pt-8 md:flex-[100%]">
-      <div className="absolute -top-4 left-10 rounded bg-element px-2 py-1 font-bold text-accent7">
-        {icon} {name}
-      </div>
-      {children}
-    </div>
-  );
-};
-
-type ServerSettingInputProps = {
-  currValue: string | number | undefined | null;
-  label: string;
-  note?: string;
-  isSecret?: boolean;
-  onChange: (value: string) => void;
-};
-
-const ServerSettingInput = ({
-  currValue,
-  label,
-  note,
-  isSecret = false,
-  onChange,
-}: ServerSettingInputProps) => {
-  const [isVisible, setIsVisible] = useState(false);
-  return (
-    <>
-      <label>{label}</label>
-      <div className="relative">
-        <input
-          type={isSecret ? (isVisible ? "text" : "password") : "text"}
-          className={`base-input w-full${isSecret ? " pr-10" : ""}`}
-          defaultValue={currValue ?? ""}
-          onChange={(val) => onChange(val.target.value)}
-        />
-        {isSecret &&
-          (isVisible ? (
-            <AiFillEye
-              onClick={() => setIsVisible(!isVisible)}
-              className="absolute top-1/2 right-2 inline -translate-y-1/2 cursor-pointer"
-            />
-          ) : (
-            <AiFillEyeInvisible
-              onClick={() => setIsVisible(!isVisible)}
-              className="absolute top-1/2 right-2 inline -translate-y-1/2 cursor-pointer"
-            />
-          ))}
-      </div>
-    </>
-  );
-};
-
-type NumericServerSettingInputProps = {
-  currValue: string | number | undefined | null;
-  label: string;
-  note?: string;
-  min?: number;
-  max?: number;
-  onChange: (value: number) => void;
-};
-
-const NumericServerSettingInput = ({
-  currValue,
-  label,
-  note,
-  min,
-  max,
-  onChange,
-}: NumericServerSettingInputProps) => {
-  const onNumberChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const value = !Number.isNaN(e.target.valueAsNumber)
-      ? e.target.valueAsNumber
-      : 0;
-
-    if (min && value < min) {
-      return min;
-    }
-
-    if (max && value > max) {
-      return max;
-    }
-
-    return value;
-  };
-
-  return (
-    <>
-      <label>{label}</label>
-      <input
-        type="number"
-        className="base-input w-full"
-        defaultValue={currValue ?? ""}
-        min={0}
-        onChange={(val) => onChange(onNumberChange(val))}
-      />
-    </>
-  );
-};
-
-type ServerCheckboxInputProps = {
-  currValue: boolean | null | undefined;
-  label: string;
-  note?: string;
-  onChange: (value: boolean) => void;
-};
-
-const ServerCheckboxInput = ({
-  currValue,
-  label,
-  note,
-  onChange,
-}: ServerCheckboxInputProps) => {
-  return (
-    <div className="flex items-center gap-2">
-      <label className="text-gray-900 dark:text-gray-300 font-medium">
-        {label}
-      </label>
-      <input
-        autoComplete="off"
-        type="checkbox"
-        checked={currValue ?? false}
-        onChange={(val) => onChange(val.target.checked)}
-        className="text-secondaryLight-600 bg-gray-100 border-gray-300 focus:ring-accent-500 dark:ring-offset-gray-800 dark:bg-gray-700 dark:border-gray-600 h-4 w-4 rounded hover:cursor-pointer focus:ring-2"
-      />
-    </div>
-  );
-};
-
-type ServerTextAreaInputProps = {
-  currValue: string | number | readonly string[];
-  label: string;
-  note?: string;
-  onChange: (value: string) => void;
-};
-
-const ServerTextAreaInput = ({
-  currValue,
-  label,
-  note,
-  onChange,
-}: ServerTextAreaInputProps) => {
-  return (
-    <>
-      <label>{label}</label>
-      <textarea
-        defaultValue={currValue}
-        className="base-input w-full"
-        rows={3}
-        onChange={(val) => onChange(val.target.value)}
-      ></textarea>
-    </>
   );
 };
 
