@@ -36,14 +36,15 @@ public class UserService : IUserService
         _whitelistRepository = whitelistRepository;
     }
 
-    public async Task<bool> ChangeUsernameAsync(string userId, string newUsername, string password)
+    public async Task<bool> ChangeUsernameAsync(string? userId, string newUsername, string password)
     {
         if (string.IsNullOrEmpty(newUsername))
             throw new HandledException("Username cannot be empty");
 
-        var user = await _userManager.FindByIdAsync(userId);
-        if (user is null)
+        if (string.IsNullOrEmpty(userId))
             throw new HandledException("Couldn't find this user");
+
+        var user = await _userManager.FindByIdAsync(userId) ?? throw new HandledException("Couldn't find this user");
 
         if (user.UserName == newUsername)
             return true;
@@ -61,14 +62,15 @@ public class UserService : IUserService
         return true;
     }
 
-    public async Task<bool> ChangePasswordAsync(string userId, string currentPassword, string newPassword)
+    public async Task<bool> ChangePasswordAsync(string? userId, string currentPassword, string newPassword)
     {
         if (string.IsNullOrEmpty(currentPassword) || string.IsNullOrEmpty(newPassword))
             throw new HandledException("New and old password can't be empty");
 
-        var user = await _userManager.FindByIdAsync(userId);
-        if (user is null)
+        if (string.IsNullOrEmpty(userId))
             throw new HandledException("Couldn't find this user");
+
+        var user = await _userManager.FindByIdAsync(userId) ?? throw new HandledException("Couldn't find this user");
 
         var result = await _userManager.ChangePasswordAsync(user, currentPassword, newPassword);
 
@@ -128,12 +130,12 @@ public class UserService : IUserService
         return await HandleLogin(user!, userDto!.Password!, IpAddress);
     }
 
-    public async Task<bool> ChangeEmailAsync(string userId, string email, string password)
+    public async Task<bool> ChangeEmailAsync(string? userId, string email, string password)
     {
-        var user = await _userManager.FindByIdAsync(userId);
-        if (user is null)
+        if (string.IsNullOrEmpty(userId))
             throw new HandledException("Couldn't find this user");
 
+        var user = await _userManager.FindByIdAsync(userId) ?? throw new HandledException("Couldn't find this user");
         if (string.IsNullOrEmpty(email))
             throw new HandledException("Email cannot be empty");
 

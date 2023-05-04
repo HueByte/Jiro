@@ -135,7 +135,7 @@ public class RefreshTokenService : IRefreshTokenService
             .Include(e => e.RefreshTokens)
             .Include(e => e.UserRoles)
             .ThenInclude(e => e.Role)
-            .SingleOrDefaultAsync(user => user.RefreshTokens.Any(t => t.Token == token));
+            .SingleOrDefaultAsync(user => user!.RefreshTokens!.Any(t => t.Token == token));
 
         if (user is null)
             throw new TokenException("Token is invalid");

@@ -5,40 +5,40 @@ namespace Jiro.Core.DTO
     public class InstanceConfigDTO
     {
         [JsonPropertyName("urls")]
-        public string urls { get; set; }
+        public string? urls { get; set; }
 
         [JsonPropertyName("TokenizerUrl")]
-        public string TokenizerUrl { get; set; }
+        public string? TokenizerUrl { get; set; }
 
         [JsonPropertyName("ConnectionStrings")]
-        public ConnectionStrings ConnectionStrings { get; set; }
+        public ConnectionStrings? ConnectionStrings { get; set; }
 
         [JsonPropertyName("Log")]
-        public Log Log { get; set; }
+        public Log? Log { get; set; }
 
         [JsonPropertyName("Whitelist")]
         public bool? Whitelist { get; set; }
 
         [JsonPropertyName("JWT")]
-        public JWT JWT { get; set; }
+        public JWT? JWT { get; set; }
 
         [JsonPropertyName("Gpt")]
-        public Gpt Gpt { get; set; }
+        public Gpt? Gpt { get; set; }
 
         [JsonPropertyName("AllowedHosts")]
-        public string AllowedHosts { get; set; }
+        public string? AllowedHosts { get; set; }
     }
 
     public class ChatGpt
     {
         [JsonPropertyName("SystemMessage")]
-        public string SystemMessage { get; set; }
+        public string? SystemMessage { get; set; }
     }
 
     public class ConnectionStrings
     {
         [JsonPropertyName("JiroContext")]
-        public string JiroContext { get; set; }
+        public string? JiroContext { get; set; }
     }
 
     public class Gpt
@@ -47,13 +47,13 @@ namespace Jiro.Core.DTO
         public bool? Enable { get; set; }
 
         [JsonPropertyName("BaseUrl")]
-        public string BaseUrl { get; set; }
+        public string? BaseUrl { get; set; }
 
         [JsonPropertyName("AuthToken")]
-        public string AuthToken { get; set; }
+        public string? AuthToken { get; set; }
 
         [JsonPropertyName("Organization")]
-        public string Organization { get; set; }
+        public string? Organization { get; set; }
 
         [JsonPropertyName("FineTune")]
         public bool? FineTune { get; set; }
@@ -62,22 +62,22 @@ namespace Jiro.Core.DTO
         public bool? UseChatGpt { get; set; }
 
         [JsonPropertyName("ChatGpt")]
-        public ChatGpt ChatGpt { get; set; }
+        public ChatGpt? ChatGpt { get; set; }
 
         [JsonPropertyName("SingleGpt")]
-        public SingleGpt SingleGpt { get; set; }
+        public SingleGpt? SingleGpt { get; set; }
     }
 
     public class JWT
     {
         [JsonPropertyName("Issuer")]
-        public string Issuer { get; set; }
+        public string? Issuer { get; set; }
 
         [JsonPropertyName("Audience")]
-        public string Audience { get; set; }
+        public string? Audience { get; set; }
 
         [JsonPropertyName("Secret")]
-        public string Secret { get; set; }
+        public string? Secret { get; set; }
 
         [JsonPropertyName("AccessTokenExpireTime")]
         public int? AccessTokenExpireTime { get; set; }
@@ -89,19 +89,19 @@ namespace Jiro.Core.DTO
     public class Log
     {
         [JsonPropertyName("TimeInterval")]
-        public string TimeInterval { get; set; }
+        public string? TimeInterval { get; set; }
 
         [JsonPropertyName("LogLevel")]
-        public string LogLevel { get; set; }
+        public string? LogLevel { get; set; }
 
         [JsonPropertyName("AspNetCoreLevel")]
-        public string AspNetCoreLevel { get; set; }
+        public string? AspNetCoreLevel { get; set; }
 
         [JsonPropertyName("DatabaseLevel")]
-        public string DatabaseLevel { get; set; }
+        public string? DatabaseLevel { get; set; }
 
         [JsonPropertyName("SystemLevel")]
-        public string SystemLevel { get; set; }
+        public string? SystemLevel { get; set; }
     }
 
     public class SingleGpt
@@ -110,12 +110,12 @@ namespace Jiro.Core.DTO
         public int? TokenLimit { get; set; }
 
         [JsonPropertyName("ContextMessage")]
-        public string ContextMessage { get; set; }
+        public string? ContextMessage { get; set; }
 
         [JsonPropertyName("Stop")]
-        public string Stop { get; set; }
+        public string? Stop { get; set; }
 
         [JsonPropertyName("Model")]
-        public string Model { get; set; }
+        public string? Model { get; set; }
     }
 }

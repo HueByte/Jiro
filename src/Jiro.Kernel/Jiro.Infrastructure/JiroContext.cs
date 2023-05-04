@@ -34,7 +34,7 @@ namespace Jiro.Infrastructure
                    .IsRequired();
         }
 
-        public DbSet<WhiteListEntry> WhiteListEntries { get; set; }
-        public DbSet<JiroInstance> JiroInstances { get; set; }
+        public required DbSet<WhiteListEntry> WhiteListEntries { get; set; }
+        public required DbSet<JiroInstance> JiroInstances { get; set; }
     }
 }

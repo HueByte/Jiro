@@ -40,7 +40,7 @@ namespace Jiro.Api.Controllers
         [ProducesResponseType(typeof(ApiResponse<VerifiedUserDTO>), 200)]
         public async Task<IActionResult> Login([FromBody] LoginUsernameDTO userDTO)
         {
-            var data = await _userService.LoginUserAsync(userDTO, GetIpAddress());
+            var data = await _userService.LoginUserAsync(userDTO, GetIpAddress()!);
             var result = new ApiResponse<VerifiedUserDTO>(data);
 
             if (result.IsSuccess)
@@ -56,7 +56,7 @@ namespace Jiro.Api.Controllers
         public async Task<IActionResult> RefreshToken()
         {
             var refreshToken = Request.Cookies[CookieNames.REFRESH_TOKEN];
-            var data = await _refreshTokenService.RefreshToken(refreshToken!, GetIpAddress());
+            var data = await _refreshTokenService.RefreshToken(refreshToken!, GetIpAddress()!);
 
             var result = new ApiResponse<VerifiedUserDTO>(data);
 
@@ -74,7 +74,7 @@ namespace Jiro.Api.Controllers
         {
             var token = bodyToken ?? Request.Cookies[CookieNames.REFRESH_TOKEN];
 
-            await _refreshTokenService.RevokeToken(token!, GetIpAddress());
+            await _refreshTokenService.RevokeToken(token!, GetIpAddress()!);
 
             return ApiResponseCreator.Empty();
         }
@@ -86,7 +86,7 @@ namespace Jiro.Api.Controllers
             var refreshToken = Request.Cookies[CookieNames.REFRESH_TOKEN];
 
             if (refreshToken is not null)
-                await _refreshTokenService.RevokeToken(refreshToken!, GetIpAddress());
+                await _refreshTokenService.RevokeToken(refreshToken!, GetIpAddress()!);
 
             Response.Cookies.Delete(CookieNames.REFRESH_TOKEN);
             Response.Cookies.Delete(CookieNames.ACCESS_TOKEN);
@@ -114,7 +114,7 @@ namespace Jiro.Api.Controllers
             return ApiResponseCreator.ValueType(data);
         }
 
-        private string GetIpAddress()
+        private string? GetIpAddress()
         {
             if (Request.Headers.ContainsKey("X-Forwarded-For"))
                 return Request?.Headers["X-Forwarded-For"] ?? "localhost";
