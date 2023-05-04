@@ -13,6 +13,26 @@ const AdminMenu = () => {
       text: "Whitelist",
       icon: <AiFillFire className="inline" />,
     },
+    {
+      path: "whitelist",
+      text: "Whitelist",
+      icon: <AiFillFire className="inline" />,
+    },
+    {
+      path: "whitelist",
+      text: "Whitelist",
+      icon: <AiFillFire className="inline" />,
+    },
+    {
+      path: "whitelist",
+      text: "Whitelist",
+      icon: <AiFillFire className="inline" />,
+    },
+    {
+      path: "whitelist",
+      text: "Whitelist",
+      icon: <AiFillFire className="inline" />,
+    },
   ];
 
   return (

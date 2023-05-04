@@ -79,7 +79,7 @@ const Menu = () => {
         </div>
       </div>
       <div
-        className={`absolute top-4 left-4 text-3xl transition duration-1000 hover:scale-125 hover:cursor-pointer${
+        className={`absolute top-4 left-4 z-40 text-3xl transition duration-1000 hover:scale-125 hover:cursor-pointer${
           isOpen ? " opacity-0" : ""
         }`}
         onClick={() => setIsOpen(!isOpen)}
