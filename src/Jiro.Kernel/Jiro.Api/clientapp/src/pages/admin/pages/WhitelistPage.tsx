@@ -156,7 +156,7 @@ const WhiteListPage = () => {
       </div>
       <button
         onClick={update}
-        className="base-bg-gradient-r h-12 self-end rounded-lg p-3 text-xl font-bold duration-150 hover:scale-105"
+        className="base-bg-gradient-r m-2 h-12 self-end rounded-lg p-3 text-xl font-bold duration-150 hover:scale-105"
       >
         Save
       </button>
