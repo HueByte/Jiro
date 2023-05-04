@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
-import { AdminService, UserInfoDTO, WhitelistService } from "../../../api";
+import { UserInfoDTO, WhitelistService } from "../../../api";
 import { promiseToast, updatePromiseToast } from "../../../lib";
+import { TiDelete } from "react-icons/ti";
 
 const WhiteListPage = () => {
   const [whitelistedUsers, setWhitelistedUsers] = useState<UserInfoDTO[]>([]);
@@ -108,45 +109,49 @@ const WhiteListPage = () => {
   };
 
   return (
-    <div className="flex h-full flex-col">
-      <div className="flex flex-1 flex-row justify-between p-4">
-        <div className="w-1/2">
-          <h2 className="mb-2 text-lg font-bold">Whitelisted Users</h2>
-          <ul className="bg-white rounded-lg p-2 shadow-md">
+    <div className="flex h-full flex-col gap-4">
+      <div className="flex flex-1 flex-row justify-between gap-2">
+        <div className="w-1/2 rounded-xl bg-backgroundColor p-2">
+          <h1 className="mb-2 h-16 text-center text-xl font-bold">
+            Whitelisted Users
+          </h1>
+          <div className="bg-white flex flex-col gap-2 overflow-y-auto rounded-lg p-2">
             {whitelistedUsers.map((user) => (
-              <li
+              <div
                 key={user.username}
-                className="flex items-center justify-between border-b py-2"
+                className="flex items-center justify-between text-ellipsis rounded bg-element p-2 text-lg shadow-xl"
               >
-                <span>{user.username}</span>
+                <span className="w-5/6 truncate">{user.username}</span>
                 <button
-                  className="text-red-600 font-bold"
+                  className="text-red-600 text-2xl font-bold hover:text-accent3"
                   onClick={() => moveUserToNonWhitelist(user)}
                 >
-                  Remove from whitelist
+                  <TiDelete />
                 </button>
-              </li>
+              </div>
             ))}
-          </ul>
+          </div>
         </div>
-        <div className="w-1/2">
-          <h2 className="mb-2 text-lg font-bold">Non-Whitelisted Users</h2>
-          <ul className="bg-white rounded-lg p-2 shadow-md">
+        <div className="w-1/2 rounded-xl bg-backgroundColor p-2">
+          <h1 className="mb-2 h-16 text-center text-xl font-bold">
+            Non-Whitelisted Users
+          </h1>
+          <div className="bg-white flex flex-col gap-2 overflow-y-auto rounded-lg p-2">
             {nonWhitelistedUsers.map((user) => (
-              <li
+              <div
                 key={user.username}
-                className="flex items-center justify-between border-b py-2"
+                className="flex items-center justify-between text-ellipsis rounded bg-element p-2 text-lg shadow-xl"
               >
-                <span>{user.username}</span>
+                <span className="w-5/6 truncate">{user.username}</span>
                 <button
-                  className="text-green-600 font-bold"
+                  className="text-red-600 text-2xl font-bold hover:text-accent3"
                   onClick={() => moveUserToWhitelist(user)}
                 >
-                  Add to whitelist
+                  <TiDelete />
                 </button>
-              </li>
+              </div>
             ))}
-          </ul>
+          </div>
         </div>
       </div>
       <button

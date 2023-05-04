@@ -1,4 +1,5 @@
 import { AiFillFire } from "react-icons/ai";
+import { RiFileList2Fill } from "react-icons/ri";
 import { NavLink } from "react-router-dom";
 
 const AdminMenu = () => {
@@ -11,27 +12,7 @@ const AdminMenu = () => {
     {
       path: "whitelist",
       text: "Whitelist",
-      icon: <AiFillFire className="inline" />,
-    },
-    {
-      path: "whitelist",
-      text: "Whitelist",
-      icon: <AiFillFire className="inline" />,
-    },
-    {
-      path: "whitelist",
-      text: "Whitelist",
-      icon: <AiFillFire className="inline" />,
-    },
-    {
-      path: "whitelist",
-      text: "Whitelist",
-      icon: <AiFillFire className="inline" />,
-    },
-    {
-      path: "whitelist",
-      text: "Whitelist",
-      icon: <AiFillFire className="inline" />,
+      icon: <RiFileList2Fill className="inline" />,
     },
   ];
 
@@ -41,10 +22,10 @@ const AdminMenu = () => {
         return (
           <NavLink
             to={route.path}
-            className="rounded-lg bg-element p-2 font-bold text-accent3 duration-200 hover:scale-110"
+            className="rounded-lg bg-element p-2 font-bold text-accent3 duration-200 hover:scale-105"
             key={index}
           >
-            {route.icon} {route.text}
+            {route.icon} <span className="md:hidden">{route.text}</span>
           </NavLink>
         );
       })}
