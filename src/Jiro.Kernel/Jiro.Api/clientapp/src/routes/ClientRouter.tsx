@@ -8,7 +8,7 @@ import LogoutPage from "../pages/auth/Logout";
 import HomePage from "../pages/homepage/Homepage";
 import ServerPage from "../pages/server/ServerPage";
 import ProtectedRoute from "./ProtectedRoute";
-import WhiteListPage from "../pages/admin/pages/WhiteListPage";
+import WhiteListPage from "../pages/admin/pages/WhitelistPage";
 
 const ClientRouter = () => {
   return (
