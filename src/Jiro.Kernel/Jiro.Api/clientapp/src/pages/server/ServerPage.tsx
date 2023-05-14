@@ -1,10 +1,5 @@
-import { ChangeEvent, useEffect, useState } from "react";
-import {
-  AiFillEye,
-  AiFillEyeInvisible,
-  AiOutlineBlock,
-  AiOutlineBug,
-} from "react-icons/ai";
+import { useEffect, useState } from "react";
+import { AiOutlineBlock, AiOutlineBug } from "react-icons/ai";
 import { InstanceConfigDTO, ServerService } from "../../api";
 import { promiseToast, updatePromiseToast } from "../../lib";
 import { infoToast } from "../../lib/notifications";
@@ -77,11 +72,6 @@ const ServerPage = () => {
         );
       }
     }
-  };
-
-  const resetToDefaults = () => {
-    infoToast("Server settings reset to defaults");
-    setConfig(initialValue);
   };
 
   return (
@@ -311,13 +301,6 @@ const ServerPage = () => {
               </div>
             </div>
             <div className="flex gap-2 self-end p-2 md:w-full md:flex-col">
-              <button
-                type="button"
-                className="rounded-lg bg-elementLight p-3 text-xl font-bold duration-150 hover:scale-105"
-                onClick={resetToDefaults}
-              >
-                Reset Changes
-              </button>
               <button
                 type="button"
                 className="rounded-lg bg-elementLight p-3 text-xl font-bold duration-150 hover:scale-105"
