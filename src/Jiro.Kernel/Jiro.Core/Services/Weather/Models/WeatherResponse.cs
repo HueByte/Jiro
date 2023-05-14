@@ -17,22 +17,22 @@ namespace Jiro.Core.Services.Weather.Models
         public int? UtcOffsetSeconds { get; set; }
 
         [JsonPropertyName("timezone")]
-        public string Timezone { get; set; }
+        public string? Timezone { get; set; }
 
         [JsonPropertyName("timezone_abbreviation")]
-        public string TimezoneAbbreviation { get; set; }
+        public string? TimezoneAbbreviation { get; set; }
 
         [JsonPropertyName("elevation")]
         public double? Elevation { get; set; }
 
         [JsonPropertyName("current_weather")]
-        public CurrentWeather CurrentWeather { get; set; }
+        public CurrentWeather? CurrentWeather { get; set; }
 
         [JsonPropertyName("hourly_units")]
-        public HourlyUnits HourlyUnits { get; set; }
+        public HourlyUnits? HourlyUnits { get; set; }
 
         [JsonPropertyName("hourly")]
-        public Hourly Hourly { get; set; }
+        public Hourly? Hourly { get; set; }
     }
 
     public class CurrentWeather
@@ -50,42 +50,42 @@ namespace Jiro.Core.Services.Weather.Models
         public int? Weathercode { get; set; }
 
         [JsonPropertyName("time")]
-        public string Time { get; set; }
+        public string? Time { get; set; }
     }
 
     public class Hourly
     {
         [JsonPropertyName("time")]
-        public List<string> Time { get; set; }
+        public List<string>? Time { get; set; }
 
         [JsonPropertyName("temperature_2m")]
-        public List<double?> Temperature2m { get; set; }
+        public List<double?>? Temperature2m { get; set; }
 
         [JsonPropertyName("rain")]
-        public List<double?> Rain { get; set; }
+        public List<double?>? Rain { get; set; }
 
         [JsonPropertyName("surface_pressure")]
-        public List<double?> SurfacePressure { get; set; }
+        public List<double?>? SurfacePressure { get; set; }
 
         [JsonPropertyName("windspeed_10m")]
-        public List<double?> Windspeed10m { get; set; }
+        public List<double?>? Windspeed10m { get; set; }
     }
 
     public class HourlyUnits
     {
         [JsonPropertyName("time")]
-        public string Time { get; set; }
+        public string? Time { get; set; }
 
         [JsonPropertyName("temperature_2m")]
-        public string Temperature2m { get; set; }
+        public string? Temperature2m { get; set; }
 
         [JsonPropertyName("rain")]
-        public string Rain { get; set; }
+        public string? Rain { get; set; }
 
         [JsonPropertyName("surface_pressure")]
-        public string SurfacePressure { get; set; }
+        public string? SurfacePressure { get; set; }
 
         [JsonPropertyName("windspeed_10m")]
-        public string Windspeed10m { get; set; }
+        public string? Windspeed10m { get; set; }
     }
 }

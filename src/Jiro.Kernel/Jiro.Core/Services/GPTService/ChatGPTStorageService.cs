@@ -17,9 +17,9 @@ namespace Jiro.Core.Services.GPTService
             _options = options.Value;
         }
 
-        public ChatGPTSession GetOrCreateSession(string userId)
+        public ChatGPTSession? GetOrCreateSession(string userId)
         {
-            if (_sessions.TryGetValue(userId, out ChatGPTSession value))
+            if (_sessions.TryGetValue(userId, out ChatGPTSession? value))
                 return value;
 
             ChatMessage systemMessage = new()
@@ -60,7 +60,7 @@ namespace Jiro.Core.Services.GPTService
             _sessions[userId] = session;
         }
 
-        public void GetSession(string userId, out ChatGPTSession session)
+        public void GetSession(string userId, out ChatGPTSession? session)
         {
             _sessions.TryGetValue(userId, out session);
         }

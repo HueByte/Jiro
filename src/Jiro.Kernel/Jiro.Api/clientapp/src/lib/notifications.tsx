@@ -2,7 +2,7 @@ import { Id, toast } from "react-toastify";
 
 export const infoToast = (
   message: string,
-  autoClose: number | false = 10000
+  autoClose: number | false = 3000
 ) => {
   toast(message, {
     position: toast.POSITION.TOP_RIGHT,
@@ -20,7 +20,7 @@ export const infoToast = (
 
 export const promiseToast = (
   message: string,
-  autoClose: number | false = 10000
+  autoClose: number | false = 3000
 ): Id => {
   let id = toast.loading(message, {
     position: toast.POSITION.TOP_RIGHT,
@@ -42,7 +42,7 @@ export const updatePromiseToast = (
   id: Id,
   message: string,
   type: "success" | "error" | "warning",
-  autoClose: number | false = 10000
+  autoClose: number | false = 3000
 ) => {
   toast.update(id, {
     render: message,
@@ -54,7 +54,7 @@ export const updatePromiseToast = (
 
 export const successToast = (
   message: string,
-  autoClose: number | false = 10000
+  autoClose: number | false = 3000
 ) => {
   toast.success(message, {
     position: toast.POSITION.TOP_RIGHT,

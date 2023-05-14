@@ -27,11 +27,11 @@ public class JiroController : BaseController
         return ApiResponseCreator.Data(result);
     }
 
-    [HttpGet("completion")]
-    public async Task<IActionResult> GetCompletion(string query)
-    {
-        // var result = await _commandHandlerService.GetCompletionAsync(query);
+    // [HttpGet("completion")]
+    // public async Task<IActionResult> GetCompletion(string query)
+    // {
+    //     // var result = await _commandHandlerService.GetCompletionAsync(query);
 
-        return ApiResponseCreator.ValueType(true);
-    }
+    //     return ApiResponseCreator.ValueType(true);
+    // }
 }

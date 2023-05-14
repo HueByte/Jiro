@@ -11,7 +11,7 @@ export const ServerSettingBox = ({
 }: ServerSettingBoxProps) => {
   return (
     <div className="relative flex flex-[40%] flex-col gap-2 rounded bg-backgroundColor p-2 pt-8 md:flex-[100%]">
-      <div className="absolute -top-4 left-10 rounded bg-element px-2 py-1 font-bold text-accent7">
+      <div className="absolute -top-4 left-10 rounded bg-element px-2 py-1 font-bold text-accent7 md:text-sm">
         {icon} {name}
       </div>
       {children}

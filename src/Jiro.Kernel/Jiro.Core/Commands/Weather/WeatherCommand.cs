@@ -22,12 +22,12 @@ namespace Jiro.Core.Commands.Weather
             var result = await _weatherService.GetWeatherAsync(location);
 
             if (string.IsNullOrEmpty(result))
-                return GraphResult.Create(null, null, note: "Something went wrong while fetching weather data");
+                return GraphResult.Create(null, null!, note: "Something went wrong while fetching weather data");
 
             var weather = JsonSerializer.Deserialize<WeatherResponse>(result);
 
             if (weather is null)
-                return GraphResult.Create(null, null, note: "No weather data found");
+                return GraphResult.Create(null, null!, note: "No weather data found");
 
             // convert to acceptable format [{...}, {...}, {...}] 
             var data = weather.Hourly.Time

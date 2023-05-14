@@ -131,7 +131,7 @@ const HomePage = () => {
   return (
     <div className="flex w-full flex-row justify-center gap-6 px-8 py-8 lg:flex-col md:px-4 md:py-0">
       <MorphAvatar />
-      <div className="flex h-[100%] w-[1024px] min-w-[700px] flex-col rounded-xl bg-element shadow-lg shadow-element lg:h-[calc(90%_-_196px)] lg:w-full lg:min-w-full md:h-[calc(90%_-_128px)]">
+      <div className="flex h-[100%] w-[1024px] min-w-[700px] flex-col rounded-xl bg-element shadow-lg shadow-element lg:h-[calc(90%_-_196px)] lg:w-full lg:min-w-full sm:my-4 sm:h-full">
         <div
           ref={chatContainer}
           className="mx-12 my-4 flex flex-1 flex-col overflow-y-auto overflow-x-hidden pr-2 md:mx-6"
@@ -181,7 +181,7 @@ const HomePage = () => {
           />
         </div>
       </div>
-      <div className="w-[256px] min-w-0"></div>
+      <div className="w-[256px] min-w-0 sm:hidden"></div>
     </div>
   );
 };
