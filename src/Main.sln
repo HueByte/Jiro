@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jiro.Core", "Jiro.Kernel\Ji
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jiro.Infrastructure", "Jiro.Kernel\Jiro.Infrastructure\Jiro.Infrastructure.csproj", "{E9D0BA9F-99A1-4847-A0DA-0466E236D067}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jiro.Tests", "Jiro.Tests\Jiro.Tests.csproj", "{AF5B2B0C-DA19-4255-89C0-052F434EC2A5}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -32,6 +34,10 @@ Global
 		{E9D0BA9F-99A1-4847-A0DA-0466E236D067}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E9D0BA9F-99A1-4847-A0DA-0466E236D067}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E9D0BA9F-99A1-4847-A0DA-0466E236D067}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AF5B2B0C-DA19-4255-89C0-052F434EC2A5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AF5B2B0C-DA19-4255-89C0-052F434EC2A5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AF5B2B0C-DA19-4255-89C0-052F434EC2A5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AF5B2B0C-DA19-4255-89C0-052F434EC2A5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{BA4B5926-C295-4A7D-93F9-E60DD51B00AE} = {5994A734-3687-48D8-81A3-7488CD5E5B9C}

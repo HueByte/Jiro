@@ -16,9 +16,9 @@ namespace Jiro.Core.Services.Whitelist
             _userManager = userManager;
         }
 
-        public async Task<bool> IsWhitelistedAsync(string userId)
+        public Task<bool> IsWhitelistedAsync(string userId)
         {
-            return await _whitelistRepository.AsQueryable()
+            return _whitelistRepository.AsQueryable()
                 .AnyAsync(x => x.UserId == userId);
         }
 
