@@ -16,7 +16,8 @@ while (true)
     var builder = WebApplication.CreateBuilder(args);
     var configRef = builder.Configuration;
     configRef.SetBasePath(AppContext.BaseDirectory)
-        .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
+        .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+        .AddEnvironmentVariables();
 
     Serilog.Log.Logger = new LoggerConfiguration()
         .WriteTo.Console()
