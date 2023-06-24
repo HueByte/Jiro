@@ -1,9 +1,9 @@
 import { createContext, useEffect, useState } from "react";
-import { AuthService, VerifiedUserDTO } from "../api";
+import { AuthService, VerifiedUser } from "../api";
 
 interface AuthContextType {
-  authState: VerifiedUserDTO | null;
-  setAuthState: (state: VerifiedUserDTO) => void;
+  authState: VerifiedUser | null;
+  setAuthState: (state: VerifiedUser) => void;
   signout: () => Promise<void>;
   isAuthenticated: () => boolean;
   isInRole: (roles?: string[]) => Boolean;
@@ -16,10 +16,10 @@ interface AuthContextProps {
 const AuthContext = createContext<AuthContextType | null>(null);
 
 const AuthProvider = ({ children }: AuthContextProps) => {
-  const user: VerifiedUserDTO | null = JSON.parse(
+  const user: VerifiedUser | null = JSON.parse(
     localStorage.getItem("user") || "{}"
   );
-  const [authState, setAuthState] = useState<VerifiedUserDTO | null>(user);
+  const [authState, setAuthState] = useState<VerifiedUser | null>(user);
 
   useEffect(() => {
     window.addEventListener("refreshUser", () => {
@@ -33,7 +33,7 @@ const AuthProvider = ({ children }: AuthContextProps) => {
     };
   }, []);
 
-  const setAuthInfo = (userData: VerifiedUserDTO) => {
+  const setAuthInfo = (userData: VerifiedUser) => {
     localStorage.setItem("user", JSON.stringify(userData));
 
     setAuthState(userData);
@@ -68,7 +68,7 @@ const AuthProvider = ({ children }: AuthContextProps) => {
 
   const value: AuthContextType = {
     authState,
-    setAuthState: (authInfo: VerifiedUserDTO) => setAuthInfo(authInfo),
+    setAuthState: (authInfo: VerifiedUser) => setAuthInfo(authInfo),
     signout,
     isAuthenticated,
     isInRole,
