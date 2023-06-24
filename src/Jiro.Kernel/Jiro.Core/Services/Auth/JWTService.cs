@@ -19,7 +19,7 @@ public class JWTService : IJWTService
     public string GenerateJsonWebToken(AppUser user, IList<string> roles)
     {
         if (user is null)
-            throw new HandledException($"User is empty");
+            throw new JiroException(new ArgumentNullException(nameof(user)), "Something went wrong with generating token");
 
         var claims = new List<Claim>()
         {
