@@ -119,7 +119,7 @@ public class UserService : IUserService
         return result;
     }
 
-    public async Task<VerifiedUserDTO> LoginUserAsync(LoginUsernameDTO userDto, string ipAddress)
+    public async Task<VerifiedUser> LoginUserAsync(LoginUsernameDTO userDto, string ipAddress)
     {
         if (userDto is null && string.IsNullOrEmpty(ipAddress))
             throw new HandledException("User model and Ip address cannot be empty");
@@ -198,7 +198,7 @@ public class UserService : IUserService
             .ToListAsync();
     }
 
-    private async Task<VerifiedUserDTO> HandleLogin(AppUser? user, string? password, string ipAddress)
+    private async Task<VerifiedUser> HandleLogin(AppUser? user, string? password, string ipAddress)
     {
         if (user is null || string.IsNullOrEmpty(password))
             throw new HandledException("Couldn't log in, check your login or password"); // Couldn't find user
@@ -220,7 +220,7 @@ public class UserService : IUserService
         // save removal of old refresh tokens
         await _userManager.UpdateAsync(user);
 
-        return new VerifiedUserDTO()
+        return new VerifiedUser()
         {
             Username = user!.UserName,
             Roles = roles?.ToArray()!,

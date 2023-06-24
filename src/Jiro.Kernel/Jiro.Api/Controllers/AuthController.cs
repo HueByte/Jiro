@@ -1,3 +1,4 @@
+using Jiro.Core;
 using Jiro.Core.Constants;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -37,11 +38,11 @@ namespace Jiro.Api.Controllers
         }
 
         [HttpPost("login")]
-        [ProducesResponseType(typeof(ApiResponse<VerifiedUserDTO>), 200)]
+        [ProducesResponseType(typeof(ApiResponse<VerifiedUser>), 200)]
         public async Task<IActionResult> Login([FromBody] LoginUsernameDTO userDTO)
         {
             var data = await _userService.LoginUserAsync(userDTO, GetIpAddress()!);
-            var result = new ApiResponse<VerifiedUserDTO>(data);
+            var result = new ApiResponse<VerifiedUser>(data);
 
             if (result.IsSuccess)
             {
@@ -52,13 +53,13 @@ namespace Jiro.Api.Controllers
         }
 
         [HttpPost("refreshToken")]
-        [ProducesResponseType(typeof(ApiResponse<VerifiedUserDTO>), 200)]
+        [ProducesResponseType(typeof(ApiResponse<VerifiedUser>), 200)]
         public async Task<IActionResult> RefreshToken()
         {
             var refreshToken = Request.Cookies[CookieNames.REFRESH_TOKEN];
             var data = await _refreshTokenService.RefreshToken(refreshToken!, GetIpAddress()!);
 
-            var result = new ApiResponse<VerifiedUserDTO>(data);
+            var result = new ApiResponse<VerifiedUser>(data);
 
             if (result.IsSuccess && !string.IsNullOrEmpty(result.Data?.RefreshToken))
             {
@@ -122,7 +123,7 @@ namespace Jiro.Api.Controllers
                 return HttpContext.Connection?.RemoteIpAddress?.MapToIPv4().ToString() ?? "localhost";
         }
 
-        private void AttachAuthCookies(VerifiedUserDTO user)
+        private void AttachAuthCookies(VerifiedUser user)
         {
             if (user is null) return;
 

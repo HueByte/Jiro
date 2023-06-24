@@ -35,16 +35,20 @@ public class RefreshTokenService : IRefreshTokenService
         };
     }
 
-    public async Task<VerifiedUserDTO> RefreshToken(string token, string ipAddress)
+    public async Task<VerifiedUser> RefreshToken(string token, string ipAddress)
     {
         var user = await GetUserByRefreshToken(token);
+        if(user is null)
+             throw new JiroException(new Exception("Couldn't find user with provided refresh token"), 
+                 "Something went wrong, try to relogin");
+        
         user.RefreshTokens ??= new();
 
         // Get matching token
         var oldRefreshToken = user.RefreshTokens.FirstOrDefault(e => e.Token == token);
 
         if (oldRefreshToken is null || !oldRefreshToken.IsActive)
-            throw new TokenException("Token was not found or is not active");
+            throw new JiroException("Token was not found or is not active");
 
         // Get new refresh token and revoke old one
         var newRefreshToken = RotateToken(oldRefreshToken, ipAddress);
@@ -57,7 +61,7 @@ public class RefreshTokenService : IRefreshTokenService
         var roles = user.UserRoles.Select(e => e.Role.Name).ToList();
         var jwtToken = _jwtAuth.GenerateJsonWebToken(user, roles!);
 
-        return new VerifiedUserDTO
+        return new VerifiedUser
         {
             Username = user.UserName,
             Token = jwtToken,
@@ -71,7 +75,7 @@ public class RefreshTokenService : IRefreshTokenService
     public async Task RevokeToken(string token, string ipAddress)
     {
         if (string.IsNullOrEmpty(token))
-            throw new TokenException("Revoking token was empty");
+            throw new JiroException("Revoking token was empty");
 
         var user = await GetUserByRefreshToken(token);
         var refreshToken = user.RefreshTokens?.FirstOrDefault(e => e.Token == token);
@@ -129,17 +133,12 @@ public class RefreshTokenService : IRefreshTokenService
     /// <param name="token"></param>
     /// <returns></returns>
     /// <exception cref="TokenException"></exception>
-    private async Task<AppUser> GetUserByRefreshToken(string token)
+    private Task<AppUser?> GetUserByRefreshToken(string token)
     {
-        var user = await _userManager.Users
+        return _userManager.Users
             .Include(e => e.RefreshTokens)
             .Include(e => e.UserRoles)
             .ThenInclude(e => e.Role)
-            .SingleOrDefaultAsync(user => user!.RefreshTokens!.Any(t => t.Token == token));
-
-        if (user is null)
-            throw new TokenException("Token is invalid");
-
-        return user;
+            .FirstOrDefaultAsync(user => user.RefreshTokens != null && user.RefreshTokens.Any(t => t.Token == token));
     }
 }

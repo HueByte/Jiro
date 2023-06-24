@@ -3,9 +3,9 @@ using Jiro.Core.Models;
 
 namespace Jiro.Core.DTO
 {
+    [Obsolete("Use Jiro.Core.VerifiedUser instead")]
     public class VerifiedUserDTO
     {
-
         public string? Username { get; set; }
         public string[]? Roles { get; set; }
         public string? Email { get; set; }

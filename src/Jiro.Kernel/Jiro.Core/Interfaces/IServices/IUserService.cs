@@ -11,6 +11,6 @@ public interface IUserService
     Task<IdentityResult> CreateUserAsync(RegisterDTO registerUser);
     Task<IdentityResult> DeleteUserAsync(string userId);
     Task<IdentityResult> AssignRoleAsync(string userId, string role);
-    Task<VerifiedUserDTO> LoginUserAsync(LoginUsernameDTO userDto, string IpAddress);
+    Task<VerifiedUser> LoginUserAsync(LoginUsernameDTO userDto, string IpAddress);
     Task<List<UserInfoDTO>> GetUsersAsync();
 }
