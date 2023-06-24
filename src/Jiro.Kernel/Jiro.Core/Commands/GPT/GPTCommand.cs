@@ -5,10 +5,12 @@ namespace Jiro.Core.Commands.GPT
     {
         private readonly IChatService _chatService;
         private readonly IChatGPTStorageService _storageService;
-        public GPTCommand(IChatService chatService, IChatGPTStorageService storageService)
+        private readonly ICurrentUserService _currentUserService;
+        public GPTCommand(IChatService chatService, IChatGPTStorageService storageService, ICurrentUserService currentUserService)
         {
             _chatService = chatService;
             _storageService = storageService;
+            _currentUserService = currentUserService;
         }
 
         [Command("chat")]
@@ -22,8 +24,7 @@ namespace Jiro.Core.Commands.GPT
         [Command("reset", commandDescription: "Clears the current session")]
         public Task ClearSession()
         {
-            string tempUser = "tempUser";
-            _storageService.RemoveSession(tempUser);
+            _storageService.RemoveSession(_currentUserService.UserId!);
 
             return Task.CompletedTask;
         }
