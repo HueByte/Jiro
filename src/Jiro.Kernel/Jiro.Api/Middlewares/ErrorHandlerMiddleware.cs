@@ -43,7 +43,7 @@ namespace Jiro.Api.Middlewares
             }
         }
 
-        public ApiResponse<object> GetExceptionResponse(Exception exception)
+        public static ApiResponse<object> GetExceptionResponse(Exception exception)
         {
             ApiResponse<object> errorResult = exception switch
             {
