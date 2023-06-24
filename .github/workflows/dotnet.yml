@@ -19,8 +19,11 @@ jobs:
       - name: Restore dependencies
         working-directory: ./src
         run: dotnet restore
-      - name: Build
+      - name: Restore tools
         working-directory: ./src
+        run: dotnet tool restore
+      - name: Build
+        working-directory: ./src/Jiro.Kernel/Jiro.Api
         run: dotnet build --no-restore
       - name: Test
         working-directory: ./src
