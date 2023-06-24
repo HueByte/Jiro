@@ -1,4 +1,3 @@
-using System.Formats.Asn1;
 using Jiro.Core.Constants;
 using Jiro.Core.DTO;
 using Jiro.Core.Interfaces.IRepositories;
@@ -6,7 +5,6 @@ using Jiro.Core.Models;
 using Jiro.Core.Options;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -14,6 +12,7 @@ namespace Jiro.Core.Services.Auth;
 
 public class UserService : IUserService
 {
+    private readonly ILogger<UserService> _logger;
     private readonly UserManager<AppUser> _userManager;
     private readonly SignInManager<AppUser> _signInManager;
     private readonly IJWTService _jwtAuthentication;
@@ -21,6 +20,7 @@ public class UserService : IUserService
     private readonly IRefreshTokenService _refreshTokenService;
     private readonly IWhitelistRepository _whitelistRepository;
     public UserService(
+        ILogger<UserService> logger,
         UserManager<AppUser> userManager,
         SignInManager<AppUser> signInManager,
         IJWTService jwtAuthentication,
@@ -28,6 +28,7 @@ public class UserService : IUserService
         IRefreshTokenService refreshTokenService,
         IWhitelistRepository whitelistRepository)
     {
+        _logger = logger;
         _userManager = userManager;
         _signInManager = signInManager;
         _jwtAuthentication = jwtAuthentication;
@@ -106,6 +107,9 @@ public class UserService : IUserService
 
     public async Task<IdentityResult> DeleteUserAsync(string userId)
     {
+        if (string.IsNullOrEmpty(userId))
+            throw new HandledException("Couldn't find this user");
+
         var user = await _userManager.FindByIdAsync(userId);
         if (user is null)
             throw new HandledException("Couldn't find this user");
@@ -115,9 +119,9 @@ public class UserService : IUserService
         return result;
     }
 
-    public async Task<VerifiedUserDTO> LoginUserAsync(LoginUsernameDTO userDto, string IpAddress)
+    public async Task<VerifiedUserDTO> LoginUserAsync(LoginUsernameDTO userDto, string ipAddress)
     {
-        if (userDto is null && string.IsNullOrEmpty(IpAddress))
+        if (userDto is null && string.IsNullOrEmpty(ipAddress))
             throw new HandledException("User model and Ip address cannot be empty");
 
         var user = await _userManager.Users
@@ -127,7 +131,7 @@ public class UserService : IUserService
             .Include(e => e.RefreshTokens)
             .FirstOrDefaultAsync();
 
-        return await HandleLogin(user!, userDto!.Password!, IpAddress);
+        return await HandleLogin(user, userDto?.Password, ipAddress);
     }
 
     public async Task<bool> ChangeEmailAsync(string? userId, string email, string password)
@@ -165,13 +169,18 @@ public class UserService : IUserService
             throw new HandledException("Couldn't find this user");
 
         var result = await _userManager.AddToRoleAsync(user, role);
+        if (!result.Succeeded)
+        {
+            _logger.LogError(string.Join(", ", result.Errors.Select(e => e.Description)));
+            throw new HandledException("Role assignment failed");
+        }
 
         return result;
     }
 
-    public async Task<List<UserInfoDTO>> GetUsersAsync()
+    public Task<List<UserInfoDTO>> GetUsersAsync()
     {
-        var users = await _userManager.Users
+        return _userManager.Users
             .Include(usr => usr.UserRoles)
                 .ThenInclude(usr => usr.Role)
             .Join(_whitelistRepository.AsQueryable(),
@@ -187,13 +196,11 @@ public class UserService : IUserService
                 IsWhitelisted = usr.IsWhitelisted
             })
             .ToListAsync();
-
-        return users;
     }
 
-    private async Task<VerifiedUserDTO> HandleLogin(AppUser user, string password, string ipAddress)
+    private async Task<VerifiedUserDTO> HandleLogin(AppUser? user, string? password, string ipAddress)
     {
-        if (user is null)
+        if (user is null || string.IsNullOrEmpty(password))
             throw new HandledException("Couldn't log in, check your login or password"); // Couldn't find user
 
         // Validate credentials 
