@@ -53,6 +53,12 @@ namespace Jiro.Api.Middlewares
                     Errors = new string[] { exception.Message },
                     IsSuccess = false
                 },
+                JiroException ex => new()
+                {
+                    Data = default,
+                    Errors = new string[] { ex.UserMessage },
+                    IsSuccess = false
+                },
                 HandledException or
                 HandledExceptionList or
                 TokenException or
