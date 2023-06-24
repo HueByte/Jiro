@@ -1,30 +1,27 @@
 ﻿using Jiro.Core;
-using Jiro.Core.Abstraction;
 using Jiro.Core.Interfaces.IRepositories;
 using Jiro.Core.Models;
 using Jiro.Core.Services.Whitelist;
 using Jiro.Tests.Utilities;
 using Microsoft.AspNetCore.Identity;
-using MockQueryable.Moq;
 using Moq;
 
 namespace Jiro.Tests.ServiceTests;
 
 public class WhitelistServiceTests
 {
-    private Mock<IWhitelistRepository> _mockRepo;
-    private Mock<UserManager<AppUser>> _userManagerMock;
-    private WhitelistService _whitelistService;
-    private string existingUserId = "testUserId";
-    private string notExistingUserId = "notTestUserId";
-
-    private AppUser existingUser;
+    private readonly Mock<IWhitelistRepository> _mockRepo;
+    private readonly Mock<UserManager<AppUser>> _userManagerMock;
+    private readonly WhitelistService _whitelistService;
+    private readonly string existingUserId = "testUserId";
+    private readonly string notExistingUserId = "notTestUserId";
+    private readonly AppUser existingUser;
 
     public WhitelistServiceTests()
     {
         existingUser = new AppUser() { Id = existingUserId };
         var entries = new List<WhiteListEntry> { new WhiteListEntry() { UserId = existingUserId } };
-        
+
         _mockRepo = MockObjects.CreateMockRepository<IWhitelistRepository, string, WhiteListEntry>(entries);
         _userManagerMock = MockObjects.GetUserManagerMock<AppUser>();
         _whitelistService = new WhitelistService(_mockRepo.Object, _userManagerMock.Object);
@@ -56,7 +53,7 @@ public class WhitelistServiceTests
         // Arrange
         _userManagerMock.Setup(x => x.FindByIdAsync(existingUserId))
             .ReturnsAsync(existingUser);
-        
+
         _mockRepo.Setup(x => x.AddAsync(It.IsAny<WhiteListEntry>()))
             .Returns(Task.FromResult(true));
 
