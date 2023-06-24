@@ -20,10 +20,10 @@ jobs:
         working-directory: ./src
         run: dotnet restore
       - name: Restore tools
-        working-directory: ./src
+        working-directory: ./src/Jiro.Kernel/Jiro.Api
         run: dotnet tool restore
       - name: Build
-        working-directory: ./src/Jiro.Kernel/Jiro.Api
+        working-directory: ./src
         run: dotnet build --no-restore
       - name: Test
         working-directory: ./src
