@@ -1,53 +1,51 @@
-using System.Net.Http.Json;
+using System.Text.Json;
 using Jiro.Core.Constants;
 using Jiro.Core.Services.Weather.Models;
 
-namespace Jiro.Core.Services.WeatherService
+namespace Jiro.Core.Services.Weather;
+
+public class WeatherService : IWeatherService
 {
-    public class WeatherService : IWeatherService
+    private readonly HttpClient _weatherClient;
+    private readonly IGeolocationService _geolocationService;
+    public WeatherService(IHttpClientFactory clientFactory, IGeolocationService geolocationService)
     {
-        private readonly HttpClient _weatherClient;
-        private readonly HttpClient _geoClient;
-        public WeatherService(IHttpClientFactory clientFactory)
-        {
-            _weatherClient = clientFactory.CreateClient(HttpClients.WEATHER_CLIENT);
-            _geoClient = clientFactory.CreateClient(HttpClients.GEOLOCATION_CLIENT);
-        }
+        _weatherClient = clientFactory.CreateClient(HttpClients.WEATHER_CLIENT);
+        _geolocationService = geolocationService;
+    }
 
-        public async Task<string?> GetWeatherAsync(string city)
-        {
-            var locationInfo = await GetGeoLocationAsync(city);
+    public async Task<string?> GetWeatherStringAsync(string city)
+    {
+        var locationInfo = await _geolocationService.GetGeolocationAsync(city);
 
-            if (locationInfo is null)
-                return null;
-
-            Dictionary<string, string> queryParams = new()
-            {
-                { "latitude", locationInfo.Lat },
-                { "longitude", locationInfo.Lon },
-                { "current_weather", "true" },
-                { "hourly", "temperature_2m,rain,surface_pressure,windspeed_10m" }
-            };
-
-            // Build the query string
-            string queryString = string.Join("&", queryParams.Select(kvp => $"{kvp.Key}={kvp.Value}"));
-
-            var response = await _weatherClient.GetAsync($"forecast?{queryString}");
-
-            return await response.Content.ReadAsStringAsync();
-        }
-
-        public async Task<GeoLocationResponse?> GetGeoLocationAsync(string city)
-        {
-            var response = await _geoClient.GetAsync($"search?city={city}&format=json");
-
-            if (response.IsSuccessStatusCode)
-            {
-                var result = await response.Content.ReadFromJsonAsync<List<GeoLocationResponse?>>();
-                return result?.FirstOrDefault();
-            }
-
+        if (locationInfo is null || locationInfo.Lat is null || locationInfo.Lon is null)
             return null;
-        }
+
+        Dictionary<string, string> queryParams = new()
+        {
+            { "latitude", locationInfo.Lat },
+            { "longitude", locationInfo.Lon },
+            { "current_weather", "true" },
+            { "hourly", "temperature_2m,rain,surface_pressure,windspeed_10m" }
+        };
+
+        // Build the query string
+        string queryString = string.Join("&", queryParams.Select(kvp => $"{kvp.Key}={kvp.Value}"));
+
+        var response = await _weatherClient.GetAsync($"forecast?{queryString}");
+
+        return await response.Content.ReadAsStringAsync();
+    }
+
+    public async Task<WeatherResponse?> GetWeatherAsync(string city)
+    {
+        WeatherResponse? response = null;
+
+        var weather = await GetWeatherStringAsync(city);
+
+        if (weather is not null) 
+            response = JsonSerializer.Deserialize<WeatherResponse>(weather);
+
+        return response;
     }
 }

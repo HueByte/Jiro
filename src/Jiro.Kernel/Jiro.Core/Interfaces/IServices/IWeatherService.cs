@@ -4,7 +4,7 @@ namespace Jiro.Core.Interfaces.IServices
 {
     public interface IWeatherService
     {
-        Task<string?> GetWeatherAsync(string country);
-        Task<GeoLocationResponse?> GetGeoLocationAsync(string city);
+        Task<string?> GetWeatherStringAsync(string country);
+        Task<WeatherResponse?> GetWeatherAsync(string country);
     }
 }

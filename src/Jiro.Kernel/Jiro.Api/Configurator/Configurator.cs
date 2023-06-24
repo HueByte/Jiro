@@ -1,6 +1,7 @@
 using System.Text;
 using Jiro.Api.Authorization;
 using Jiro.Api.Authorization.Requirements;
+using Jiro.Core;
 using Jiro.Core.Constants;
 using Jiro.Core.Interfaces.IRepositories;
 using Jiro.Core.Models;
@@ -8,9 +9,10 @@ using Jiro.Core.Options;
 using Jiro.Core.Services.Auth;
 using Jiro.Core.Services.CommandHandler;
 using Jiro.Core.Services.CommandSystem;
+using Jiro.Core.Services.Geolocation;
 using Jiro.Core.Services.GPTService;
 using Jiro.Core.Services.Instance;
-using Jiro.Core.Services.WeatherService;
+using Jiro.Core.Services.Weather;
 using Jiro.Core.Services.Whitelist;
 using Jiro.Infrastructure;
 using Jiro.Infrastructure.Repositories;
@@ -53,6 +55,7 @@ namespace Jiro.Api.Configurator
             services.AddScoped<IRefreshTokenService, RefreshTokenService>();
             services.AddScoped<IWhitelistService, WhitelistService>();
             services.AddScoped<IJiroInstanceService, JiroInstanceService>();
+            services.AddScoped<IGeolocationService, GeolocationService>();
 
             // repositories
             services.AddScoped<IWhitelistRepository, WhitelistRepository>();
