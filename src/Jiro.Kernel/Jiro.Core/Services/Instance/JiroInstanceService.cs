@@ -4,6 +4,7 @@ using Jiro.Core.DTO;
 using Jiro.Core.Interfaces.IRepositories;
 using Jiro.Core.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
 namespace Jiro.Core.Services.Instance
@@ -13,11 +14,13 @@ namespace Jiro.Core.Services.Instance
         private readonly ILogger _logger;
         private readonly IJiroInstanceRepository _jiroInstanceRepository;
         private readonly ICurrentInstanceService _currentInstanceService;
-        public JiroInstanceService(ILogger<JiroInstanceService> logger, IJiroInstanceRepository jiroInstanceRepository, ICurrentInstanceService currentInstanceService)
+        private readonly IConfiguration _configuration;
+        public JiroInstanceService(ILogger<JiroInstanceService> logger, IJiroInstanceRepository jiroInstanceRepository, ICurrentInstanceService currentInstanceService, IConfiguration configuration)
         {
             _logger = logger;
             _jiroInstanceRepository = jiroInstanceRepository;
             _currentInstanceService = currentInstanceService;
+            _configuration = configuration;
         }
 
         public async Task<JiroInstance?> GetJiroInstanceAsync()
@@ -85,7 +88,7 @@ namespace Jiro.Core.Services.Instance
             await _jiroInstanceRepository.SaveChangesAsync();
         }
 
-        private static async Task WriteConfigAsyncInternal(InstanceConfigDTO instanceConfig)
+        private async Task WriteConfigAsyncInternal(InstanceConfigDTO instanceConfig)
         {
             JsonSerializerOptions options = new()
             {
@@ -93,13 +96,25 @@ namespace Jiro.Core.Services.Instance
             };
 
             var json = JsonSerializer.Serialize(instanceConfig, options);
-            await File.WriteAllTextAsync(Path.Join(AppContext.BaseDirectory, "appsettings.json"), json);
+            await File.WriteAllTextAsync(GetConfigPath(), json);
         }
 
-        private static async Task<InstanceConfigDTO?> GetConfigAsyncInternal()
+        private async Task<InstanceConfigDTO?> GetConfigAsyncInternal()
         {
-            var json = await File.ReadAllBytesAsync(Path.Join(AppContext.BaseDirectory, "appsettings.json"));
+            var json = await File.ReadAllBytesAsync(GetConfigPath());
+
             return JsonSerializer.Deserialize<InstanceConfigDTO>(json);
+        }
+
+        private string GetConfigPath()
+        {
+            var path = _configuration.GetValue<string>("CONFIG_PATH") ?? Path.Join(AppContext.BaseDirectory, "appsettings.json");
+            if (string.IsNullOrEmpty(path) || !File.Exists(path))
+                throw new JiroException("No configuration file found!");
+
+            _logger.LogInformation("Found configuration file at {Path}", path);
+
+            return path;
         }
     }
 }
