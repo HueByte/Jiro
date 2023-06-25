@@ -16,10 +16,11 @@ namespace Jiro.Api
             var whitelistService = scope.ServiceProvider.GetRequiredService<IWhitelistService>();
             var IJiroInstanceService = scope.ServiceProvider.GetRequiredService<IJiroInstanceService>();
             var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+            var config = scope.ServiceProvider.GetRequiredService<IConfiguration>();
 
             await SeedMainInstanceAsync(logger, IJiroInstanceService);
             await SeedRolesAsync(logger, roleManager);
-            await SeedManagementAsync(logger, userManager, whitelistService);
+            await SeedManagementAsync(logger, userManager, whitelistService, config);
         }
 
         private async static Task SeedMainInstanceAsync(ILogger logger, IJiroInstanceService jiroInstanceService)
@@ -55,7 +56,7 @@ namespace Jiro.Api
             }
         }
 
-        private async static Task SeedManagementAsync(ILogger logger, UserManager<AppUser> userManager, IWhitelistService whitelistService)
+        private async static Task SeedManagementAsync(ILogger logger, UserManager<AppUser> userManager, IWhitelistService whitelistService, IConfiguration config)
         {
             Tuple<AppUser, string[]>[] managementUsers = {
                 new Tuple<AppUser, string[]>(new AppUser()
@@ -76,8 +77,15 @@ namespace Jiro.Api
                 {
                     try
                     {
+                        // workaround for async logger queue merging std out
+                        await Task.Delay(5);
                         logger.LogInformation("Seeding {username} with roles {roles}\n", user.UserName, string.Join(';', roles));
-                        var pass = PasswordPrompt(user!.UserName!);
+                        await Task.Delay(5);
+
+                        // todo; think of some other system non inputted password
+                        string pass = "TempPassword12!";
+                        if (config.GetValue<bool>("PASSWORD_SEED_PROMPT"))
+                            pass = PasswordPrompt(user.UserName!);
 
                         var result = await userManager.CreateAsync(user, pass);
                         if (result.Succeeded)
