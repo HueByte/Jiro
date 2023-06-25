@@ -101,6 +101,8 @@ while (true)
 
     if (AppUtils.IsDebug()) app.Map("/", () => Results.Redirect("/swagger"));
 
+    app.Map("/api", () => "Hello World");
+
     try
     {
         await app.RunAsync(_cts.Token);
