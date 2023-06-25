@@ -20,6 +20,7 @@ COPY ["Jiro.Infrastructure/Jiro.Infrastructure.csproj", "Jiro.Infrastructure/"]
 RUN dotnet restore "Jiro.Api/Jiro.Api.csproj"
 COPY . .
 WORKDIR "/Jiro.Api"
+RUN dotnet tool restore
 RUN dotnet build "Jiro.Api.csproj" -c Release -o /app/build
 
 FROM build AS publish

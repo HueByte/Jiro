@@ -48,8 +48,8 @@
   </Target>
 
   <!-- Create API client -->
-  <Target Name="OpenAPI" AfterTargets="Build" Condition="$(Configuration)=='Debug'">
-    <Exec Command="dotnet swagger tofile --output clientapp/src/api/swagger.json $(OutputPath)$(AssemblyName).dll v1" WorkingDirectory="$(ProjectDir)" />
+  <Target Name="OpenAPI" AfterTargets="Build">
+    <Exec Command="dotnet swagger tofile --output clientapp/src/api/swagger.json $(OutputPath)/$(AssemblyName).dll v1" WorkingDirectory="$(ProjectDir)" />
     <Exec Command="npx openapi --input src/api/swagger.json --output src/api/ --client axios --postfix Service --useOptions --useUnionTypes" WorkingDirectory="$(ProjectDir)/clientapp" />
   </Target>
 
