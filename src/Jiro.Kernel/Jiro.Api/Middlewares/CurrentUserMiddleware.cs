@@ -18,7 +18,8 @@ namespace Jiro.Api.Middlewares
 
         public async Task InvokeAsync(HttpContext context, ICurrentUserService currentUserService)
         {
-            currentUserService.SetCurrentUser(context.User.FindFirstValue(ClaimTypes.NameIdentifier));
+            if (context.User.Identity?.IsAuthenticated == true)
+                currentUserService.SetCurrentUser(context.User.FindFirstValue(ClaimTypes.NameIdentifier));
 
             await _next(context);
         }
