@@ -37,18 +37,16 @@ public class RefreshTokenService : IRefreshTokenService
 
     public async Task<VerifiedUser> RefreshToken(string token, string ipAddress)
     {
-        var user = await GetUserByRefreshToken(token);
-        if(user is null)
-             throw new JiroException(new Exception("Couldn't find user with provided refresh token"), 
-                 "Something went wrong, try to relogin");
-        
+        var user = await GetUserByRefreshToken(token)
+            ?? throw new TokenException("Couldn't find user with provided refresh token");
+
         user.RefreshTokens ??= new();
 
         // Get matching token
         var oldRefreshToken = user.RefreshTokens.FirstOrDefault(e => e.Token == token);
 
         if (oldRefreshToken is null || !oldRefreshToken.IsActive)
-            throw new JiroException("Token was not found or is not active");
+            throw new TokenException("Token was not found or is not active");
 
         // Get new refresh token and revoke old one
         var newRefreshToken = RotateToken(oldRefreshToken, ipAddress);
@@ -75,7 +73,7 @@ public class RefreshTokenService : IRefreshTokenService
     public async Task RevokeToken(string token, string ipAddress)
     {
         if (string.IsNullOrEmpty(token))
-            throw new JiroException("Revoking token was empty");
+            throw new TokenException("Revoking token was empty");
 
         var user = await GetUserByRefreshToken(token);
         var refreshToken = user.RefreshTokens?.FirstOrDefault(e => e.Token == token);
@@ -139,6 +137,7 @@ public class RefreshTokenService : IRefreshTokenService
             .Include(e => e.RefreshTokens)
             .Include(e => e.UserRoles)
             .ThenInclude(e => e.Role)
+            .AsSplitQuery()
             .FirstOrDefaultAsync(user => user.RefreshTokens != null && user.RefreshTokens.Any(t => t.Token == token));
     }
 }
