@@ -14,10 +14,15 @@ using Serilog.Sinks.SystemConsole.Themes;
 while (true)
 {
     var builder = WebApplication.CreateBuilder(args);
+
     var configRef = builder.Configuration;
     configRef.SetBasePath(AppContext.BaseDirectory)
-        .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
         .AddEnvironmentVariables();
+
+    EnvironmentConfigurator environmentConfigurator = new(configRef);
+    environmentConfigurator.PrepareDefaultFolders();
+    environmentConfigurator.PrepareConfigFiles();
+    environmentConfigurator.PrepareLogsFolder();
 
     Serilog.Log.Logger = new LoggerConfiguration()
         .WriteTo.Console()
@@ -40,7 +45,7 @@ while (true)
         .MinimumLevel.Override("Microsoft.AspNetCore", logLevelAspNetCore)
         .MinimumLevel.Override("Microsoft.EntityFrameworkCore.Database.Command", logLevelDatabase)
         .WriteTo.Async(e => e.Console(theme: AnsiConsoleTheme.Code))
-        .WriteTo.Async(e => e.File(Path.Combine(AppContext.BaseDirectory, "logs/jiro.log"), rollingInterval: logInterval))
+        .WriteTo.Async(e => e.File(configRef.GetValue<string>("API_LOGS_PATH") ?? Path.Combine(AppContext.BaseDirectory, "logs/jiro.log"), rollingInterval: logInterval))
         .ReadFrom.Configuration(builder.Configuration)
         .ReadFrom.Services(services));
 

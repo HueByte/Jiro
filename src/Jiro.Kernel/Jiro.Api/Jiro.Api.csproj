@@ -43,14 +43,6 @@
 	  <ProjectReference Include="..\Jiro.Infrastructure\Jiro.Infrastructure.csproj" />
   </ItemGroup>
 
-  <Target Name="CreateLogFolder" AfterTargets="Build">
-    <MakeDir Directories="$(OutDir)logs" Condition="!Exists('$(OutDir)Database')" />
-  </Target>
-  
-  <Target Name="CreateLogFolder" AfterTargets="AfterPublish">
-   <MakeDir Directories="$(PublishDir)logs" Condition="!Exists('$(PublishDir)Database')" />
-  </Target>
-
   <Target Name="CreateModulesFolder" AfterTargets="Build">
      <MakeDir Directories="$(OutDir)modules" Condition="!Exists('$(OutDir)Database')" />
   </Target>

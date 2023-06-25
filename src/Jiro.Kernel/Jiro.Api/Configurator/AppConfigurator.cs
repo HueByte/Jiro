@@ -62,9 +62,6 @@ namespace Jiro.Api.Configurator
 
         public AppConfigurator Migrate()
         {
-            if (!Directory.Exists(Path.Join(AppContext.BaseDirectory, "save")))
-                Directory.CreateDirectory(Path.Join(AppContext.BaseDirectory, "save"));
-
             using var scope = _app.Services.CreateScope();
             var context = scope.ServiceProvider.GetRequiredService<JiroContext>();
 

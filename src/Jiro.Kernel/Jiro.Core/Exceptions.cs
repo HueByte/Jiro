@@ -36,7 +36,6 @@ public class HandledException : Exception
     public HandledException(string exceptionMessage) : base(exceptionMessage) { }
 }
 
-[Obsolete("Use JiroException instead")]
 public class TokenException : Exception
 {
     public TokenException(string exceptionMessage) : base(exceptionMessage) { }
