@@ -1,6 +1,7 @@
 using Jiro.Core;
 using Jiro.Core.Constants;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
@@ -19,69 +20,65 @@ namespace Jiro.Api.Controllers
         }
 
         [HttpPost("create")]
-        [ProducesResponseType(typeof(ApiResponse<IdentityResult>), 200)]
+        [ProducesResponseType(typeof(ApiSuccessResponse<IdentityResult>), 200)]
+        [ProducesResponseType(typeof(ApiErrorResponse), 400)]
         public async Task<IActionResult> CreateAccount([FromBody] RegisterDTO registerDTO)
         {
             var data = await _userService.CreateUserAsync(registerDTO);
 
-            return ApiResponseCreator.Data(data);
+            return Ok(new ApiSuccessResponse<IdentityResult>(data));
         }
 
         [HttpDelete("deleteUser")]
         [Authorize(Roles = Roles.ADMIN)]
-        [ProducesResponseType(typeof(ApiResponse<IdentityResult>), 200)]
+        [ProducesResponseType(typeof(ApiSuccessResponse<IdentityResult>), 200)]
+        [ProducesResponseType(typeof(ApiErrorResponse), 400)]
         public async Task<IActionResult> DeleteUser(string userId)
         {
             var data = await _userService.DeleteUserAsync(userId);
 
-            return ApiResponseCreator.Data(data);
+            return Ok(new ApiSuccessResponse<IdentityResult>(data));
         }
 
         [HttpPost("login")]
-        [ProducesResponseType(typeof(ApiResponse<VerifiedUser>), 200)]
+        [ProducesResponseType(typeof(ApiSuccessResponse<VerifiedUser>), 200)]
+        [ProducesResponseType(typeof(ApiErrorResponse), 400)]
         public async Task<IActionResult> Login([FromBody] LoginUsernameDTO userDTO)
         {
             var data = await _userService.LoginUserAsync(userDTO, GetIpAddress()!);
-            var result = new ApiResponse<VerifiedUser>(data);
+            AttachAuthCookies(data);
 
-            if (result.IsSuccess)
-            {
-                AttachAuthCookies(result.Data!);
-            }
-
-            return ApiResponseCreator.Create(result);
+            return Ok(new ApiSuccessResponse<VerifiedUser>(data));
         }
 
         [HttpPost("refreshToken")]
-        [ProducesResponseType(typeof(ApiResponse<VerifiedUser>), 200)]
+        [ProducesResponseType(typeof(ApiSuccessResponse<VerifiedUser>), 200)]
+        [ProducesResponseType(typeof(ApiErrorResponse), 400)]
         public async Task<IActionResult> RefreshToken()
         {
             var refreshToken = Request.Cookies[CookieNames.REFRESH_TOKEN];
             var data = await _refreshTokenService.RefreshToken(refreshToken!, GetIpAddress()!);
 
-            var result = new ApiResponse<VerifiedUser>(data);
+            AttachAuthCookies(data);
 
-            if (result.IsSuccess && !string.IsNullOrEmpty(result.Data?.RefreshToken))
-            {
-                AttachAuthCookies(result.Data!);
-            }
-
-            return ApiResponseCreator.Create(result);
+            return Ok(new ApiSuccessResponse<VerifiedUser>(data));
         }
 
         [HttpPost("revokeToken")]
-        [ProducesResponseType(typeof(ApiResponse<object>), 200)]
+        [ProducesResponseType(typeof(ApiSuccessResponse<object>), 200)]
+        [ProducesResponseType(typeof(ApiErrorResponse), 400)]
         public async Task<IActionResult> RevokeToken([FromBody] string bodyToken)
         {
             var token = bodyToken ?? Request.Cookies[CookieNames.REFRESH_TOKEN];
 
             await _refreshTokenService.RevokeToken(token!, GetIpAddress()!);
 
-            return ApiResponseCreator.Empty();
+            return Ok(new ApiSuccessResponse<object>(null));
         }
 
         [HttpPost("logout")]
-        [ProducesResponseType(typeof(ApiResponse<object>), 200)]
+        [ProducesResponseType(typeof(ApiSuccessResponse<object>), 200)]
+        [ProducesResponseType(typeof(ApiErrorResponse), 400)]
         public async Task<IActionResult> Logout()
         {
             var refreshToken = Request.Cookies[CookieNames.REFRESH_TOKEN];
@@ -92,27 +89,29 @@ namespace Jiro.Api.Controllers
             Response.Cookies.Delete(CookieNames.REFRESH_TOKEN);
             Response.Cookies.Delete(CookieNames.ACCESS_TOKEN);
 
-            return ApiResponseCreator.Empty();
+            return Ok(new ApiSuccessResponse<object>(null));
         }
 
         [HttpPost("changePassword")]
         [Authorize]
-        [ProducesResponseType(typeof(ApiResponse<bool>), 200)]
+        [ProducesResponseType(typeof(ApiSuccessResponse<bool>), 200)]
+        [ProducesResponseType(typeof(ApiErrorResponse), 400)]
         public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordDTO changePasswordDTO)
         {
             var data = await _userService.ChangePasswordAsync(_currentUserService.UserId, changePasswordDTO.CurrentPassword, changePasswordDTO.NewPassword);
 
-            return ApiResponseCreator.ValueType(data);
+            return Ok(new ApiSuccessResponse<bool>(data));
         }
 
         [HttpPost("changeEmail")]
         [Authorize]
-        [ProducesResponseType(typeof(ApiResponse<bool>), 200)]
+        [ProducesResponseType(typeof(ApiSuccessResponse<bool>), 200)]
+        [ProducesResponseType(typeof(ApiErrorResponse), 400)]
         public async Task<IActionResult> ChangeEmail([FromBody] ChangeEmailDTO changeEmailDTO)
         {
             var data = await _userService.ChangeEmailAsync(_currentUserService.UserId, changeEmailDTO.Password, changeEmailDTO.NewEmail);
 
-            return ApiResponseCreator.ValueType(data);
+            return Ok(new ApiSuccessResponse<bool>(data));
         }
 
         private string? GetIpAddress()

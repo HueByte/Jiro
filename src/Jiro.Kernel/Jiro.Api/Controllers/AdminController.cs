@@ -15,22 +15,22 @@ namespace Jiro.Api.Controllers
         }
 
         [HttpPost("assingRole")]
-        [ProducesResponseType(typeof(ApiResponse<IdentityResult>), 200)]
-        [ProducesResponseType(typeof(ApiResponse<IdentityResult>), 400)]
+        [ProducesResponseType(typeof(ApiSuccessResponse<IdentityResult>), 200)]
+        [ProducesResponseType(typeof(ApiErrorResponse), 400)]
         public async Task<IActionResult> AssingRole([FromBody] AssignRoleDTO assignRoleDTO)
         {
             var data = await _userService.AssignRoleAsync(assignRoleDTO.UserId, assignRoleDTO.Role);
-            return ApiResponseCreator.Data(data);
+            return Ok(new ApiSuccessResponse<IdentityResult>(data));
         }
 
         [HttpGet("users")]
-        [ProducesResponseType(typeof(ApiResponse<List<UserInfoDTO>>), 200)]
-        [ProducesResponseType(typeof(ApiResponse<object>), 400)]
+        [ProducesResponseType(typeof(ApiSuccessResponse<List<UserInfoDTO>>), 200)]
+        [ProducesResponseType(typeof(ApiErrorResponse), 400)]
         public async Task<IActionResult> GetUsers()
         {
             var data = await _userService.GetUsersAsync();
 
-            return ApiResponseCreator.Data(data);
+            return Ok(new ApiSuccessResponse<List<UserInfoDTO>>(data));
         }
     }
 }

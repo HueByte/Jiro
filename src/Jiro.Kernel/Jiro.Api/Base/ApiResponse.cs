@@ -1,25 +1,24 @@
 using System.Text.Json.Serialization;
 
-namespace Jiro.Api.Base
+namespace Jiro.Api.Base;
+
+public class ApiSuccessResponse<T>
 {
-    public class ApiResponse<T>
-    {
-        [JsonPropertyName("data")]
-        public T? Data { get; set; }
+    [JsonPropertyName("data")]
+    public T? Data { get; set; }
 
-        [JsonPropertyName("errors")]
-        public ICollection<string?>? Errors { get; set; }
+    public ApiSuccessResponse() { }
+    public ApiSuccessResponse(T? data) => Data = data;
+}
 
-        [JsonPropertyName("isSuccess")]
-        public bool IsSuccess { get; set; }
+public class ApiErrorResponse
+{
+    [JsonPropertyName("code")]
+    public int Code { get; set; }
 
-        public ApiResponse() { }
-        public ApiResponse(T? data) : this(data, null!, true) { }
-        public ApiResponse(T? data, ICollection<string>? errors, bool isSuccess)
-        {
-            Data = data;
-            Errors = errors!;
-            IsSuccess = isSuccess;
-        }
-    }
+    [JsonPropertyName("message")]
+    public string? Message { get; set; }
+
+    [JsonPropertyName("details")]
+    public string[]? Details { get; set; }
 }

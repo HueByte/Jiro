@@ -1,7 +1,6 @@
-using Jiro.Core.Base.Models;
-using Jiro.Core.DTO;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Jiro.Commands.Models;
 
 namespace Jiro.Api.Controllers;
 
@@ -18,13 +17,13 @@ public class JiroController : BaseController
     }
 
     [HttpPost]
-    [ProducesResponseType(typeof(ApiResponse<CommandResponse>), 200)]
-    [ProducesResponseType(typeof(ApiResponse<object>), 400)]
+    [ProducesResponseType(typeof(ApiSuccessResponse<CommandResponse>), 200)]
+    [ProducesResponseType(typeof(ApiErrorResponse), 400)]
     public async Task<IActionResult> PushCommand([FromBody] JiroPromptDTO query)
     {
-        var result = await _commandHandlerService.ExecuteCommandAsync(_httpContextAccessor?.HttpContext?.RequestServices!, query.Prompt);
+        CommandResponse result = await _commandHandlerService.ExecuteCommandAsync(_httpContextAccessor?.HttpContext?.RequestServices!, query.Prompt);
 
-        return ApiResponseCreator.Data(result);
+        return Ok(new ApiSuccessResponse<CommandResponse>(result));
     }
 
     // [HttpGet("completion")]

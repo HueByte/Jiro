@@ -16,18 +16,18 @@ namespace Jiro.Api.Controllers
         }
 
         [HttpGet]
-        [ProducesResponseType(typeof(ApiResponse<InstanceConfigDTO>), 200)]
-        [ProducesResponseType(typeof(ApiResponse<object>), 400)]
+        [ProducesResponseType(typeof(ApiSuccessResponse<InstanceConfigDTO>), 200)]
+        [ProducesResponseType(typeof(ApiErrorResponse), 400)]
         public async Task<IActionResult> GetServerConfig()
         {
             var config = await _jiroInstanceService.GetConfigAsync();
 
-            return ApiResponseCreator.Data(config);
+            return Ok(new ApiSuccessResponse<InstanceConfigDTO>(config));
         }
 
         [HttpPut]
-        [ProducesResponseType(typeof(ApiResponse<bool>), 200)]
-        [ProducesResponseType(typeof(ApiResponse<object>), 400)]
+        [ProducesResponseType(typeof(ApiSuccessResponse<bool>), 200)]
+        [ProducesResponseType(typeof(ApiErrorResponse), 400)]
         public async Task<IActionResult> UpdateServiceConfig([FromBody] InstanceConfigDTO config)
         {
             await _jiroInstanceService.ConfigureAsync(config);
@@ -40,12 +40,12 @@ namespace Jiro.Api.Controllers
                 Program.Restart();
             });
 
-            return ApiResponseCreator.ValueType(true);
+            return Ok(new ApiSuccessResponse<bool>(true));
         }
 
         [HttpGet("restart")]
-        [ProducesResponseType(typeof(ApiResponse<bool>), 200)]
-        [ProducesResponseType(typeof(ApiResponse<object>), 400)]
+        [ProducesResponseType(typeof(ApiSuccessResponse<bool>), 200)]
+        [ProducesResponseType(typeof(ApiErrorResponse), 400)]
         public void Restart()
         {
             Program.Restart();
