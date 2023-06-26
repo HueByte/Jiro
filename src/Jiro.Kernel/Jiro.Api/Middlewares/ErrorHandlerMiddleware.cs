@@ -26,16 +26,7 @@ namespace Jiro.Api.Middlewares
             }
             catch (Exception ex)
             {
-                var result = GetExceptionResponse(ex);
-
-                context.Response.StatusCode = ex switch
-                {
-                    CommandException => (int)HttpStatusCode.BadRequest,
-                    HandledException => (int)HttpStatusCode.BadRequest,
-                    HandledExceptionList => (int)HttpStatusCode.BadRequest,
-                    TokenException => 498,
-                    _ => (int)HttpStatusCode.BadRequest
-                };
+                var result = GetExceptionResponse(ex, context.Response);
 
                 context.Response.ContentType = "application/json";
 
@@ -43,32 +34,31 @@ namespace Jiro.Api.Middlewares
             }
         }
 
-        public static ApiResponse<object> GetExceptionResponse(Exception exception)
+        public static ApiErrorResponse GetExceptionResponse(Exception exception, HttpResponse response)
         {
-            ApiResponse<object> errorResult = exception switch
+            ApiErrorResponse errorResult = exception switch
             {
-                CommandException ex => new()
-                {
-                    Data = ex.CommandName,
-                    Errors = new string[] { exception.Message },
-                    IsSuccess = false
-                },
                 JiroException ex => new()
                 {
-                    Data = default,
-                    Errors = new string[] { ex.UserMessage },
-                    IsSuccess = false
+                    Code = (int)HttpStatusCode.BadRequest,
+                    Message = ex.UserMessage,
+                    Details = ex.Details
                 },
-                HandledException or
-                HandledExceptionList or
-                TokenException or
+                TokenException ex => new()
+                {
+                    Code = 498,
+                    Message = ex.Message,
+                    Details = null
+                },
                 _ => new()
                 {
-                    Data = default,
-                    Errors = new string[] { exception.Message },
-                    IsSuccess = false
+                    Code = (int)HttpStatusCode.BadRequest,
+                    Message = "Something went wrong",
+                    Details = null
                 }
             };
+
+            response.StatusCode = errorResult.Code;
 
             return errorResult;
         }

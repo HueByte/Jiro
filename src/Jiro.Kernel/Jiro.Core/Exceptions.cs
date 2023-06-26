@@ -20,22 +20,6 @@ public class JiroException : Exception
     }
 }
 
-[Obsolete("Use JiroException instead")]
-public class HandledExceptionList : Exception
-{
-    public ICollection<string> ExceptionMessages { get; set; }
-    public HandledExceptionList(ICollection<string> exceptionMessages)
-    {
-        ExceptionMessages = exceptionMessages;
-    }
-}
-
-[Obsolete("Use JiroException instead")]
-public class HandledException : Exception
-{
-    public HandledException(string exceptionMessage) : base(exceptionMessage) { }
-}
-
 public class TokenException : Exception
 {
     public TokenException(string exceptionMessage) : base(exceptionMessage) { }
