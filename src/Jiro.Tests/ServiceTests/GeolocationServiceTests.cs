@@ -53,11 +53,8 @@ namespace Jiro.Tests.ServiceTests
         [InlineData(null)]
         public async Task GetGeolocationAsync_WithWrongCity(string? city)
         {
-            // Act
-            var result = await _geolocationService.GetGeolocationAsync(city);
-
-            // Assert
-            Assert.Null(result);
+            // Act & Asssert
+            await Assert.ThrowsAsync<JiroException>(async () => await _geolocationService.GetGeolocationAsync(city));
         }
     }
 }

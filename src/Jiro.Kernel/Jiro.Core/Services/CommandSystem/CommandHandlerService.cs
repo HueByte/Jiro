@@ -1,101 +1,110 @@
 using System.Diagnostics;
 using System.Text.RegularExpressions;
 using Jiro.Commands.Exceptions;
-using Jiro.Core.Base.Models;
-using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
-namespace Jiro.Core.Services.CommandHandler
+namespace Jiro.Core.Services.CommandHandler;
+
+public partial class CommandHandlerService : ICommandHandlerService
 {
-    public partial class CommandHandlerService : ICommandHandlerService
+    private readonly CommandsContext _commandsModule;
+    private readonly ICurrentInstanceService _currentInstanceService;
+    private readonly ILogger _logger;
+    private readonly Regex pattern = RegexCommandParserPattern();
+    public event Action<string, object[]>? OnLog;
+    public CommandHandlerService(CommandsContext commandModule, ICurrentInstanceService currentInstanceService, ILogger<CommandHandlerService> logger)
     {
-        private readonly CommandsContext _commandsModule;
-        private readonly ICurrentInstanceService _currentInstanceService;
-        private readonly Regex pattern = RegexCommandParserPattern();
-        public event Action<string, object[]>? OnLog;
-        public CommandHandlerService(CommandsContext commandModule, ICurrentInstanceService currentInstanceService)
-        {
-            _commandsModule = commandModule;
-            _currentInstanceService = currentInstanceService;
-        }
+        _commandsModule = commandModule;
+        _currentInstanceService = currentInstanceService;
+        _logger = logger;
+    }
 
-        public async Task<CommandResponse> ExecuteCommandAsync(IServiceProvider scopedProvider, string prompt)
+    public async Task<CommandResponse> ExecuteCommandAsync(IServiceProvider scopedProvider, string prompt)
+    {
+        CommandResponse? result = null;
+        var watch = Stopwatch.StartNew();
+        var tokens = ParseTokens(prompt);
+        var commandName = GetCommandName(tokens);
+        var command = GetCommand(commandName);
+
+        try
         {
             if (!_currentInstanceService.IsConfigured())
                 throw new CommandException("Jiro", "Jiro is not configured yet. Please login on server account and configure Jiro in Server Panel.");
 
-            var watch = Stopwatch.StartNew();
-            var tokens = ParseTokens(prompt);
-            var commandName = GetCommandName(tokens);
-            var command = GetCommand(commandName);
-
-            CommandResponse? result = null;
-            try
-            {
-                result = await command.ExecuteAsync(scopedProvider, _commandsModule, tokens);
-            }
-            catch (CommandException)
-            {
-                throw;
-            }
-            catch (Exception exception)
-            {
-                throw new AggregateException(new Exception[]
-                {
-                    new CommandException(command.Name, "Command failed to exectute"),
-                    exception
-                });
-            }
-            finally
-            {
-                watch.Stop();
-                OnLog?.Invoke("Finished [{commandName}] command in {time} ms", new object[] { command.Name, watch.ElapsedMilliseconds });
-            }
-
-            return result;
+            result = await command.ExecuteAsync(scopedProvider, _commandsModule, tokens);
         }
-
-        private string GetCommandName(string[] tokens)
+        catch (CommandException exception)
         {
-            if (tokens.Length >= 1)
+            result = new()
             {
-                var commandSeg = tokens[0].ToLower();
-                if (commandSeg.StartsWith('$') && commandSeg.Length > 1)
-                    return commandSeg[1..];
-            }
-
-            return _commandsModule.DefaultCommand;
+                CommandName = command.Name,
+                CommandType = CommandType.Text,
+                IsSuccess = false,
+                Result = TextResult.Create(exception.Message),
+            };
         }
-
-        private CommandInfo GetCommand(string? commandName)
+        catch (Exception exception)
         {
-            if (string.IsNullOrEmpty(commandName) || !_commandsModule.Commands.TryGetValue(commandName, out CommandInfo? commandInfo))
-                _commandsModule.Commands.TryGetValue(_commandsModule.DefaultCommand, out commandInfo);
+            _logger.LogError(exception, "Command failed to execute");
 
-            if (commandInfo is null)
-                throw new Exception("Couldn't find any command that meets the requirements");
-
-            return commandInfo;
-        }
-
-        private string[] ParseTokens(string input)
-        {
-            var matches = pattern.Matches(input);
-            var tokens = new string[matches.Count];
-
-            for (int i = 0; i < matches.Count; i++)
+            result = new()
             {
-                var match = matches[i].Value;
-                if (match.StartsWith('\"') && match.EndsWith('\"'))
-                    tokens[i] = match[1..^1];
-                else
-                    tokens[i] = match;
-            }
-
-            return tokens;
+                CommandName = command.Name,
+                CommandType = CommandType.Text,
+                IsSuccess = false,
+                Result = TextResult.Create("Command failed to exectute"),
+            };
+        }
+        finally
+        {
+            watch.Stop();
+            OnLog?.Invoke("Finished [{commandName}] command in {time} ms", new object[] { command.Name, watch.ElapsedMilliseconds });
         }
 
-        [GeneratedRegex("[\\\"].+?[\\\"]|[^ ]+", RegexOptions.Compiled)]
-        private static partial Regex RegexCommandParserPattern();
+        return result;
     }
+
+    private string GetCommandName(string[] tokens)
+    {
+        if (tokens.Length >= 1)
+        {
+            var commandSeg = tokens[0].ToLower();
+            if (commandSeg.StartsWith('$') && commandSeg.Length > 1)
+                return commandSeg[1..];
+        }
+
+        return _commandsModule.DefaultCommand;
+    }
+
+    private CommandInfo GetCommand(string? commandName)
+    {
+        if (string.IsNullOrEmpty(commandName) || !_commandsModule.Commands.TryGetValue(commandName, out CommandInfo? commandInfo))
+            _commandsModule.Commands.TryGetValue(_commandsModule.DefaultCommand, out commandInfo);
+
+        if (commandInfo is null)
+            throw new Exception("Couldn't find any command that meets the requirements");
+
+        return commandInfo;
+    }
+
+    private string[] ParseTokens(string input)
+    {
+        var matches = pattern.Matches(input);
+        var tokens = new string[matches.Count];
+
+        for (int i = 0; i < matches.Count; i++)
+        {
+            var match = matches[i].Value;
+            if (match.StartsWith('\"') && match.EndsWith('\"'))
+                tokens[i] = match[1..^1];
+            else
+                tokens[i] = match;
+        }
+
+        return tokens;
+    }
+
+    [GeneratedRegex("[\\\"].+?[\\\"]|[^ ]+", RegexOptions.Compiled)]
+    private static partial Regex RegexCommandParserPattern();
 }

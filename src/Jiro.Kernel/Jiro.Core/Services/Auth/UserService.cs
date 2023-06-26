@@ -40,23 +40,23 @@ public class UserService : IUserService
     public async Task<bool> ChangeUsernameAsync(string? userId, string newUsername, string password)
     {
         if (string.IsNullOrEmpty(newUsername))
-            throw new HandledException("Username cannot be empty");
+            throw new JiroException(new ArgumentException("username was null or empty", nameof(newUsername)), "Please provide username");
 
         if (string.IsNullOrEmpty(userId))
-            throw new HandledException("Couldn't find this user");
+            throw new JiroException(new ArgumentException("userId was null or empty", nameof(userId)), "Something went wrong, please try again");
 
-        var user = await _userManager.FindByIdAsync(userId) ?? throw new HandledException("Couldn't find this user");
+        var user = await _userManager.FindByIdAsync(userId) ?? throw new JiroException(new Exception("Couldn't find the desired user"), "Something went wrong");
 
         if (user.UserName == newUsername)
             return true;
 
         var passwordVerification = await _userManager.CheckPasswordAsync(user, password);
         if (!passwordVerification)
-            throw new HandledException("Wrong password");
+            throw new JiroException("Wrong password");
 
         var duplicateUser = await _userManager.FindByNameAsync(newUsername);
         if (duplicateUser is not null)
-            throw new HandledException("This username is already taken");
+            throw new JiroException("This username is already taken");
 
         await _userManager.SetUserNameAsync(user, newUsername);
 
@@ -66,17 +66,17 @@ public class UserService : IUserService
     public async Task<bool> ChangePasswordAsync(string? userId, string currentPassword, string newPassword)
     {
         if (string.IsNullOrEmpty(currentPassword) || string.IsNullOrEmpty(newPassword))
-            throw new HandledException("New and old password can't be empty");
+            throw new JiroException("New and old password can't be empty");
 
         if (string.IsNullOrEmpty(userId))
-            throw new HandledException("Couldn't find this user");
+            throw new JiroException(new ArgumentException("userId was null or empty", nameof(userId)), "Something went wrong, please try again");
 
-        var user = await _userManager.FindByIdAsync(userId) ?? throw new HandledException("Couldn't find this user");
+        var user = await _userManager.FindByIdAsync(userId) ?? throw new JiroException(new Exception("Couldn't find the desired user"), "Something went wrong");
 
         var result = await _userManager.ChangePasswordAsync(user, currentPassword, newPassword);
 
         if (!result.Succeeded)
-            throw new HandledException("Couldn't change password, the current password is incorrect");
+            throw new JiroException("Something went wrong, please try again");
 
         return true;
     }
@@ -84,7 +84,7 @@ public class UserService : IUserService
     public async Task<IdentityResult> CreateUserAsync(RegisterDTO registerUser)
     {
         if (registerUser is null)
-            throw new HandledException("Register User model cannot be empty");
+            throw new JiroException(new ArgumentException("RegisterDTO cannot be null", nameof(registerUser)), "The provided data was invalid");
 
         var user = new AppUser()
         {
@@ -97,7 +97,7 @@ public class UserService : IUserService
         var result = await _userManager.CreateAsync(user, registerUser?.Password!);
 
         if (!result.Succeeded)
-            throw new HandledExceptionList(result.Errors.Select(errors => errors.Description).ToList());
+            throw new JiroException("Coudln't create the user", result.Errors.Select(errors => errors.Description).ToArray());
 
         // seed data
         await _userManager.AddToRoleAsync(user, Roles.USER);
@@ -108,11 +108,9 @@ public class UserService : IUserService
     public async Task<IdentityResult> DeleteUserAsync(string userId)
     {
         if (string.IsNullOrEmpty(userId))
-            throw new HandledException("Couldn't find this user");
+            throw new JiroException(new ArgumentException("userId was null or empty", nameof(userId)), "Something went wrong, please try again");
 
-        var user = await _userManager.FindByIdAsync(userId);
-        if (user is null)
-            throw new HandledException("Couldn't find this user");
+        var user = await _userManager.FindByIdAsync(userId) ?? throw new JiroException("Couldn't find this user");
 
         var result = await _userManager.DeleteAsync(user);
 
@@ -121,8 +119,11 @@ public class UserService : IUserService
 
     public async Task<VerifiedUser> LoginUserAsync(LoginUsernameDTO userDto, string ipAddress)
     {
-        if (userDto is null && string.IsNullOrEmpty(ipAddress))
-            throw new HandledException("User model and Ip address cannot be empty");
+        if (userDto is null)
+            throw new JiroException(new ArgumentException("LoginUsernameDTO cannot be null", nameof(userDto)), "The provided data was invalid");
+
+        if (string.IsNullOrEmpty(ipAddress))
+            throw new JiroException(new ArgumentException("ipAddress was null or empty", nameof(ipAddress)), "Something went wrong, please try again");
 
         var user = await _userManager.Users
             .Where(u => u.UserName == userDto!.Username)
@@ -137,42 +138,41 @@ public class UserService : IUserService
     public async Task<bool> ChangeEmailAsync(string? userId, string email, string password)
     {
         if (string.IsNullOrEmpty(userId))
-            throw new HandledException("Couldn't find this user");
+            throw new JiroException(new ArgumentException("userId was null or empty", nameof(userId)), "Something went wrong, please try again");
 
-        var user = await _userManager.FindByIdAsync(userId) ?? throw new HandledException("Couldn't find this user");
+        var user = await _userManager.FindByIdAsync(userId) ?? throw new JiroException("Couldn't find this user");
+
         if (string.IsNullOrEmpty(email))
-            throw new HandledException("Email cannot be empty");
+            throw new JiroException("Email cannot be empty");
 
         if (user.Email == email)
             return true;
 
         var passwordVerification = await _userManager.CheckPasswordAsync(user, password);
         if (!passwordVerification)
-            throw new HandledException("Wrong password");
+            throw new JiroException("Wrong password");
 
         var duplicateUser = await _userManager.FindByEmailAsync(email);
         if (duplicateUser is not null)
-            throw new HandledException("This email is already taken");
+            throw new JiroException("Cannot change to that email");
 
         var result = await _userManager.ChangeEmailAsync(user, email, "");
 
         if (!result.Succeeded)
-            throw new HandledExceptionList(result.Errors.Select(errors => errors.Description).ToList());
+            throw new JiroException("Couldn't change the email", result.Errors.Select(errors => errors.Description).ToArray());
 
         return result.Succeeded;
     }
 
     public async Task<IdentityResult> AssignRoleAsync(string userId, string role)
     {
-        var user = await _userManager.FindByIdAsync(userId);
-        if (user is null)
-            throw new HandledException("Couldn't find this user");
+        var user = await _userManager.FindByIdAsync(userId) ?? throw new JiroException("Couldn't find this user");
 
         var result = await _userManager.AddToRoleAsync(user, role);
         if (!result.Succeeded)
         {
-            _logger.LogError(string.Join(", ", result.Errors.Select(e => e.Description)));
-            throw new HandledException("Role assignment failed");
+            var reasons = result.Errors.Select(e => e.Description).ToArray();
+            throw new JiroException(new Exception($"Failed to add to the role {role}\n{string.Join("\n", reasons)}"), "Role assignment failed");
         }
 
         return result;
@@ -195,18 +195,19 @@ public class UserService : IUserService
                 Roles = usr.User.UserRoles.Select(e => e.Role.Name).ToArray()!,
                 IsWhitelisted = usr.IsWhitelisted
             })
+            .AsSplitQuery()
             .ToListAsync();
     }
 
     private async Task<VerifiedUser> HandleLogin(AppUser? user, string? password, string ipAddress)
     {
         if (user is null || string.IsNullOrEmpty(password))
-            throw new HandledException("Couldn't log in, check your login or password"); // Couldn't find user
+            throw new JiroException(new Exception("Couldn't find the user"), "Couldn't log in, check your login or password"); // Couldn't find user
 
         // Validate credentials 
         var result = await _signInManager.CheckPasswordSignInAsync(user, password, false);
         if (!result.Succeeded)
-            throw new HandledException("Couldn't log in, check your login or password");
+            throw new JiroException("Couldn't log in, check your login or password");
 
         var refreshToken = _refreshTokenService.CreateRefreshToken(ipAddress);
         user.RefreshTokens ??= new();

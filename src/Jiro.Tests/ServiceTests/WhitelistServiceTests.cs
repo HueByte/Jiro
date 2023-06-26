@@ -74,7 +74,7 @@ public class WhitelistServiceTests
             .ReturnsAsync((AppUser?)null);
 
         // Act & Assert
-        await Assert.ThrowsAsync<HandledException>(() => _whitelistService.AddUserToWhitelistAsync(notExistingUserId));
+        await Assert.ThrowsAsync<JiroException>(() => _whitelistService.AddUserToWhitelistAsync(notExistingUserId));
         _userManagerMock.Verify(x => x.FindByIdAsync(notExistingUserId), Times.Once);
         _mockRepo.Verify(x => x.AddAsync(It.IsAny<WhiteListEntry>()), Times.Never);
     }
@@ -111,7 +111,7 @@ public class WhitelistServiceTests
             .ReturnsAsync((AppUser?)null);
 
         // Act & Assert
-        await Assert.ThrowsAsync<HandledException>(() => _whitelistService.RemoveUserFromWhitelistAsync(notExistingUserId));
+        await Assert.ThrowsAsync<JiroException>(() => _whitelistService.RemoveUserFromWhitelistAsync(notExistingUserId));
 
         _userManagerMock.Verify(x => x.FindByIdAsync(notExistingUserId), Times.Once);
         _mockRepo.Verify(x => x.AsQueryable(), Times.Never);

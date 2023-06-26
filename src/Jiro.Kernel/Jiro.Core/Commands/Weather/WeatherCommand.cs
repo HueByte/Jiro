@@ -22,7 +22,7 @@ namespace Jiro.Core.Commands.Weather
             var weather = await _weatherService.GetWeatherAsync(location);
 
             if (weather is null || weather.Hourly is null || weather.Hourly.Time is null)
-                return GraphResult.Create(null, null!, note: "No weather data found");
+                return GraphResult.Create("No weather data found", null, null!);
 
             // convert to acceptable format [{...}, {...}, {...}] 
             var data = weather.Hourly.Time
@@ -47,7 +47,7 @@ namespace Jiro.Core.Commands.Weather
             // create note
             var note = $"Current weather in {location} is {weather.CurrentWeather.Temperature} {weather.HourlyUnits.Temperature2m} with wind of {weather.CurrentWeather.Windspeed} {weather.HourlyUnits.Windspeed10m}";
 
-            return GraphResult.Create(data.ToArray(), units, "date", note: note);
+            return GraphResult.Create("", data.ToArray(), units, "date", note: note);
         }
     }
 }

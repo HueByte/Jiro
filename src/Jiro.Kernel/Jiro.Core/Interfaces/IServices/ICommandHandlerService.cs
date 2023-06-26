@@ -1,5 +1,3 @@
-using Jiro.Core.Base.Models;
-
 namespace Jiro.Core.Interfaces.IServices
 {
     public interface ICommandHandlerService

@@ -19,7 +19,7 @@ public class WeatherService : IWeatherService
         var locationInfo = await _geolocationService.GetGeolocationAsync(city);
 
         if (locationInfo is null || locationInfo.Lat is null || locationInfo.Lon is null)
-            return null;
+            throw new JiroException("Couldn't find he weather for desired city");
 
         Dictionary<string, string> queryParams = new()
         {
@@ -43,7 +43,7 @@ public class WeatherService : IWeatherService
 
         var weather = await GetWeatherStringAsync(city);
 
-        if (weather is not null) 
+        if (weather is not null)
             response = JsonSerializer.Deserialize<WeatherResponse>(weather);
 
         return response;

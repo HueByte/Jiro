@@ -15,7 +15,8 @@ public class GeolocationService : IGeolocationService
 
     public async Task<GeoLocationResponse?> GetGeolocationAsync(string city)
     {
-        if (string.IsNullOrEmpty(city)) return null;
+        if (string.IsNullOrEmpty(city))
+            throw new JiroException(new ArgumentException("city was null or empty", nameof(city)), "Please provide city");
 
         var response = await _geoClient.GetAsync($"search?city={city}&format=json");
 
@@ -24,7 +25,9 @@ public class GeolocationService : IGeolocationService
             var result = await response.Content.ReadFromJsonAsync<List<GeoLocationResponse?>>();
             return result?.FirstOrDefault();
         }
-
-        return null;
+        else
+        {
+            throw new JiroException("Couldn't find the desired city");
+        }
     }
 }

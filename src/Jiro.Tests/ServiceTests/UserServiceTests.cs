@@ -74,7 +74,7 @@ public class UserServiceTests
     }
 
     [Fact]
-    public async Task ChangeUsernameAsync_WhenEmptyNewUsername_ThrowsHandledException()
+    public async Task ChangeUsernameAsync_WhenEmptyNewUsername_ThrowsJiroException()
     {
         // Arrange
         string userId = "userId";
@@ -82,14 +82,14 @@ public class UserServiceTests
         string password = "password";
 
         // Act & Assert
-        await Assert.ThrowsAsync<HandledException>(async () =>
+        await Assert.ThrowsAsync<JiroException>(async () =>
         {
             await _userService.ChangeUsernameAsync(userId, newUsername, password);
         });
     }
 
     [Fact]
-    public async Task ChangeUsernameAsync_WhenInvalidUserId_ThrowsHandledException()
+    public async Task ChangeUsernameAsync_WhenInvalidUserId_ThrowsJiroException()
     {
         // Arrange
         string userId = "";
@@ -97,7 +97,7 @@ public class UserServiceTests
         string password = "password";
 
         // Act & Assert
-        await Assert.ThrowsAsync<HandledException>(async () =>
+        await Assert.ThrowsAsync<JiroException>(async () =>
         {
             await _userService.ChangeUsernameAsync(userId, newUsername, password);
         });
@@ -123,7 +123,7 @@ public class UserServiceTests
     }
 
     [Fact]
-    public async Task ChangeUsernameAsync_WhenWrongPassword_ThrowsHandledException()
+    public async Task ChangeUsernameAsync_WhenWrongPassword_ThrowsJiroException()
     {
         // Arrange
         string userId = "userId";
@@ -134,14 +134,14 @@ public class UserServiceTests
         _userManagerMock.Setup(u => u.CheckPasswordAsync(user, password)).ReturnsAsync(false);
 
         // Act & Assert
-        await Assert.ThrowsAsync<HandledException>(async () =>
+        await Assert.ThrowsAsync<JiroException>(async () =>
         {
             await _userService.ChangeUsernameAsync(userId, newUsername, password);
         });
     }
 
     [Fact]
-    public async Task ChangeUsernameAsync_WhenDuplicateUsername_ThrowsHandledException()
+    public async Task ChangeUsernameAsync_WhenDuplicateUsername_ThrowsJiroException()
     {
         // Arrange
         string userId = "userId";
@@ -154,7 +154,7 @@ public class UserServiceTests
         _userManagerMock.Setup(u => u.FindByNameAsync(newUsername)).ReturnsAsync(duplicateUser);
 
         // Act & Assert
-        await Assert.ThrowsAsync<HandledException>(async () =>
+        await Assert.ThrowsAsync<JiroException>(async () =>
         {
             await _userService.ChangeUsernameAsync(userId, newUsername, password);
         });
@@ -181,7 +181,7 @@ public class UserServiceTests
     }
 
     [Fact]
-    public async Task ChangePasswordAsync_WhenEmptyPasswords_ThrowsHandledException()
+    public async Task ChangePasswordAsync_WhenEmptyPasswords_ThrowsJiroException()
     {
         // Arrange
         string userId = "userId";
@@ -189,14 +189,14 @@ public class UserServiceTests
         string newPassword = "";
 
         // Act & Assert
-        await Assert.ThrowsAsync<HandledException>(async () =>
+        await Assert.ThrowsAsync<JiroException>(async () =>
         {
             await _userService.ChangePasswordAsync(userId, currentPassword, newPassword);
         });
     }
 
     [Fact]
-    public async Task ChangePasswordAsync_WhenInvalidUserId_ThrowsHandledException()
+    public async Task ChangePasswordAsync_WhenInvalidUserId_ThrowsJiroException()
     {
         // Arrange
         string userId = "";
@@ -204,14 +204,14 @@ public class UserServiceTests
         string newPassword = "newPassword";
 
         // Act & Assert
-        await Assert.ThrowsAsync<HandledException>(async () =>
+        await Assert.ThrowsAsync<JiroException>(async () =>
         {
             await _userService.ChangePasswordAsync(userId, currentPassword, newPassword);
         });
     }
 
     [Fact]
-    public async Task ChangePasswordAsync_WhenChangePasswordFails_ThrowsHandledException()
+    public async Task ChangePasswordAsync_WhenChangePasswordFails_ThrowsJiroException()
     {
         // Arrange
         string userId = "userId";
@@ -223,7 +223,7 @@ public class UserServiceTests
             .ReturnsAsync(IdentityResult.Failed(new IdentityError { Description = "Error message" }));
 
         // Act & Assert
-        await Assert.ThrowsAsync<HandledException>(async () =>
+        await Assert.ThrowsAsync<JiroException>(async () =>
         {
             await _userService.ChangePasswordAsync(userId, currentPassword, newPassword);
         });
@@ -261,20 +261,20 @@ public class UserServiceTests
     }
 
     [Fact]
-    public async Task CreateUserAsync_WhenNullRegisterUser_ThrowsHandledException()
+    public async Task CreateUserAsync_WhenNullRegisterUser_ThrowsJiroException()
     {
         // Arrange
         RegisterDTO? registerUser = null;
 
         // Act & Assert
-        await Assert.ThrowsAsync<HandledException>(async () =>
+        await Assert.ThrowsAsync<JiroException>(async () =>
         {
             await _userService.CreateUserAsync(registerUser!);
         });
     }
 
     [Fact]
-    public async Task CreateUserAsync_WhenCreateUserFails_ThrowsHandledExceptionList()
+    public async Task CreateUserAsync_WhenCreateUserFails_ThrowsJiroExceptionList()
     {
         // Arrange
         var registerUser = new RegisterDTO
@@ -288,7 +288,7 @@ public class UserServiceTests
         _userManagerMock.Setup(u => u.CreateAsync(It.IsAny<AppUser>(), registerUser.Password)).ReturnsAsync(identityResult);
 
         // Act & Assert
-        await Assert.ThrowsAsync<HandledExceptionList>(async () =>
+        await Assert.ThrowsAsync<JiroException>(async () =>
         {
             await _userService.CreateUserAsync(registerUser);
         });
@@ -314,7 +314,7 @@ public class UserServiceTests
     }
 
     [Fact]
-    public async Task DeleteUserAsync_WhenNullOrEmptyUserId_ThrowsHandledException()
+    public async Task DeleteUserAsync_WhenNullOrEmptyUserId_ThrowsJiroException()
     {
         // Arrange
         string userId = "userId";
@@ -322,14 +322,14 @@ public class UserServiceTests
         _userManagerMock.Setup(u => u.FindByIdAsync(userId)).ReturnsAsync(user);
 
         // Act & Assert
-        await Assert.ThrowsAsync<HandledException>(async () =>
+        await Assert.ThrowsAsync<JiroException>(async () =>
         {
             await _userService.DeleteUserAsync(userId);
         });
     }
 
     [Fact]
-    public async Task DeleteUserAsync_WhenUserNotFound_ThrowsHandledException()
+    public async Task DeleteUserAsync_WhenUserNotFound_ThrowsJiroException()
     {
         // Arrange
         string userId = "userId";
@@ -337,7 +337,7 @@ public class UserServiceTests
         _userManagerMock.Setup(u => u.FindByIdAsync(userId)).ReturnsAsync(user);
 
         // Act & Assert
-        await Assert.ThrowsAsync<HandledException>(async () =>
+        await Assert.ThrowsAsync<JiroException>(async () =>
         {
             await _userService.DeleteUserAsync(userId);
         });
@@ -397,7 +397,7 @@ public class UserServiceTests
     }
 
     [Fact]
-    public async Task LoginUserAsync_WhenInvalidUser_ThrowsHandledException()
+    public async Task LoginUserAsync_WhenInvalidUser_ThrowsJiroException()
     {
         // Arrange
         string username = "testuser";
@@ -408,7 +408,7 @@ public class UserServiceTests
             .Returns(MockObjects.GetMockDbSet(new List<AppUser>()).Object);
 
         // Act & Assert
-        await Assert.ThrowsAsync<HandledException>(async () =>
+        await Assert.ThrowsAsync<JiroException>(async () =>
         {
             await _userService.LoginUserAsync(userDto, ipAddress);
         });
@@ -420,7 +420,7 @@ public class UserServiceTests
     }
 
     [Fact]
-    public async Task LoginUserAsync_WhenInvalidCredentials_ThrowsHandledException()
+    public async Task LoginUserAsync_WhenInvalidCredentials_ThrowsJiroException()
     {
         // Arrange
         string username = "testuser";
@@ -436,7 +436,7 @@ public class UserServiceTests
             .ReturnsAsync(SignInResult.Failed);
 
         // Act & Assert
-        await Assert.ThrowsAsync<HandledException>(async () =>
+        await Assert.ThrowsAsync<JiroException>(async () =>
         {
             await _userService.LoginUserAsync(userDto, ipAddress);
         });
@@ -472,7 +472,7 @@ public class UserServiceTests
     }
 
     [Fact]
-    public async Task AssignRoleAsync_WhenInvalidUser_ThrowsHandledException()
+    public async Task AssignRoleAsync_WhenInvalidUser_ThrowsJiroException()
     {
         // Arrange
         string userId = "user1";
@@ -482,7 +482,7 @@ public class UserServiceTests
             .ReturnsAsync((AppUser)null);
 
         // Act & Assert
-        await Assert.ThrowsAsync<HandledException>(async () =>
+        await Assert.ThrowsAsync<JiroException>(async () =>
         {
             await _userService.AssignRoleAsync(userId, role);
         });
@@ -492,7 +492,7 @@ public class UserServiceTests
     }
 
     [Fact]
-    public async Task AssignRoleAsync_WhenAddToRoleAsyncFails_ThrowsHandledExceptionList()
+    public async Task AssignRoleAsync_WhenAddToRoleAsyncFails_ThrowsJiroExceptionList()
     {
         // Arrange
         string userId = "user1";
@@ -507,7 +507,7 @@ public class UserServiceTests
             .ReturnsAsync(identityResult);
 
         // Act & Assert
-        var exception = await Assert.ThrowsAsync<HandledException>(async () =>
+        var exception = await Assert.ThrowsAsync<JiroException>(async () =>
         {
             await _userService.AssignRoleAsync(userId, role);
         });

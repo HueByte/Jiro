@@ -24,10 +24,7 @@ namespace Jiro.Core.Services.Whitelist
 
         public async Task<bool> AddUserToWhitelistAsync(string userId)
         {
-            var user = await _userManager.FindByIdAsync(userId);
-            if (user is null)
-                throw new HandledException("User doesn't exist");
-
+            var user = await _userManager.FindByIdAsync(userId) ?? throw new JiroException("Couldn't find this user");
             return await AddUserToWhitelistAsync(user);
         }
 
@@ -47,9 +44,7 @@ namespace Jiro.Core.Services.Whitelist
 
         public async Task<bool> RemoveUserFromWhitelistAsync(string userId)
         {
-            var user = await _userManager.FindByIdAsync(userId);
-            if (user is null)
-                throw new HandledException("User doesn't exist");
+            var user = await _userManager.FindByIdAsync(userId) ?? throw new JiroException("Couldn't find this user");
 
             return await RemoveUserFromWhitelistAsync(user);
         }
@@ -71,7 +66,7 @@ namespace Jiro.Core.Services.Whitelist
         public async Task<bool> UpdateWhitelistRangeAsync(IEnumerable<WhitelistedUserDTO> users)
         {
             if (users is null)
-                throw new HandledException("Users cannot be null");
+                throw new JiroException(new ArgumentNullException(nameof(users), "IEnumerable<WhitelistedUserDTO> cannot be null"), "Provided list of users was invalid");
 
             if (!users.Any())
                 return true;

@@ -51,7 +51,7 @@ namespace Jiro.Tests.ServiceTests
                     Time = new List<string> { "2021-09-05T18:00:00Z", "2021-09-05T19:00:00Z", "2021-09-05T20:00:00Z", "2021-09-05T21:00:00Z", "2021-09-05T22:00:00Z", "2021-09-05T23:00:00Z", "2021-09-06T00:00:00Z", "2021-09-06T01:00:00Z", "2021-09-06T02:00:00Z", "2021-09-06T03:00:00Z", "2021-09-06T04:00:00Z", "2021-09-06T05:00:00Z", "2021-09-06T06:00:00Z", "2021-09-06T07:00:00Z", "2021-09-06T08:00:00Z", "2021-09-06T09:00:00Z", "2021-09-06T10:00:00Z", "2021-09-06T11:00:00Z", "2021-09-06T12:00:00Z", "2021-09-06T13:00:00Z", "2021-09-06T14:00:00Z" }
                 }
             };
-            
+
             MockHttpMessageHandler weatherHttpMock = new();
             weatherHttpMock.When(WeatherEndpoint(_lat, _lon))
                 .Respond("application/json", JsonSerializer.Serialize(correctWeatherResponse));
@@ -88,11 +88,8 @@ namespace Jiro.Tests.ServiceTests
         [Fact]
         public async Task GetWeatherStringAsync_WithWrongCity()
         {
-            // Act
-            var result = await _weatherService.GetWeatherStringAsync("WrongCity");
-
-            // Assert
-            Assert.Null(result);
+            // Act & Assert
+            await Assert.ThrowsAsync<JiroException>(async () => await _weatherService.GetWeatherStringAsync("WrongCity"));
         }
 
         [Fact]
@@ -113,11 +110,8 @@ namespace Jiro.Tests.ServiceTests
         [Fact]
         public async Task GetWeatherAsync_WithWrongCity()
         {
-            // Act
-            var result = await _weatherService.GetWeatherAsync("WrongCity");
-
-            // Assert
-            Assert.Null(result);
+            // Act & Assert
+            await Assert.ThrowsAsync<JiroException>(async () => await _weatherService.GetWeatherAsync("WrongCity"));
         }
     }
 }
