@@ -11,6 +11,7 @@ services:
     environment:
       - CONFIG_PATH=/shared/appsettings.json
       - API_LOGS_PATH=/shared/logs/jiro.log
+      - JIRO_DB_CONN=/shared/jiro.db
     volumes:
       - jiro_shared:/shared/
 

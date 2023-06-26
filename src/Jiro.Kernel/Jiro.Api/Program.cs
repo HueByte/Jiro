@@ -63,7 +63,10 @@ while (true)
     servicesRef.AddSwaggerGen();
     servicesRef.AddHttpContextAccessor();
 
-    var connString = configRef.GetConnectionString("JiroContext");
+    string? connString = configRef.GetValue<string>("JIRO_DB_CONN");
+    if (string.IsNullOrEmpty(connString))
+        connString = configRef.GetConnectionString("JiroContext");
+
     servicesRef.AddJiroSQLiteContext(string.IsNullOrEmpty(connString) ? Path.Join(AppContext.BaseDirectory, "save", "jiro.db") : connString);
     servicesRef.AddServices(configRef);
     servicesRef.RegisterCommands(nameof(GPTCommand.Chat));
