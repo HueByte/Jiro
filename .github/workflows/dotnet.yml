@@ -17,13 +17,10 @@ jobs:
         with:
           dotnet-version: 7.0.x
       - name: Perpare files
-        run: mv ./src/Jiro.Kernel/Jiro.Api/appsettings.example.json ./src/Jiro.Kernel/Jiro.Api/appsettings.json
+        run: mv ./src/Jiro.Kernel/Jiro.App/appsettings.example.json ./src/Jiro.Kernel/Jiro.Api/appsettings.json
       - name: Restore dependencies
         working-directory: ./src
         run: dotnet restore
-      - name: Restore tools
-        working-directory: ./src/Jiro.Kernel/Jiro.Api
-        run: dotnet tool restore
       - name: Build
         working-directory: ./src
         run: dotnet build --no-restore
