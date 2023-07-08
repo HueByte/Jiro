@@ -1,5 +1,5 @@
-using Jiro.Core.DTO;
 using Jiro.Core.Models;
+using Jiro.Core.Services.Auth.Models;
 
 namespace Jiro.Core.Interfaces.IServices;
 

@@ -1,6 +1,5 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Jiro.Commands.Models;
 
 namespace Jiro.Api.Controllers;
 

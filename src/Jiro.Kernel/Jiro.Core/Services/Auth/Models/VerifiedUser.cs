@@ -1,7 +1,7 @@
 ﻿using System.Text.Json.Serialization;
 using Jiro.Core.Models;
 
-namespace Jiro.Core;
+namespace Jiro.Core.Services.Auth.Models;
 
 public class VerifiedUser
 {

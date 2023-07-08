@@ -3,44 +3,43 @@ using Jiro.Core.Constants;
 using Jiro.Core.Services.GPTService.Models;
 using Jiro.Core.Services.GPTService.Models.ChatGPT;
 
-namespace Jiro.Core.Services.GPTService
+namespace Jiro.Core.Services.GPTService;
+
+
+public class TokenizerService : ITokenizerService
 {
-
-    public class TokenizerService : ITokenizerService
+    private readonly HttpClient _client;
+    public TokenizerService(IHttpClientFactory clientFactory)
     {
-        private readonly HttpClient _client;
-        public TokenizerService(IHttpClientFactory clientFactory)
+        _client = clientFactory.CreateClient(HttpClients.TOKENIZER);
+    }
+
+    public async Task<List<ChatMessage>> ReduceTokenCountAsync(List<ChatMessage> messages)
+    {
+        TokenizeReduceRequest request = new() { Messages = messages };
+
+        var result = await _client.PostAsJsonAsync("/reduce", request);
+
+        if (!result.IsSuccessStatusCode)
         {
-            _client = clientFactory.CreateClient(HttpClients.TOKENIZER);
+            var errMessage = await result.Content.ReadAsStringAsync();
+            throw new Exception(errMessage);
         }
 
-        public async Task<List<ChatMessage>> ReduceTokenCountAsync(List<ChatMessage> messages)
-        {
-            TokenizeReduceRequest request = new() { Messages = messages };
+        var resultBody = await result.Content.ReadFromJsonAsync<List<ChatMessage>>();
 
-            var result = await _client.PostAsJsonAsync("/reduce", request);
+        if (resultBody is null)
+            return messages;
 
-            if (!result.IsSuccessStatusCode)
-            {
-                var errMessage = await result.Content.ReadAsStringAsync();
-                throw new Exception(errMessage);
-            }
+        return resultBody;
+    }
 
-            var resultBody = await result.Content.ReadFromJsonAsync<List<ChatMessage>>();
+    public async Task<int> GetTokenCountAsync(string text)
+    {
+        TokenizeCountRequest request = new() { Text = text };
 
-            if (resultBody is null)
-                return messages;
+        var result = await _client.PostAsJsonAsync("/tokenize", request);
 
-            return resultBody;
-        }
-
-        public async Task<int> GetTokenCountAsync(string text)
-        {
-            TokenizeCountRequest request = new() { Text = text };
-
-            var result = await _client.PostAsJsonAsync("/tokenize", request);
-
-            return Convert.ToInt32(await result.Content.ReadAsStringAsync());
-        }
+        return Convert.ToInt32(await result.Content.ReadAsStringAsync());
     }
 }

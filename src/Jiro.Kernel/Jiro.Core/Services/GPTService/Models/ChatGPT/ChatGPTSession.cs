@@ -1,8 +1,7 @@
-namespace Jiro.Core.Services.GPTService.Models.ChatGPT
+namespace Jiro.Core.Services.GPTService.Models.ChatGPT;
+
+public class ChatGPTSession
 {
-    public class ChatGPTSession
-    {
-        public string OwnerId { get; set; } = string.Empty;
-        public ChatGPTRequest Request { get; set; } = null!;
-    }
+    public string OwnerId { get; set; } = string.Empty;
+    public ChatGPTRequest Request { get; set; } = null!;
 }

@@ -1,11 +1,9 @@
-﻿using Jiro.Core;
-using Jiro.Core.Interfaces.IServices;
+﻿using Jiro.Core.Interfaces.IServices;
 using Jiro.Core.Models;
 using Jiro.Core.Options;
 using Jiro.Core.Services.Auth;
 using Jiro.Tests.Utilities;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Moq;
 

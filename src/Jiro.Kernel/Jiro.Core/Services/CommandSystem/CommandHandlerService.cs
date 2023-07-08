@@ -8,14 +8,12 @@ namespace Jiro.Core.Services.CommandHandler;
 public partial class CommandHandlerService : ICommandHandlerService
 {
     private readonly CommandsContext _commandsModule;
-    private readonly ICurrentInstanceService _currentInstanceService;
     private readonly ILogger _logger;
     private readonly Regex pattern = RegexCommandParserPattern();
     public event Action<string, object[]>? OnLog;
-    public CommandHandlerService(CommandsContext commandModule, ICurrentInstanceService currentInstanceService, ILogger<CommandHandlerService> logger)
+    public CommandHandlerService(CommandsContext commandModule, ILogger<CommandHandlerService> logger)
     {
         _commandsModule = commandModule;
-        _currentInstanceService = currentInstanceService;
         _logger = logger;
     }
 
@@ -29,9 +27,6 @@ public partial class CommandHandlerService : ICommandHandlerService
 
         try
         {
-            if (!_currentInstanceService.IsConfigured())
-                throw new CommandException("Jiro", "Jiro is not configured yet. Please login on server account and configure Jiro in Server Panel.");
-
             result = await command.ExecuteAsync(scopedProvider, _commandsModule, tokens);
         }
         catch (CommandException exception)

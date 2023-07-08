@@ -1,8 +1,8 @@
 using Jiro.Core.Constants;
 using Jiro.Core.DTO;
-using Jiro.Core.Interfaces.IRepositories;
 using Jiro.Core.Models;
 using Jiro.Core.Options;
+using Jiro.Core.Services.Auth.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -18,15 +18,13 @@ public class UserService : IUserService
     private readonly IJWTService _jwtAuthentication;
     private readonly JWTOptions _jwtOptions;
     private readonly IRefreshTokenService _refreshTokenService;
-    private readonly IWhitelistRepository _whitelistRepository;
     public UserService(
         ILogger<UserService> logger,
         UserManager<AppUser> userManager,
         SignInManager<AppUser> signInManager,
         IJWTService jwtAuthentication,
         IOptions<JWTOptions> jwtOptions,
-        IRefreshTokenService refreshTokenService,
-        IWhitelistRepository whitelistRepository)
+        IRefreshTokenService refreshTokenService)
     {
         _logger = logger;
         _userManager = userManager;
@@ -34,7 +32,6 @@ public class UserService : IUserService
         _jwtAuthentication = jwtAuthentication;
         _jwtOptions = jwtOptions.Value;
         _refreshTokenService = refreshTokenService;
-        _whitelistRepository = whitelistRepository;
     }
 
     public async Task<bool> ChangeUsernameAsync(string? userId, string newUsername, string password)
@@ -183,17 +180,12 @@ public class UserService : IUserService
         return _userManager.Users
             .Include(usr => usr.UserRoles)
                 .ThenInclude(usr => usr.Role)
-            .Join(_whitelistRepository.AsQueryable(),
-                user => user.Id,
-                wle => wle.UserId,
-                (user, wle) => new { User = user, IsWhitelisted = true })
             .Select(usr => new UserInfoDTO()
             {
-                Id = usr.User.Id,
-                Username = usr.User.UserName!,
-                Email = usr.User.Email!,
-                Roles = usr.User.UserRoles.Select(e => e.Role.Name).ToArray()!,
-                IsWhitelisted = usr.IsWhitelisted
+                Id = usr.Id,
+                Username = usr.UserName!,
+                Email = usr.Email!,
+                Roles = usr.UserRoles.Select(e => e.Role.Name).ToArray()!,
             })
             .AsSplitQuery()
             .ToListAsync();

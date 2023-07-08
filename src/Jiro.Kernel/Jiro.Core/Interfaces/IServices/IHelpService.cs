@@ -1,8 +1,7 @@
-namespace Jiro.Core.Interfaces.IServices
+namespace Jiro.Core.Interfaces.IServices;
+
+public interface IHelpService
 {
-    public interface IHelpService
-    {
-        string HelpMessage { get; }
-        void CreateHelpMessage();
-    }
+    string HelpMessage { get; }
+    void CreateHelpMessage();
 }

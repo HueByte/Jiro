@@ -1,7 +1,7 @@
 using System.Security.Cryptography;
-using Jiro.Core.DTO;
 using Jiro.Core.Models;
 using Jiro.Core.Options;
+using Jiro.Core.Services.Auth.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;

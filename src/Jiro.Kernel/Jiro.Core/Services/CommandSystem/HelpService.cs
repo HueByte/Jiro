@@ -1,57 +1,56 @@
 using System.Text;
 
-namespace Jiro.Core.Services.CommandSystem
+namespace Jiro.Core.Services.CommandSystem;
+
+public class HelpService : IHelpService
 {
-    public class HelpService : IHelpService
+    public string HelpMessage { get; private set; }
+    private readonly CommandsContext _commandsContainer;
+
+    public HelpService(CommandsContext commandsContainer)
     {
-        public string HelpMessage { get; private set; }
-        private readonly CommandsContext _commandsContainer;
+        HelpMessage = "";
+        _commandsContainer = commandsContainer;
+        CreateHelpMessage();
+    }
 
-        public HelpService(CommandsContext commandsContainer)
+    public void CreateHelpMessage()
+    {
+        var commands = _commandsContainer.Commands;
+        var modules = _commandsContainer.CommandModules.Select(e => e.Value);
+
+        StringBuilder messageBuilder = new();
+
+        foreach (var module in modules)
         {
-            HelpMessage = "";
-            _commandsContainer = commandsContainer;
-            CreateHelpMessage();
-        }
+            if (module.Commands.Keys.Count == 0) continue;
 
-        public void CreateHelpMessage()
-        {
-            var commands = _commandsContainer.Commands;
-            var modules = _commandsContainer.CommandModules.Select(e => e.Value);
-
-            StringBuilder messageBuilder = new();
-
-            foreach (var module in modules)
+            messageBuilder.AppendLine($"## {module.Name}");
+            foreach (var command in module.Commands)
             {
-                if (module.Commands.Keys.Count == 0) continue;
+                string header;
+                string? description = null;
+                string? syntax = null;
 
-                messageBuilder.AppendLine($"## {module.Name}");
-                foreach (var command in module.Commands)
-                {
-                    string header;
-                    string? description = null;
-                    string? syntax = null;
+                var parameters = command.Value.Parameters.Select(e => e?.ParamType.Name);
+                string parametersString = parameters.Any() ? $"<span style=\"color: DeepPink;\">[ {string.Join(", ", parameters)} ]</span>" : string.Empty;
 
-                    var parameters = command.Value.Parameters.Select(e => e?.ParamType.Name);
-                    string parametersString = parameters.Any() ? $"<span style=\"color: DeepPink;\">[ {string.Join(", ", parameters)} ]</span>" : string.Empty;
+                header = $"- {command.Key} {parametersString}<br />";
 
-                    header = $"- {command.Key} {parametersString}<br />";
+                if (!string.IsNullOrEmpty(command.Value.CommandDescription))
+                    description = $"{command.Value.CommandDescription}<br />";
 
-                    if (!string.IsNullOrEmpty(command.Value.CommandDescription))
-                        description = $"{command.Value.CommandDescription}<br />";
+                if (!string.IsNullOrEmpty(command.Value.CommandSyntax))
+                    syntax = $"Syntax:<span style=\"color: DeepPink;\"> ${command.Value.CommandSyntax}</span><br />";
 
-                    if (!string.IsNullOrEmpty(command.Value.CommandSyntax))
-                        syntax = $"Syntax:<span style=\"color: DeepPink;\"> ${command.Value.CommandSyntax}</span><br />";
-
-                    messageBuilder.AppendLine(header);
-                    if (!string.IsNullOrEmpty(command.Value.CommandDescription)) messageBuilder.AppendLine(description);
-                    if (!string.IsNullOrEmpty(command.Value.CommandSyntax)) messageBuilder.AppendLine(syntax);
-                }
-
-                messageBuilder.AppendLine();
+                messageBuilder.AppendLine(header);
+                if (!string.IsNullOrEmpty(command.Value.CommandDescription)) messageBuilder.AppendLine(description);
+                if (!string.IsNullOrEmpty(command.Value.CommandSyntax)) messageBuilder.AppendLine(syntax);
             }
 
-            HelpMessage = messageBuilder.ToString();
+            messageBuilder.AppendLine();
         }
+
+        HelpMessage = messageBuilder.ToString();
     }
 }

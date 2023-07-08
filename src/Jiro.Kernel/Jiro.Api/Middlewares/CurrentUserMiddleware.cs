@@ -1,27 +1,26 @@
 using System.Security.Claims;
 
-namespace Jiro.Api.Middlewares
+namespace Jiro.Api.Middlewares;
+
+public static class CurrentUserExtensions
 {
-    public static class CurrentUserExtensions
+    public static IApplicationBuilder UseCurrentUser(this IApplicationBuilder app)
+        => app.UseMiddleware<CurrentUserMiddleware>();
+}
+
+public class CurrentUserMiddleware
+{
+    private readonly RequestDelegate _next;
+    public CurrentUserMiddleware(RequestDelegate next)
     {
-        public static IApplicationBuilder UseCurrentUser(this IApplicationBuilder app)
-            => app.UseMiddleware<CurrentUserMiddleware>();
+        _next = next;
     }
 
-    public class CurrentUserMiddleware
+    public async Task InvokeAsync(HttpContext context, ICurrentUserService currentUserService)
     {
-        private readonly RequestDelegate _next;
-        public CurrentUserMiddleware(RequestDelegate next)
-        {
-            _next = next;
-        }
+        if (context.User.Identity?.IsAuthenticated == true)
+            currentUserService.SetCurrentUser(context.User.FindFirstValue(ClaimTypes.NameIdentifier));
 
-        public async Task InvokeAsync(HttpContext context, ICurrentUserService currentUserService)
-        {
-            if (context.User.Identity?.IsAuthenticated == true)
-                currentUserService.SetCurrentUser(context.User.FindFirstValue(ClaimTypes.NameIdentifier));
-
-            await _next(context);
-        }
+        await _next(context);
     }
 }

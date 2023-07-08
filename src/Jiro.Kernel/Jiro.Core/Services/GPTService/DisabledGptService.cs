@@ -1,10 +1,9 @@
-namespace Jiro.Core.Services.GPTService
+namespace Jiro.Core.Services.GPTService;
+
+public class DisabledGptService : IChatService
 {
-    public class DisabledGptService : IChatService
+    public Task<string> ChatAsync(string prompt)
     {
-        public Task<string> ChatAsync(string prompt)
-        {
-            return Task.FromResult("The chat functionality is currently disabled.");
-        }
+        return Task.FromResult("The chat functionality is currently disabled.");
     }
 }

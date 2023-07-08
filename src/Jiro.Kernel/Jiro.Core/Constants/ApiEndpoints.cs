@@ -1,8 +1,7 @@
-namespace Jiro.Core.Constants
+namespace Jiro.Core.Constants;
+
+public class ApiEndpoints
 {
-    public class ApiEndpoints
-    {
-        public const string GPT_COMPLETIONS = "completions";
-        public const string CHAT_GPT_COMPLETIONS = "chat/completions";
-    }
+    public const string GPT_COMPLETIONS = "completions";
+    public const string CHAT_GPT_COMPLETIONS = "chat/completions";
 }

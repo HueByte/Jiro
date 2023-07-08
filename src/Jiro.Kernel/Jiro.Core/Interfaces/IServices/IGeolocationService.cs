@@ -1,6 +1,6 @@
 ﻿using Jiro.Core.Services.Weather.Models;
 
-namespace Jiro.Core;
+namespace Jiro.Core.Interfaces.IServices;
 
 public interface IGeolocationService
 {

@@ -1,7 +1,6 @@
-namespace Jiro.Core.DTO
+namespace Jiro.Core.DTO;
+
+public class UserIdDTO
 {
-    public class UserIdDTO
-    {
-        public string UserId { get; set; } = default!;
-    }
+    public string UserId { get; set; } = default!;
 }

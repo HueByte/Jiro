@@ -1,4 +1,5 @@
 using Jiro.Core.DTO;
+using Jiro.Core.Services.Auth.Models;
 using Microsoft.AspNetCore.Identity;
 
 namespace Jiro.Core.Interfaces.IServices;

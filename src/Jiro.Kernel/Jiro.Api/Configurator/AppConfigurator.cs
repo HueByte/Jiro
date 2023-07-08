@@ -1,73 +1,72 @@
 using Jiro.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 
-namespace Jiro.Api.Configurator
+namespace Jiro.Api.Configurator;
+
+public class AppConfigurator
 {
-    public class AppConfigurator
+    private readonly WebApplication _app;
+    private readonly EventsConfigurator _eventsConfigurator;
+    public AppConfigurator(WebApplication app)
     {
-        private readonly WebApplication _app;
-        private readonly EventsConfigurator _eventsConfigurator;
-        public AppConfigurator(WebApplication app)
+        _app = app;
+        _eventsConfigurator = app.Services.GetRequiredService<EventsConfigurator>();
+    }
+    public AppConfigurator ConfigureSPA()
+    {
+        var cacheMaxAgeOneWeek = (60 * 60 * 24 * 7).ToString();
+        _app.UseStaticFiles(new StaticFileOptions
         {
-            _app = app;
-            _eventsConfigurator = app.Services.GetRequiredService<EventsConfigurator>();
-        }
-        public AppConfigurator ConfigureSPA()
-        {
-            var cacheMaxAgeOneWeek = (60 * 60 * 24 * 7).ToString();
-            _app.UseStaticFiles(new StaticFileOptions
+            OnPrepareResponse = ctx =>
             {
-                OnPrepareResponse = ctx =>
-                {
-                    ctx.Context.Response.Headers.Append(
-                         "Cache-Control", $"public, max-age={cacheMaxAgeOneWeek}");
-                }
-            });
+                ctx.Context.Response.Headers.Append(
+                     "Cache-Control", $"public, max-age={cacheMaxAgeOneWeek}");
+            }
+        });
 
-            return this;
-        }
+        return this;
+    }
 
-        public AppConfigurator ConfigureEvents()
+    public AppConfigurator ConfigureEvents()
+    {
+        _eventsConfigurator?.ConfigureLoggingEvents();
+
+        return this;
+    }
+
+    public AppConfigurator ConfigureCors()
+    {
+        // TODO:
+        // temporary, will be replaced with a more secure solution once auth system is finished
+        _app.UseCors(builder =>
         {
-            _eventsConfigurator?.ConfigureLoggingEvents();
+            builder.AllowAnyOrigin();
+            builder.AllowAnyHeader();
+            builder.AllowAnyMethod();
+        });
 
-            return this;
-        }
+        return this;
+    }
 
-        public AppConfigurator ConfigureCors()
+    public AppConfigurator UseJiroSwagger()
+    {
+        _app.UseSwagger();
+        _app.UseSwaggerUI(c =>
         {
-            // TODO:
-            // temporary, will be replaced with a more secure solution once auth system is finished
-            _app.UseCors(builder =>
-            {
-                builder.AllowAnyOrigin();
-                builder.AllowAnyHeader();
-                builder.AllowAnyMethod();
-            });
+            c.SwaggerEndpoint("/swagger/v1/swagger.json", "Jiro API V1");
+            c.InjectStylesheet("/swagger-ui/SwaggerDark.css");
+        });
 
-            return this;
-        }
+        return this;
+    }
 
-        public AppConfigurator UseJiroSwagger()
-        {
-            _app.UseSwagger();
-            _app.UseSwaggerUI(c =>
-            {
-                c.SwaggerEndpoint("/swagger/v1/swagger.json", "Jiro API V1");
-                c.InjectStylesheet("/swagger-ui/SwaggerDark.css");
-            });
+    public AppConfigurator Migrate()
+    {
+        using var scope = _app.Services.CreateScope();
+        var context = scope.ServiceProvider.GetRequiredService<JiroContext>();
 
-            return this;
-        }
+        context.Database.Migrate();
 
-        public AppConfigurator Migrate()
-        {
-            using var scope = _app.Services.CreateScope();
-            var context = scope.ServiceProvider.GetRequiredService<JiroContext>();
-
-            context.Database.Migrate();
-
-            return this;
-        }
+        return this;
     }
 }

@@ -2,65 +2,64 @@ using System.Net;
 using Jiro.Commands.Exceptions;
 using Jiro.Core;
 
-namespace Jiro.Api.Middlewares
+namespace Jiro.Api.Middlewares;
+
+public static class ErrorHandlerExtensions
 {
-    public static class ErrorHandlerExtensions
+    public static IApplicationBuilder UseErrorHandler(this IApplicationBuilder app)
+        => app.UseMiddleware<ErrorHandlerMiddleware>();
+}
+
+public class ErrorHandlerMiddleware
+{
+    private readonly RequestDelegate _next;
+    public ErrorHandlerMiddleware(RequestDelegate next)
     {
-        public static IApplicationBuilder UseErrorHandler(this IApplicationBuilder app)
-            => app.UseMiddleware<ErrorHandlerMiddleware>();
+        _next = next;
     }
 
-    public class ErrorHandlerMiddleware
+    public async Task InvokeAsync(HttpContext context)
     {
-        private readonly RequestDelegate _next;
-        public ErrorHandlerMiddleware(RequestDelegate next)
+        try
         {
-            _next = next;
+            await _next(context);
         }
-
-        public async Task InvokeAsync(HttpContext context)
+        catch (Exception ex)
         {
-            try
+            var result = GetExceptionResponse(ex, context.Response);
+
+            context.Response.ContentType = "application/json";
+
+            await context.Response.WriteAsJsonAsync(result);
+        }
+    }
+
+    public static ApiErrorResponse GetExceptionResponse(Exception exception, HttpResponse response)
+    {
+        ApiErrorResponse errorResult = exception switch
+        {
+            JiroException ex => new()
             {
-                await _next(context);
+                Code = (int)HttpStatusCode.BadRequest,
+                Message = ex.UserMessage,
+                Details = ex.Details
+            },
+            TokenException ex => new()
+            {
+                Code = 498,
+                Message = ex.Message,
+                Details = null
+            },
+            _ => new()
+            {
+                Code = (int)HttpStatusCode.BadRequest,
+                Message = "Something went wrong",
+                Details = null
             }
-            catch (Exception ex)
-            {
-                var result = GetExceptionResponse(ex, context.Response);
+        };
 
-                context.Response.ContentType = "application/json";
+        response.StatusCode = errorResult.Code;
 
-                await context.Response.WriteAsJsonAsync(result);
-            }
-        }
-
-        public static ApiErrorResponse GetExceptionResponse(Exception exception, HttpResponse response)
-        {
-            ApiErrorResponse errorResult = exception switch
-            {
-                JiroException ex => new()
-                {
-                    Code = (int)HttpStatusCode.BadRequest,
-                    Message = ex.UserMessage,
-                    Details = ex.Details
-                },
-                TokenException ex => new()
-                {
-                    Code = 498,
-                    Message = ex.Message,
-                    Details = null
-                },
-                _ => new()
-                {
-                    Code = (int)HttpStatusCode.BadRequest,
-                    Message = "Something went wrong",
-                    Details = null
-                }
-            };
-
-            response.StatusCode = errorResult.Code;
-
-            return errorResult;
-        }
+        return errorResult;
     }
 }

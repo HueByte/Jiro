@@ -1,7 +1,6 @@
-namespace Jiro.Core.Services.GPTService.Models
+namespace Jiro.Core.Services.GPTService.Models;
+
+public class TokenizeCountRequest
 {
-    public class TokenizeCountRequest
-    {
-        public string Text { get; set; } = string.Empty;
-    }
+    public string Text { get; set; } = string.Empty;
 }

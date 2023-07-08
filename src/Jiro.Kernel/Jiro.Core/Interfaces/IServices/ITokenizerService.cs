@@ -1,10 +1,9 @@
 using Jiro.Core.Services.GPTService.Models.ChatGPT;
 
-namespace Jiro.Core.Interfaces.IServices
+namespace Jiro.Core.Interfaces.IServices;
+
+public interface ITokenizerService
 {
-    public interface ITokenizerService
-    {
-        Task<int> GetTokenCountAsync(string text);
-        Task<List<ChatMessage>> ReduceTokenCountAsync(List<ChatMessage> messages);
-    }
+    Task<int> GetTokenCountAsync(string text);
+    Task<List<ChatMessage>> ReduceTokenCountAsync(List<ChatMessage> messages);
 }

@@ -15,7 +15,7 @@ namespace Jiro.Infrastructure.Migrations
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder.HasAnnotation("ProductVersion", "7.0.2");
+            modelBuilder.HasAnnotation("ProductVersion", "7.0.4");
 
             modelBuilder.Entity("Jiro.Core.Models.AppRole", b =>
                 {
@@ -125,27 +125,6 @@ namespace Jiro.Infrastructure.Migrations
                     b.ToTable("AspNetUserRoles", (string)null);
                 });
 
-            modelBuilder.Entity("Jiro.Core.Models.JiroInstance", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("InstanceName")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<bool>("IsConfigured")
-                        .HasColumnType("INTEGER");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("JiroInstances");
-                });
-
             modelBuilder.Entity("Jiro.Core.Models.RefreshToken", b =>
                 {
                     b.Property<int>("Id")
@@ -181,25 +160,6 @@ namespace Jiro.Infrastructure.Migrations
                     b.HasIndex("AppUserId");
 
                     b.ToTable("RefreshToken");
-                });
-
-            modelBuilder.Entity("Jiro.Core.Models.WhiteListEntry", b =>
-                {
-                    b.Property<string>("Id")
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime>("AddedDate")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("WhiteListEntries");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -313,17 +273,6 @@ namespace Jiro.Infrastructure.Migrations
                     b.HasOne("Jiro.Core.Models.AppUser", null)
                         .WithMany("RefreshTokens")
                         .HasForeignKey("AppUserId");
-                });
-
-            modelBuilder.Entity("Jiro.Core.Models.WhiteListEntry", b =>
-                {
-                    b.HasOne("Jiro.Core.Models.AppUser", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>

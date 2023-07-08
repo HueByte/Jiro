@@ -4,65 +4,64 @@ using Jiro.Core.Services.GPTService.Models.ChatGPT;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-namespace Jiro.Core.Services.GPTService
+namespace Jiro.Core.Services.GPTService;
+
+public class ChatGPTStorageService : IChatGPTStorageService
 {
-    public class ChatGPTStorageService : IChatGPTStorageService
+    private readonly ILogger _logger;
+    private readonly ConcurrentDictionary<string, ChatGPTSession> _sessions = new();
+    private readonly ChatGptOptions _options;
+    public ChatGPTStorageService(ILogger<ChatGPTStorageService> logger, IOptions<ChatGptOptions> options)
     {
-        private readonly ILogger _logger;
-        private readonly ConcurrentDictionary<string, ChatGPTSession> _sessions = new();
-        private readonly ChatGptOptions _options;
-        public ChatGPTStorageService(ILogger<ChatGPTStorageService> logger, IOptions<ChatGptOptions> options)
+        _logger = logger;
+        _options = options.Value;
+    }
+
+    public ChatGPTSession? GetOrCreateSession(string userId)
+    {
+        if (_sessions.TryGetValue(userId, out ChatGPTSession? value))
+            return value;
+
+        ChatMessage systemMessage = new()
         {
-            _logger = logger;
-            _options = options.Value;
-        }
+            Role = "system",
+            Content = _options.SystemMessage
+        };
 
-        public ChatGPTSession? GetOrCreateSession(string userId)
+        ChatGPTRequest req = new()
         {
-            if (_sessions.TryGetValue(userId, out ChatGPTSession? value))
-                return value;
+            Model = "gpt-3.5-turbo",
+            Messages = new() { systemMessage },
+        };
 
-            ChatMessage systemMessage = new()
-            {
-                Role = "system",
-                Content = _options.SystemMessage
-            };
-
-            ChatGPTRequest req = new()
-            {
-                Model = "gpt-3.5-turbo",
-                Messages = new() { systemMessage },
-            };
-
-            ChatGPTSession session = new()
-            {
-                OwnerId = userId,
-                Request = req
-            };
-
-            AddSession(userId, session);
-
-            return session;
-        }
-
-        public void AddSession(string userId, ChatGPTSession session)
+        ChatGPTSession session = new()
         {
-            _sessions.TryAdd(userId, session);
-        }
+            OwnerId = userId,
+            Request = req
+        };
 
-        public void RemoveSession(string userId)
-        {
-            _sessions.TryRemove(userId, out _);
-        }
+        AddSession(userId, session);
 
-        public void UpdateSession(string userId, ChatGPTSession session)
-        {
-            _sessions[userId] = session;
-        }
+        return session;
+    }
 
-        public void GetSession(string userId, out ChatGPTSession? session)
-        {
-            _sessions.TryGetValue(userId, out session);
-        }
+    public void AddSession(string userId, ChatGPTSession session)
+    {
+        _sessions.TryAdd(userId, session);
+    }
+
+    public void RemoveSession(string userId)
+    {
+        _sessions.TryRemove(userId, out _);
+    }
+
+    public void UpdateSession(string userId, ChatGPTSession session)
+    {
+        _sessions[userId] = session;
+    }
+
+    public void GetSession(string userId, out ChatGPTSession? session)
+    {
+        _sessions.TryGetValue(userId, out session);
     }
 }

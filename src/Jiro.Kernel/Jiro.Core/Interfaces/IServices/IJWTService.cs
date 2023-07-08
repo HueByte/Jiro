@@ -1,9 +1,8 @@
 using Jiro.Core.Models;
 
-namespace Jiro.Core.Interfaces.IServices
+namespace Jiro.Core.Interfaces.IServices;
+
+public interface IJWTService
 {
-    public interface IJWTService
-    {
-        string GenerateJsonWebToken(AppUser user, IList<string> roles);
-    }
+    string GenerateJsonWebToken(AppUser user, IList<string> roles);
 }

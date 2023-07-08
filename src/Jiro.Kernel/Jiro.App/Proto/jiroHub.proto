@@ -1,0 +1,42 @@
+﻿syntax = "proto3";
+
+option csharp_namespace = "JiroCloud.Api.Proto";
+
+package JiroHubProto;
+
+service JiroHubProto {
+	rpc InstanceCommand (stream InstanceCommandRequest) returns (stream InstanceCommandResponse);
+}
+
+message InstanceCommandRequest {
+    string commandName = 1;
+    CommandType commandType = 2;
+    oneof result {
+		TextResult textResult = 3;
+		GraphResult graphResult = 4;
+	}
+    bool isSuccess = 5;
+}
+
+enum CommandType {
+    text = 0;
+    graph = 1;
+}
+
+message TextResult {
+    string response = 1;
+}
+
+message GraphResult {
+    string message = 1;
+    bytes graphData = 2;
+    string note = 3;
+    string xAxis = 4;
+    string yAxis = 5;
+    map<string, string> units = 6;
+}
+
+message InstanceCommandResponse {
+    string instanceName = 1;
+	string command = 2;
+}

@@ -1,30 +1,29 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Jiro.Infrastructure
+namespace Jiro.Infrastructure;
+
+public static class Extensions
 {
-    public static class Extensions
+    public static IServiceCollection AddJiroMySQLContext(this IServiceCollection services, string conn)
     {
-        public static IServiceCollection AddJiroMySQLContext(this IServiceCollection services, string conn)
+        services.AddDbContext<JiroContext>(options =>
         {
-            services.AddDbContext<JiroContext>(options =>
-            {
-                options.UseMySql(ServerVersion.AutoDetect(conn),
-                    x => x.MigrationsAssembly(typeof(JiroContext).Assembly.GetName().Name));
-            });
+            options.UseMySql(ServerVersion.AutoDetect(conn),
+                x => x.MigrationsAssembly(typeof(JiroContext).Assembly.GetName().Name));
+        });
 
-            return services;
-        }
+        return services;
+    }
 
-        public static IServiceCollection AddJiroSQLiteContext(this IServiceCollection services, string conn)
+    public static IServiceCollection AddJiroSQLiteContext(this IServiceCollection services, string conn)
+    {
+        services.AddDbContext<JiroContext>(options =>
         {
-            services.AddDbContext<JiroContext>(options =>
-            {
-                options.UseSqlite($"Data Source={conn}",
-                    x => x.MigrationsAssembly(typeof(JiroContext).Assembly.GetName().Name));
-            });
+            options.UseSqlite($"Data Source={conn}",
+                x => x.MigrationsAssembly(typeof(JiroContext).Assembly.GetName().Name));
+        });
 
-            return services;
-        }
+        return services;
     }
 }

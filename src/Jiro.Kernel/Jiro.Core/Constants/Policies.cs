@@ -1,7 +1,6 @@
-namespace Jiro.Core.Constants
+namespace Jiro.Core.Constants;
+
+public class Policies
 {
-    public class Policies
-    {
-        public const string WHITE_LIST = "whitelist";
-    }
+    public const string WHITE_LIST = "whitelist";
 }

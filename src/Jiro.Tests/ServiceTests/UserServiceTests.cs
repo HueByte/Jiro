@@ -1,14 +1,12 @@
 ﻿using Jiro.Core;
 using Jiro.Core.Constants;
 using Jiro.Core.DTO;
-using Jiro.Core.Interfaces.IRepositories;
 using Jiro.Core.Interfaces.IServices;
 using Jiro.Core.Models;
 using Jiro.Core.Options;
 using Jiro.Core.Services.Auth;
 using Jiro.Tests.Utilities;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Moq;
@@ -21,7 +19,6 @@ public class UserServiceTests
     private readonly Mock<SignInManager<AppUser>> _signInManagerMock;
     private readonly Mock<IJWTService> _jwtServiceMock;
     private readonly Mock<IRefreshTokenService> _refreshTokenServiceMock;
-    private readonly Mock<IWhitelistRepository> _whitelistRepositoryMock;
     private readonly Mock<UserManager<AppUser>> _userManagerMock;
     private readonly Mock<IOptions<JWTOptions>> _jwtOptionsMock;
 
@@ -32,14 +29,12 @@ public class UserServiceTests
         Mock<IJWTService> jwtMock = new();
         Mock<IOptions<JWTOptions>> jwtOptionsMock = new();
         Mock<IRefreshTokenService> refreshTokenServiceMock = new();
-        Mock<IWhitelistRepository> whitelistRepositoryMock = new();
         Mock<ILogger<UserService>> loggerMock = new();
 
         _userManagerMock = userManager;
         _signInManagerMock = signInManager;
         _jwtServiceMock = jwtMock;
         _refreshTokenServiceMock = refreshTokenServiceMock;
-        _whitelistRepositoryMock = whitelistRepositoryMock;
         _jwtOptionsMock = jwtOptionsMock;
         _jwtOptionsMock.Setup(x => x.Value).Returns(new JWTOptions() { Secret = "test" });
         _userService = new UserService(
@@ -48,8 +43,7 @@ public class UserServiceTests
             signInManager.Object,
             jwtMock.Object,
             jwtOptionsMock.Object,
-            refreshTokenServiceMock.Object,
-            whitelistRepositoryMock.Object);
+            refreshTokenServiceMock.Object);
     }
 
     [Fact]
@@ -545,20 +539,10 @@ public class UserServiceTests
                 }
             }
         };
-
-        var whitelistEntries = new List<WhiteListEntry>
-        {
-            new WhiteListEntry { UserId = "user1" },
-            new WhiteListEntry { UserId = "user2" }
-        };
-
         var usersMock = MockObjects.GetMockDbSet(users);
 
         _userManagerMock.Setup(u => u.Users)
             .Returns(usersMock.Object);
-
-        _whitelistRepositoryMock.Setup(w => w.AsQueryable())
-            .Returns(whitelistEntries.AsQueryable());
 
         // Act
         var result = await _userService.GetUsersAsync();
