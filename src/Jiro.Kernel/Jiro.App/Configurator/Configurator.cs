@@ -1,9 +1,9 @@
 using Jiro.Core.Constants;
 using Jiro.Core.Interfaces.IServices;
 using Jiro.Core.Options;
-using Jiro.Core.Services.Auth;
 using Jiro.Core.Services.CommandHandler;
 using Jiro.Core.Services.CommandSystem;
+using Jiro.Core.Services.CurrentUser;
 using Jiro.Core.Services.Geolocation;
 using Jiro.Core.Services.GPTService;
 using Jiro.Core.Services.Weather;
@@ -37,10 +37,7 @@ public static class Configurator
         services.AddSingleton<EventsConfigurator>();
 
         services.AddScoped<IWeatherService, WeatherService>();
-        services.AddScoped<IUserService, UserService>();
         services.AddScoped<ICurrentUserService, CurrentUserService>();
-        services.AddScoped<IJWTService, JWTService>();
-        services.AddScoped<IRefreshTokenService, RefreshTokenService>();
         services.AddScoped<IGeolocationService, GeolocationService>();
 
         return services;

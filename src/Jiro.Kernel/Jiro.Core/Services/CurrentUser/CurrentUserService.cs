@@ -1,4 +1,4 @@
-namespace Jiro.Core.Services.Auth;
+﻿namespace Jiro.Core.Services.CurrentUser;
 
 public class CurrentUserService : ICurrentUserService
 {
