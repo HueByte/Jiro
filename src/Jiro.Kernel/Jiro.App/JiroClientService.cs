@@ -58,6 +58,9 @@ internal class JiroClientService : IHostedService
                             throw new Exception("Command already in queue");
                         }
 
+                        if (serverMessage.CommandSyncId == "dummy")
+                            return;
+
                         // capture variables
                         var scopedCommandSyncId = serverMessage.CommandSyncId;
                         var command = serverMessage.Command;
@@ -70,7 +73,19 @@ internal class JiroClientService : IHostedService
                     }
                 }, cancellationToken);
 
+                var keepingAliveLoop = Task.Run(async () =>
+                {
+                    while (!cancellationToken.IsCancellationRequested)
+                    {
+                        _logger.LogInformation("Alive check");
+
+                        await Task.Delay(30_000);
+                        await callInstance.RequestStream.WriteAsync(new ClientMessage() { CommandSyncId = "dummy" });
+                    }
+                }, cancellationToken);
+
                 await listeningLoop;
+                await keepingAliveLoop;
                 await callInstance.RequestStream.CompleteAsync();
             }
             catch (RpcException ex)
