@@ -17,6 +17,7 @@ message ClientMessage {
 		GraphResult graphResult = 4;
 	}
     bool isSuccess = 5;
+    string commandSyncId = 6;
 }
 
 enum CommandType {
@@ -40,6 +41,7 @@ message GraphResult {
 message ServerMessage {
     string instanceName = 1;
 	string command = 2;
+    string commandSyncId = 3;
 }
 
 message HelloRequest {
