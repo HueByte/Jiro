@@ -17,13 +17,12 @@ internal class JiroClientService : IHostedService
 {
     private readonly IServiceScopeFactory _scopeFactory;
     private readonly ILogger<JiroClientService> _logger;
-    private readonly IServiceProvider _serviceProvider;
-    private ICommandHandlerService _commandHandler;
-    public JiroClientService(IServiceScopeFactory scopeFactory, ILogger<JiroClientService> logger, IServiceProvider serviceProvider, ICommandHandlerService commandHandlerService)
+    private readonly ICommandHandlerService _commandHandler;
+    private readonly SemaphoreSlim _semaphore = new(1, 1);
+    public JiroClientService(IServiceScopeFactory scopeFactory, ILogger<JiroClientService> logger, ICommandHandlerService commandHandlerService)
     {
         _scopeFactory = scopeFactory;
         _logger = logger;
-        _serviceProvider = serviceProvider;
         _commandHandler = commandHandlerService;
     }
 
@@ -35,7 +34,7 @@ internal class JiroClientService : IHostedService
         {
             try
             {
-                Dictionary<string, Task<ServerMessage>> commandQueue = new();
+                Dictionary<string, Task> commandQueue = new();
 
                 await using var connectionScope = _scopeFactory.CreateAsyncScope();
                 var clientFactory = connectionScope.ServiceProvider.GetRequiredService<GrpcClientFactory>();
@@ -53,34 +52,46 @@ internal class JiroClientService : IHostedService
 
                     await foreach (var serverMessage in callInstance.ResponseStream.ReadAllAsync())
                     {
+                        _logger.LogInformation("Received message from server [{Message}]", serverMessage.CommandSyncId);
                         if (commandQueue.TryGetValue(serverMessage.CommandSyncId, out _))
                         {
                             throw new Exception("Command already in queue");
                         }
 
                         if (serverMessage.CommandSyncId == "dummy")
-                            return;
+                            continue;
 
                         // capture variables
                         var scopedCommandSyncId = serverMessage.CommandSyncId;
                         var command = serverMessage.Command;
-                        var commandTask = Task.Run(async () =>
+                        var instanceId = serverMessage.InstanceName;
+                        var commandExecutionTask = Task.Run(async () =>
                         {
-                            var commandResult = await ExecuteCommand(scopedCommandSyncId, command);
+                            try
+                            {
+                                var commandResult = await ExecuteCommand(scopedCommandSyncId, instanceId, command);
 
-                            await callInstance.RequestStream.WriteAsync(commandResult);
+                                _logger.LogInformation("Sending command [{syncId}]", commandResult.CommandSyncId);
+                                await WriteMessageToServer(callInstance, commandResult);
+                            }
+                            finally
+                            {
+                                _logger.LogInformation("Command execution finished");
+                            }
                         });
                     }
+
+                    _logger.LogInformation("Disconnecting...");
                 }, cancellationToken);
 
                 var keepingAliveLoop = Task.Run(async () =>
                 {
                     while (!cancellationToken.IsCancellationRequested)
                     {
-                        _logger.LogInformation("Alive check");
+                        _logger.LogInformation("Alive ping");
 
-                        await Task.Delay(30_000);
-                        await callInstance.RequestStream.WriteAsync(new ClientMessage() { CommandSyncId = "dummy" });
+                        await Task.Delay(60_000);
+                        await WriteMessageToServer(callInstance, new ClientMessage() { CommandSyncId = "dummy" });
                     }
                 }, cancellationToken);
 
@@ -104,12 +115,28 @@ internal class JiroClientService : IHostedService
         } while (!cancellationToken.IsCancellationRequested);
     }
 
-    private async Task<ClientMessage> ExecuteCommand(string id, string command)
+    private async Task WriteMessageToServer(AsyncDuplexStreamingCall<ClientMessage, ServerMessage> stream, ClientMessage message)
+    {
+        await _semaphore.WaitAsync();
+        try
+        {
+            await stream.RequestStream.WriteAsync(message);
+        }
+        finally
+        {
+            _semaphore.Release();
+        }
+    }
+
+    private async Task<ClientMessage> ExecuteCommand(string syncId, string instanceId, string command)
     {
         await using var commandScope = _scopeFactory.CreateAsyncScope();
+        var currentClient = commandScope.ServiceProvider.GetRequiredService<ICurrentUserService>();
+        currentClient.SetCurrentUser(instanceId);
+
         var commandResult = await _commandHandler.ExecuteCommandAsync(commandScope.ServiceProvider, command);
 
-        return CreateMessage(id, commandResult);
+        return CreateMessage(syncId, commandResult);
     }
 
     private ClientMessage CreateMessage(string syncId, CommandResponse commandResult)
