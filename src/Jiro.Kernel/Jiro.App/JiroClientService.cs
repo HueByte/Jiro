@@ -27,11 +27,6 @@ internal class JiroClientService : IHostedService
         _commandHandler = commandHandlerService;
     }
 
-    /// <summary>
-    /// Initial idea for command exchange
-    /// </summary>
-    /// <param name="cancellationToken"></param>
-    /// <returns></returns>
     public async Task StartAsync(CancellationToken cancellationToken)
     {
         //await SayHello();
@@ -69,7 +64,7 @@ internal class JiroClientService : IHostedService
                         var commandTask = Task.Run(async () =>
                         {
                             var commandResult = await ExecuteCommand(scopedCommandSyncId, command);
-                            
+
                             await callInstance.RequestStream.WriteAsync(commandResult);
                         });
                     }
@@ -110,7 +105,7 @@ internal class JiroClientService : IHostedService
 
         ClientMessage response = new()
         {
-            CommandSyncId = syncId, 
+            CommandSyncId = syncId,
             CommandName = commandResult.CommandName,
             CommandType = commandType,
             IsSuccess = commandResult.IsSuccess
