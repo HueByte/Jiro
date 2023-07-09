@@ -14,16 +14,15 @@ using Jiro.Core.Utils;
 using Jiro.Infrastructure;
 using Jiro.Core.Commands.GPT;
 using Jiro.Commands.Models;
+using Grpc.Core;
+
+AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
 
 var host = Host.CreateDefaultBuilder(args);
 
-host.ConfigureHostConfiguration(options =>
-{
-
-});
-
 ConfigurationManager configManager = new();
-configManager.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
+configManager.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+    .AddEnvironmentVariables();
 
 EnvironmentConfigurator environmentConfigurator = new(configManager);
 environmentConfigurator.PrepareDefaultFolders();
@@ -66,19 +65,39 @@ host.ConfigureAppConfiguration(options =>
 
 host.ConfigureServices(services =>
 {
+    string? apiKey = configManager.GetValue<string>("API_KEY");
+    string? apiUrl = configManager.GetValue<string>("JIRO_API");
+
+    // todo
+    // add link to guide
+    if (string.IsNullOrWhiteSpace(apiKey))
+        throw new Exception("Please provide API_KEY");
+
+    if (string.IsNullOrWhiteSpace(apiUrl))
+        throw new Exception("Couldn't connect to API");
+
     services.AddGrpcClient<JiroHubProto.JiroHubProtoClient>("JiroClient", options =>
     {
-        options.Address = new Uri("https://localhost:18092");
+        options.Address = new Uri(apiUrl);
     })
     .AddCallCredentials((context, metadata) =>
     {
-        metadata.Add("X-Api-Key", "e7+s7hpjjAUvASi7GorGLK0bm+J3fN//xq/IQRpQwVA=");
+        metadata.Add("X-Api-Key", apiKey);
 
         return Task.CompletedTask;
+    })
+    .ConfigureChannel(options =>
+    {
+        options.HttpHandler = new SocketsHttpHandler
+        {
+            PooledConnectionIdleTimeout = Timeout.InfiniteTimeSpan,
+            KeepAlivePingDelay = TimeSpan.FromSeconds(60),
+            KeepAlivePingTimeout = TimeSpan.FromSeconds(30),
+            EnableMultipleHttp2Connections = true
+        };
     });
 
     pluginManager = new(services, configManager, logger);
-
 
     string? connString = configManager.GetValue<string>("JIRO_DB_CONN");
     if (string.IsNullOrEmpty(connString))

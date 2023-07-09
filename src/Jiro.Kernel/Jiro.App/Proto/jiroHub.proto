@@ -5,10 +5,11 @@ option csharp_namespace = "JiroCloud.Api.Proto";
 package JiroHubProto;
 
 service JiroHubProto {
-	rpc InstanceCommand (stream InstanceCommandRequest) returns (stream InstanceCommandResponse);
+	rpc InstanceCommand (stream ClientMessage) returns (stream ServerMessage);
+    rpc Hello (HelloRequest) returns (HelloReply);
 }
 
-message InstanceCommandRequest {
+message ClientMessage {
     string commandName = 1;
     CommandType commandType = 2;
     oneof result {
@@ -36,7 +37,15 @@ message GraphResult {
     map<string, string> units = 6;
 }
 
-message InstanceCommandResponse {
+message ServerMessage {
     string instanceName = 1;
 	string command = 2;
+}
+
+message HelloRequest {
+    string message = 1;
+}
+
+message HelloReply {
+    string message = 1;
 }
