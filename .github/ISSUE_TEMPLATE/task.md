@@ -15,6 +15,6 @@ assignees: ''
 - [ ] Task2
 - [ ] Task3
 
-## Related tasks
+## Related Issues
 - #11
 - user/repo#13
