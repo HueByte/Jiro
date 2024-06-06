@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Jiro.Core.Services.Weather.Models;
 
 namespace Jiro.Core.Commands.Weather;
@@ -45,7 +46,7 @@ public class WeatherCommand : ICommandBase
 
         // create note
         var note = $"Current weather in {location} is {weather.CurrentWeather.Temperature} {weather.HourlyUnits.Temperature2m} with wind of {weather.CurrentWeather.Windspeed} {weather.HourlyUnits.Windspeed10m}";
-
-        return GraphResult.Create("", data.ToArray(), units, "date", note: note);
+        var dataInJson = JsonSerializer.Serialize(data);
+        return GraphResult.Create("", dataInJson, units, "date", note: note);
     }
 }

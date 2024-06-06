@@ -11,7 +11,7 @@ public class EnvironmentConfigurator
         _config = config;
     }
 
-    public void PrepareDefaultFolders()
+    public EnvironmentConfigurator PrepareDefaultFolders()
     {
         if (!Directory.Exists(Path.Join(AppContext.BaseDirectory, "logs")))
             Directory.CreateDirectory(Path.Join(AppContext.BaseDirectory, "logs"));
@@ -21,13 +21,15 @@ public class EnvironmentConfigurator
 
         if (!Directory.Exists(Path.Join(AppContext.BaseDirectory, "modules")))
             Directory.CreateDirectory(Path.Join(AppContext.BaseDirectory, "modules"));
+
+        return this;
     }
 
-    public void PrepareLogsFolder()
+    public EnvironmentConfigurator PrepareLogsFolder()
     {
         var logsPath = _config.GetValue<string>("API_LOGS_PATH");
         if (string.IsNullOrEmpty(logsPath))
-            return;
+            return this;
 
         var logsInfo = new FileInfo(logsPath);
         var rootDirectory = logsInfo?.Directory?.Parent?.FullName;
@@ -40,9 +42,11 @@ public class EnvironmentConfigurator
         {
             Directory.CreateDirectory(logsDirectory);
         }
+
+        return this;
     }
 
-    public void PrepareConfigFiles()
+    public EnvironmentConfigurator PrepareConfigFiles()
     {
         string finalPath = "";
         try
@@ -84,5 +88,7 @@ public class EnvironmentConfigurator
         {
             throw new Exception($"Error while loading config file: {finalPath}", ex);
         }
+
+        return this;
     }
 }

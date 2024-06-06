@@ -14,7 +14,6 @@ using Jiro.Core.Utils;
 using Jiro.Infrastructure;
 using Jiro.Core.Commands.GPT;
 using Jiro.Commands.Models;
-using Grpc.Core;
 
 AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
 
@@ -24,10 +23,10 @@ ConfigurationManager configManager = new();
 configManager.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
     .AddEnvironmentVariables();
 
-EnvironmentConfigurator environmentConfigurator = new(configManager);
-environmentConfigurator.PrepareDefaultFolders();
-environmentConfigurator.PrepareConfigFiles();
-environmentConfigurator.PrepareLogsFolder();
+EnvironmentConfigurator environmentConfigurator = new EnvironmentConfigurator(configManager)
+    .PrepareDefaultFolders()
+    .PrepareConfigFiles()
+    .PrepareLogsFolder();
 
 Serilog.Log.Logger = new LoggerConfiguration()
     .WriteTo.Console()
