@@ -1,8 +1,6 @@
-﻿using System.Linq.Expressions;
-using Google.Protobuf;
+﻿using Google.Protobuf;
 using Grpc.Core;
 using Grpc.Net.ClientFactory;
-using Jiro.Commands;
 using Jiro.Commands.Models;
 using Jiro.Core.Interfaces.IServices;
 using JiroCloud.Api.Proto;
@@ -150,7 +148,6 @@ internal class JiroClientService : IHostedService
             {
                 _logger.LogError(ex, "Error while processing command [{Message}].", serverMessage.CommandSyncId);
             }
-
         }
     }
 
@@ -185,7 +182,7 @@ internal class JiroClientService : IHostedService
         try
         {
             await using var commandScope = _scopeFactory.CreateAsyncScope();
-            var currentClient = commandScope.ServiceProvider.GetRequiredService<ICurrentUserService>();
+            var currentClient = commandScope.ServiceProvider.GetRequiredService<ICommandContext>();
             currentClient.SetCurrentUser(instanceId);
 
             var commandResult = await _commandHandler.ExecuteCommandAsync(commandScope.ServiceProvider, command);
@@ -201,6 +198,7 @@ internal class JiroClientService : IHostedService
         }
         finally
         {
+            _commandQueue.TryRemove(scopedCommandSyncId, out _);
             _logger.LogInformation("Command execution finished");
         }
     }
@@ -266,7 +264,6 @@ internal class JiroClientService : IHostedService
         try
         {
             await stream.RequestStream.WriteAsync(message, cancellationToken: _cancellationToken);
-            _commandQueue.TryRemove(message.CommandSyncId, out _);
         }
         finally
         {

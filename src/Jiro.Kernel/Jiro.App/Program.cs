@@ -14,6 +14,8 @@ using Jiro.Core.Utils;
 using Jiro.Infrastructure;
 using Jiro.Core.Commands.GPT;
 using Jiro.Commands.Models;
+using Jiro.Core.Services.Chat;
+using Jiro.Core.Commands.Chat;
 
 AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
 
@@ -76,25 +78,25 @@ host.ConfigureServices(services =>
         throw new Exception("Couldn't connect to API");
 
     services.AddGrpcClient<JiroHubProto.JiroHubProtoClient>("JiroClient", options =>
-    {
-        options.Address = new Uri(apiUrl);
-    })
-    .AddCallCredentials((context, metadata) =>
-    {
-        metadata.Add("X-Api-Key", apiKey);
-
-        return Task.CompletedTask;
-    })
-    .ConfigureChannel(options =>
-    {
-        options.HttpHandler = new SocketsHttpHandler
         {
-            PooledConnectionIdleTimeout = Timeout.InfiniteTimeSpan,
-            KeepAlivePingDelay = TimeSpan.FromSeconds(60),
-            KeepAlivePingTimeout = TimeSpan.FromSeconds(30),
-            EnableMultipleHttp2Connections = true
-        };
-    });
+            options.Address = new Uri(apiUrl);
+        })
+        .AddCallCredentials((context, metadata) =>
+        {
+            metadata.Add("X-Api-Key", apiKey);
+
+            return Task.CompletedTask;
+        })
+        .ConfigureChannel(options =>
+        {
+            options.HttpHandler = new SocketsHttpHandler
+            {
+                PooledConnectionIdleTimeout = Timeout.InfiniteTimeSpan,
+                KeepAlivePingDelay = TimeSpan.FromSeconds(60),
+                KeepAlivePingTimeout = TimeSpan.FromSeconds(30),
+                EnableMultipleHttp2Connections = true
+            };
+        });
 
     pluginManager = new(services, configManager, logger);
 
@@ -103,12 +105,13 @@ host.ConfigureServices(services =>
         connString = configManager.GetConnectionString("JiroContext");
 
     services.AddJiroSQLiteContext(string.IsNullOrEmpty(connString) ? Path.Join(AppContext.BaseDirectory, "save", "jiro.db") : connString);
-
+    services.AddMemoryCache();
     services.AddServices(configManager);
-    services.RegisterCommands(nameof(GPTCommand.Chat));
+    services.RegisterCommands(nameof(ChatCommand.Chat));
     services.AddHttpClients(configManager);
     services.AddOptions(configManager);
     services.AddHostedService<JiroClientService>();
+    services.AddHttpContextAccessor();
 });
 
 if (AppUtils.IsDebug()) pluginManager?.BuildDevModules(modulePaths);

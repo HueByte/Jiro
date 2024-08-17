@@ -6,9 +6,11 @@ using Jiro.Core.Services.GPTService.Models;
 using Jiro.Core.Services.GPTService.Models.GPT;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using OpenAI.Chat;
 
 namespace Jiro.Core.Services.GPTService;
 
+[Obsolete]
 public class GPTService : IChatService
 {
     private readonly ILogger _logger;
@@ -80,5 +82,15 @@ public class GPTService : IChatService
         await File.AppendAllTextAsync(AppContext.BaseDirectory + "Model.jsonl", $"{jsonAppend}\n");
 
         return true;
+    }
+
+    public Task<string> ChatAsync(string prompt, string sessionId)
+    {
+        throw new NotImplementedException();
+    }
+
+    Task<Message> IChatService.ChatAsync(string prompt, string sessionId)
+    {
+        throw new NotImplementedException();
     }
 }

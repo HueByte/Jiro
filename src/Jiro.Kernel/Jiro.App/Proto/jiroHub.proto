@@ -5,6 +5,7 @@ option csharp_namespace = "JiroCloud.Api.Proto";
 package JiroHubProto;
 
 service JiroHubProto {
+    rpc StartUserSession (Empty) returns (StartSessionReply);
 	rpc InstanceCommand (stream ClientMessage) returns (stream ServerMessage);
     rpc Hello (HelloRequest) returns (HelloReply);
 }
@@ -18,6 +19,7 @@ message ClientMessage {
 	}
     bool isSuccess = 5;
     string commandSyncId = 6;
+    repeated Pair parameters = 7;
 }
 
 enum CommandType {
@@ -50,4 +52,17 @@ message HelloRequest {
 
 message HelloReply {
     string message = 1;
+}
+
+message StartSessionReply {
+    string sessionId = 1;
+}
+
+message Pair {
+    string key = 1;
+    string value = 2;
+}
+
+message Empty {
+
 }

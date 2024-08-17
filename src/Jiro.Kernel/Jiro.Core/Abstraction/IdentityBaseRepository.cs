@@ -13,8 +13,8 @@ public class IdentityBaseRepository<TKeyType, TEntity, TContext> : IIdentityRepo
         IdentityRoleClaim<string>, IdentityUserToken<string>>, new()
 {
     protected internal readonly TContext _context;
-    private readonly ICurrentUserService _currentUser;
-    public IdentityBaseRepository(TContext context, ICurrentUserService currentUser)
+    private readonly ICommandContext _currentUser;
+    public IdentityBaseRepository(TContext context, ICommandContext currentUser)
     {
         _context = context ?? new TContext();
         _currentUser = currentUser;

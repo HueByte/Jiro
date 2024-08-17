@@ -2,6 +2,7 @@ using Jiro.Core.Services.GPTService.Models.ChatGPT;
 
 namespace Jiro.Core.Interfaces.IServices;
 
+[Obsolete]
 public interface IChatGPTStorageService
 {
     ChatGPTSession? GetOrCreateSession(string userId);

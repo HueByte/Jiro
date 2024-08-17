@@ -32,5 +32,21 @@ public class JiroContext : IdentityDbContext<AppUser, AppRole, string,
                .WithOne(e => e.Role)
                .HasForeignKey(e => e.RoleId)
                .IsRequired();
+
+        builder.Entity<ChatSession>()
+                .HasMany(e => e.Messages)
+                .WithOne(e => e.ChatSession)
+                .HasForeignKey(e => e.ChatSessionId)
+                .IsRequired()
+                .OnDelete(DeleteBehavior.Cascade);
+
+        builder.Entity<Message>()
+                .HasOne(e => e.ChatSession)
+                .WithMany(e => e.Messages)
+                .HasForeignKey(e => e.ChatSessionId)
+                .IsRequired();
     }
+
+    public DbSet<ChatSession> ChatSessions { get; set; } = default!;
+    public DbSet<Message> Messages { get; set; } = default!;
 }

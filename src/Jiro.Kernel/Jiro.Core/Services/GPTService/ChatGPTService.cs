@@ -8,6 +8,7 @@ using Microsoft.Extensions.Options;
 
 namespace Jiro.Core.Services.GPTService;
 
+[Obsolete]
 public class ChatGPTService : IChatService
 {
     private readonly ILogger _logger;
@@ -15,8 +16,8 @@ public class ChatGPTService : IChatService
     private readonly HttpClient _client;
     private readonly IChatGPTStorageService _storageService;
     private readonly ITokenizerService _tokenizerService;
-    private readonly ICurrentUserService _currentUserService;
-    public ChatGPTService(ILogger<ChatGPTService> logger, IChatGPTStorageService storageService, IHttpClientFactory clientFactory, IOptions<ChatGptOptions> chatGptOptions, ITokenizerService tokenizerService, ICurrentUserService currentUserService)
+    private readonly ICommandContext _currentUserService;
+    public ChatGPTService(ILogger<ChatGPTService> logger, IChatGPTStorageService storageService, IHttpClientFactory clientFactory, IOptions<ChatGptOptions> chatGptOptions, ITokenizerService tokenizerService, ICommandContext currentUserService)
     {
         _logger = logger;
         _storageService = storageService;
@@ -96,5 +97,15 @@ public class ChatGPTService : IChatService
         var combinedText = string.Join(' ', messages.Select(e => e.Content));
 
         return await _tokenizerService.GetTokenCountAsync(combinedText);
+    }
+
+    public Task<string> ChatAsync(string prompt, string sessionId)
+    {
+        throw new NotImplementedException();
+    }
+
+    Task<OpenAI.Chat.Message> IChatService.ChatAsync(string prompt, string sessionId)
+    {
+        throw new NotImplementedException();
     }
 }

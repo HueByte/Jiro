@@ -2,6 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Jiro.Core.Options;
 
+[Obsolete]
 public class GptOptions
 {
     public const string Gpt = "Gpt";
@@ -21,6 +22,7 @@ public class GptOptions
     public SingleGptOptions? SingleGpt { get; set; }
 }
 
+[Obsolete]
 public class ChatGptOptions
 {
     public const string ChatGpt = "ChatGpt";
@@ -28,6 +30,7 @@ public class ChatGptOptions
     public string SystemMessage { get; set; } = string.Empty;
 }
 
+[Obsolete]
 public class SingleGptOptions
 {
     public const string SingleGpt = "SingleGpt";

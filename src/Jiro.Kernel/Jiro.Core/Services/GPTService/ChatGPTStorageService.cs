@@ -6,6 +6,7 @@ using Microsoft.Extensions.Options;
 
 namespace Jiro.Core.Services.GPTService;
 
+[Obsolete]
 public class ChatGPTStorageService : IChatGPTStorageService
 {
     private readonly ILogger _logger;

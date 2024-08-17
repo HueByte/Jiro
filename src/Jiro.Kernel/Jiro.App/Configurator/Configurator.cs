@@ -1,15 +1,18 @@
+using Jiro.Core;
 using Jiro.Core.Constants;
 using Jiro.Core.Interfaces.IServices;
+using Jiro.Core.IRepositories;
 using Jiro.Core.Options;
+using Jiro.Core.Services.Chat;
 using Jiro.Core.Services.CommandHandler;
 using Jiro.Core.Services.CommandSystem;
 using Jiro.Core.Services.CurrentUser;
 using Jiro.Core.Services.Geolocation;
-using Jiro.Core.Services.GPTService;
 using Jiro.Core.Services.Weather;
+using Jiro.Infrastructure.Repositories;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
+using OpenAI;
 
 namespace Jiro.App.Configurator;
 
@@ -17,37 +20,46 @@ public static class Configurator
 {
     public static IServiceCollection AddServices(this IServiceCollection services, IConfiguration config)
     {
-        GptOptions? gptOptions = config.GetSection(GptOptions.Gpt).Get<GptOptions>();
-
-        if (gptOptions is { Enable: true, AuthToken: not null and not "" })
+        ChatOptions? chatOptions = config.GetSection(ChatOptions.Chat).Get<ChatOptions>();
+        if (chatOptions is { Enabled: true, AuthToken: not null and not "" })
         {
-            if (gptOptions.UseChatGpt) services.AddScoped<IChatService, ChatGPTService>();
-            else services.AddScoped<IChatService, GPTService>();
+            services.AddScoped<IChatService, ChatService>();
+
         }
         else
         {
-            services.AddScoped<IChatService, DisabledGptService>();
+            services.AddScoped<IChatService, DisabledChatService>();
         }
 
-        // services
-        services.AddSingleton<IChatGPTStorageService, ChatGPTStorageService>();
-        services.AddSingleton<ITokenizerService, TokenizerService>();
         services.AddSingleton<ICommandHandlerService, CommandHandlerService>();
         services.AddSingleton<IHelpService, HelpService>();
         services.AddSingleton<EventsConfigurator>();
+        services.AddSingleton<OpenAIClient>((factoryServices) =>
+        {
+            var apiKey = config.GetSection(ChatOptions.Chat).Get<ChatOptions>()?.AuthToken;
+            if (apiKey is null)
+            {
+                throw new JiroException("API Key for chat not found");
+            }
+
+            return new OpenAIClient(apiKey);
+        });
 
         services.AddScoped<IWeatherService, WeatherService>();
-        services.AddScoped<ICurrentUserService, CurrentUserService>();
+        services.AddScoped<ICommandContext, CommandContext>();
         services.AddScoped<IGeolocationService, GeolocationService>();
+        services.AddScoped<IChatStorageService, ChatStorageService>();
+
+        // Repositories
+        services.AddScoped<IChatSessionRepository, ChatSessionRepository>();
 
         return services;
     }
 
     public static IServiceCollection AddOptions(this IServiceCollection services, IConfiguration configuration)
     {
-        services.Configure<GptOptions>(configuration.GetSection(GptOptions.Gpt));
-        services.Configure<ChatGptOptions>(configuration.GetSection($"{GptOptions.Gpt}:{ChatGptOptions.ChatGpt}"));
-        services.Configure<SingleGptOptions>(configuration.GetSection($"{GptOptions.Gpt}:{SingleGptOptions.SingleGpt}"));
+        services.AddOptions();
+        services.Configure<ChatOptions>(configuration.GetSection(ChatOptions.Chat));
         services.Configure<LogOptions>(configuration.GetSection(LogOptions.Log));
         services.Configure<JWTOptions>(configuration.GetSection(JWTOptions.JWT));
 
@@ -56,17 +68,6 @@ public static class Configurator
 
     public static IServiceCollection AddHttpClients(this IServiceCollection services, IConfiguration configuration)
     {
-        services.AddHttpClient(HttpClients.GPT_CLIENT, (provider, httpClient) =>
-        {
-            var gptOptions = provider.GetRequiredService<IOptions<GptOptions>>().Value;
-
-            httpClient.BaseAddress = new Uri(gptOptions.BaseUrl);
-            httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {gptOptions.AuthToken}");
-
-            if (!string.IsNullOrEmpty(gptOptions.Organization))
-                httpClient.DefaultRequestHeaders.Add("OpenAI-Organization", gptOptions.Organization);
-        });
-
         services.AddHttpClient(HttpClients.WEATHER_CLIENT, httpClient =>
         {
             httpClient.BaseAddress = new Uri("https://api.open-meteo.com/v1/");
@@ -78,26 +79,9 @@ public static class Configurator
             httpClient.DefaultRequestHeaders.Add("User-Agent", "JiroBot");
         });
 
-        services.AddHttpClient(HttpClients.CHAT_GPT_CLIENT, (provider, httpClient) =>
-        {
-            var gptOptions = provider.GetRequiredService<IOptions<GptOptions>>().Value;
-
-            httpClient.BaseAddress = new Uri(gptOptions.BaseUrl);
-            httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {gptOptions.AuthToken}");
-
-            if (!string.IsNullOrEmpty(gptOptions.Organization))
-                httpClient.DefaultRequestHeaders.Add("OpenAI-Organization", gptOptions.Organization);
-        });
-
-        services.AddHttpClient(HttpClients.TOKENIZER, (provider, httpClient) =>
-        {
-            var tokenizerUrl = provider.GetRequiredService<IConfiguration>()
-                .GetValue<string>("TokenizerUrl");
-
-            httpClient.BaseAddress = new Uri(tokenizerUrl ?? "http://localhost:8000");
-        });
-
         services.AddHttpClient(HttpClients.JIRO);
+
+
 
         return services;
     }

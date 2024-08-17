@@ -1,12 +1,13 @@
 namespace Jiro.Core.Commands.GPT;
 
 [CommandModule("GPT")]
+[Obsolete]
 public class GPTCommand : ICommandBase
 {
     private readonly IChatService _chatService;
     private readonly IChatGPTStorageService _storageService;
-    private readonly ICurrentUserService _currentUserService;
-    public GPTCommand(IChatService chatService, IChatGPTStorageService storageService, ICurrentUserService currentUserService)
+    private readonly ICommandContext _currentUserService;
+    public GPTCommand(IChatService chatService, IChatGPTStorageService storageService, ICommandContext currentUserService)
     {
         _chatService = chatService;
         _storageService = storageService;

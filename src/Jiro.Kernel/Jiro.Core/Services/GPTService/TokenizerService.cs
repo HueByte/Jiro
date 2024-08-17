@@ -5,7 +5,7 @@ using Jiro.Core.Services.GPTService.Models.ChatGPT;
 
 namespace Jiro.Core.Services.GPTService;
 
-
+[Obsolete]
 public class TokenizerService : ITokenizerService
 {
     private readonly HttpClient _client;
