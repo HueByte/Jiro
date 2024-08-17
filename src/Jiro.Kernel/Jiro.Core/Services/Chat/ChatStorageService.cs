@@ -30,7 +30,7 @@ public class ChatStorageService : IChatStorageService
     public async Task AppendMessagesAsync(string sessionId, IEnumerable<OpenAI.Chat.Message> messages)
     {
         var persistentSession = await _chatSessionRepository.AsQueryable()
-            .FirstOrDefaultAsync(s => s.SessionId == sessionId);
+            .FirstOrDefaultAsync(s => s.Id == sessionId);
 
         if (persistentSession is null)
         {
@@ -62,13 +62,14 @@ public class ChatStorageService : IChatStorageService
     {
         ChatSession session = new()
         {
-            SessionId = Guid.NewGuid().ToString(),
+            Id = Guid.NewGuid().ToString(),
             UserId = ownerId,
             Messages = new List<Message>()
         };
 
         session.Messages.Add(new Message
         {
+            Id = Guid.NewGuid().ToString(),
             Role = "System",
             Content = _chatOptions.SystemMessage
         });
@@ -86,7 +87,7 @@ public class ChatStorageService : IChatStorageService
         {
             var persistentSession = await _chatSessionRepository.AsQueryable()
                 .Include(s => s.Messages)
-                .FirstOrDefaultAsync(s => s.SessionId == sessionId);
+                .FirstOrDefaultAsync(s => s.Id == sessionId);
 
             if (persistentSession is null)
                 return null;
@@ -94,7 +95,7 @@ public class ChatStorageService : IChatStorageService
             session = new MemorySession()
             {
                 OwnerId = persistentSession.UserId,
-                SessionId = persistentSession.SessionId,
+                SessionId = persistentSession.Id,
             };
 
             foreach (var message in persistentSession.Messages)
@@ -115,7 +116,7 @@ public class ChatStorageService : IChatStorageService
     {
         return _chatSessionRepository.AsQueryable()
             .Where(s => s.UserId == ownerId)
-            .Select(s => s.SessionId)
+            .Select(s => s.Id)
             .ToListAsync();
     }
 

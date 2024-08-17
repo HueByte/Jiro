@@ -12,9 +12,7 @@ using Serilog.Sinks.SystemConsole.Themes;
 using Jiro.Commands.Base;
 using Jiro.Core.Utils;
 using Jiro.Infrastructure;
-using Jiro.Core.Commands.GPT;
 using Jiro.Commands.Models;
-using Jiro.Core.Services.Chat;
 using Jiro.Core.Commands.Chat;
 
 AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
