@@ -31,10 +31,10 @@ public class PersonaService : IPersonaService
 			return await GetPersonaInternalAsync();
 		}
 
-		var channelSemaphore = _chatSemaphoreManager.GetOrCreateInstanceSemaphore(instanceId);
+		SemaphoreSlim channelSemaphore = _chatSemaphoreManager.GetOrCreateInstanceSemaphore(instanceId);
 		await channelSemaphore.WaitAsync();
 
-		string personaMessage = string.Empty;
+		var personaMessage = string.Empty;
 		try
 		{
 			personaMessage = await GetPersonaInternalAsync();
@@ -63,8 +63,8 @@ public class PersonaService : IPersonaService
 				_logger.LogInformation("Persona message cache miss. Loaded from source.");
 			}
 
-			// Add a newline for readability
 			personaMessage += $"\nThis is your summary of recent conversations: {updateMessage}";
+
 			_memoryCache.Set(Constants.CacheKeys.ComputedPersonaMessageKey, personaMessage, TimeSpan.FromDays(1));
 			_logger.LogInformation("Persona summary updated.");
 		}

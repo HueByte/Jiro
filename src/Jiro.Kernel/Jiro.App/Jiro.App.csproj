@@ -38,7 +38,6 @@
 		<PackageReference Include="Serilog.Sinks.Async" Version="2.1.0" />
 		<PackageReference Include="Serilog.Sinks.Console" Version="6.0.1-dev-00953" />
 		<PackageReference Include="Serilog.Sinks.File" Version="7.0.0" />
-    	<PackageReference Include="OpenAI-DotNet" Version="8.6.4" />
 	</ItemGroup>
 
 	<ItemGroup>

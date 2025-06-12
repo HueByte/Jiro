@@ -3,8 +3,8 @@ using Jiro.Core.Models;
 
 namespace Jiro.Core.IRepositories
 {
-    public interface IMessageRepository : IRepository<string, Message>
-    {
+	public interface IMessageRepository : IRepository<string, Message>
+	{
 
-    }
+	}
 }
