@@ -1,11 +1,9 @@
 using Jiro.Core.IRepositories;
 using Jiro.Core.Models;
 using Jiro.Core.Options;
-using Jiro.Core.Services.Chat.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
-using OpenAI;
 
 namespace Jiro.Core.Services.Chat;
 
@@ -22,40 +20,40 @@ public class ChatStorageService : IChatStorageService
         _chatOptions = chatOptions.Value;
     }
 
-    public async Task AppendMessageAsync(string sessionId, string role, string content)
+
+    public Task AppendMessageToSessionAsync(string sessionId, string role, string content)
     {
-        await AppendMessagesAsync(sessionId, [new OpenAI.Chat.Message(GetMessageRole(role), content)]);
+        Message message = new()
+        {
+            Role = role,
+            Content = content,
+            ChatSessionId = sessionId
+        };
+
+        return AppendMessagesToSessionAsync(sessionId, [message]);
     }
 
-    public async Task AppendMessagesAsync(string sessionId, IEnumerable<OpenAI.Chat.Message> messages)
+    public async Task AppendMessagesToSessionAsync(string sessionId, List<Message> messages)
     {
-        var persistentSession = await _chatSessionRepository.AsQueryable()
-            .FirstOrDefaultAsync(s => s.Id == sessionId);
-
-        if (persistentSession is null)
+        ChatSession? session = TryGetSessionFromCache(sessionId);
+        if (session is null)
         {
-            throw new JiroException("Session not found");
-        }
-
-        var memorySession = await GetSessionAsync(sessionId);
-
-        persistentSession.Messages.AddRange(messages.Select(m => new Message
-        {
-            Role = m.Role.ToString(),
-            Content = m.Content
-        }));
-
-        await _chatSessionRepository.UpdateAsync(persistentSession);
-        await _chatSessionRepository.SaveChangesAsync();
-
-        if (memorySession is not null)
-        {
-            memorySession.Messages.AddRange(messages);
-            _memoryCache.Set(sessionId, memorySession, new MemoryCacheEntryOptions
+            session = await _chatSessionRepository.GetAsync(sessionId);
+            if (session is null)
             {
-                AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(15)
+                throw new JiroException("Session not found");
+            }
+
+            _memoryCache.Set(sessionId, session, new MemoryCacheEntryOptions()
+            {
+                AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(30)
             });
         }
+
+        session.Messages.AddRange(messages);
+
+        await _chatSessionRepository.UpdateAsync(session);
+        await _chatSessionRepository.SaveChangesAsync();
     }
 
     public async Task<ChatSession> CreateSessionAsync(string ownerId)
@@ -63,16 +61,8 @@ public class ChatStorageService : IChatStorageService
         ChatSession session = new()
         {
             Id = Guid.NewGuid().ToString(),
-            UserId = ownerId,
-            Messages = new List<Message>()
+            UserId = ownerId
         };
-
-        session.Messages.Add(new Message
-        {
-            Id = Guid.NewGuid().ToString(),
-            Role = "System",
-            Content = _chatOptions.SystemMessage
-        });
 
         await _chatSessionRepository.AddAsync(session);
         await _chatSessionRepository.SaveChangesAsync();
@@ -80,63 +70,35 @@ public class ChatStorageService : IChatStorageService
         return session;
     }
 
-    public async Task<MemorySession?> GetSessionAsync(string sessionId, bool withMessages = false)
+    public async Task DeleteSessionAsync(string sessionId)
     {
-        var session = _memoryCache.Get<MemorySession>(sessionId);
+        var session = _chatSessionRepository.GetAsync(sessionId);
         if (session is null)
         {
-            var persistentSession = await _chatSessionRepository.AsQueryable()
-                .Include(s => s.Messages)
-                .FirstOrDefaultAsync(s => s.Id == sessionId);
-
-            if (persistentSession is null)
-                return null;
-
-            session = new MemorySession()
-            {
-                OwnerId = persistentSession.UserId,
-                SessionId = persistentSession.Id,
-            };
-
-            foreach (var message in persistentSession.Messages)
-            {
-                session.Messages.Add(new OpenAI.Chat.Message(GetMessageRole(message.Role), message.Content));
-            }
-
-            _memoryCache.Set(sessionId, session, new MemoryCacheEntryOptions
-            {
-                AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(15)
-            });
+            throw new JiroException("Session not found");
         }
 
-        return session;
-    }
-
-    public Task<List<string>> GetSessionIdsAsync(string ownerId)
-    {
-        return _chatSessionRepository.AsQueryable()
-            .Where(s => s.UserId == ownerId)
-            .Select(s => s.Id)
-            .ToListAsync();
-    }
-
-    public async Task RemoveSessionAsync(string sessionId)
-    {
+        _memoryCache.Remove(sessionId);
         await _chatSessionRepository.RemoveAsync(sessionId);
         await _chatSessionRepository.SaveChangesAsync();
     }
 
-    public async Task UpdateSessionAsync(ChatSession session)
+    public async Task<ChatSession?> GetSessionAsync(string sessionId)
     {
-        await _chatSessionRepository.UpdateAsync(session);
-        await _chatSessionRepository.SaveChangesAsync();
+        return TryGetSessionFromCache(sessionId) ?? await _chatSessionRepository.GetAsync(sessionId);
     }
 
-    private Role GetMessageRole(string value) => value switch
+    public ChatSession? TryGetSessionFromCache(string sessionId)
     {
-        "User" => Role.User,
-        "System" => Role.System,
-        "AI" => Role.Assistant,
-        _ => throw new ArgumentException($"Invalid value {value}", nameof(value))
-    };
+        return _memoryCache.Get<ChatSession>(sessionId);
+    }
+
+    public async Task<List<ChatSession>> GetSessionsAsync(string ownerId)
+    {
+        var sessions = await _chatSessionRepository.AsQueryable()
+            .Where(session => session.UserId == ownerId)
+            .ToListAsync();
+
+        return sessions;
+    }
 }

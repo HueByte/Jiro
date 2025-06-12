@@ -1,5 +1,5 @@
 using Jiro.Core.Options;
-using Microsoft.Extensions.Caching.Memory;
+using Jiro.Core.Utils;
 using Microsoft.Extensions.Options;
 using OpenAI;
 using OpenAI.Chat;
@@ -22,29 +22,50 @@ public class ChatService : IChatService
 
     public async Task<OpenAI.Chat.Message> ChatAsync(string prompt, string sessionId)
     {
-        var memorySession = await _chatStorageService.GetSessionAsync(sessionId);
-        if (memorySession is null)
+        var session = await _chatStorageService.GetSessionAsync(sessionId);
+        if (session is null)
         {
             throw new JiroException("Session not found");
         }
 
-        OpenAI.Chat.Message newUserMessage = new OpenAI.Chat.Message(Role.User, prompt);
-        memorySession.Messages.Add(newUserMessage);
+        OpenAI.Chat.Message messageRequest = new OpenAI.Chat.Message(Role.User, prompt);
 
-        var chatRequest = new ChatRequest(memorySession.Messages, Model.GPT4o, maxTokens: 2000);
+        var sessionMessages = session.Messages.Select(message => new OpenAI.Chat.Message(AppUtils.GetRole(message.Role), message.Content));
+        sessionMessages.Append(messageRequest);
+
+        var chatRequest = new ChatRequest(sessionMessages, Model.GPT4o, maxTokens: _chatOptions.TokenLimit);
         var response = await _aiClient.ChatEndpoint.GetCompletionAsync(chatRequest);
         var aiMessage = response.FirstChoice;
 
-        OpenAI.Chat.Message aiResponse = new OpenAI.Chat.Message(Role.Assistant, aiMessage.Message);
-        memorySession.Messages.Add(aiResponse);
 
-        await _chatStorageService.AppendMessagesAsync(sessionId, [newUserMessage, aiResponse]);
-
-        return aiResponse;
+        await AppendMessagesToSessionAsync(sessionId, [messageRequest, aiMessage.Message]);
+        return new Message(Role.Assistant, aiMessage.Message);
     }
 
-    public Task<string> ChatAsync(string prompt)
+    private async Task AppendMessagesToSessionAsync(string sessionId, List<Message> messages)
     {
-        throw new JiroException("This functionality is no longer supported");
+        List<Core.Models.Message> newMessages = new();
+        foreach (var message in messages)
+        {
+            newMessages.Add(new Core.Models.Message()
+            {
+                Role = message.Role.ToString(),
+                Content = message.Content,
+                ChatSessionId = sessionId
+            });
+        }
+
+        await _chatStorageService.AppendMessagesToSessionAsync(sessionId, newMessages);
+    }
+
+    public async Task<string?> CreateChatSessionAsync(string userId)
+    {
+        var session = await _chatStorageService.CreateSessionAsync(userId);
+        return session.Id;
+    }
+
+    public Task<Core.Models.ChatSession?> GetSessionAsync(string sessionId)
+    {
+        return _chatStorageService.GetSessionAsync(sessionId);
     }
 }

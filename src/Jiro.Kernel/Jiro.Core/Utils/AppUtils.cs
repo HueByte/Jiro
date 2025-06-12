@@ -1,3 +1,5 @@
+using OpenAI;
+
 namespace Jiro.Core.Utils;
 
 public static class AppUtils
@@ -10,4 +12,12 @@ public static class AppUtils
         return false;
 #endif
     }
+
+    public static Role GetRole(string role) => role switch
+    {
+        "User" => Role.User,
+        "System" => Role.System,
+        "AI" => Role.Assistant,
+        _ => throw new ArgumentException($"Invalid value {role}", nameof(role))
+    };
 }

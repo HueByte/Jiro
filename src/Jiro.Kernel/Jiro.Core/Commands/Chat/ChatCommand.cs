@@ -1,5 +1,4 @@
 using System.Text.Json;
-using System.Web.Helpers;
 
 namespace Jiro.Core.Commands.Chat;
 
@@ -23,9 +22,9 @@ public class ChatCommand : ICommandBase
         if (_commandContext.UserId == null)
             throw new JiroException("User not found");
 
-        await _chatStorageService.CreateSessionAsync(_commandContext.UserId);
+        var result = await _chatService.CreateChatSessionAsync(_commandContext.UserId);
 
-        return TextResult.Create("Session created");
+        return TextResult.Create(result);
     }
 
     [Command("chat")]
@@ -48,7 +47,7 @@ public class ChatCommand : ICommandBase
         if (_commandContext.UserId == null)
             throw new JiroException("User not found");
 
-        var sessions = await _chatStorageService.GetSessionIdsAsync(_commandContext.UserId);
+        var sessions = await _chatStorageService.GetSessionsAsync(_commandContext.UserId);
 
         return TextResult.Create(JsonSerializer.Serialize(sessions));
     }
