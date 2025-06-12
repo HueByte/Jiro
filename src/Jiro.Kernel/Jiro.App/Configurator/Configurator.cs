@@ -3,7 +3,6 @@ using Jiro.Core.Constants;
 using Jiro.Core.Interfaces.IServices;
 using Jiro.Core.IRepositories;
 using Jiro.Core.Options;
-using Jiro.Core.Services.Chat;
 using Jiro.Core.Services.CommandHandler;
 using Jiro.Core.Services.CommandSystem;
 using Jiro.Core.Services.Conversation;
@@ -25,17 +24,6 @@ public static class Configurator
 {
 	public static IServiceCollection AddServices (this IServiceCollection services, IConfiguration config)
 	{
-		ChatOptions? chatOptions = config.GetSection(ChatOptions.Chat).Get<ChatOptions>();
-		if (chatOptions is { Enabled: true, AuthToken: not null and not "" })
-		{
-			services.AddScoped<IChatService, ChatService>();
-
-		}
-		else
-		{
-			services.AddScoped<IChatService, DisabledChatService>();
-		}
-
 		services.AddSingleton<ICommandHandlerService, CommandHandlerService>();
 		services.AddSingleton<IHelpService, HelpService>();
 		services.AddSingleton<EventsConfigurator>();

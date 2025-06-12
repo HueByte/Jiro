@@ -23,7 +23,7 @@ public class ChatCoreService : IChatCoreService
 		_chatSemaphoreManager = chatSemaphoreManager;
 	}
 
-	public async Task<ChatCompletion> ChatAsync (ulong instanceId, List<ChatMessage> messageHistory, ChatMessage? personaMessage = null)
+	public async Task<ChatCompletion> ChatAsync (string instanceId, List<ChatMessage> messageHistory, ChatMessage? personaMessage = null)
 	{
 		// Use a semaphore to prevent concurrent updates for the same channel.
 		SemaphoreSlim instanceSemaphore = _chatSemaphoreManager.GetOrCreateInstanceSemaphore(instanceId);

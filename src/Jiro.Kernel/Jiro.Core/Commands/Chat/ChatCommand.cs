@@ -1,31 +1,33 @@
 using System.Text.Json;
 
+using Jiro.Core.Services.Conversation;
+
 namespace Jiro.Core.Commands.Chat;
 
 [CommandModule("Chat")]
 public class ChatCommand : ICommandBase
 {
-	private readonly IChatService _chatService;
+	private readonly IPersonalizedConversationService _chatService;
 	private readonly ICommandContext _commandContext;
 	private readonly IChatStorageService _chatStorageService;
 
-	public ChatCommand (IChatService chatService, ICommandContext commandContext, IChatStorageService chatStorageService)
+	public ChatCommand (IPersonalizedConversationService chatService, ICommandContext commandContext, IChatStorageService chatStorageService)
 	{
 		_chatService = chatService;
 		_commandContext = commandContext;
 		_chatStorageService = chatStorageService;
 	}
 
-	[Command("init")]
-	public async Task<ICommandResult> Init ()
-	{
-		if (_commandContext.UserId == null)
-			throw new JiroException("User not found");
+	// [Command("init")]
+	// public async Task<ICommandResult> Init ()
+	// {
+	// 	if (_commandContext.UserId == null)
+	// 		throw new JiroException("User not found");
 
-		var result = await _chatService.CreateChatSessionAsync(_commandContext.UserId);
+	// 	var result = await _chatService.CreateChatSessionAsync(_commandContext.UserId);
 
-		return TextResult.Create(result);
-	}
+	// 	return TextResult.Create(result);
+	// }
 
 	[Command("chat")]
 	public async Task<ICommandResult> Chat (string prompt)
@@ -36,9 +38,9 @@ public class ChatCommand : ICommandBase
 		if (string.IsNullOrEmpty(sessionId))
 			throw new JiroException("Session not found");
 
-		var result = await _chatService.ChatAsync(prompt, sessionId);
+		var result = await _chatService.ChatAsync(_commandContext.UserId ?? "", sessionId, prompt);
 
-		return TextResult.Create(result.Content);
+		return TextResult.Create(result);
 	}
 
 	[Command("getSessions")]

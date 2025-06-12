@@ -38,7 +38,7 @@ public class MessageCacheService : IMessageCacheService
 		return await GetMessageAsync(Constants.CacheKeys.CorePersonaMessageKey);
 	}
 
-	public int GetChatMessageCount (ulong instanceId)
+	public int GetChatMessageCount (string instanceId)
 	{
 		if (_memoryCache.TryGetValue(instanceId, out List<ChatMessage>? channelMessages))
 		{
@@ -48,7 +48,7 @@ public class MessageCacheService : IMessageCacheService
 		return 0;
 	}
 
-	public async Task<List<ChatMessage>?> GetOrCreateChatMessagesAsync (ulong instanceId)
+	public async Task<List<ChatMessage>?> GetOrCreateChatMessagesAsync (string instanceId)
 	{
 		try
 		{
@@ -77,7 +77,7 @@ public class MessageCacheService : IMessageCacheService
 		}
 	}
 
-	public async Task AddChatExchangeAsync (ulong instanceId, List<ChatMessage> messages, List<Core.Models.Message> modelMessages)
+	public async Task AddChatExchangeAsync (string instanceId, List<ChatMessage> messages, List<Core.Models.Message> modelMessages)
 	{
 		try
 		{
@@ -108,7 +108,7 @@ public class MessageCacheService : IMessageCacheService
 		}
 	}
 
-	public void ClearOldMessages (ulong instanceId, int range)
+	public void ClearOldMessages (string instanceId, int range)
 	{
 		if (!_memoryCache.TryGetValue(instanceId, out List<ChatMessage>? serverMessages))
 		{

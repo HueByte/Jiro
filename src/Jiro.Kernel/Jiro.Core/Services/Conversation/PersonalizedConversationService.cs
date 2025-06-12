@@ -1,3 +1,4 @@
+using Jiro.Core.Models;
 using Jiro.Core.Services.MessageCache;
 using Jiro.Core.Services.Persona;
 
@@ -28,7 +29,7 @@ public class PersonalizedConversationService : IPersonalizedConversationService
 		_historyOptimizerService = historyOptimizerService;
 	}
 
-	public async Task<string> ChatAsync (ulong instanceId, ulong userId, ulong botId, string message)
+	public async Task<string> ChatAsync (string instanceId, string sessionId, string message)
 	{
 		try
 		{
@@ -60,7 +61,7 @@ public class PersonalizedConversationService : IPersonalizedConversationService
 			conversationForChat.Add(jiroMessage);
 			conversationHistory.Add(jiroMessage);
 
-			var models = CreateMessageModels(instanceId, botId, userId, userMessage, jiroMessage);
+			var models = CreateMessageModels(instanceId, sessionId, userMessage, jiroMessage);
 
 			await _messageCacheService.AddChatExchangeAsync(instanceId, conversationHistory, models);
 
@@ -101,7 +102,7 @@ public class PersonalizedConversationService : IPersonalizedConversationService
 		_logger.LogInformation("Estimated message price: {messagePrice}$", CalculateMessagePrice(usage));
 	}
 
-	private async Task<(List<ChatMessage>, List<ChatMessage>)> PrepareMessageHistory (ulong instanceId, string message)
+	private async Task<(List<ChatMessage>, List<ChatMessage>)> PrepareMessageHistory (string instanceId, string message)
 	{
 		var cachedMessages = await _messageCacheService.GetOrCreateChatMessagesAsync(instanceId)
 							 ?? [];
@@ -131,18 +132,20 @@ public class PersonalizedConversationService : IPersonalizedConversationService
 		return messagePrice;
 	}
 
-	private List<Core.Models.Message> CreateMessageModels (ulong instanceId, ulong botId, ulong userId, ChatMessage userMessage, ChatMessage JiroMessage)
+	private List<Core.Models.Message> CreateMessageModels (string instanceId, string sessionId, ChatMessage userMessage, ChatMessage JiroMessage)
 	{
 		var modelMessages = new List<Core.Models.Message>
 		{
+			// TODO adjust Message Type based on the actual message type.
 			new()
 			{
 				Id = Guid.NewGuid().ToString(),
 				InstanceId = instanceId,
 				Content = userMessage.Content.FirstOrDefault()?.Text ?? string.Empty,
 				IsUser = true,
-				AuthorId = userId,
 				CreatedAt = DateTime.UtcNow,
+				SessionId = sessionId,
+				Type = MessageType.Text,
 			},
 			new()
 			{
@@ -150,8 +153,9 @@ public class PersonalizedConversationService : IPersonalizedConversationService
 				InstanceId = instanceId,
 				Content = JiroMessage.Content.FirstOrDefault()?.Text ?? string.Empty,
 				IsUser = false,
-				AuthorId = botId,
 				CreatedAt = DateTime.UtcNow,
+				SessionId = sessionId,
+				Type = MessageType.Text,
 			}
 		};
 

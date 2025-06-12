@@ -24,10 +24,11 @@ public class PersonaService : IPersonaService
 		_chatSemaphoreManager = chatSemaphoreManager;
 	}
 
-	public async Task<string> GetPersonaAsync (ulong instanceId = 0)
+	public async Task<string> GetPersonaAsync (string instanceId = "")
 	{
-		if (instanceId == 0)
+		if (string.IsNullOrEmpty(instanceId))
 		{
+			_logger.LogWarning("Instance ID is empty. Returning default persona message.");
 			return await GetPersonaInternalAsync();
 		}
 
