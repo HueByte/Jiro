@@ -15,13 +15,15 @@ public class BaseRepository<TKeyType, TEntity, TContext> : IRepository<TKeyType,
 
     public virtual async Task<bool> AddAsync(TEntity? entity)
     {
-        if (entity is null) return false;
+        if (entity is null)
+            return false;
 
         var doesExist = await _context
             .Set<TEntity>()
             .AnyAsync(entry => entry.Id.Equals(entity.Id));
 
-        if (doesExist) return false;
+        if (doesExist)
+            return false;
 
         _context
             .Set<TEntity>()
@@ -32,7 +34,8 @@ public class BaseRepository<TKeyType, TEntity, TContext> : IRepository<TKeyType,
 
     public virtual async Task<bool> AddRangeAsync(IEnumerable<TEntity> entities)
     {
-        if (entities is null) return false;
+        if (entities is null)
+            return false;
 
         await _context
             .Set<TEntity>()
@@ -55,13 +58,17 @@ public class BaseRepository<TKeyType, TEntity, TContext> : IRepository<TKeyType,
 
     public virtual async Task<bool> RemoveAsync(TKeyType id)
     {
-        TEntity entity = new() { Id = id };
+        TEntity entity = new()
+        {
+            Id = id
+        };
 
         var doesExist = await _context
             .Set<TEntity>()
             .AnyAsync(entry => entry.Id.Equals(entity.Id));
 
-        if (!doesExist) return false;
+        if (!doesExist)
+            return false;
 
         _context
             .Set<TEntity>()
@@ -72,13 +79,15 @@ public class BaseRepository<TKeyType, TEntity, TContext> : IRepository<TKeyType,
 
     public virtual async Task<bool> RemoveAsync(TEntity? entity)
     {
-        if (entity is null) return false;
+        if (entity is null)
+            return false;
 
         var doesExist = await _context
             .Set<TEntity>()
             .AnyAsync(entry => entry.Id.Equals(entity.Id));
 
-        if (!doesExist) return false;
+        if (!doesExist)
+            return false;
 
         _context
             .Set<TEntity>()
@@ -89,7 +98,8 @@ public class BaseRepository<TKeyType, TEntity, TContext> : IRepository<TKeyType,
 
     public virtual Task UpdateAsync(TEntity? entity)
     {
-        if (entity is null) return Task.CompletedTask;
+        if (entity is null)
+            return Task.CompletedTask;
 
         _context
             .Set<TEntity>()
@@ -114,7 +124,8 @@ public class BaseRepository<TKeyType, TEntity, TContext> : IRepository<TKeyType,
 
     public Task<bool> RemoveRangeAsync(IEnumerable<TEntity> entity)
     {
-        if (entity is null) return Task.FromResult(false);
+        if (entity is null)
+            return Task.FromResult(false);
 
         _context
             .Set<TEntity>()

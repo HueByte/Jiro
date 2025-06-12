@@ -10,8 +10,10 @@ using Jiro.Core.Services.CurrentUser;
 using Jiro.Core.Services.Geolocation;
 using Jiro.Core.Services.Weather;
 using Jiro.Infrastructure.Repositories;
+
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+
 using OpenAI;
 
 namespace Jiro.App.Configurator;

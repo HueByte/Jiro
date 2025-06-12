@@ -1,4 +1,5 @@
 using System.Text.Json;
+
 using Jiro.Core.Constants;
 using Jiro.Core.Services.Weather.Models;
 

@@ -7,7 +7,8 @@ public static class SerilogConfigurator
 {
     public static LogEventLevel GetLogEventLevel(string? setting)
     {
-        if (string.IsNullOrEmpty(setting)) return LogEventLevel.Warning;
+        if (string.IsNullOrEmpty(setting))
+            return LogEventLevel.Warning;
 
         return setting.ToLower() switch
         {
@@ -23,7 +24,8 @@ public static class SerilogConfigurator
 
     public static RollingInterval GetRollingInterval(string? setting)
     {
-        if (string.IsNullOrEmpty(setting)) return RollingInterval.Day;
+        if (string.IsNullOrEmpty(setting))
+            return RollingInterval.Day;
 
         return setting.ToLower() switch
         {

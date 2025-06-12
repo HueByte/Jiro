@@ -1,19 +1,22 @@
-﻿using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.DependencyInjection;
 using Jiro.App;
-using JiroCloud.Api.Proto;
 using Jiro.App.Configurator;
-using Microsoft.Extensions.Configuration;
-using Serilog;
-using Serilog.Extensions.Logging;
-using Jiro.Core.Options;
-using Serilog.Events;
-using Serilog.Sinks.SystemConsole.Themes;
 using Jiro.Commands.Base;
-using Jiro.Core.Utils;
-using Jiro.Infrastructure;
 using Jiro.Commands.Models;
 using Jiro.Core.Commands.Chat;
+using Jiro.Core.Options;
+using Jiro.Core.Utils;
+using Jiro.Infrastructure;
+
+using JiroCloud.Api.Proto;
+
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+
+using Serilog;
+using Serilog.Events;
+using Serilog.Extensions.Logging;
+using Serilog.Sinks.SystemConsole.Themes;
 
 AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
 

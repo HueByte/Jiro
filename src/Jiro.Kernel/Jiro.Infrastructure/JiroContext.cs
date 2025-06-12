@@ -1,4 +1,5 @@
 using Jiro.Core.Models;
+
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -9,12 +10,13 @@ public class JiroContext : IdentityDbContext<AppUser, AppRole, string,
     IdentityUserClaim<string>, AppUserRole, IdentityUserLogin<string>,
     IdentityRoleClaim<string>, IdentityUserToken<string>>
 {
-    public JiroContext() { }
+    public JiroContext()
+    {
+    }
     public JiroContext(DbContextOptions<JiroContext> options) : base(options) { }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
-
     }
 
     protected override void OnModelCreating(ModelBuilder builder)
@@ -32,19 +34,6 @@ public class JiroContext : IdentityDbContext<AppUser, AppRole, string,
                .WithOne(e => e.Role)
                .HasForeignKey(e => e.RoleId)
                .IsRequired();
-
-        builder.Entity<ChatSession>()
-                .HasMany(e => e.Messages)
-                .WithOne(e => e.ChatSession)
-                .HasForeignKey(e => e.ChatSessionId)
-                .IsRequired()
-                .OnDelete(DeleteBehavior.Cascade);
-
-        builder.Entity<Message>()
-                .HasOne(e => e.ChatSession)
-                .WithMany(e => e.Messages)
-                .HasForeignKey(e => e.ChatSessionId)
-                .IsRequired();
     }
 
     public DbSet<ChatSession> ChatSessions { get; set; } = default!;

@@ -1,8 +1,11 @@
-﻿namespace Jiro.Core.Services.CurrentUser;
+namespace Jiro.Core.Services.CurrentUser;
 
 public class CommandContext : ICommandContext
 {
-    public string? UserId { get; private set; }
+    public string? UserId
+    {
+        get; private set;
+    }
     public Dictionary<string, object> Data { get; } = new();
 
     public void SetData(IEnumerable<KeyValuePair<string, object>> data)

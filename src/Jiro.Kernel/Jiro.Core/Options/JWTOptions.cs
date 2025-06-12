@@ -1,6 +1,6 @@
 namespace Jiro.Core.Options;
 
-public class JWTOptions
+public class JWTOptions : IOption
 {
     public const string JWT = "JWT";
 

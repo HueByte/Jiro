@@ -1,4 +1,4 @@
-﻿using Jiro.Core.Services.Weather.Models;
+using Jiro.Core.Services.Weather.Models;
 
 namespace Jiro.Core.Interfaces.IServices;
 

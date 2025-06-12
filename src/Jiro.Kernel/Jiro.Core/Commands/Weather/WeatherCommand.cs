@@ -1,4 +1,5 @@
 using System.Text.Json;
+
 using Jiro.Core.Services.Weather.Models;
 
 namespace Jiro.Core.Commands.Weather;
@@ -15,7 +16,8 @@ public class WeatherCommand : ICommandBase
     [Command("weather", CommandType.Graph, "weather \"Location\" [daysRange]", "Shows weather forecast for the specified location (24 hours by default)")]
     public async Task<ICommandResult> Weather(string location, int daysRange)
     {
-        if (daysRange <= 0 || daysRange > 7) daysRange = 1;
+        if (daysRange <= 0 || daysRange > 7)
+            daysRange = 1;
         int range = daysRange * 24;
 
         // fetch weather data

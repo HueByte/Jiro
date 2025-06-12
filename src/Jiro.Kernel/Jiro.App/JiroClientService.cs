@@ -1,14 +1,20 @@
-﻿using Google.Protobuf;
+using System.Collections.Concurrent;
+using System.Text;
+
+using Google.Protobuf;
+
 using Grpc.Core;
 using Grpc.Net.ClientFactory;
+
 using Jiro.Commands.Models;
 using Jiro.Core.Interfaces.IServices;
+
 using JiroCloud.Api.Proto;
+
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using System.Collections.Concurrent;
-using System.Text;
+
 using static JiroCloud.Api.Proto.JiroHubProto;
 
 namespace Jiro.App;

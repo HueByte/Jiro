@@ -1,6 +1,6 @@
 namespace Jiro.Core.Options;
 
-public class LogOptions
+public class LogOptions : IOption
 {
     public const string Log = "Log";
 

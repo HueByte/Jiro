@@ -4,7 +4,10 @@ namespace Jiro.Core.Services.CommandSystem;
 
 public class HelpService : IHelpService
 {
-    public string HelpMessage { get; private set; }
+    public string HelpMessage
+    {
+        get; private set;
+    }
     private readonly CommandsContext _commandsContainer;
 
     public HelpService(CommandsContext commandsContainer)
@@ -23,7 +26,8 @@ public class HelpService : IHelpService
 
         foreach (var module in modules)
         {
-            if (module.Commands.Keys.Count == 0) continue;
+            if (module.Commands.Keys.Count == 0)
+                continue;
 
             messageBuilder.AppendLine($"## {module.Name}");
             foreach (var command in module.Commands)
@@ -44,8 +48,10 @@ public class HelpService : IHelpService
                     syntax = $"Syntax:<span style=\"color: DeepPink;\"> ${command.Value.CommandSyntax}</span><br />";
 
                 messageBuilder.AppendLine(header);
-                if (!string.IsNullOrEmpty(command.Value.CommandDescription)) messageBuilder.AppendLine(description);
-                if (!string.IsNullOrEmpty(command.Value.CommandSyntax)) messageBuilder.AppendLine(syntax);
+                if (!string.IsNullOrEmpty(command.Value.CommandDescription))
+                    messageBuilder.AppendLine(description);
+                if (!string.IsNullOrEmpty(command.Value.CommandSyntax))
+                    messageBuilder.AppendLine(syntax);
             }
 
             messageBuilder.AppendLine();

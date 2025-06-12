@@ -1,6 +1,6 @@
 namespace Jiro.Core.Options;
 
-public class ChatOptions
+public class ChatOptions : IOption
 {
     public const string Chat = "Chat";
     public bool Enabled { get; set; }

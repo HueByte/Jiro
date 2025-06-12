@@ -1,13 +1,14 @@
 version: "3.7"
+
 services:
   api:
     container_name: jiroapi
-    build: 
-      context: ./Jiro.Kernel
+    build:
+      context: ./src/Jiro.Kernel
       dockerfile: Dockerfile
-    ports: 
-      - 5000:80 
-      - 5001:443 
+    ports:
+      - 5000:80
+      - 5001:443
     environment:
       - CONFIG_PATH=/shared/appsettings.json
       - API_LOGS_PATH=/shared/logs/jiro.log
@@ -17,11 +18,11 @@ services:
 
   tokenizer:
     container_name: jirotokenizer
-    build: 
-      context: ./Jiro.TokenApi
+    build:
+      context: ./src/Jiro.TokenApi
       dockerfile: Dockerfile
-    ports: 
-      - 8000:80 
+    ports:
+      - 8000:80
     volumes:
       - jiro_shared:/shared/
 

@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
+
 using Jiro.Core.Abstraction;
 
 namespace Jiro.Core.Models;
