@@ -10,12 +10,12 @@ namespace Jiro.Core.Services.Persona;
 public class PersonaService : IPersonaService
 {
 	private readonly ILogger<PersonaService> _logger;
-	private readonly IMessageCacheService _messageCacheService;
+	private readonly IMessageManager _messageCacheService;
 	private readonly IConversationCoreService _coreChatService;
 	private readonly IMemoryCache _memoryCache;
 	private readonly ISemaphoreManager _chatSemaphoreManager;
 
-	public PersonaService (ILogger<PersonaService> logger, IMessageCacheService messageCacheService, IConversationCoreService chatService, IMemoryCache memoryCache, ISemaphoreManager chatSemaphoreManager)
+	public PersonaService (ILogger<PersonaService> logger, IMessageManager messageCacheService, IConversationCoreService chatService, IMemoryCache memoryCache, ISemaphoreManager chatSemaphoreManager)
 	{
 		_logger = logger;
 		_messageCacheService = messageCacheService;

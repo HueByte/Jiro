@@ -15,7 +15,7 @@ public class PersonalizedConversationService : IPersonalizedConversationService
 	private readonly ILogger<PersonalizedConversationService> _logger;
 	private readonly IConversationCoreService _chatCoreService;
 	private readonly IPersonaService _personaService;
-	private readonly IMessageCacheService _messageCacheService;
+	private readonly IMessageManager _messageCacheService;
 	private readonly IHistoryOptimizerService _historyOptimizerService;
 	private readonly ICommandContext _commandContext;
 	private const float PRICING_OUTPUT = 0.600f;
@@ -23,7 +23,7 @@ public class PersonalizedConversationService : IPersonalizedConversationService
 	private const float PRICING_INPUT_CACHED = 0.075f;
 	private const float ONE_MILLION = 1_000_000;
 
-	public PersonalizedConversationService (ILogger<PersonalizedConversationService> logger, IConversationCoreService chatCoreService, IPersonaService personaService, IMessageCacheService messageCacheService, IHistoryOptimizerService historyOptimizerService, ICommandContext commandContext)
+	public PersonalizedConversationService (ILogger<PersonalizedConversationService> logger, IConversationCoreService chatCoreService, IPersonaService personaService, IMessageManager messageCacheService, IHistoryOptimizerService historyOptimizerService, ICommandContext commandContext)
 	{
 		_logger = logger ?? throw new ArgumentNullException(nameof(logger), "Logger cannot be null.");
 		_chatCoreService = chatCoreService ?? throw new ArgumentNullException(nameof(chatCoreService), "Chat core service cannot be null.");
@@ -46,7 +46,7 @@ public class PersonalizedConversationService : IPersonalizedConversationService
 
 			var (conversationForChat, conversationHistory, session) = await PrepareMessageHistory(sessionId, message);
 
-			var response = await _chatCoreService.ChatAsync(instanceId, conversationForChat, ChatMessage.CreateDeveloperMessage(persona));
+			var response = await _chatCoreService.ChatAsync(instanceId, conversationForChat.Select(x => x.Message).ToList(), ChatMessage.CreateDeveloperMessage(persona));
 			var assistantMessages = response.Content;
 			var assistantResponse = assistantMessages.FirstOrDefault()?.Text;
 
@@ -60,19 +60,24 @@ public class PersonalizedConversationService : IPersonalizedConversationService
 			LogTokenUsage(tokenUsage);
 
 			var userMessage = conversationForChat.Last();
-			var jiroMessage = ChatMessage.CreateAssistantMessage(assistantResponse);
+			var jiroMessage = new ChatMessageWithMetadata
+			{
+				Message = ChatMessage.CreateAssistantMessage(assistantResponse),
+				CreatedAt = DateTime.UtcNow,
+				Type = MessageType.Text
+			};
 
 			conversationForChat.Add(jiroMessage);
 			conversationHistory.Add(jiroMessage);
 
-			var models = CreateMessageModels(session.SessionId, userMessage, jiroMessage);
+			var models = CreateMessageModels(session.SessionId, userMessage.Message, jiroMessage.Message);
 
-			await _messageCacheService.AddChatExchangeAsync(sessionId, conversationHistory, models);
+			await _messageCacheService.AddChatExchangeAsync(sessionId, conversationHistory.ToList(), models);
 			if (_historyOptimizerService.ShouldOptimizeMessageHistory(tokenUsage))
 			{
 				try
 				{
-					var optimizationResult = await _historyOptimizerService.OptimizeMessageHistory(tokenUsage.TotalTokenCount, conversationForChat, persona);
+					var optimizationResult = await _historyOptimizerService.OptimizeMessageHistory(tokenUsage.TotalTokenCount, conversationForChat.Select(x => x.Message).ToList(), persona);
 					_messageCacheService.ClearOldMessages(sessionId, optimizationResult.RemovedMessages - 1);
 					await _personaService.AddSummaryAsync(optimizationResult.MessagesSummary);
 				}
@@ -105,7 +110,7 @@ public class PersonalizedConversationService : IPersonalizedConversationService
 		_logger.LogInformation("Estimated message price: {messagePrice}$", CalculateMessagePrice(usage));
 	}
 
-	private async Task<(List<ChatMessage>, List<ChatMessage>, Session session)> PrepareMessageHistory (string sessionId, string message)
+	private async Task<(List<ChatMessageWithMetadata>, List<ChatMessageWithMetadata>, Session session)> PrepareMessageHistory (string sessionId, string message)
 	{
 		Session session = await _messageCacheService.GetOrCreateChatSessionAsync(sessionId);
 		if (session is null)
@@ -114,32 +119,27 @@ public class PersonalizedConversationService : IPersonalizedConversationService
 			throw new InvalidOperationException($"Chat session with ID {sessionId} could not be created or retrieved.");
 		}
 
-		var conversationHistory = new List<ChatMessage>(session.Messages);
-		var conversationForChat = new List<ChatMessage>();
+		var conversationHistory = new List<ChatMessageWithMetadata>(session.Messages.Select(x => new ChatMessageWithMetadata
+		{
+			Message = x.Message,
+			CreatedAt = x.CreatedAt,
+			Type = x.Type
+		}) ?? []);
+
+		var conversationForChat = new List<ChatMessageWithMetadata>();
 		conversationForChat.AddRange(conversationHistory);
 
-		var userChatMessage = ChatMessage.CreateUserMessage(message);
+		var userChatMessage = new ChatMessageWithMetadata
+		{
+			Message = ChatMessage.CreateUserMessage(message),
+			CreatedAt = DateTime.UtcNow,
+			Type = MessageType.Text
+		};
+
 		conversationForChat.Add(userChatMessage);
 		conversationHistory.Add(userChatMessage);
 
 		return (conversationForChat, conversationHistory, session)!;
-
-		// var cachedMessages = await _messageCacheService.GetOrCreateChatSessionAsync(instanceId, sessionId)
-		// 					 ?? [];
-
-		// var conversationHistory = new List<ChatMessage>(cachedMessages);
-
-		// var conversationForChat = new List<ChatMessage>();
-		// conversationForChat.AddRange(conversationHistory);
-
-		// // Create the user message.
-		// var userChatMessage = ChatMessage.CreateUserMessage(message);
-		// conversationForChat.Add(userChatMessage);
-
-		// // Also add the user message to the conversation history for persistence.
-		// conversationHistory.Add(userChatMessage);
-
-		// return (conversationForChat, conversationHistory);
 	}
 
 	private float CalculateMessagePrice (ChatTokenUsage tokenUsage)

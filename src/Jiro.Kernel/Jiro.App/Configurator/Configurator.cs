@@ -46,7 +46,7 @@ public static class Configurator
 		services.AddScoped<IGeolocationService, GeolocationService>();
 		services.AddScoped<IConversationCoreService, ConversationCoreService>();
 		services.AddScoped<IHistoryOptimizerService, HistoryOptimizerService>();
-		services.AddScoped<IMessageCacheService, MessageCacheService>();
+		services.AddScoped<IMessageManager, MessageManager>();
 		services.AddScoped<IPersonaService, PersonaService>();
 		services.AddScoped<IPersonalizedConversationService, PersonalizedConversationService>();
 		services.AddScoped<ChatClient>((services) =>

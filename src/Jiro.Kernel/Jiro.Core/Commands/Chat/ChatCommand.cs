@@ -1,5 +1,6 @@
 using System.Text.Json;
 
+using Jiro.Core.Commands.ComplexCommandResults;
 using Jiro.Core.Services.CommandContext;
 using Jiro.Core.Services.Conversation;
 using Jiro.Core.Services.MessageCache;
@@ -11,11 +12,11 @@ public class ChatCommand : ICommandBase
 {
 	private readonly IPersonalizedConversationService _chatService;
 	private readonly ICommandContext _commandContext;
-	private readonly IMessageCacheService _chatStorageService;
+	private readonly IMessageManager _messageManager;
 
-	public ChatCommand (IPersonalizedConversationService chatService, ICommandContext commandContext, IMessageCacheService chatStorageService)
+	public ChatCommand (IPersonalizedConversationService chatService, ICommandContext commandContext, IMessageManager messageManager)
 	{
-		_chatStorageService = chatStorageService ?? throw new ArgumentNullException(nameof(chatStorageService), "Chat storage service cannot be null.");
+		_messageManager = messageManager ?? throw new ArgumentNullException(nameof(messageManager), "Chat storage service cannot be null.");
 		_chatService = chatService ?? throw new ArgumentNullException(nameof(chatService), "Chat service cannot be null.");
 		_commandContext = commandContext ?? throw new ArgumentNullException(nameof(commandContext), "Command context cannot be null.");
 	}
@@ -38,9 +39,26 @@ public class ChatCommand : ICommandBase
 		if (_commandContext.InstanceId == null)
 			throw new JiroException("User not found");
 
-		var sessions = await _chatStorageService.GetChatSessionsAsync(_commandContext.InstanceId);
+		var sessions = await _messageManager.GetChatSessionsAsync(_commandContext.InstanceId);
 
 		return TextResult.Create(JsonSerializer.Serialize(sessions));
+	}
+
+	[Command("getSessionHistory")]
+	public async Task<ICommandResult> GetSessionMessages (string sessionId)
+	{
+		if (_commandContext.InstanceId == null)
+			throw new JiroException("User not found");
+
+		if (string.IsNullOrEmpty(sessionId))
+			throw new JiroException("Session ID cannot be empty");
+
+		var session = await _messageManager.GetSessionAsync(sessionId)
+			?? throw new JiroException($"Session with ID {sessionId} not found");
+
+		var data = new SessionResult(session);
+
+		return TextResult.Create(JsonSerializer.Serialize(data));
 	}
 
 	[Command("reset", commandDescription: "Clears the current session")]

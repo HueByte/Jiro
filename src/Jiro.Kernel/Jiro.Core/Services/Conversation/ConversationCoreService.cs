@@ -10,12 +10,12 @@ namespace Jiro.Core.Services.Conversation;
 public class ConversationCoreService : IConversationCoreService
 {
 	private readonly ILogger<ConversationCoreService> _logger;
-	private readonly IMessageCacheService _messageCacheService;
+	private readonly IMessageManager _messageCacheService;
 	private readonly ChatClient _openAIClient;
 	private readonly ISemaphoreManager _chatSemaphoreManager;
 	private const float TEMPERATURE = 0.6f;
 
-	public ConversationCoreService (ILogger<ConversationCoreService> logger, IMessageCacheService messageCacheService, ChatClient openAIClient, ISemaphoreManager chatSemaphoreManager)
+	public ConversationCoreService (ILogger<ConversationCoreService> logger, IMessageManager messageCacheService, ChatClient openAIClient, ISemaphoreManager chatSemaphoreManager)
 	{
 		_logger = logger;
 		_messageCacheService = messageCacheService;

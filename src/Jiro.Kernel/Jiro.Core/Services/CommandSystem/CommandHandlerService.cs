@@ -31,6 +31,7 @@ public partial class CommandHandlerService : ICommandHandlerService
 		{
 			command = GetCommand(commandName);
 			result = await command.ExecuteAsync(scopedProvider, _commandsModule, tokens);
+			result.IsSuccess = true;
 		}
 		catch (CommandException exception)
 		{

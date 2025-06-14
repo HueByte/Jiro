@@ -12,9 +12,9 @@ using OpenAI.Chat;
 
 namespace Jiro.Core.Services.MessageCache;
 
-public class MessageCacheService : IMessageCacheService
+public class MessageManager : IMessageManager
 {
-	private readonly ILogger<MessageCacheService> _logger;
+	private readonly ILogger<MessageManager> _logger;
 	private readonly IMemoryCache _memoryCache;
 	private readonly IMessageRepository _messageRepository;
 	private readonly IChatSessionRepository _chatSessionRepository;
@@ -22,7 +22,7 @@ public class MessageCacheService : IMessageCacheService
 	private readonly int _messageFetchCount = 40;
 	private const int MEMORY_CACHE_EXPIRATION = 5;
 
-	public MessageCacheService (ILogger<MessageCacheService> logger, IMemoryCache memoryCache, IMessageRepository messageRepository, IChatSessionRepository chatSessionRepository, IConfiguration configuration, ICommandContext commandContext)
+	public MessageManager (ILogger<MessageManager> logger, IMemoryCache memoryCache, IMessageRepository messageRepository, IChatSessionRepository chatSessionRepository, IConfiguration configuration, ICommandContext commandContext)
 	{
 		_logger = logger;
 		_memoryCache = memoryCache;
@@ -67,6 +67,34 @@ public class MessageCacheService : IMessageCacheService
 			_logger.LogError(ex, "Error retrieving chat sessions for instance {InstanceId}", instanceId);
 			throw;
 		}
+	}
+
+	public async Task<Session?> GetSessionAsync (string sessionId)
+	{
+		if (!_memoryCache.TryGetValue(sessionId, out Session? session))
+		{
+			session = await _chatSessionRepository.AsQueryable()
+				.Include(x => x.Messages.OrderBy(m => m.CreatedAt))
+				.Select(x => new Session
+				{
+					InstanceId = _commandContext.InstanceId,
+					SessionId = x.Id,
+					CreatedAt = x.CreatedAt,
+					LastUpdatedAt = x.LastUpdatedAt,
+					Messages = x.Messages != null ? x.Messages.Select(m => new ChatMessageWithMetadata()
+					{
+						Type = m.Type,
+						Message = m.IsUser
+								? ChatMessage.CreateUserMessage(m.Content)
+								: ChatMessage.CreateAssistantMessage(m.Content)
+					}).ToList() : new List<ChatMessageWithMetadata>()
+				})
+				.FirstOrDefaultAsync();
+
+			_memoryCache.Set(sessionId, session, TimeSpan.FromDays(MEMORY_CACHE_EXPIRATION));
+		}
+
+		return session;
 	}
 
 	public async Task<string?> GetPersonaCoreMessageAsync ()
@@ -118,26 +146,14 @@ public class MessageCacheService : IMessageCacheService
 					SessionId = session.Id,
 					CreatedAt = session.CreatedAt,
 					LastUpdatedAt = session.LastUpdatedAt,
-					Messages = session.Messages.Select(x =>
-							x.IsUser
-								? (ChatMessage)ChatMessage.CreateUserMessage(x.Content)
+					Messages = session.Messages.Select(x => new ChatMessageWithMetadata()
+					{
+						Type = x.Type,
+						Message = x.IsUser
+								? ChatMessage.CreateUserMessage(x.Content)
 								: ChatMessage.CreateAssistantMessage(x.Content)
-						).ToList()
+					}).ToList()
 				};
-
-				// List<Models.Message> messages = await _messageRepository.AsQueryable()
-				// 	.Where(x => x.InstanceId == instanceId && x.SessionId == sessionId)
-				// 	.OrderBy(x => x.CreatedAt)
-				// 	.Take(_messageFetchCount)
-				// 	.ToListAsync();
-
-				// _logger.LogInformation("Populating cache for instance {InstanceId} with {Count} messages.", instanceId, messages.Count);
-
-				// return messages.Select(x =>
-				// 		x.IsUser
-				// 			? (ChatMessage)ChatMessage.CreateUserMessage(x.Content)
-				// 			: ChatMessage.CreateAssistantMessage(x.Content)
-				// 	).ToList();
 			}) ?? throw new InvalidOperationException($"Chat session with ID {sessionId} could not be created or retrieved.");
 		}
 		catch (Exception ex)
@@ -147,7 +163,7 @@ public class MessageCacheService : IMessageCacheService
 		}
 	}
 
-	public async Task AddChatExchangeAsync (string sessionId, List<ChatMessage> messages, List<Message> modelMessages)
+	public async Task AddChatExchangeAsync (string sessionId, List<ChatMessageWithMetadata> messages, List<Message> modelMessages)
 	{
 		try
 		{

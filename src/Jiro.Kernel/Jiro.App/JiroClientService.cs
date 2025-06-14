@@ -102,8 +102,7 @@ internal class JiroClientService : IHostedService
 				_logger.LogInformation("Clearing command queue");
 				_commandQueue.Clear();
 
-				if (callInstance is not null)
-					callInstance.Dispose();
+				callInstance?.Dispose();
 			}
 		} while (!cancellationToken.IsCancellationRequested && _retryCount++ < MAX_RETRY_COUNT);
 	}
