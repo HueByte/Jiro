@@ -1,4 +1,5 @@
 using Jiro.Core.Models;
+using Jiro.Core.Services.CommandContext;
 
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
@@ -27,7 +28,7 @@ public class IdentityBaseRepository<TKeyType, TEntity, TContext> : IIdentityRepo
 			return false;
 
 		var doesExist = await _context.Set<TEntity>()
-			.AnyAsync(entry => entry.Id.Equals(entity.Id) && entry.UserId.Equals(_currentUser.UserId));
+			.AnyAsync(entry => entry.Id.Equals(entity.Id) && entry.UserId.Equals(_currentUser.InstanceId));
 
 		if (doesExist)
 			return false;
@@ -59,14 +60,14 @@ public class IdentityBaseRepository<TKeyType, TEntity, TContext> : IIdentityRepo
 	public virtual IQueryable<TEntity> AsIdentityQueryable ()
 	{
 		return _context.Set<TEntity>()
-			.Where(cat => cat.UserId == _currentUser.UserId)
+			.Where(cat => cat.UserId == _currentUser.InstanceId)
 			.AsQueryable();
 	}
 
 	public virtual async Task<TEntity?> GetAsync (TKeyType id)
 	{
 		return await _context.Set<TEntity>()
-			.FirstOrDefaultAsync(entry => entry.Id.Equals(id) && entry.UserId.Equals(_currentUser.UserId));
+			.FirstOrDefaultAsync(entry => entry.Id.Equals(id) && entry.UserId.Equals(_currentUser.InstanceId));
 	}
 
 	public virtual async Task<bool> RemoveAsync (TKeyType id)
@@ -76,7 +77,7 @@ public class IdentityBaseRepository<TKeyType, TEntity, TContext> : IIdentityRepo
 			Id = id
 		};
 
-		var doesExist = await _context.Set<TEntity>().AnyAsync(entry => entry.Id.Equals(entity.Id) && entry.UserId.Equals(_currentUser.UserId));
+		var doesExist = await _context.Set<TEntity>().AnyAsync(entry => entry.Id.Equals(entity.Id) && entry.UserId.Equals(_currentUser.InstanceId));
 
 		if (!doesExist)
 			return false;
@@ -91,7 +92,7 @@ public class IdentityBaseRepository<TKeyType, TEntity, TContext> : IIdentityRepo
 		if (entity is null)
 			return false;
 
-		var doesExist = await _context.Set<TEntity>().AnyAsync(entry => entry.Id.Equals(entity.Id) && entry.UserId.Equals(_currentUser.UserId));
+		var doesExist = await _context.Set<TEntity>().AnyAsync(entry => entry.Id.Equals(entity.Id) && entry.UserId.Equals(_currentUser.InstanceId));
 		if (!doesExist)
 			return false;
 

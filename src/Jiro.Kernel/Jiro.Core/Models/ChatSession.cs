@@ -4,6 +4,9 @@ namespace Jiro.Core.Models;
 
 public class ChatSession : DbModel<string>
 {
-	public string UserId { get; set; } = default!;
+	public string Name { get; set; } = string.Empty;
+	public string Description { get; set; } = string.Empty;
 	public List<Message> Messages { get; set; } = [];
+	public DateTime CreatedAt { get; set; }
+	public DateTime LastUpdatedAt { get; set; }
 }

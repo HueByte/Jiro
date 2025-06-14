@@ -1,3 +1,5 @@
+using Jiro.Core.Services.CommandSystem;
+
 namespace Jiro.Core.Commands.BaseCommands;
 
 [CommandModule("BaseCommands")]

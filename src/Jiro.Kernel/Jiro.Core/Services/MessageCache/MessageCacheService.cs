@@ -1,4 +1,7 @@
 using Jiro.Core.IRepositories;
+using Jiro.Core.Models;
+using Jiro.Core.Services.CommandContext;
+using Jiro.Core.Services.Conversation.Models;
 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
@@ -14,15 +17,19 @@ public class MessageCacheService : IMessageCacheService
 	private readonly ILogger<MessageCacheService> _logger;
 	private readonly IMemoryCache _memoryCache;
 	private readonly IMessageRepository _messageRepository;
+	private readonly IChatSessionRepository _chatSessionRepository;
+	private readonly ICommandContext _commandContext;
 	private readonly int _messageFetchCount = 40;
 	private const int MEMORY_CACHE_EXPIRATION = 5;
 
-	public MessageCacheService (ILogger<MessageCacheService> logger, IMemoryCache memoryCache, IMessageRepository messageRepository, IConfiguration configuration)
+	public MessageCacheService (ILogger<MessageCacheService> logger, IMemoryCache memoryCache, IMessageRepository messageRepository, IChatSessionRepository chatSessionRepository, IConfiguration configuration, ICommandContext commandContext)
 	{
 		_logger = logger;
 		_memoryCache = memoryCache;
 		_messageRepository = messageRepository;
+		_chatSessionRepository = chatSessionRepository;
 		_messageFetchCount = configuration.GetValue<int>(Constants.Environment.MessageFetchCount);
+		_commandContext = commandContext ?? throw new ArgumentNullException(nameof(commandContext), "Command context cannot be null.");
 	}
 
 	public void ClearMessageCache ()
@@ -31,6 +38,35 @@ public class MessageCacheService : IMessageCacheService
 		_logger?.LogInformation("Clearing persona and core persona message cache.");
 		_memoryCache.Remove(Constants.CacheKeys.ComputedPersonaMessageKey);
 		_memoryCache.Remove(Constants.CacheKeys.CorePersonaMessageKey);
+	}
+
+	public async Task<List<ChatSession>> GetChatSessionsAsync (string instanceId)
+	{
+		try
+		{
+			return await _memoryCache.GetOrCreateAsync(instanceId, async entry =>
+			{
+				entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromDays(MEMORY_CACHE_EXPIRATION);
+
+				var sessions = await FetchChatSessionsAsync(instanceId);
+				if (sessions == null || !sessions.Any())
+				{
+					_logger.LogInformation("No chat sessions found for instance {InstanceId}", instanceId);
+					return new List<ChatSession>();
+				}
+
+				_logger.LogInformation("Retrieved {Count} chat sessions for instance {InstanceId}", sessions.Count, instanceId);
+
+				_memoryCache.Set(Constants.CacheKeys.SessionsKey, sessions, TimeSpan.FromDays(MEMORY_CACHE_EXPIRATION));
+				return sessions;
+			}) ?? throw new InvalidOperationException($"Chat sessions for instance {instanceId} could not be retrieved.");
+		}
+
+		catch (Exception ex)
+		{
+			_logger.LogError(ex, "Error retrieving chat sessions for instance {InstanceId}", instanceId);
+			throw;
+		}
 	}
 
 	public async Task<string?> GetPersonaCoreMessageAsync ()
@@ -48,54 +84,95 @@ public class MessageCacheService : IMessageCacheService
 		return 0;
 	}
 
-	public async Task<List<ChatMessage>?> GetOrCreateChatMessagesAsync (string instanceId)
+	public async Task<Session> GetOrCreateChatSessionAsync (string sessionId)
 	{
 		try
 		{
-			return await _memoryCache.GetOrCreateAsync(instanceId, async entry =>
+			return await _memoryCache.GetOrCreateAsync(sessionId, async entry =>
 			{
 				entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromDays(MEMORY_CACHE_EXPIRATION);
-				List<Models.Message> messages = await _messageRepository.AsQueryable()
-					.Where(x => x.InstanceId == instanceId)
-					.OrderBy(x => x.CreatedAt)
-					.Take(_messageFetchCount)
-					.ToListAsync();
+				var session = await _chatSessionRepository.AsQueryable()
+					.Where(x => x.Id == sessionId)
+					.Include(x => x.Messages.OrderBy(m => m.CreatedAt))
+					.FirstOrDefaultAsync();
 
-				_logger.LogInformation("Populating cache for instance {InstanceId} with {Count} messages.", instanceId, messages.Count);
+				if (session is null)
+				{
+					_logger.LogInformation("No chat session found for instance {InstanceId} and session {SessionId}. Creating new session.", _commandContext.InstanceId, sessionId);
+					session = new ChatSession
+					{
+						Id = _commandContext.SessionId,
+						Name = $"Session-{sessionId}",
+						CreatedAt = DateTime.UtcNow,
+						LastUpdatedAt = DateTime.UtcNow,
+					};
 
-				return messages.Select(x =>
-						x.IsUser
-							? (ChatMessage)ChatMessage.CreateUserMessage(x.Content)
-							: ChatMessage.CreateAssistantMessage(x.Content)
-					).ToList();
-			});
+					await _chatSessionRepository.AddAsync(session);
+					await _chatSessionRepository.SaveChangesAsync();
+					_memoryCache.Remove(Constants.CacheKeys.SessionsKey);
+				}
+
+				return new Session
+				{
+					InstanceId = _commandContext.InstanceId,
+					SessionId = session.Id,
+					CreatedAt = session.CreatedAt,
+					LastUpdatedAt = session.LastUpdatedAt,
+					Messages = session.Messages.Select(x =>
+							x.IsUser
+								? (ChatMessage)ChatMessage.CreateUserMessage(x.Content)
+								: ChatMessage.CreateAssistantMessage(x.Content)
+						).ToList()
+				};
+
+				// List<Models.Message> messages = await _messageRepository.AsQueryable()
+				// 	.Where(x => x.InstanceId == instanceId && x.SessionId == sessionId)
+				// 	.OrderBy(x => x.CreatedAt)
+				// 	.Take(_messageFetchCount)
+				// 	.ToListAsync();
+
+				// _logger.LogInformation("Populating cache for instance {InstanceId} with {Count} messages.", instanceId, messages.Count);
+
+				// return messages.Select(x =>
+				// 		x.IsUser
+				// 			? (ChatMessage)ChatMessage.CreateUserMessage(x.Content)
+				// 			: ChatMessage.CreateAssistantMessage(x.Content)
+				// 	).ToList();
+			}) ?? throw new InvalidOperationException($"Chat session with ID {sessionId} could not be created or retrieved.");
 		}
 		catch (Exception ex)
 		{
-			_logger.LogError(ex, "Error fetching or caching chat messages for instance {InstanceId}", instanceId);
+			_logger.LogError(ex, "Error fetching or caching chat messages for instance {InstanceId}", _commandContext.InstanceId);
 			throw;
 		}
 	}
 
-	public async Task AddChatExchangeAsync (string instanceId, List<ChatMessage> messages, List<Core.Models.Message> modelMessages)
+	public async Task AddChatExchangeAsync (string sessionId, List<ChatMessage> messages, List<Message> modelMessages)
 	{
 		try
 		{
-			if (_memoryCache.TryGetValue(instanceId, out List<ChatMessage>? chatMessages))
+			var instanceId = _commandContext.InstanceId ?? throw new InvalidOperationException("Command context or current instance is not set.");
+			if (_memoryCache.TryGetValue(sessionId, out Session? session))
 			{
-				if (chatMessages?.Count > 0)
+				if (session is null)
 				{
-					chatMessages.Clear();
+					_logger.LogWarning("Chat session with ID {SessionId} not found in cache. Creating a new session.", sessionId);
+					session = await GetOrCreateChatSessionAsync(sessionId);
 				}
 
-				chatMessages = chatMessages ?? messages;
-				chatMessages.AddRange(messages);
+				var sessionMessages = session.Messages ?? [];
+				if (sessionMessages.Count > 0)
+				{
+					sessionMessages.Clear();
+				}
 
-				_memoryCache.Set(instanceId, chatMessages, TimeSpan.FromDays(MEMORY_CACHE_EXPIRATION));
+				sessionMessages.AddRange(messages);
+				_memoryCache.Set(sessionId, session, TimeSpan.FromDays(MEMORY_CACHE_EXPIRATION));
 			}
 			else
 			{
-				_memoryCache.Set(instanceId, messages, TimeSpan.FromDays(MEMORY_CACHE_EXPIRATION));
+				session = await GetOrCreateChatSessionAsync(sessionId);
+				_memoryCache.Set(sessionId, session, TimeSpan.FromDays(MEMORY_CACHE_EXPIRATION));
 			}
 
 			await _messageRepository.AddRangeAsync(modelMessages);
@@ -103,22 +180,22 @@ public class MessageCacheService : IMessageCacheService
 		}
 		catch (Exception ex)
 		{
-			_logger?.LogError(ex, "Error adding chat exchange for instance {InstanceId}", instanceId);
+			_logger?.LogError(ex, "Error adding chat exchange for instance {InstanceId}", sessionId);
 			throw;
 		}
 	}
 
-	public void ClearOldMessages (string instanceId, int range)
+	public void ClearOldMessages (string sessionId, int range)
 	{
-		if (!_memoryCache.TryGetValue(instanceId, out List<ChatMessage>? serverMessages))
+		if (!_memoryCache.TryGetValue(sessionId, out Session? session))
 		{
 			return;
 		}
 
-		if (serverMessages is not null && serverMessages.Count > range)
+		if (session is not null && session.Messages.Count > range)
 		{
-			serverMessages.RemoveRange(0, serverMessages.Count - range);
-			_memoryCache.Set(instanceId, serverMessages, TimeSpan.FromDays(MEMORY_CACHE_EXPIRATION));
+			session.Messages.RemoveRange(0, session.Messages.Count - range);
+			_memoryCache.Set(sessionId, session, TimeSpan.FromDays(MEMORY_CACHE_EXPIRATION));
 		}
 	}
 
@@ -141,5 +218,28 @@ public class MessageCacheService : IMessageCacheService
 		}
 
 		return null;
+	}
+
+	private async Task<List<ChatSession>> FetchChatSessionsAsync (string instanceId)
+	{
+		try
+		{
+			var sessions = await _chatSessionRepository.AsQueryable()
+				.Include(x => x.Messages.OrderBy(m => m.CreatedAt))
+				.ToListAsync();
+
+			if (sessions == null || !sessions.Any())
+			{
+				_logger.LogInformation("No chat sessions found for instance {InstanceId}", instanceId);
+				return new List<ChatSession>();
+			}
+
+			return sessions;
+		}
+		catch (Exception ex)
+		{
+			_logger.LogError(ex, "Error fetching chat sessions for instance {InstanceId}", instanceId);
+			throw;
+		}
 	}
 }

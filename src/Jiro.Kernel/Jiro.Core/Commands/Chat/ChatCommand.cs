@@ -1,6 +1,8 @@
 using System.Text.Json;
 
+using Jiro.Core.Services.CommandContext;
 using Jiro.Core.Services.Conversation;
+using Jiro.Core.Services.MessageCache;
 
 namespace Jiro.Core.Commands.Chat;
 
@@ -9,36 +11,23 @@ public class ChatCommand : ICommandBase
 {
 	private readonly IPersonalizedConversationService _chatService;
 	private readonly ICommandContext _commandContext;
-	private readonly IChatStorageService _chatStorageService;
+	private readonly IMessageCacheService _chatStorageService;
 
-	public ChatCommand (IPersonalizedConversationService chatService, ICommandContext commandContext, IChatStorageService chatStorageService)
+	public ChatCommand (IPersonalizedConversationService chatService, ICommandContext commandContext, IMessageCacheService chatStorageService)
 	{
-		_chatService = chatService;
-		_commandContext = commandContext;
-		_chatStorageService = chatStorageService;
+		_chatStorageService = chatStorageService ?? throw new ArgumentNullException(nameof(chatStorageService), "Chat storage service cannot be null.");
+		_chatService = chatService ?? throw new ArgumentNullException(nameof(chatService), "Chat service cannot be null.");
+		_commandContext = commandContext ?? throw new ArgumentNullException(nameof(commandContext), "Command context cannot be null.");
 	}
-
-	// [Command("init")]
-	// public async Task<ICommandResult> Init ()
-	// {
-	// 	if (_commandContext.UserId == null)
-	// 		throw new JiroException("User not found");
-
-	// 	var result = await _chatService.CreateChatSessionAsync(_commandContext.UserId);
-
-	// 	return TextResult.Create(result);
-	// }
 
 	[Command("chat")]
 	public async Task<ICommandResult> Chat (string prompt)
 	{
-		_commandContext.Data.TryGetValue("sessionId", out var chatSessionId);
-
-		var sessionId = chatSessionId as string;
+		var sessionId = _commandContext.SessionId;
 		if (string.IsNullOrEmpty(sessionId))
 			throw new JiroException("Session not found");
 
-		var result = await _chatService.ChatAsync(_commandContext.UserId ?? "", sessionId, prompt);
+		var result = await _chatService.ChatAsync(_commandContext.InstanceId ?? "", sessionId, prompt);
 
 		return TextResult.Create(result);
 	}
@@ -46,10 +35,10 @@ public class ChatCommand : ICommandBase
 	[Command("getSessions")]
 	public async Task<ICommandResult> GetSessions ()
 	{
-		if (_commandContext.UserId == null)
+		if (_commandContext.InstanceId == null)
 			throw new JiroException("User not found");
 
-		var sessions = await _chatStorageService.GetSessionsAsync(_commandContext.UserId);
+		var sessions = await _chatStorageService.GetChatSessionsAsync(_commandContext.InstanceId);
 
 		return TextResult.Create(JsonSerializer.Serialize(sessions));
 	}

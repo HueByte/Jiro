@@ -7,15 +7,15 @@ using OpenAI.Chat;
 
 namespace Jiro.Core.Services.Conversation;
 
-public class ChatCoreService : IChatCoreService
+public class ConversationCoreService : IConversationCoreService
 {
-	private readonly ILogger<ChatCoreService> _logger;
+	private readonly ILogger<ConversationCoreService> _logger;
 	private readonly IMessageCacheService _messageCacheService;
 	private readonly ChatClient _openAIClient;
-	private readonly IChatSemaphoreManager _chatSemaphoreManager;
+	private readonly ISemaphoreManager _chatSemaphoreManager;
 	private const float TEMPERATURE = 0.6f;
 
-	public ChatCoreService (ILogger<ChatCoreService> logger, IMessageCacheService messageCacheService, ChatClient openAIClient, IChatSemaphoreManager chatSemaphoreManager)
+	public ConversationCoreService (ILogger<ConversationCoreService> logger, IMessageCacheService messageCacheService, ChatClient openAIClient, ISemaphoreManager chatSemaphoreManager)
 	{
 		_logger = logger;
 		_messageCacheService = messageCacheService;

@@ -11,11 +11,11 @@ public class PersonaService : IPersonaService
 {
 	private readonly ILogger<PersonaService> _logger;
 	private readonly IMessageCacheService _messageCacheService;
-	private readonly IChatCoreService _coreChatService;
+	private readonly IConversationCoreService _coreChatService;
 	private readonly IMemoryCache _memoryCache;
-	private readonly IChatSemaphoreManager _chatSemaphoreManager;
+	private readonly ISemaphoreManager _chatSemaphoreManager;
 
-	public PersonaService (ILogger<PersonaService> logger, IMessageCacheService messageCacheService, IChatCoreService chatService, IMemoryCache memoryCache, IChatSemaphoreManager chatSemaphoreManager)
+	public PersonaService (ILogger<PersonaService> logger, IMessageCacheService messageCacheService, IConversationCoreService chatService, IMemoryCache memoryCache, ISemaphoreManager chatSemaphoreManager)
 	{
 		_logger = logger;
 		_messageCacheService = messageCacheService;

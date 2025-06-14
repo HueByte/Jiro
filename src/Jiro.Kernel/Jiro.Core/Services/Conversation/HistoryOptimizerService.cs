@@ -12,10 +12,10 @@ namespace Jiro.Core.Services.Conversation;
 public class HistoryOptimizerService : IHistoryOptimizerService
 {
 	private readonly ILogger<HistoryOptimizerService> _logger;
-	private readonly IChatCoreService _chatCoreService;
+	private readonly IConversationCoreService _chatCoreService;
 	private readonly int _maxTokens = 10000;
 
-	public HistoryOptimizerService (ILogger<HistoryOptimizerService> logger, IChatCoreService chatCoreService)
+	public HistoryOptimizerService (ILogger<HistoryOptimizerService> logger, IConversationCoreService chatCoreService)
 	{
 		_logger = logger;
 		_chatCoreService = chatCoreService;

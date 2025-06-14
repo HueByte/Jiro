@@ -38,4 +38,5 @@ public class JiroContext : IdentityDbContext<AppUser, AppRole, string,
 
 	public DbSet<ChatSession> ChatSessions { get; set; } = default!;
 	public DbSet<Message> Messages { get; set; } = default!;
+	public DbSet<RefreshToken> RefreshTokens { get; set; } = default!;
 }

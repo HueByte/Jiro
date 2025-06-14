@@ -7,9 +7,9 @@ public class Environment
 
 public class CacheKeys
 {
-	public const string CorePersonaMessageKey = "Persona";
-	public const string ComputedPersonaMessageKey = "ComputedPersona";
-	public const string ServerTogglesCreated = "ServerTogglesCreated";
+	public const string CorePersonaMessageKey = $"{AgentMetadata.CachePrefix}Persona";
+	public const string ComputedPersonaMessageKey = $"{AgentMetadata.CachePrefix}ComputedPersona";
+	public const string SessionsKey = $"{AgentMetadata.CachePrefix}Sessions";
 }
 
 public class AI
@@ -23,11 +23,10 @@ public class AI
 public class Paths
 {
 	public static string MessageBasePath = Path.Join(AppContext.BaseDirectory, "Messages");
-	public static string TTSBasePath = Path.Join(AppContext.BaseDirectory, "TTS");
-	public static string TTSBaseOutputPath = Path.Join(TTSBasePath, "output");
 }
 
 public class AgentMetadata
 {
 	public const string Name = "Jiro";
+	public const string CachePrefix = "JIRO_";
 }

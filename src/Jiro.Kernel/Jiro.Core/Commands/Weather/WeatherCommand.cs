@@ -1,5 +1,6 @@
 using System.Text.Json;
 
+using Jiro.Core.Services.Weather;
 using Jiro.Core.Services.Weather.Models;
 
 namespace Jiro.Core.Commands.Weather;
@@ -26,7 +27,7 @@ public class WeatherCommand : ICommandBase
 		if (weather is null || weather.Hourly is null || weather.Hourly.Time is null)
 			return GraphResult.Create("No weather data found", null, null!);
 
-		// convert to acceptable format [{...}, {...}, {...}] 
+		// convert to acceptable format [{...}, {...}, {...}]
 		var data = weather.Hourly.Time
 			.Select((time, index) =>
 				new WeatherGraphData

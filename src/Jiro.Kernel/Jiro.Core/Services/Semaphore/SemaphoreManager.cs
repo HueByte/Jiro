@@ -4,12 +4,12 @@ using Microsoft.Extensions.Logging;
 
 namespace Jiro.Core.Services.Semaphore;
 
-public class ChatSemaphoreManager : IChatSemaphoreManager
+public class SemaphoreManager : ISemaphoreManager
 {
-	private readonly ILogger<ChatSemaphoreManager> _logger;
+	private readonly ILogger<SemaphoreManager> _logger;
 	private readonly ConcurrentDictionary<string, SemaphoreSlim> _personaSemaphore = new();
 
-	public ChatSemaphoreManager (ILogger<ChatSemaphoreManager> logger)
+	public SemaphoreManager (ILogger<SemaphoreManager> logger)
 	{
 		_logger = logger;
 	}

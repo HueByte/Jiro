@@ -1,6 +1,7 @@
 using System.Text.Json;
 
 using Jiro.Core.Constants;
+using Jiro.Core.Services.Geolocation;
 using Jiro.Core.Services.Weather.Models;
 
 namespace Jiro.Core.Services.Weather;

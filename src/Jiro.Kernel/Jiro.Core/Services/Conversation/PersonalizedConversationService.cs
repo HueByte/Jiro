@@ -1,4 +1,6 @@
 using Jiro.Core.Models;
+using Jiro.Core.Services.CommandContext;
+using Jiro.Core.Services.Conversation.Models;
 using Jiro.Core.Services.MessageCache;
 using Jiro.Core.Services.Persona;
 
@@ -11,22 +13,24 @@ namespace Jiro.Core.Services.Conversation;
 public class PersonalizedConversationService : IPersonalizedConversationService
 {
 	private readonly ILogger<PersonalizedConversationService> _logger;
-	private readonly IChatCoreService _chatCoreService;
+	private readonly IConversationCoreService _chatCoreService;
 	private readonly IPersonaService _personaService;
 	private readonly IMessageCacheService _messageCacheService;
 	private readonly IHistoryOptimizerService _historyOptimizerService;
+	private readonly ICommandContext _commandContext;
 	private const float PRICING_OUTPUT = 0.600f;
 	private const float PRICING_INPUT = 0.150f;
 	private const float PRICING_INPUT_CACHED = 0.075f;
 	private const float ONE_MILLION = 1_000_000;
 
-	public PersonalizedConversationService (ILogger<PersonalizedConversationService> logger, IChatCoreService chatCoreService, IPersonaService personaService, IMessageCacheService messageCacheService, IHistoryOptimizerService historyOptimizerService)
+	public PersonalizedConversationService (ILogger<PersonalizedConversationService> logger, IConversationCoreService chatCoreService, IPersonaService personaService, IMessageCacheService messageCacheService, IHistoryOptimizerService historyOptimizerService, ICommandContext commandContext)
 	{
-		_logger = logger;
-		_chatCoreService = chatCoreService;
-		_personaService = personaService;
-		_messageCacheService = messageCacheService;
-		_historyOptimizerService = historyOptimizerService;
+		_logger = logger ?? throw new ArgumentNullException(nameof(logger), "Logger cannot be null.");
+		_chatCoreService = chatCoreService ?? throw new ArgumentNullException(nameof(chatCoreService), "Chat core service cannot be null.");
+		_personaService = personaService ?? throw new ArgumentNullException(nameof(personaService), "Persona service cannot be null.");
+		_messageCacheService = messageCacheService ?? throw new ArgumentNullException(nameof(messageCacheService), "Message cache service cannot be null.");
+		_historyOptimizerService = historyOptimizerService ?? throw new ArgumentNullException(nameof(historyOptimizerService), "History optimizer service cannot be null.");
+		_commandContext = commandContext ?? throw new ArgumentNullException(nameof(commandContext), "Command context cannot be null.");
 	}
 
 	public async Task<string> ChatAsync (string instanceId, string sessionId, string message)
@@ -40,7 +44,7 @@ public class PersonalizedConversationService : IPersonalizedConversationService
 				throw new Exception("Persona not found.");
 			}
 
-			var (conversationForChat, conversationHistory) = await PrepareMessageHistory(instanceId, message);
+			var (conversationForChat, conversationHistory, session) = await PrepareMessageHistory(sessionId, message);
 
 			var response = await _chatCoreService.ChatAsync(instanceId, conversationForChat, ChatMessage.CreateDeveloperMessage(persona));
 			var assistantMessages = response.Content;
@@ -61,16 +65,15 @@ public class PersonalizedConversationService : IPersonalizedConversationService
 			conversationForChat.Add(jiroMessage);
 			conversationHistory.Add(jiroMessage);
 
-			var models = CreateMessageModels(instanceId, sessionId, userMessage, jiroMessage);
+			var models = CreateMessageModels(session.SessionId, userMessage, jiroMessage);
 
-			await _messageCacheService.AddChatExchangeAsync(instanceId, conversationHistory, models);
-
+			await _messageCacheService.AddChatExchangeAsync(sessionId, conversationHistory, models);
 			if (_historyOptimizerService.ShouldOptimizeMessageHistory(tokenUsage))
 			{
 				try
 				{
 					var optimizationResult = await _historyOptimizerService.OptimizeMessageHistory(tokenUsage.TotalTokenCount, conversationForChat, persona);
-					_messageCacheService.ClearOldMessages(instanceId, optimizationResult.RemovedMessages - 1);
+					_messageCacheService.ClearOldMessages(sessionId, optimizationResult.RemovedMessages - 1);
 					await _personaService.AddSummaryAsync(optimizationResult.MessagesSummary);
 				}
 				catch (Exception ex)
@@ -102,24 +105,41 @@ public class PersonalizedConversationService : IPersonalizedConversationService
 		_logger.LogInformation("Estimated message price: {messagePrice}$", CalculateMessagePrice(usage));
 	}
 
-	private async Task<(List<ChatMessage>, List<ChatMessage>)> PrepareMessageHistory (string instanceId, string message)
+	private async Task<(List<ChatMessage>, List<ChatMessage>, Session session)> PrepareMessageHistory (string sessionId, string message)
 	{
-		var cachedMessages = await _messageCacheService.GetOrCreateChatMessagesAsync(instanceId)
-							 ?? [];
+		Session session = await _messageCacheService.GetOrCreateChatSessionAsync(sessionId);
+		if (session is null)
+		{
+			_logger.LogError("Chat session with ID {SessionId} could not be created or retrieved.", sessionId);
+			throw new InvalidOperationException($"Chat session with ID {sessionId} could not be created or retrieved.");
+		}
 
-		var conversationHistory = new List<ChatMessage>(cachedMessages);
-
+		var conversationHistory = new List<ChatMessage>(session.Messages);
 		var conversationForChat = new List<ChatMessage>();
 		conversationForChat.AddRange(conversationHistory);
 
-		// Create the user message.
 		var userChatMessage = ChatMessage.CreateUserMessage(message);
 		conversationForChat.Add(userChatMessage);
-
-		// Also add the user message to the conversation history for persistence.
 		conversationHistory.Add(userChatMessage);
 
-		return (conversationForChat, conversationHistory);
+		return (conversationForChat, conversationHistory, session)!;
+
+		// var cachedMessages = await _messageCacheService.GetOrCreateChatSessionAsync(instanceId, sessionId)
+		// 					 ?? [];
+
+		// var conversationHistory = new List<ChatMessage>(cachedMessages);
+
+		// var conversationForChat = new List<ChatMessage>();
+		// conversationForChat.AddRange(conversationHistory);
+
+		// // Create the user message.
+		// var userChatMessage = ChatMessage.CreateUserMessage(message);
+		// conversationForChat.Add(userChatMessage);
+
+		// // Also add the user message to the conversation history for persistence.
+		// conversationHistory.Add(userChatMessage);
+
+		// return (conversationForChat, conversationHistory);
 	}
 
 	private float CalculateMessagePrice (ChatTokenUsage tokenUsage)
@@ -132,7 +152,7 @@ public class PersonalizedConversationService : IPersonalizedConversationService
 		return messagePrice;
 	}
 
-	private List<Core.Models.Message> CreateMessageModels (string instanceId, string sessionId, ChatMessage userMessage, ChatMessage JiroMessage)
+	private List<Core.Models.Message> CreateMessageModels (string sessionId, ChatMessage userMessage, ChatMessage JiroMessage)
 	{
 		var modelMessages = new List<Core.Models.Message>
 		{
@@ -140,7 +160,7 @@ public class PersonalizedConversationService : IPersonalizedConversationService
 			new()
 			{
 				Id = Guid.NewGuid().ToString(),
-				InstanceId = instanceId,
+				InstanceId = _commandContext.InstanceId,
 				Content = userMessage.Content.FirstOrDefault()?.Text ?? string.Empty,
 				IsUser = true,
 				CreatedAt = DateTime.UtcNow,
@@ -150,7 +170,7 @@ public class PersonalizedConversationService : IPersonalizedConversationService
 			new()
 			{
 				Id = Guid.NewGuid().ToString(),
-				InstanceId = instanceId,
+				InstanceId = _commandContext.InstanceId,
 				Content = JiroMessage.Content.FirstOrDefault()?.Text ?? string.Empty,
 				IsUser = false,
 				CreatedAt = DateTime.UtcNow,

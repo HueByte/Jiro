@@ -47,4 +47,10 @@
 		<Protobuf Include="Proto\jiroHub.proto" GrpcServices="Client" />
 	</ItemGroup>
 
+	<ItemGroup>
+		<None Include="Messages\**\*">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+	</ItemGroup>
+
 </Project>

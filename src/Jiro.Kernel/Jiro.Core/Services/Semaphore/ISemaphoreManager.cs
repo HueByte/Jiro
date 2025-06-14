@@ -1,6 +1,6 @@
 namespace Jiro.Core.Services.Semaphore;
 
-public interface IChatSemaphoreManager
+public interface ISemaphoreManager
 {
 	SemaphoreSlim GetOrCreateInstanceSemaphore (string instanceId);
 }

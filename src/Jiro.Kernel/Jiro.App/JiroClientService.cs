@@ -7,7 +7,8 @@ using Grpc.Core;
 using Grpc.Net.ClientFactory;
 
 using Jiro.Commands.Models;
-using Jiro.Core.Interfaces.IServices;
+using Jiro.Core.Services.CommandContext;
+using Jiro.Core.Services.CommandHandler;
 
 using JiroCloud.Api.Proto;
 
@@ -56,18 +57,18 @@ internal class JiroClientService : IHostedService
 				var currentClient = clientFactory.CreateClient<JiroHubProtoClient>("JiroClient");
 
 				Metadata connectionHeaders = new()
-					{
-						{ "Content-Type", "application/grpc" }
-					};
+				{
+					{ "Content-Type", "application/grpc" }
+				};
 
 				// Initialize the connection
 				callInstance = currentClient.InstanceCommand(connectionHeaders, cancellationToken: cancellationToken);
 				_logger.LogInformation("Connected to server");
 
 				var serverListenTask = Task.Run(async () => await StartListeningLoopAsync(callInstance), cancellationToken);
-				var keepAliveTask = Task.Run(async () => await StatKeepAliveLoopAsync(callInstance), cancellationToken);
+				var keepAliveTask = Task.Run(async () => await StartKeepAliveLoopAsync(callInstance), cancellationToken);
 
-				await Task.WhenAll(serverListenTask);
+				await serverListenTask;
 				await callInstance.RequestStream.CompleteAsync();
 			}
 			catch (Exception ex) when (ex is TaskCanceledException
@@ -131,11 +132,12 @@ internal class JiroClientService : IHostedService
 
 				// capture variables
 				var scopedCommandSyncId = serverMessage.CommandSyncId;
-				var instanceId = serverMessage.InstanceName;
+				var instanceId = serverMessage.InstanceId ?? throw new InvalidOperationException("Instance ID is null in server message");
 				var command = serverMessage.Command;
+				var sessionId = serverMessage.SessionId ?? throw new InvalidOperationException("Session ID is null in server message");
 
 				// Fire and forget execute command
-				var commandTask = Task.Run(async () => await ExecuteCommandAsync(scopedCommandSyncId, instanceId, command, callInstance), _cancellationToken);
+				var commandTask = Task.Run(async () => await ExecuteCommandAsync(scopedCommandSyncId, instanceId, sessionId, command, callInstance), _cancellationToken);
 				var enqueueResult = _commandQueue.TryAdd(scopedCommandSyncId, commandTask);
 			}
 			catch (Exception ex) when (ex is TaskCanceledException
@@ -157,7 +159,7 @@ internal class JiroClientService : IHostedService
 		}
 	}
 
-	private async Task StatKeepAliveLoopAsync (AsyncDuplexStreamingCall<ClientMessage, ServerMessage>? callInstance)
+	private async Task StartKeepAliveLoopAsync (AsyncDuplexStreamingCall<ClientMessage, ServerMessage>? callInstance)
 	{
 		while (!_cancellationToken.IsCancellationRequested)
 		{
@@ -183,13 +185,14 @@ internal class JiroClientService : IHostedService
 		}
 	}
 
-	private async Task ExecuteCommandAsync (string scopedCommandSyncId, string instanceId, string command, AsyncDuplexStreamingCall<ClientMessage, ServerMessage> callInstance)
+	private async Task ExecuteCommandAsync (string scopedCommandSyncId, string instanceId, string sessionId, string command, AsyncDuplexStreamingCall<ClientMessage, ServerMessage> callInstance)
 	{
 		try
 		{
 			await using var commandScope = _scopeFactory.CreateAsyncScope();
 			var currentClient = commandScope.ServiceProvider.GetRequiredService<ICommandContext>();
-			currentClient.SetCurrentUser(instanceId);
+			currentClient.SetCurrentInstance(instanceId);
+			currentClient.SetSessionId(sessionId);
 
 			var commandResult = await _commandHandler.ExecuteCommandAsync(commandScope.ServiceProvider, command);
 			var commandResponse = CreateMessage(scopedCommandSyncId, commandResult);
