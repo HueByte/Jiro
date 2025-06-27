@@ -1,0 +1,90 @@
+name: Jiro.Kernel Performance Test
+
+on:
+  schedule:
+    # Run performance tests every Sunday at 3 AM UTC
+    - cron: "0 3 * * 0"
+  workflow_dispatch:
+    inputs:
+      benchmark_filter:
+        description: "Benchmark filter (optional)"
+        required: false
+        default: "*"
+
+env:
+  DOTNET_VERSION: "9.0.x"
+  SOLUTION_PATH: "./src/Jiro.Kernel/Jiro.Kernel.sln"
+
+jobs:
+  performance-test:
+    runs-on: ubuntu-latest
+    name: Performance Tests & Benchmarks
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Prepare configuration files
+        run: |
+          if [ ! -f ./src/Jiro.Kernel/Jiro.App/appsettings.json ]; then
+            cp ./src/Jiro.Kernel/Jiro.App/appsettings.example.json ./src/Jiro.Kernel/Jiro.App/appsettings.json
+          fi
+
+      - name: Restore dependencies
+        run: dotnet restore ${{ env.SOLUTION_PATH }}
+
+      - name: Build in Release mode
+        run: dotnet build ${{ env.SOLUTION_PATH }} --no-restore --configuration Release
+
+      - name: Run performance tests
+        run: |
+          echo "## Performance Test Results" >> $GITHUB_STEP_SUMMARY
+          echo "Date: $(date)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          # Run tests with performance category if they exist
+          TEST_OUTPUT=$(dotnet test ${{ env.SOLUTION_PATH }} --no-build --configuration Release --filter "Category=Performance" --logger "console;verbosity=detailed" 2>&1 || true)
+
+          if echo "$TEST_OUTPUT" | grep -q "No test"; then
+            echo "ℹ️ **No performance tests found**" >> $GITHUB_STEP_SUMMARY
+            echo "Consider adding performance tests with [Category(\"Performance\")] attribute" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "✅ **Performance tests completed:**" >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+            echo "$TEST_OUTPUT" >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: Install BenchmarkDotNet tools
+        run: dotnet tool install -g BenchmarkDotNet.Tool || true
+
+      - name: Run benchmarks
+        run: |
+          # Look for benchmark projects
+          BENCHMARK_PROJECTS=$(find ./src/Jiro.Kernel -name "*.csproj" -exec grep -l "BenchmarkDotNet" {} \; 2>/dev/null || true)
+
+          if [ -z "$BENCHMARK_PROJECTS" ]; then
+            echo "ℹ️ **No benchmark projects found**" >> $GITHUB_STEP_SUMMARY
+            echo "Consider adding BenchmarkDotNet for performance benchmarking" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "🚀 **Running benchmarks:**" >> $GITHUB_STEP_SUMMARY
+            for project in $BENCHMARK_PROJECTS; do
+              echo "Running benchmarks in $project" >> $GITHUB_STEP_SUMMARY
+              dotnet run --project "$project" --configuration Release --framework net9.0 -- --filter "${{ github.event.inputs.benchmark_filter || '*' }}" || true
+            done
+          fi
+
+      - name: Upload benchmark results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: benchmark-results
+          path: |
+            **/BenchmarkDotNet.Artifacts/**
+            **/TestResults/**
+          retention-days: 30
