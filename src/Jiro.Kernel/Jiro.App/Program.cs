@@ -3,7 +3,6 @@ using Jiro.App.Configurator;
 using Jiro.Commands.Base;
 using Jiro.Commands.Models;
 using Jiro.Core.Commands.Chat;
-using Jiro.Core.Options;
 using Jiro.Core.Utils;
 using Jiro.Infrastructure;
 
@@ -14,9 +13,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
 using Serilog;
-using Serilog.Events;
 using Serilog.Extensions.Logging;
-using Serilog.Sinks.SystemConsole.Themes;
 
 AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
 
@@ -31,34 +28,19 @@ EnvironmentConfigurator environmentConfigurator = new EnvironmentConfigurator(co
 	.PrepareConfigFiles()
 	.PrepareLogsFolder();
 
-Serilog.Log.Logger = new LoggerConfiguration()
-	.WriteTo.Console()
-	.Enrich.FromLogContext()
+Log.Logger = new LoggerConfiguration()
+	.ReadFrom.Configuration(configManager)
 	.CreateBootstrapLogger();
 
-var logger = new SerilogLoggerProvider(Serilog.Log.Logger)
+var logger = new SerilogLoggerProvider(Log.Logger)
 	.CreateLogger(nameof(Program));
 
-LogOptions loggerOptions = new();
-configManager.GetSection(LogOptions.Log).Bind(loggerOptions);
-LogEventLevel logLevelSystem = SerilogConfigurator.GetLogEventLevel(loggerOptions.SystemLevel);
-LogEventLevel logLevelAspNetCore = SerilogConfigurator.GetLogEventLevel(loggerOptions.AspNetCoreLevel);
-LogEventLevel logLevelDatabase = SerilogConfigurator.GetLogEventLevel(loggerOptions.DatabaseLevel);
-LogEventLevel logLevel = SerilogConfigurator.GetLogEventLevel(loggerOptions.LogLevel);
-RollingInterval logInterval = SerilogConfigurator.GetRollingInterval(loggerOptions.TimeInterval);
-
 host.UseSerilog((context, services, configuration) => configuration
-		.MinimumLevel.Override("System", logLevelSystem)
-		.MinimumLevel.Override("Microsoft.AspNetCore", logLevelAspNetCore)
-		.MinimumLevel.Override("Microsoft.EntityFrameworkCore.Database.Command", logLevelDatabase)
-		.WriteTo.Async(e => e.Console(theme: AnsiConsoleTheme.Code))
-		.WriteTo.Async(e => e.File(configManager.GetValue<string>("API_LOGS_PATH") ?? Path.Combine(AppContext.BaseDirectory, "logs/jiro.log"), rollingInterval: logInterval))
 		.ReadFrom.Configuration(configManager)
 		.ReadFrom.Services(services));
 
 var modulePaths = configManager.GetSection("Modules").Get<string[]>();
 PluginManager? pluginManager = null;
-
 
 host.ConfigureAppConfiguration(options =>
 {
@@ -126,7 +108,7 @@ var app = host.Build();
 
 // Log loaded modules
 var commandContainer = app.Services.GetRequiredService<CommandsContext>();
-foreach (var module in commandContainer.CommandModules.Keys) Serilog.Log.Information("Module {Module} loaded", module);
+foreach (var module in commandContainer.CommandModules.Keys) Log.Information("Module {Module} loaded", module);
 
 var appConf = new AppConfigurator(app)
 	  .Migrate();
