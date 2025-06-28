@@ -15,16 +15,15 @@ on:
       - ".github/workflows/deploy-docs.yml"
   workflow_dispatch:
 
-# Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
+# Sets permissions of the GITHUB_TOKEN to allow pushing to gh-pages branch
 permissions:
+  contents: write
   actions: read
-  pages: write
-  id-token: write
 
 # Allow only one concurrent deployment, skipping runs queued between the run in-progress and latest queued.
 # However, do NOT cancel in-progress runs as we want to allow these production deployments to complete.
 concurrency:
-  group: "pages"
+  group: "gh-pages-deploy"
   cancel-in-progress: false
 
 jobs:
@@ -75,18 +74,16 @@ jobs:
           echo "Documentation structure:"
           find generated -type f -name "*.html" | head -10
 
-      - name: Upload documentation artifact
-        uses: actions/upload-pages-artifact@v3
+      - name: Deploy to web branch
+        uses: peaceiris/actions-gh-pages@v3
         with:
-          path: "generated"
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./generated
+          publish_branch: web
+          force_orphan: true
 
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
-
-      - name: Output deployment URL
+      - name: Output deployment info
         run: |
-          echo "📚 Documentation deployed successfully!"
-          echo "🔗 URL: ${{ steps.deployment.outputs.page_url }}"
-          echo "📖 Documentation: ${{ steps.deployment.outputs.page_url }}docs/"
-          echo "🔧 API Reference: ${{ steps.deployment.outputs.page_url }}api/"
+          echo "📚 Documentation deployed successfully to gh-pages branch!"
+          echo "🔗 GitHub Pages URL will be available at: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/"
+          echo "� Make sure GitHub Pages is configured to serve from web branch in repository settings"
