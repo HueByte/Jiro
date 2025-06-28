@@ -39,7 +39,7 @@ dirname, _ = os.path.split(os.path.abspath(__file__))
 root = Path(dirname).parent
 outputPath = os.path.join(root, 'build')
 
-apiPath = os.path.join(root, 'Jiro.Kernel\Jiro.Api')
+apiPath = os.path.join(root, 'Jiro.Kernel\Jiro.App')
 clientPath = os.path.join(root, 'Jiro.Client')
 tokenizerPath = os.path.join(root, 'Jiro.TokenApi')
 

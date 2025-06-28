@@ -18,9 +18,9 @@ To create plugins, refer to [github](https://github.com/HueByte/Jiro.Libs) https
 
 ## How to run
 ### **Jiro API & Client**
-1. navigate to `src/Jiro.Kernel/Jiro.Api/clientapp/envExamples` and rename example files to `.env` and `.env.development`
-2. move these renamed files to `src/Jiro.Kernel/Jiro.Api/clientapp`
-3. navigate to `src/Jiro.Kernel/Jiro.Api`
+1. navigate to `src/Jiro.Kernel/Jiro.App/clientapp/envExamples` and rename example files to `.env` and `.env.development`
+2. move these renamed files to `src/Jiro.Kernel/Jiro.App/clientapp`
+3. navigate to `src/Jiro.Kernel/Jiro.App`
 4. rename `appsettings.example.json` to `appsettings.json`
 5. Configure `appsettings.json`, especially `Gpt:AuthToken` for enabling conversations (can be obtained from https://platform.openai.com/account/api-keys)
 6. run `dotnet tool restore`

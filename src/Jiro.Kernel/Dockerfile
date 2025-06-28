@@ -37,7 +37,7 @@ WORKDIR /src
 COPY ["Jiro.App/Jiro.App.csproj", "Jiro.App/"]
 COPY ["Jiro.Core/Jiro.Core.csproj", "Jiro.Core/"]
 COPY ["Jiro.Infrastructure/Jiro.Infrastructure.csproj", "Jiro.Infrastructure/"]
-RUN dotnet restore "Jiro.Api/Jiro.Api.csproj"
+RUN dotnet restore "Jiro.App/Jiro.App.csproj"
 COPY . .
 WORKDIR "/src/Jiro.App"
 
