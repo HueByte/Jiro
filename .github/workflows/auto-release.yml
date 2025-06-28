@@ -73,6 +73,12 @@ jobs:
             echo "New version ${{ steps.get-version.outputs.version }}, will create release"
           fi
 
+      - name: Setup .NET
+        if: steps.check-version.outputs.skip == 'false'
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "9.0.x"
+
       - name: Build solution to verify
         if: steps.check-version.outputs.skip == 'false'
         run: |
