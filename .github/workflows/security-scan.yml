@@ -1,0 +1,89 @@
+name: Security Scanning
+
+on:
+  push:
+    branches: ["main"]
+    paths:
+      - "src/**"
+      - ".github/workflows/security-scan.yml"
+  pull_request:
+    branches: ["main", "dev"]
+    paths:
+      - "src/**"
+      - ".github/workflows/security-scan.yml"
+  schedule:
+    # Run security scan weekly on Sundays at 2 AM UTC
+    - cron: "0 2 * * 0"
+
+env:
+  DOTNET_VERSION: "9.0.x"
+  SOLUTION_PATH: "./src/Main.sln"
+
+jobs:
+  security-scan:
+    runs-on: ubuntu-latest
+    name: Security Vulnerability Scan
+    permissions:
+      security-events: write
+      actions: read
+      contents: read
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Prepare configuration files
+        run: |
+          if [ ! -f ./src/Jiro.Kernel/Jiro.App/appsettings.json ]; then
+            cp ./src/Jiro.Kernel/Jiro.App/appsettings.example.json ./src/Jiro.Kernel/Jiro.App/appsettings.json
+          fi
+
+      - name: Restore dependencies
+        run: dotnet restore ${{ env.SOLUTION_PATH }}
+
+      - name: Run .NET security audit
+        run: dotnet list ${{ env.SOLUTION_PATH }} package --vulnerable --include-transitive
+
+      - name: Install Snyk CLI
+        run: |
+          curl -L https://static.snyk.io/cli/latest/snyk-linux -o snyk
+          chmod +x ./snyk
+
+      - name: Run Snyk security scan
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        run: |
+          if [ -n "$SNYK_TOKEN" ]; then
+            echo "Running Snyk security scan..."
+            ./snyk test --severity-threshold=high --file=${{ env.SOLUTION_PATH }} || true
+          else
+            echo "⚠️ Snyk token not configured, skipping Snyk scan"
+            echo "To enable Snyk scanning, add SNYK_TOKEN to repository secrets"
+          fi
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: csharp
+          queries: security-extended,security-and-quality
+
+      - name: Autobuild for CodeQL
+        uses: github/codeql-action/autobuild@v3
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: "/language:csharp"
+
+      - name: Security scanning completed
+        run: |
+          echo "✅ Security scanning completed"
+          echo "🔍 CodeQL analysis finished"
+          echo "📊 Check the Security tab for detailed results"

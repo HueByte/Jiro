@@ -1,0 +1,131 @@
+name: Docker Build & Security
+
+on:
+  push:
+    branches: ["main"]
+    paths:
+      - "src/**"
+      - "Dockerfile"
+      - "**/Dockerfile"
+      - ".github/workflows/docker-build.yml"
+  pull_request:
+    branches: ["main", "dev"]
+    paths:
+      - "src/**"
+      - "Dockerfile"
+      - "**/Dockerfile"
+      - ".github/workflows/docker-build.yml"
+
+env:
+  DOCKER_IMAGE_NAME: "jiro-kernel"
+  REGISTRY: ghcr.io
+
+jobs:
+  docker-build:
+    runs-on: ubuntu-latest
+    name: Docker Build & Verification
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Container Registry
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.DOCKER_IMAGE_NAME }}
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=raw,value=latest,enable={{is_default_branch}}
+            type=sha,format=short
+
+      - name: Build Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./src/Jiro.Kernel
+          file: ./src/Jiro.Kernel/Dockerfile
+          push: false
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          load: true
+
+      - name: Test Docker image
+        run: |
+          # Get the first tag for testing
+          IMAGE_TAG=$(echo "${{ steps.meta.outputs.tags }}" | head -n1)
+          echo "Testing Docker image: $IMAGE_TAG"
+
+          # Run basic container health check
+          docker run --rm -d --name jiro-kernel-test $IMAGE_TAG || exit 1
+          sleep 10
+
+          # Check if container is running
+          if docker ps | grep -q jiro-kernel-test; then
+            echo "✅ Container started successfully"
+            docker stop jiro-kernel-test
+          else
+            echo "❌ Container failed to start"
+            docker logs jiro-kernel-test || true
+            exit 1
+          fi
+
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ${{ fromJSON(steps.meta.outputs.json).tags[0] }}
+          format: "sarif"
+          output: "trivy-results.sarif"
+        continue-on-error: true
+
+      - name: Check Trivy results file
+        id: check-trivy-results
+        run: |
+          if [ -f "trivy-results.sarif" ]; then
+            echo "trivy-file-exists=true" >> $GITHUB_OUTPUT
+            echo "✅ Trivy results file created successfully"
+            ls -la trivy-results.sarif
+          else
+            echo "trivy-file-exists=false" >> $GITHUB_OUTPUT
+            echo "⚠️ Trivy results file not found"
+            echo "Files in current directory:"
+            ls -la
+          fi
+
+      - name: Upload Trivy scan results
+        uses: github/codeql-action/upload-sarif@v3
+        if: always() && steps.check-trivy-results.outputs.trivy-file-exists == 'true'
+        with:
+          sarif_file: "trivy-results.sarif"
+
+      - name: Push Docker image
+        if: github.event_name != 'pull_request'
+        uses: docker/build-push-action@v5
+        with:
+          context: ./src/Jiro.Kernel
+          file: ./src/Jiro.Kernel/Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Docker build completed
+        run: |
+          echo "✅ Docker build and security scanning completed"
+          echo "📦 Built image: ${{ steps.meta.outputs.tags }}"

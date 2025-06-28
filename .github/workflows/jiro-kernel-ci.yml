@@ -1,4 +1,4 @@
-name: Jiro CI/CD
+name: .NET CI
 
 on:
   push:
@@ -15,8 +15,6 @@ on:
 env:
   DOTNET_VERSION: "9.0.x"
   SOLUTION_PATH: "./src/Main.sln"
-  DOCKER_IMAGE_NAME: "jiro-kernel"
-  REGISTRY: ghcr.io
 
 jobs:
   # Build and Test Job
@@ -27,6 +25,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
@@ -74,228 +74,48 @@ jobs:
           flags: jiro-kernel
           fail_ci_if_error: false
 
-  # Markdown Linting
-  markdown-lint:
-    runs-on: ubuntu-latest
-    name: Markdown Linting
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: "18"
-
-      - name: Install markdownlint-cli
-        run: npm install -g markdownlint-cli
-
-      - name: Run markdownlint
-        run: markdownlint '**/*.md' --ignore node_modules --ignore TestResults --ignore src/docs/build --config .markdownlint.json || true
-
-      - name: Create markdownlint config if not exists
+      - name: .NET build and test completed
         run: |
-          if [ ! -f .markdownlint.json ]; then
-            cat > .markdownlint.json << 'EOF'
-          {
-            "MD013": false,
-            "MD033": false,
-            "MD041": false
-          }
-          EOF
-          fi
-
-  # Security Vulnerability Scanning
-  security-scan:
-    runs-on: ubuntu-latest
-    name: Security Vulnerability Scan
-    needs: build-and-test
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: ${{ env.DOTNET_VERSION }}
-
-      - name: Prepare configuration files
-        run: |
-          if [ ! -f ./src/Jiro.Kernel/Jiro.App/appsettings.json ]; then
-            cp ./src/Jiro.Kernel/Jiro.App/appsettings.example.json ./src/Jiro.Kernel/Jiro.App/appsettings.json
-          fi
-
-      - name: Restore dependencies
-        run: dotnet restore ${{ env.SOLUTION_PATH }}
-
-      - name: Run .NET security audit
-        run: dotnet list ${{ env.SOLUTION_PATH }} package --vulnerable --include-transitive
-
-      - name: Install Snyk CLI
-        run: |
-          curl -L https://static.snyk.io/cli/latest/snyk-linux -o snyk
-          chmod +x ./snyk
-
-      - name: Run Snyk security scan
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-        run: |
-          if [ -n "$SNYK_TOKEN" ]; then
-            ./snyk test --severity-threshold=high --file=${{ env.SOLUTION_PATH }} || true
-          else
-            echo "Snyk token not configured, skipping Snyk scan"
-          fi
-
-      - name: Run CodeQL Analysis
-        uses: github/codeql-action/init@v3
-        with:
-          languages: csharp
-
-      - name: Autobuild for CodeQL
-        uses: github/codeql-action/autobuild@v3
-
-      - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@v3
-
-  # Docker Build and Verification
-  docker-build:
-    runs-on: ubuntu-latest
-    name: Docker Build & Verification
-    needs: build-and-test
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      - name: Log in to Container Registry
-        if: github.event_name != 'pull_request'
-        uses: docker/login-action@v3
-        with:
-          registry: ${{ env.REGISTRY }}
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Extract metadata
-        id: meta
-        uses: docker/metadata-action@v5
-        with:
-          images: ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.DOCKER_IMAGE_NAME }}
-          tags: |
-            type=ref,event=branch
-            type=ref,event=pr
-            type=raw,value=latest,enable={{is_default_branch}}
-            type=sha,format=short
-
-      - name: Build Docker image
-        uses: docker/build-push-action@v5
-        with:
-          context: ./src/Jiro.Kernel
-          file: ./src/Jiro.Kernel/Dockerfile
-          push: false
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-          load: true
-
-      - name: Test Docker image
-        run: |
-          # Get the first tag for testing
-          IMAGE_TAG=$(echo "${{ steps.meta.outputs.tags }}" | head -n1)
-          echo "Testing Docker image: $IMAGE_TAG"
-
-          # Run basic container health check
-          docker run --rm -d --name jiro-kernel-test $IMAGE_TAG || exit 1
-          sleep 10
-
-          # Check if container is running
-          if docker ps | grep -q jiro-kernel-test; then
-            echo "✅ Container started successfully"
-            docker stop jiro-kernel-test
-          else
-            echo "❌ Container failed to start"
-            docker logs jiro-kernel-test || true
-            exit 1
-          fi
-
-      - name: Run Trivy vulnerability scanner
-        uses: aquasecurity/trivy-action@master
-        with:
-          image-ref: ${{ fromJSON(steps.meta.outputs.json).tags[0] }}
-          format: "sarif"
-          output: "trivy-results.sarif"
-        continue-on-error: true
-
-      - name: Check Trivy results file
-        id: check-trivy-results
-        run: |
-          if [ -f "trivy-results.sarif" ]; then
-            echo "trivy-file-exists=true" >> $GITHUB_OUTPUT
-            echo "✅ Trivy results file created successfully"
-            ls -la trivy-results.sarif
-          else
-            echo "trivy-file-exists=false" >> $GITHUB_OUTPUT
-            echo "⚠️ Trivy results file not found"
-            echo "Files in current directory:"
-            ls -la
-          fi
-
-      - name: Upload Trivy scan results
-        uses: github/codeql-action/upload-sarif@v3
-        if: always() && steps.check-trivy-results.outputs.trivy-file-exists == 'true'
-        with:
-          sarif_file: "trivy-results.sarif"
-
-      - name: Push Docker image
-        if: github.event_name != 'pull_request'
-        uses: docker/build-push-action@v5
-        with:
-          context: ./src/Jiro.Kernel
-          file: ./src/Jiro.Kernel/Dockerfile
-          push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          echo "✅ .NET build, test, and formatting checks completed successfully"
+          echo "🧪 Test results uploaded to artifacts"
+          echo "📊 Code coverage uploaded to Codecov"
 
   # Quality Gate Summary
   quality-gate:
     runs-on: ubuntu-latest
-    name: Quality Gate
-    needs: [build-and-test, markdown-lint, security-scan, docker-build]
+    name: .NET Quality Gate
+    needs: [build-and-test]
     if: always()
 
     steps:
-      - name: Check job results
+      - name: Check .NET CI results
         run: |
+          echo "🔍 .NET CI Quality Gate Summary"
+          echo "================================"
           echo "Build and Test: ${{ needs.build-and-test.result }}"
-          echo "Markdown Lint: ${{ needs.markdown-lint.result }}"
-          echo "Security Scan: ${{ needs.security-scan.result }}"
-          echo "Docker Build: ${{ needs.docker-build.result }}"
+          echo ""
 
-          if [[ "${{ needs.build-and-test.result }}" == "failure" ]]; then
-            echo "❌ Build and test failed"
+          if [[ "${{ needs.build-and-test.result }}" == "success" ]]; then
+            echo "✅ .NET CI Quality Gate PASSED"
+            echo "🏗️ Build: SUCCESS"
+            echo "🧪 Tests: SUCCESS" 
+            echo "🎨 Format: SUCCESS"
+            echo "📊 Coverage: UPLOADED"
+          elif [[ "${{ needs.build-and-test.result }}" == "failure" ]]; then
+            echo "❌ .NET CI Quality Gate FAILED"
+            echo "🚨 Build and test pipeline failed"
+            echo "📋 Check the build-and-test job logs for details"
+            exit 1
+          elif [[ "${{ needs.build-and-test.result }}" == "cancelled" ]]; then
+            echo "⚠️ .NET CI Quality Gate CANCELLED"
+            echo "🛑 Build and test pipeline was cancelled"
+            exit 1
+          else
+            echo "❓ .NET CI Quality Gate UNKNOWN"
+            echo "🔍 Build and test result: ${{ needs.build-and-test.result }}"
             exit 1
           fi
 
-          if [[ "${{ needs.markdown-lint.result }}" == "failure" ]]; then
-            echo "⚠️ Markdown linting failed"
-            # Don't fail the pipeline for markdown lint failures, but warn
-          fi
-
-          if [[ "${{ needs.security-scan.result }}" == "failure" ]]; then
-            echo "⚠️ Security scan failed"
-            # Don't fail the pipeline for security scan failures, but warn
-          fi
-
-          if [[ "${{ needs.docker-build.result }}" == "failure" ]]; then
-            echo "❌ Docker build failed"
-            exit 1
-          fi
-
-          echo "✅ Quality gate passed"
+          echo ""
+          echo "🎯 .NET CI pipeline completed successfully"
+          echo "📈 Ready for integration with other workflows"

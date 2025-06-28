@@ -1,34 +1,21 @@
-name: Create Release on Main Branch
+name: CI/CD Pipeline
 
 on:
   push:
-    branches:
-      - main
+    branches: [main]
   pull_request:
-    branches:
-      - main
-    types:
-      - closed
+    branches: [main]
 
 jobs:
-  create-release:
-    # Run on direct push to main OR when PR from dev to main is merged
-    if: |
-      (github.event_name == 'push' && github.ref == 'refs/heads/main') ||
-      (github.event_name == 'pull_request' && 
-       github.event.pull_request.merged == true && 
-       github.event.pull_request.base.ref == 'main' && 
-       github.event.pull_request.head.ref == 'dev')
+  test-and-validate:
+    name: Test and Validate
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
-      pull-requests: read
+    if: github.event_name == 'pull_request'
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Setup .NET
@@ -36,212 +23,157 @@ jobs:
         with:
           dotnet-version: "9.0.x"
 
-      - name: Verify Main.sln exists and build
+      - name: Restore dependencies
+        run: dotnet restore src/Main.sln
+
+      - name: Build
+        run: dotnet build src/Main.sln --no-restore --configuration Release
+
+      - name: Run tests
+        run: dotnet test src/Main.sln --no-build --configuration Release --verbosity normal
+
+      - name: Check code formatting
+        run: dotnet format src/Main.sln --verify-no-changes --verbosity diagnostic
+
+      - name: Security scan with CodeQL
+        uses: github/codeql-action/analyze@v3
+        continue-on-error: true
+
+  release:
+    name: Create Release
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    permissions:
+      contents: write
+      actions: read
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "9.0.x"
+
+      - name: Check if last commit was a version bump
+        id: check_bot_commit
         run: |
-          if [ ! -f "./src/Main.sln" ]; then
-            echo "❌ Main.sln not found at ./src/Main.sln"
-            exit 1
-          fi
-
-          echo "✅ Main.sln found, attempting to build..."
-          dotnet build ./src/Main.sln --configuration Release
-
-      - name: Check if triggered by GitHub Actions
-        id: check-github-actions
-        run: |
-          LAST_COMMIT_AUTHOR=$(git log -1 --pretty=format:"%an")
-          LAST_COMMIT_EMAIL=$(git log -1 --pretty=format:"%ae")
-
-          echo "Last commit author: $LAST_COMMIT_AUTHOR"
-          echo "Last commit email: $LAST_COMMIT_EMAIL"
-          echo "GitHub actor: ${{ github.actor }}"
-
-          # Check if the last commit was made by GitHub Actions
-          if [[ "$LAST_COMMIT_AUTHOR" == "github-actions[bot]" ]] || [[ "$LAST_COMMIT_EMAIL" == "github-actions[bot]@users.noreply.github.com" ]]; then
-            echo "is-github-actions=true" >> $GITHUB_OUTPUT
-            echo "⚠️ Last commit was made by GitHub Actions, skipping auto-increment to prevent loops"
+          last_commit_message=$(git log -1 --pretty=format:"%s")
+          if [[ "$last_commit_message" == *"[skip ci]"* ]] || [[ "$last_commit_message" == *"Bump version to"* ]]; then
+              echo "is_bot_commit=true" >> $GITHUB_OUTPUT
+              echo "Last commit was a version bump, skipping version increment"
           else
-            echo "is-github-actions=false" >> $GITHUB_OUTPUT
-            echo "✅ Last commit was made by human user, proceeding with auto-increment"
+              echo "is_bot_commit=false" >> $GITHUB_OUTPUT
+              echo "Last commit was not a version bump"
           fi
 
       - name: Auto-increment version
-        id: increment-version
-        if: steps.check-github-actions.outputs.is-github-actions == 'false'
+        if: steps.check_bot_commit.outputs.is_bot_commit == 'false'
+        id: increment_version
         run: |
-          # Get current version from Jiro.App.csproj
-          CURRENT_VERSION=$(grep -h "<Version>" "./src/Jiro.Kernel/Jiro.App/Jiro.App.csproj" | sed 's/.*<Version>\(.*\)<\/Version>.*/\1/' | tr -d '[:space:]')
+          # Extract current version
+          current_version=$(grep -oPm1 "(?<=<Version>)[^<]+" src/Jiro.Kernel/Jiro.App/Jiro.App.csproj)
+          echo "Current version: $current_version"
 
-          if [ -z "$CURRENT_VERSION" ]; then
-            echo "❌ Could not find version in Jiro.App.csproj"
-            echo "Setting initial version to 0.1.0"
-            NEW_VERSION="0.1.0"
-          else
-            echo "✅ Current version: $CURRENT_VERSION"
-            
-            # Parse version parts (major.minor.patch)
-            IFS='.' read -ra VERSION_PARTS <<< "$CURRENT_VERSION"
-            MAJOR=${VERSION_PARTS[0]}
-            MINOR=${VERSION_PARTS[1]}
-            PATCH=${VERSION_PARTS[2]}
-            
-            # Increment patch version
-            NEW_PATCH=$((PATCH + 1))
-            NEW_VERSION="$MAJOR.$MINOR.$NEW_PATCH"
-          fi
+          # Split version into parts (major.minor.patch)
+          IFS='.' read -ra VERSION_PARTS <<< "$current_version"
+          major=${VERSION_PARTS[0]}
+          minor=${VERSION_PARTS[1]}
+          patch=${VERSION_PARTS[2]}
 
-          echo "🚀 New version: $NEW_VERSION"
+          # Increment patch version
+          new_patch=$((patch + 1))
+          new_version="$major.$minor.$new_patch"
 
-          # Update the csproj file
-          sed -i "s/<Version>.*<\/Version>/<Version>$NEW_VERSION<\/Version>/" "./src/Jiro.Kernel/Jiro.App/Jiro.App.csproj"
+          echo "New version: $new_version"
+          echo "new_version=$new_version" >> $GITHUB_OUTPUT
+
+          # Update the project file
+          sed -i "s/<Version>$current_version<\/Version>/<Version>$new_version<\/Version>/" src/Jiro.Kernel/Jiro.App/Jiro.App.csproj
 
           # Verify the change
-          UPDATED_VERSION=$(grep -h "<Version>" "./src/Jiro.Kernel/Jiro.App/Jiro.App.csproj" | sed 's/.*<Version>\(.*\)<\/Version>.*/\1/' | tr -d '[:space:]')
-          echo "✅ Version updated to: $UPDATED_VERSION"
+          updated_version=$(grep -oPm1 "(?<=<Version>)[^<]+" src/Jiro.Kernel/Jiro.App/Jiro.App.csproj)
+          echo "Updated version in file: $updated_version"
 
-          # Set outputs
-          echo "new-version=$NEW_VERSION" >> $GITHUB_OUTPUT
-          echo "current-version=$CURRENT_VERSION" >> $GITHUB_OUTPUT
-
-      - name: Commit version bump
-        if: steps.check-github-actions.outputs.is-github-actions == 'false'
+      - name: Commit and push version bump
+        if: steps.check_bot_commit.outputs.is_bot_commit == 'false'
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action Bot"
+          git add src/Jiro.Kernel/Jiro.App/Jiro.App.csproj
+          git commit -m "Bump version to ${{ steps.increment_version.outputs.new_version }} [skip ci]"
+          git push
 
-          # Check if there are changes to commit
-          if git diff --quiet; then
-            echo "No changes to commit"
-          else
-            git add "./src/Jiro.Kernel/Jiro.App/Jiro.App.csproj"
-            git commit -m "🔖 Bump version to ${{ steps.increment-version.outputs.new-version }}"
-            git push origin main
-            echo "✅ Version bump committed and pushed"
-          fi
-
-      - name: Get version from project file
-        id: get-version
+      - name: Extract final version
+        id: get_version
         run: |
-          # Get the current version from Jiro.App.csproj
-          VERSION=$(grep -h "<Version>" "./src/Jiro.Kernel/Jiro.App/Jiro.App.csproj" | sed 's/.*<Version>\(.*\)<\/Version>.*/\1/' | tr -d '[:space:]')
-
-          if [ -z "$VERSION" ]; then
-            echo "❌ Could not find version in Jiro.App.csproj"
-            # Generate version based on date and commit as fallback
-            VERSION="$(date +'%Y.%m.%d')-$(git rev-parse --short HEAD)"
-            echo "🔄 Using generated version: $VERSION"
-          else
-            echo "✅ Found version in Jiro.App.csproj: $VERSION"
-          fi
-
-          VERSION="v$VERSION"
-
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
-          echo "Version: $VERSION"
-
-          # Set version info for release notes
-          if [ "${{ steps.check-github-actions.outputs.is-github-actions }}" == "true" ]; then
-            echo "version-was-bumped=false" >> $GITHUB_OUTPUT
-            echo "current-version-for-notes=$VERSION" >> $GITHUB_OUTPUT
-            echo "new-version-for-notes=$VERSION" >> $GITHUB_OUTPUT
-          else
-            echo "version-was-bumped=true" >> $GITHUB_OUTPUT
-            echo "current-version-for-notes=${{ steps.increment-version.outputs.current-version }}" >> $GITHUB_OUTPUT
-            echo "new-version-for-notes=${{ steps.increment-version.outputs.new-version }}" >> $GITHUB_OUTPUT
-          fi
+          version=$(grep -oPm1 "(?<=<Version>)[^<]+" src/Jiro.Kernel/Jiro.App/Jiro.App.csproj)
+          echo "version=$version" >> $GITHUB_OUTPUT
+          echo "Final version: $version"
 
       - name: Check if tag exists
-        id: check-tag
+        id: check_tag
         run: |
-          if git tag -l "${{ steps.get-version.outputs.version }}" | grep -q "${{ steps.get-version.outputs.version }}"; then
-            echo "tag-exists=true" >> $GITHUB_OUTPUT
-            echo "Tag ${{ steps.get-version.outputs.version }} already exists"
+          if git rev-parse "v${{ steps.get_version.outputs.version }}" >/dev/null 2>&1; then
+              echo "exists=true" >> $GITHUB_OUTPUT
+              echo "Tag v${{ steps.get_version.outputs.version }} already exists"
           else
-            echo "tag-exists=false" >> $GITHUB_OUTPUT
-            echo "Tag ${{ steps.get-version.outputs.version }} does not exist"
+              echo "exists=false" >> $GITHUB_OUTPUT
+              echo "Tag v${{ steps.get_version.outputs.version }} does not exist"
           fi
-
-      - name: Generate release notes
-        id: release-notes
-        if: steps.check-tag.outputs.tag-exists == 'false'
-        run: |
-          # Get the latest tag to compare
-          LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
-
-          if [ -z "$LATEST_TAG" ]; then
-            # If no previous tag, get all commits
-            COMMITS=$(git log --pretty=format:"- %s (%h)" --reverse)
-          else
-            # Get commits since the latest tag
-            COMMITS=$(git log ${LATEST_TAG}..HEAD --pretty=format:"- %s (%h)" --reverse)
-          fi
-
-          # Create release notes based on whether version was bumped
-          if [ "${{ steps.get-version.outputs.version-was-bumped }}" == "true" ]; then
-            # Version was auto-incremented
-            cat > release_notes.md << EOF
-          ## 🚀 What's Changed
-
-          ### 📝 Version Update
-          - **Previous Version**: ${{ steps.get-version.outputs.current-version-for-notes }}
-          - **New Version**: ${{ steps.get-version.outputs.new-version-for-notes }}
-
-          ### 📋 Commits in this release:
-          $COMMITS
-
-          ### 🔄 Automatic Release
-          This release was automatically created with version auto-increment when changes were pushed to the \`main\` branch.
-
-          **Full Changelog**: https://github.com/${{ github.repository }}/compare/${LATEST_TAG:-$(git rev-list --max-parents=0 HEAD)}...${{ steps.get-version.outputs.version }}
-          EOF
-          else
-            # Version bump commit triggered the workflow
-            cat > release_notes.md << EOF
-          ## 🚀 What's Changed
-
-          ### 📝 Release for Version ${{ steps.get-version.outputs.new-version-for-notes }}
-
-          ### 📋 Recent changes:
-          $COMMITS
-
-          ### 🏷️ Version Bump Release
-          This release was created for the version bump commit.
-
-          **Full Changelog**: https://github.com/${{ github.repository }}/compare/${LATEST_TAG:-$(git rev-list --max-parents=0 HEAD)}...${{ steps.get-version.outputs.version }}
-          EOF
-          fi
-
-          echo "Release notes generated"
-          cat release_notes.md
 
       - name: Create Git tag
-        if: steps.check-tag.outputs.tag-exists == 'false'
+        if: steps.check_tag.outputs.exists == 'false'
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git tag -a "${{ steps.get-version.outputs.version }}" -m "Release ${{ steps.get-version.outputs.version }}"
-          git push origin --tags
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action Bot"
+          git tag "v${{ steps.get_version.outputs.version }}"
+          git push origin "v${{ steps.get_version.outputs.version }}"
+
+      - name: Generate release notes
+        if: steps.check_tag.outputs.exists == 'false'
+        id: release_notes
+        run: |
+          # Get the previous tag for changelog
+          previous_tag=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
+
+          if [ -n "$previous_tag" ]; then
+              changelog=$(git log --pretty=format:"- %s" $previous_tag..HEAD)
+          else
+              changelog=$(git log --pretty=format:"- %s")
+          fi
+
+          # Create release notes
+          {
+              echo "## What's Changed"
+              echo ""
+              echo "$changelog"
+              echo ""
+              echo "## Version Information"
+              echo "- Version: ${{ steps.get_version.outputs.version }}"
+              echo "- Build Date: $(date -u +"%Y-%m-%d %H:%M:%S UTC")"
+              echo "- Commit: ${{ github.sha }}"
+          } > release_notes.md
+
+          # Set output for release body
+          {
+              echo "RELEASE_NOTES<<EOF"
+              cat release_notes.md
+              echo "EOF"
+          } >> $GITHUB_OUTPUT
 
       - name: Create GitHub Release
-        if: steps.check-tag.outputs.tag-exists == 'false'
-        uses: softprops/action-gh-release@v1
-        with:
-          tag_name: ${{ steps.get-version.outputs.version }}
-          name: Release ${{ steps.get-version.outputs.version }}
-          body_path: release_notes.md
-          draft: false
-          prerelease: false
-          generate_release_notes: true
+        if: steps.check_tag.outputs.exists == 'false'
+        uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Notify success
-        if: steps.check-tag.outputs.tag-exists == 'false'
-        run: |
-          echo "🎉 Successfully created release ${{ steps.get-version.outputs.version }}"
-          echo "📦 Release URL: https://github.com/${{ github.repository }}/releases/tag/${{ steps.get-version.outputs.version }}"
-
-      - name: Skip release creation
-        if: steps.check-tag.outputs.tag-exists == 'true'
-        run: |
-          echo "⚠️ Skipping release creation - tag ${{ steps.get-version.outputs.version }} already exists"
+        with:
+          tag_name: "v${{ steps.get_version.outputs.version }}"
+          release_name: "Release v${{ steps.get_version.outputs.version }}"
+          body: ${{ steps.release_notes.outputs.RELEASE_NOTES }}
+          draft: false
+          prerelease: false
