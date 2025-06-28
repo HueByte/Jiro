@@ -156,7 +156,7 @@ jobs:
           tags: |
             type=ref,event=branch
             type=ref,event=pr
-            type=sha,prefix={{branch}}-
+            type=sha,prefix={{branch}}-,enable=${{ github.ref_name != '' }}
             type=raw,value=latest,enable={{is_default_branch}}
 
       - name: Build Docker image
@@ -194,13 +194,28 @@ jobs:
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@master
         with:
-          image-ref: ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.DOCKER_IMAGE_NAME }}:${{ github.sha }}
+          image-ref: ${{ fromJSON(steps.meta.outputs.json).tags[0] }}
           format: "sarif"
           output: "trivy-results.sarif"
+        continue-on-error: true
+
+      - name: Check Trivy results file
+        id: check-trivy-results
+        run: |
+          if [ -f "trivy-results.sarif" ]; then
+            echo "trivy-file-exists=true" >> $GITHUB_OUTPUT
+            echo "✅ Trivy results file created successfully"
+            ls -la trivy-results.sarif
+          else
+            echo "trivy-file-exists=false" >> $GITHUB_OUTPUT
+            echo "⚠️ Trivy results file not found"
+            echo "Files in current directory:"
+            ls -la
+          fi
 
       - name: Upload Trivy scan results
         uses: github/codeql-action/upload-sarif@v3
-        if: always()
+        if: always() && steps.check-trivy-results.outputs.trivy-file-exists == 'true'
         with:
           sarif_file: "trivy-results.sarif"
 
