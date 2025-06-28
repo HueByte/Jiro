@@ -1,22 +1,23 @@
-name: CI/CD Pipeline
+name: Release Management
 
 on:
   push:
-    branches: [main]
+    tags:
+      - "v*.*.*"
   pull_request:
     branches: [main]
+    paths:
+      - "src/**"
 
 jobs:
-  test-and-validate:
-    name: Test and Validate
+  validate-pr:
+    name: Validate Pull Request
     runs-on: ubuntu-latest
     if: github.event_name == 'pull_request'
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
@@ -39,103 +40,77 @@ jobs:
         uses: github/codeql-action/analyze@v3
         continue-on-error: true
 
-  release:
-    name: Create Release
+  build-and-release:
+    name: Build Release Artifacts
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    if: startsWith(github.ref, 'refs/tags/v')
     permissions:
       contents: write
-      actions: read
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          fetch-depth: 0
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: "9.0.x"
 
-      - name: Check if last commit was a version bump
-        id: check_bot_commit
-        run: |
-          last_commit_message=$(git log -1 --pretty=format:"%s")
-          if [[ "$last_commit_message" == *"[skip ci]"* ]] || [[ "$last_commit_message" == *"Bump version to"* ]] || [[ "$last_commit_message" == *"☁️ Bump version to"* ]]; then
-              echo "is_bot_commit=true" >> $GITHUB_OUTPUT
-              echo "Last commit was a version bump, skipping version increment"
-          else
-              echo "is_bot_commit=false" >> $GITHUB_OUTPUT
-              echo "Last commit was not a version bump"
-          fi
-
-      - name: Auto-increment version
-        if: steps.check_bot_commit.outputs.is_bot_commit == 'false'
-        id: increment_version
-        run: |
-          # Extract current version
-          current_version=$(grep -oPm1 "(?<=<Version>)[^<]+" src/Jiro.Kernel/Jiro.App/Jiro.App.csproj)
-          echo "Current version: $current_version"
-
-          # Split version into parts (major.minor.patch)
-          IFS='.' read -ra VERSION_PARTS <<< "$current_version"
-          major=${VERSION_PARTS[0]}
-          minor=${VERSION_PARTS[1]}
-          patch=${VERSION_PARTS[2]}
-
-          # Increment patch version
-          new_patch=$((patch + 1))
-          new_version="$major.$minor.$new_patch"
-
-          echo "New version: $new_version"
-          echo "new_version=$new_version" >> $GITHUB_OUTPUT
-
-          # Update the project file
-          sed -i "s/<Version>$current_version<\/Version>/<Version>$new_version<\/Version>/" src/Jiro.Kernel/Jiro.App/Jiro.App.csproj
-
-          # Verify the change
-          updated_version=$(grep -oPm1 "(?<=<Version>)[^<]+" src/Jiro.Kernel/Jiro.App/Jiro.App.csproj)
-          echo "Updated version in file: $updated_version"
-
-      - name: Commit and push version bump
-        if: steps.check_bot_commit.outputs.is_bot_commit == 'false'
-        run: |
-          git config --local user.email "action@github.com"
-          git config --local user.name "GitHub Action Bot"
-          git add src/Jiro.Kernel/Jiro.App/Jiro.App.csproj
-          git commit -m "☁️ Bump version to ${{ steps.increment_version.outputs.new_version }} [skip ci]"
-          git push
-
-      - name: Extract final version
+      - name: Extract version from tag
         id: get_version
         run: |
-          version=$(grep -oPm1 "(?<=<Version>)[^<]+" src/Jiro.Kernel/Jiro.App/Jiro.App.csproj)
+          version=${GITHUB_REF#refs/tags/v}
           echo "version=$version" >> $GITHUB_OUTPUT
-          echo "Final version: $version"
+          echo "Release version: $version"
 
-      - name: Check if tag exists
-        id: check_tag
-        run: |
-          if git rev-parse "v${{ steps.get_version.outputs.version }}" >/dev/null 2>&1; then
-              echo "exists=true" >> $GITHUB_OUTPUT
-              echo "Tag v${{ steps.get_version.outputs.version }} already exists"
-          else
-              echo "exists=false" >> $GITHUB_OUTPUT
-              echo "Tag v${{ steps.get_version.outputs.version }} does not exist"
-          fi
+      - name: Restore dependencies
+        run: dotnet restore src/Main.sln
 
-      - name: Create Git tag
-        if: steps.check_tag.outputs.exists == 'false'
+      - name: Build Release
         run: |
-          git config --local user.email "action@github.com"
-          git config --local user.name "GitHub Action Bot"
-          git tag -a "v${{ steps.get_version.outputs.version }}" -m "☁️ Release v${{ steps.get_version.outputs.version }}"
-          git push origin "v${{ steps.get_version.outputs.version }}"
+          dotnet build src/Main.sln --no-restore --configuration Release
+          dotnet test src/Main.sln --no-build --configuration Release --verbosity normal
+
+      - name: Publish Release Artifacts
+        run: |
+          # Publish for multiple platforms
+          dotnet publish src/Jiro.Kernel/Jiro.App/Jiro.App.csproj \
+            --configuration Release \
+            --no-build \
+            --output ./publish/linux-x64 \
+            --runtime linux-x64 \
+            --self-contained true \
+            -p:PublishSingleFile=true \
+            -p:IncludeNativeLibrariesForSelfExtract=true
+            
+          dotnet publish src/Jiro.Kernel/Jiro.App/Jiro.App.csproj \
+            --configuration Release \
+            --no-build \
+            --output ./publish/win-x64 \
+            --runtime win-x64 \
+            --self-contained true \
+            -p:PublishSingleFile=true \
+            -p:IncludeNativeLibrariesForSelfExtract=true
+            
+          dotnet publish src/Jiro.Kernel/Jiro.App/Jiro.App.csproj \
+            --configuration Release \
+            --no-build \
+            --output ./publish/osx-x64 \
+            --runtime osx-x64 \
+            --self-contained true \
+            -p:PublishSingleFile=true \
+            -p:IncludeNativeLibrariesForSelfExtract=true
+
+      - name: Create release archives
+        run: |
+          cd publish
+
+          # Create archives for each platform
+          tar -czf jiro-kernel-v${{ steps.get_version.outputs.version }}-linux-x64.tar.gz -C linux-x64 .
+          zip -r jiro-kernel-v${{ steps.get_version.outputs.version }}-win-x64.zip win-x64/*
+          tar -czf jiro-kernel-v${{ steps.get_version.outputs.version }}-osx-x64.tar.gz -C osx-x64 .
 
       - name: Generate release notes
-        if: steps.check_tag.outputs.exists == 'false'
         id: release_notes
         run: |
           # Get the previous tag for changelog
@@ -149,14 +124,21 @@ jobs:
 
           # Create release notes
           {
-              echo "## What's Changed"
+              echo "## 🚀 What's Changed"
               echo ""
               echo "$changelog"
               echo ""
-              echo "## Version Information"
-              echo "- Version: ${{ steps.get_version.outputs.version }}"
-              echo "- Build Date: $(date -u +"%Y-%m-%d %H:%M:%S UTC")"
-              echo "- Commit: ${{ github.sha }}"
+              echo "## 📦 Release Artifacts"
+              echo ""
+              echo "- **Linux x64**: \`jiro-kernel-v${{ steps.get_version.outputs.version }}-linux-x64.tar.gz\`"
+              echo "- **Windows x64**: \`jiro-kernel-v${{ steps.get_version.outputs.version }}-win-x64.zip\`"
+              echo "- **macOS x64**: \`jiro-kernel-v${{ steps.get_version.outputs.version }}-osx-x64.tar.gz\`"
+              echo ""
+              echo "## ℹ️ Version Information"
+              echo "- **Version**: ${{ steps.get_version.outputs.version }}"
+              echo "- **Build Date**: $(date -u +"%Y-%m-%d %H:%M:%S UTC")"
+              echo "- **Commit**: ${{ github.sha }}"
+              echo "- **Runtime**: .NET 9.0"
           } > release_notes.md
 
           # Set output for release body
@@ -167,13 +149,14 @@ jobs:
           } >> $GITHUB_OUTPUT
 
       - name: Create GitHub Release
-        if: steps.check_tag.outputs.exists == 'false'
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        uses: softprops/action-gh-release@v1
         with:
           tag_name: "v${{ steps.get_version.outputs.version }}"
-          release_name: "Release v${{ steps.get_version.outputs.version }}"
+          name: "☁️ Jiro Kernel v${{ steps.get_version.outputs.version }}"
           body: ${{ steps.release_notes.outputs.RELEASE_NOTES }}
           draft: false
           prerelease: false
+          files: |
+            publish/jiro-kernel-v${{ steps.get_version.outputs.version }}-linux-x64.tar.gz
+            publish/jiro-kernel-v${{ steps.get_version.outputs.version }}-win-x64.zip
+            publish/jiro-kernel-v${{ steps.get_version.outputs.version }}-osx-x64.tar.gz

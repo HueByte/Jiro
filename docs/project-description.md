@@ -430,53 +430,128 @@ services:
 
 ## 📁 Project Structure
 
-```cs
+```text
 Jiro/
-├── src/
-│   ├── Jiro.Kernel/                 # Main application kernel
-│   │   ├── Jiro.App/               # Web API & gRPC host
-│   │   ├── Jiro.Core/              # Business logic & services
-│   │   └── Jiro.Infrastructure/    # Data access & external services
-│   ├── Jiro.Communication/         # Python CLI client
-│   ├── Jiro.TokenApi/             # Token management API
-│   └── Jiro.Tests/                # Comprehensive test suite
-├── docs/                          # Documentation content
-│   ├── project-description.md     # This comprehensive project overview
-│   ├── user-guide.md             # End-user documentation
-│   ├── workflow-pipelines.md     # CI/CD and automation documentation
-│   └── api-index.md              # API documentation index
-├── assets/                        # Documentation assets (logos, images)
-├── scripts/                       # Build and deployment scripts
-├── .github/workflows/             # GitHub Actions automation
-├── generated/                     # DocFX build output (ignored)
-├── docfx.json                    # DocFX documentation configuration
-├── toc.yml                       # Main navigation structure
-├── index.md                      # Documentation homepage
-├── docker-compose.yml            # Container orchestration
-└── README.md                     # Setup and usage guide
+├── src/                           # Source code
+│   ├── Jiro.Kernel/              # Main application kernel
+│   │   ├── Jiro.App/            # Web API & gRPC host (v0.1.2)
+│   │   ├── Jiro.Core/           # Business logic & services
+│   │   └── Jiro.Infrastructure/ # Data access & external services
+│   ├── Jiro.Communication/       # Python CLI client
+│   ├── Jiro.TokenApi/           # Token management FastAPI service
+│   ├── Jiro.Tests/              # Comprehensive test suite
+│   └── Main.sln                 # Solution file
+├── .github/                      # GitHub automation & workflows
+│   ├── workflows/               # CI/CD pipeline definitions
+│   │   ├── jiro-kernel-ci.yml       # 🔧 .NET CI (build, test, quality gate)
+│   │   ├── create-release.yml       # 🚀 Version-based releases & artifacts
+│   │   ├── docker-build.yml         # 🐳 Container build & security scanning
+│   │   ├── markdown-lint.yml        # 📝 Documentation quality assurance
+│   │   ├── jiro-kernel-security.yml # 🔒 Security vulnerability scanning
+│   │   ├── deploy-docs.yml          # 📚 Documentation deployment
+│   │   └── jiro-kernel-performance.yml # 📊 Performance monitoring
+│   └── WORKFLOWS.md             # Workflow documentation
+├── docs/                        # Documentation content
+│   ├── project-description.md   # This comprehensive project overview
+│   ├── user-guide.md           # End-user documentation  
+│   ├── workflow-pipelines.md   # ☁️ CI/CD automation documentation
+│   ├── api-index.md            # API documentation index
+│   └── README.md               # Documentation setup guide
+├── assets/                      # Documentation assets (logos, images)
+├── scripts/                     # Build and deployment scripts
+├── generated/                   # DocFX build output (auto-generated)
+├── api/                         # Generated API documentation (auto-generated)
+├── docfx.json                  # DocFX documentation configuration
+├── toc.yml                     # Main navigation structure
+├── index.md                    # Documentation homepage
+├── docker-compose.yml          # Container orchestration
+├── filterConfig.yml            # API documentation filter
+└── README.md                   # Project setup and usage guide
 ```
 
-### **Core Modules**
+### **🔧 Core Application Architecture**
 
-#### **Jiro.Core Services**
+#### **Jiro.Core Services** (Business Logic Layer)
 
 - `Services/Conversation/`: AI conversation management
+  - `ConversationCoreService`: Direct OpenAI integration
+  - `PersonalizedConversationService`: Session-based conversations
+  - `HistoryOptimizerService`: Token optimization
 - `Services/Weather/`: Weather and geolocation services
-- `Services/MessageCache/`: Session and message management
+- `Services/MessageCache/`: Session and message management  
 - `Services/Persona/`: AI personality system
 - `Services/CommandSystem/`: Plugin command framework
 - `Services/Semaphore/`: Concurrency control
 
-#### **Command Modules**
+#### **Jiro.App** (Presentation Layer)
 
-- `Commands/Chat/`: Conversation commands
-- `Commands/Weather/`: Weather data commands
-- `Commands/Base/`: Command framework infrastructure
+- `Controllers/`: Web API endpoints
+- `Services/`: gRPC service implementations
+- `Configurator/`: Application startup and dependency injection
+- `Proto/`: Protocol buffer definitions
 
-#### **Infrastructure**
+#### **Jiro.Infrastructure** (Data Access Layer)
 
-- `Repositories/`: Data access layer
+- `Repositories/`: Entity Framework repositories
 - `Migrations/`: Database schema management
+- `JiroContext.cs`: Database context configuration
+
+#### **Command Modules** (Plugin System)
+
+- `Commands/Chat/`: Conversation commands (`chat`, `getSessions`, `reset`)
+- `Commands/Weather/`: Weather data commands (`weather`)
+- `Commands/BaseCommands/`: Command framework infrastructure
+- `Commands/Net/`: Network utility commands
+
+### **🚀 CI/CD Pipeline Architecture**
+
+#### **Automated Workflows Organization**
+
+```text
+Pull Request → Multiple Validation Workflows (Parallel)
+    ├── .NET CI: Build, Test, Format, Quality Gate
+    ├── Docker Build: Container build & security scan  
+    ├── Markdown Lint: Documentation quality
+    ├── Security Scan: CodeQL, Snyk, .NET audit
+    └── Release Validation: Additional pre-merge checks
+
+Merge to Main → Production Workflows (Sequential)
+    ├── Manual Version Control: Developer-controlled release timing
+    ├── Release Artifacts: Multi-platform binaries (Linux, Windows, macOS)
+    ├── Docker Push: Container registry deployment
+    ├── Documentation Deploy: GitHub Pages update
+    └── Security Monitoring: Ongoing vulnerability tracking
+```
+
+#### **Deployment Artifacts**
+
+- **🐳 Container Images**: `ghcr.io/huebyte/jiro-kernel:latest`
+- **📦 GitHub Releases**: Manual version-controlled releases with multi-platform binaries
+  - Linux x64: `jiro-kernel-vX.X.X-linux-x64.tar.gz`
+  - Windows x64: `jiro-kernel-vX.X.X-win-x64.zip`
+  - macOS x64: `jiro-kernel-vX.X.X-osx-x64.tar.gz`
+- **📚 Documentation**: Live API docs on GitHub Pages
+- **🔒 Security Reports**: Continuous vulnerability monitoring
+
+### **🛡️ Quality Assurance & Security**
+
+#### **Automated Quality Gates**
+
+- **Pre-merge**: Build verification, test execution, code formatting
+- **Security**: CodeQL analysis, dependency scanning, container security
+- **Documentation**: Markdown linting, API doc generation
+- **Performance**: NuGet caching, parallel execution, smart triggers
+
+#### **Development Best Practices**
+
+- **Clean Architecture**: Clear separation of concerns across layers
+- **Dependency Injection**: Configured in `Jiro.App/Configurator/`
+- **Entity Framework**: Code-first migrations with repository pattern  
+- **Testing**: Comprehensive unit and integration test coverage
+- **Documentation**: Auto-generated from XML comments and markdown
+
+This architecture ensures scalable development with automated quality assurance, security monitoring, and deployment automation through the comprehensive ☁️ CI/CD pipeline.
+
 - `Options/`: Configuration models
 
 ---

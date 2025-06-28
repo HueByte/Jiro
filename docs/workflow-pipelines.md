@@ -4,54 +4,366 @@ This document describes all the automated workflows and CI/CD pipelines configur
 
 ## 📋 Overview
 
-The Jiro project utilizes multiple GitHub Actions workflows to ensure code quality, security, and automated releases. The workflows are designed to work together to provide comprehensive coverage of the development lifecycle.
+The Jiro project utilizes multiple GitHub Actions workflows organized by responsibility to ensure code quality, security, and automated releases. The workflows are designed to work together to provide comprehensive coverage of the development lifecycle from PR creation to production deployment.
 
-## 🏗️ Main CI/CD Pipeline
+## 🚀 Pipeline Flow: PR → Merge → Deploy
 
-### **Jiro CI/CD** (`jiro-kernel-ci.yml`)
+### **Phase 1: Pull Request Validation**
+
+When a Pull Request is created, multiple validation workflows run in parallel:
+
+```mermaid
+graph TD
+    A[PR Created/Updated] --> B[.NET CI]
+    A --> C[Docker Build]
+    A --> D[Markdown Lint]
+    A --> E[Security Scan]
+    A --> F[Release Validation]
+    
+    B --> B1[✅ Build & Test & Quality Gate]
+    C --> C1[✅ Container Build & Security]
+    D --> D1[✅ Documentation Quality]
+    E --> E1[✅ CodeQL & Security Audit]
+    F --> F1[✅ Additional Validation]
+```
+
+### **Phase 2: Post-Merge Automation**
+
+When PR is merged to main, production workflows execute:
+
+```mermaid
+graph TD
+    A[Merge to Main] --> B[☁️ Auto-Versioning]
+    A --> C[🐳 Docker Push]
+    A --> D[📚 Documentation Deploy]
+    A --> E[🔒 Security Monitoring]
+    
+    B --> B1[Version Bump + GitHub Release]
+    C --> C1[Container Registry Push]
+    D --> D1[GitHub Pages Update]
+    E --> E1[Continuous Security Scanning]
+```
+
+---
+
+## 🏗️ Workflow Catalog
+
+### **🔧 Core .NET CI** (`jiro-kernel-ci.yml`)
 
 **Triggers:**
 
-- Push to `main` branch (when changes are made to `src/**` or the workflow file)
-- Pull requests to `main` or `dev` branches (when changes are made to `src/**` or the workflow file)
+- Push to `main` branch (`src/**` changes)
+- Pull requests to `main`/`dev` (`src/**` changes)
 
-**Purpose:** Primary continuous integration and deployment pipeline that builds, tests, and validates the Jiro application.
+**Purpose:** Core .NET build, test, and code quality validation
 
 #### **Jobs:**
 
-##### 1. **Build and Test** (`build-and-test`)
+##### 1. **Build, Test & Format Check** (`build-and-test`)
 
 - **Environment:** Ubuntu Latest
 - **.NET Version:** 9.0.x
 - **Steps:**
-  - Checkout source code
-  - Setup .NET SDK
-  - Prepare configuration files (copy `appsettings.example.json` to `appsettings.json`)
-  - Cache NuGet packages for faster builds
-  - Restore project dependencies
-  - Build solution in Release configuration
-  - Check code formatting compliance using `dotnet format`
-  - Run all unit tests with code coverage
-  - Upload test results as artifacts
-  - Upload code coverage to Codecov
+  - Checkout source code with GitHub token
+  - Setup .NET 9.0 SDK
+  - Prepare configuration files (`appsettings.json`)
+  - Cache NuGet packages for performance
+  - Restore dependencies
+  - Build solution (Release configuration)
+  - Verify code formatting with `dotnet format`
+  - Run unit tests with code coverage
+  - Upload test results and coverage to Codecov
 
-**Key Features:**
+##### 2. **.NET Quality Gate** (`quality-gate`)
 
-- Automated configuration file preparation
-- NuGet package caching for performance
-- Code formatting verification
-- Comprehensive test execution with coverage reporting
+- **Purpose:** Validate all .NET CI results
+- **Dependencies:** `build-and-test`
+- **Behavior:**
+  - ✅ **SUCCESS**: All build, test, format checks pass
+  - ❌ **FAILURE**: Any .NET CI component fails
+  - Provides detailed status reporting
 
-##### 2. **Markdown Linting** (`markdown-lint`)
+---
+
+### **🚀 Auto-Versioning & Release** (`create-release.yml`)
+
+**Triggers:**
+
+- Push to `main` branch
+- Pull requests to `main`
+
+**Purpose:** Automated versioning, tagging, and GitHub release creation
+
+#### **Jobs:**
+
+##### 1. **Test and Validate** (PR Only)
+
+- **Condition:** `github.event_name == 'pull_request'`
+- **Steps:**
+  - .NET build and test validation
+  - Code formatting checks
+  - Security scanning with CodeQL
+
+##### 2. **Pull Request Validation** (PRs Only)
+
+- **Condition:** `github.event_name == 'pull_request'`
+- **Permissions:** `contents: read`
+- **Steps:**
+  - .NET build and test validation
+  - Code formatting checks
+  - Security scanning with CodeQL
+
+##### 3. **Release Artifact Build** (Manual Tag Triggered)
+
+- **Condition:** `startsWith(github.ref, 'refs/tags/v')`
+- **Permissions:** `contents: write`
+- **Steps:**
+  - Build release configuration
+  - Publish multi-platform binaries (Linux, Windows, macOS)
+  - Create release archives
+  - Generate release notes with changelog
+  - Create GitHub release with artifacts attached
+
+**Manual Release Process:**
+
+1. **Developer manually creates git tag**: `git tag -a v1.2.3 -m "Release v1.2.3"`
+2. **Push tag to trigger build**: `git push origin v1.2.3`
+3. **Workflow builds multi-platform binaries** automatically
+4. **GitHub release created** with all artifacts attached
+5. **Full control over release timing** and version numbers
+
+**Release Artifacts Generated:**
+
+- `jiro-kernel-vX.X.X-linux-x64.tar.gz` - Linux 64-bit self-contained binary
+- `jiro-kernel-vX.X.X-win-x64.zip` - Windows 64-bit self-contained binary  
+- `jiro-kernel-vX.X.X-osx-x64.tar.gz` - macOS 64-bit self-contained binary
+
+---
+
+### **🐳 Container Build & Security** (`docker-build.yml`)
+
+**Triggers:**
+
+- Push to `main` (`src/**`, `Dockerfile` changes)
+- Pull requests (`src/**`, `Dockerfile` changes)
+
+**Purpose:** Docker image building, testing, and security scanning
+
+#### **Jobs:**
+
+##### 1. **Docker Build & Verification** (`docker-build`)
+
+- **Environment:** Ubuntu Latest
+- **Registry:** GitHub Container Registry (`ghcr.io`)
+- **Steps:**
+  - Setup Docker Buildx
+  - Login to GHCR (main branch only)
+  - Extract metadata and tags
+  - Build Docker image with caching
+  - Test container startup and health
+  - Run Trivy vulnerability scanner
+  - Upload security scan results
+  - Push to registry (main branch only)
+
+**Image Tags Generated:**
+
+- `ghcr.io/huebyte/jiro-kernel:latest` (main branch)
+- `ghcr.io/huebyte/jiro-kernel:main` (main branch)
+- `ghcr.io/huebyte/jiro-kernel:pr-123` (pull requests)
+- `ghcr.io/huebyte/jiro-kernel:sha-abcd123` (commit SHA)
+
+---
+
+### **🔒 Security Scanning** (`jiro-kernel-security.yml`)
+
+**Triggers:**
+
+- Weekly schedule (Mondays at 2 AM UTC)
+- Manual workflow dispatch
+- Push/PR to main (`src/**` changes)
+
+**Purpose:** Comprehensive security vulnerability detection
+
+#### **Jobs:**
+
+##### 1. **Security Vulnerability Scan**
+
+- **Environment:** Ubuntu Latest
+- **Permissions:** `security-events: write`
+- **Steps:**
+  - .NET security audit (`dotnet list package --vulnerable`)
+  - Snyk security scanning (if token configured)
+  - CodeQL analysis with security-extended queries
+  - Upload security findings to GitHub Security tab
+
+---
+
+### **📝 Documentation Quality** (`markdown-lint.yml`)
+
+**Triggers:**
+
+- Push to `main` (`**/*.md` changes)
+- Pull requests (`**/*.md` changes)
+
+**Purpose:** Documentation linting and quality assurance
+
+#### **Jobs:**
+
+##### 1. **Markdown Linting**
 
 - **Environment:** Ubuntu Latest
 - **Node.js Version:** 18
 - **Steps:**
-  - Checkout source code
-  - Setup Node.js environment
-  - Install markdownlint-cli globally
-  - Run markdownlint on all markdown files
-  - Create default configuration if not present
+  - Setup Node.js and markdownlint-cli
+  - Create default config if missing
+  - Run markdown linting on all `.md` files
+  - Ignore build directories and node_modules
+
+---
+
+### **📚 Documentation Deployment** (`deploy-docs.yml`)
+
+**Triggers:**
+
+- Push to `main` (docs/API changes)
+- Manual workflow dispatch
+
+**Purpose:** Build and deploy project documentation to GitHub Pages
+
+#### **Jobs:**
+
+##### 1. **Publish Documentation**
+
+- **Environment:** Ubuntu Latest
+- **Target:** GitHub Pages
+- **Steps:**
+  - Setup .NET and DocFX
+  - Restore dependencies for API docs
+  - Build DocFX documentation
+  - Deploy to GitHub Pages
+
+---
+
+## 🎯 Deployment Ready Artifacts
+
+After successful pipeline execution, the following artifacts are available:
+
+### **🐳 Container Images**
+
+```bash
+# Latest stable release
+docker pull ghcr.io/huebyte/jiro-kernel:latest
+
+# Specific version
+docker pull ghcr.io/huebyte/jiro-kernel:v0.1.3
+
+# Development builds
+docker pull ghcr.io/huebyte/jiro-kernel:main
+```
+
+### **📦 GitHub Releases**
+
+- Semantic versioning with auto-incremented patch versions
+- Comprehensive release notes with commit changelog
+- Version metadata and build information
+- Direct download links for assets
+
+### **📚 Live Documentation**
+
+- **GitHub Pages**: Automatically updated API documentation
+- **API Reference**: Generated from XML comments
+- **User Guides**: Markdown-based documentation
+
+---
+
+## ⚡ Performance Optimizations
+
+### **Intelligent Triggers**
+
+- **Path-based filtering**: Workflows only run when relevant files change
+- **Parallel execution**: Independent workflows run concurrently
+- **Conditional jobs**: Jobs run only when necessary (PR vs. main branch)
+
+### **Caching Strategies**
+
+- **NuGet packages**: Cached across builds for faster dependency restoration
+- **Docker layers**: GitHub Actions cache for container builds
+- **Build artifacts**: Test results and coverage cached between jobs
+
+### **Resource Efficiency**
+
+- **Targeted scans**: Security scans run on schedule vs. every commit
+- **Optimized Docker builds**: Multi-stage builds with layer caching
+- **Smart dependencies**: Jobs run only after required dependencies complete
+
+---
+
+## 🛡️ Security & Compliance
+
+### **Comprehensive Security Coverage**
+
+- **Static Analysis**: CodeQL for source code security
+- **Dependency Scanning**: Snyk and .NET audit for vulnerable packages
+- **Container Security**: Trivy scanner for Docker image vulnerabilities
+- **Access Control**: Proper GitHub token permissions and secrets management
+
+### **Quality Gates**
+
+- **Automated Formatting**: Enforced code style with `dotnet format`
+- **Test Coverage**: Comprehensive unit test execution with coverage reporting
+- **Documentation Quality**: Markdown linting for documentation consistency
+- **Build Verification**: Multi-stage validation before release
+
+---
+
+## 🔧 Configuration Management
+
+### **Environment Variables**
+
+- `DOTNET_VERSION: "9.0.x"` - Consistent .NET version across all workflows
+- `SOLUTION_PATH: "./src/Main.sln"` - Central solution file reference
+- `REGISTRY: ghcr.io` - Container registry configuration
+
+### **Secrets Required**
+
+- `GITHUB_TOKEN` - Automatically provided, used for repository access
+- `SNYK_TOKEN` - Optional, for enhanced security scanning
+- `CODECOV_TOKEN` - Optional, for code coverage reporting
+
+### **Workflow Dependencies**
+
+```mermaid
+graph LR
+    A[PR Created] --> B[All Validation Workflows]
+    B --> C[Merge Approved]
+    C --> D[Auto-Versioning]
+    D --> E[Container Build]
+    D --> F[Documentation Deploy]
+    D --> G[Security Monitoring]
+```
+
+---
+
+## 📈 Monitoring & Observability
+
+### **Workflow Status**
+
+- **Quality Gates**: Clear pass/fail indicators for each pipeline stage
+- **Artifact Tracking**: Test results, coverage reports, and build outputs
+- **Security Alerts**: Automated vulnerability detection and reporting
+
+### **Performance Metrics**
+
+- **Build Times**: Optimized with caching and parallel execution
+- **Test Coverage**: Tracked and reported via Codecov
+- **Security Posture**: Regular scanning with trend analysis
+
+This comprehensive pipeline ensures high code quality, security, and reliable deployment automation for the Jiro project.
+
+- Setup Node.js environment
+- Install markdownlint-cli globally
+- Run markdownlint on all markdown files
+- Create default configuration if not present
 
 **Key Features:**
 
@@ -69,7 +381,7 @@ The Jiro project utilizes multiple GitHub Actions workflows to ensure code quali
 - MD024 (duplicate headings): Allowed for structured documents
 - MD029 (ordered list prefixes): Flexible numbering allowed
 
-##### 3. **Security Vulnerability Scanning** (`security-scan`)
+#### 3. **Security Vulnerability Scanning** (`security-scan`)
 
 - **Dependencies:** Requires `build-and-test` to complete successfully
 - **Steps:**

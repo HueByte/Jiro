@@ -23,23 +23,23 @@ This document explains the organization and purpose of each GitHub Actions workf
 
 ---
 
-#### 2. `create-release.yml` - Auto Release
+#### 2. `create-release.yml` - Manual Release Management
 
-**Purpose**: Automated versioning and release creation
+**Purpose**: Tag-triggered release builds and artifact distribution
 **Triggers**:
 
-- Push to main
-- Pull requests to main
+- Manual tag creation (v*.*.*)
+- Pull requests to main (validation only)
 
 **Jobs**:
 
-- ✅ Pre-merge validation (PR testing)
-- ✅ Auto-increment version on merge with ☁️ icon commit
-- ✅ Create Git tags with ☁️ release message
-- ✅ Generate release notes and GitHub releases
+- ✅ PR validation (build, test, format, security)
+- ✅ Release artifact building (Linux, Windows, macOS) on tag creation
+- ✅ Multi-platform binary distribution
 
-**Version Commit Format**: `☁️ Bump version to X.X.X [skip ci]`
-**Tag Message Format**: `☁️ Release vX.X.X`
+**Manual Process**: Developer creates git tag to trigger release build
+**Release Artifacts**: Self-contained binaries for Linux, Windows, and macOS
+**Full Control**: No automatic version detection or tag creation
 
 ---
 
