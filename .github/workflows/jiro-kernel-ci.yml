@@ -156,8 +156,8 @@ jobs:
           tags: |
             type=ref,event=branch
             type=ref,event=pr
-            type=sha,prefix={{branch}}-,enable=${{ github.ref_name != '' }}
             type=raw,value=latest,enable={{is_default_branch}}
+            type=sha,format=short
 
       - name: Build Docker image
         uses: docker/build-push-action@v5
