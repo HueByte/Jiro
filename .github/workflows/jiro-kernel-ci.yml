@@ -2,12 +2,12 @@ name: Jiro CI/CD
 
 on:
   push:
-    branches: ["master", "main", "develop", "dev"]
+    branches: ["main"]
     paths:
       - "src/**"
       - ".github/workflows/jiro-kernel-ci.yml"
   pull_request:
-    branches: ["master", "main", "develop", "dev"]
+    branches: ["main", "dev"]
     paths:
       - "src/**"
       - ".github/workflows/jiro-kernel-ci.yml"
