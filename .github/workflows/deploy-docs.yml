@@ -6,8 +6,12 @@ on:
     branches:
       - main
     paths:
-      - "src/docs/**"
-      - "src/docfx.json"
+      - "docs/**"
+      - "assets/**"
+      - "docfx.json"
+      - "index.md"
+      - "toc.yml"
+      - "src/**/*.cs"
       - ".github/workflows/deploy-docs.yml"
   workflow_dispatch:
 
@@ -36,7 +40,7 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: 9.x # Updated to match project's .NET version
+          dotnet-version: 9.x
 
       - name: Setup DocFX
         run: dotnet tool update -g docfx --version 2.75.3
@@ -45,35 +49,36 @@ jobs:
         run: dotnet restore src/Main.sln
         continue-on-error: true # API docs will still generate even if restore fails
 
-      - name: Build .NET projects for XML generation
+      - name: Build .NET projects for XML documentation generation
         run: |
-          cd src
-          dotnet build Jiro.Kernel/Jiro.Core/Jiro.Core.csproj --configuration Release --no-restore
-          dotnet build Jiro.Kernel/Jiro.App/Jiro.App.csproj --configuration Release --no-restore
-          dotnet build Jiro.Kernel/Jiro.Infrastructure/Jiro.Infrastructure.csproj --configuration Release --no-restore
+          dotnet build src/Jiro.Kernel/Jiro.Core/Jiro.Core.csproj --configuration Release --no-restore
+          dotnet build src/Jiro.Kernel/Jiro.App/Jiro.App.csproj --configuration Release --no-restore
+          dotnet build src/Jiro.Kernel/Jiro.Infrastructure/Jiro.Infrastructure.csproj --configuration Release --no-restore
         continue-on-error: true # Continue even if some projects fail to build
 
-      - name: Build documentation
+      - name: Build documentation with DocFX
         run: |
-          cd src
           docfx docfx.json
         env:
           DOCFX_SOURCE_BRANCH_NAME: ${{ github.ref_name }}
 
       - name: Verify build output
         run: |
-          if [ ! -d "src/docs/build" ]; then
-            echo "❌ DocFX build failed - docs/build directory not found"
+          if [ ! -d "generated" ]; then
+            echo "❌ DocFX build failed - generated directory not found"
             exit 1
           fi
           echo "✅ DocFX build successful"
           echo "Generated files:"
-          ls -la src/docs/build/
+          ls -la generated/
+          echo ""
+          echo "Documentation structure:"
+          find generated -type f -name "*.html" | head -10
 
       - name: Upload documentation artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: "src/docs/build"
+          path: "generated"
 
       - name: Deploy to GitHub Pages
         id: deployment
@@ -83,3 +88,5 @@ jobs:
         run: |
           echo "📚 Documentation deployed successfully!"
           echo "🔗 URL: ${{ steps.deployment.outputs.page_url }}"
+          echo "📖 Documentation: ${{ steps.deployment.outputs.page_url }}docs/"
+          echo "🔧 API Reference: ${{ steps.deployment.outputs.page_url }}api/"

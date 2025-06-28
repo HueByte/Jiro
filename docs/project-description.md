@@ -440,8 +440,18 @@ Jiro/
 │   ├── Jiro.Communication/         # Python CLI client
 │   ├── Jiro.TokenApi/             # Token management API
 │   └── Jiro.Tests/                # Comprehensive test suite
-├── assets/                        # Project documentation assets
+├── docs/                          # Documentation content
+│   ├── project-description.md     # This comprehensive project overview
+│   ├── user-guide.md             # End-user documentation
+│   ├── workflow-pipelines.md     # CI/CD and automation documentation
+│   └── api-index.md              # API documentation index
+├── assets/                        # Documentation assets (logos, images)
 ├── scripts/                       # Build and deployment scripts
+├── .github/workflows/             # GitHub Actions automation
+├── generated/                     # DocFX build output (ignored)
+├── docfx.json                    # DocFX documentation configuration
+├── toc.yml                       # Main navigation structure
+├── index.md                      # Documentation homepage
 ├── docker-compose.yml            # Container orchestration
 └── README.md                     # Setup and usage guide
 ```

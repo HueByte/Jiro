@@ -171,7 +171,62 @@ The Jiro project utilizes multiple GitHub Actions workflows to ensure code quali
 - More aggressive in creating releases
 - Focuses on Main.sln structure compatibility
 
-## 🔒 Security Workflows
+## � Documentation Deployment
+
+### **Deploy Documentation to GitHub Pages** (`deploy-docs.yml`)
+
+**Triggers:**
+
+- Push to `main` branch (when changes are made to documentation files)
+- Paths monitored:
+  - `docs/**` - Documentation content
+  - `assets/**` - Images and assets
+  - `docfx.json` - DocFX configuration
+  - `index.md` - Main homepage
+  - `toc.yml` - Table of contents
+  - `src/**/*.cs` - Source code for API documentation
+- Manual trigger via workflow_dispatch
+
+**Purpose:** Automatically builds and deploys the DocFX documentation site to GitHub Pages whenever documentation changes are pushed to the main branch.
+
+#### **Build Process:**
+
+1. **Environment Setup**
+   - Ubuntu Latest runner
+   - .NET 9.x SDK installation
+   - DocFX tool installation (version 2.75.3)
+
+2. **Project Preparation**
+   - Restore NuGet dependencies for API documentation
+   - Build .NET projects to generate XML documentation files
+   - Continue on build errors (API docs still generate)
+
+3. **Documentation Generation**
+   - Run `docfx docfx.json` to build complete documentation
+   - Generate both documentation and API reference
+   - Create static website in `generated/` directory
+
+4. **Deployment to GitHub Pages**
+   - Upload generated site as Pages artifact
+   - Deploy to GitHub Pages using official actions
+   - Provide deployment URL feedback
+
+#### **Generated Content:**
+
+- **Documentation Pages** (`/docs/`): Project guides, architecture, user documentation
+- **API Reference** (`/api/`): Auto-generated .NET API documentation from XML comments
+- **Assets**: Images, logos, and styling assets
+- **Navigation**: Organized table of contents and cross-references
+
+#### **Features:**
+
+- **Automatic API Documentation:** Generated from XML comments in source code
+- **Asset Management:** Proper handling of images and logos (including custom Jiro branding)
+- **Clean URLs:** Organized structure with `/docs/` and `/api/` sections
+- **Modern Theme:** DocFX modern template with custom branding
+- **Error Resilience:** Continues deployment even if some .NET projects fail to build
+
+## �🔒 Security Workflows
 
 ### **Jiro Security Scan** (`jiro-kernel-security.yml`)
 
