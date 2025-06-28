@@ -63,7 +63,7 @@ jobs:
         id: check_bot_commit
         run: |
           last_commit_message=$(git log -1 --pretty=format:"%s")
-          if [[ "$last_commit_message" == *"[skip ci]"* ]] || [[ "$last_commit_message" == *"Bump version to"* ]]; then
+          if [[ "$last_commit_message" == *"[skip ci]"* ]] || [[ "$last_commit_message" == *"Bump version to"* ]] || [[ "$last_commit_message" == *"☁️ Bump version to"* ]]; then
               echo "is_bot_commit=true" >> $GITHUB_OUTPUT
               echo "Last commit was a version bump, skipping version increment"
           else
@@ -105,7 +105,7 @@ jobs:
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action Bot"
           git add src/Jiro.Kernel/Jiro.App/Jiro.App.csproj
-          git commit -m "Bump version to ${{ steps.increment_version.outputs.new_version }} [skip ci]"
+          git commit -m "☁️ Bump version to ${{ steps.increment_version.outputs.new_version }} [skip ci]"
           git push
 
       - name: Extract final version
@@ -131,7 +131,7 @@ jobs:
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action Bot"
-          git tag "v${{ steps.get_version.outputs.version }}"
+          git tag -a "v${{ steps.get_version.outputs.version }}" -m "☁️ Release v${{ steps.get_version.outputs.version }}"
           git push origin "v${{ steps.get_version.outputs.version }}"
 
       - name: Generate release notes

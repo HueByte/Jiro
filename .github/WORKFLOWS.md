@@ -34,9 +34,12 @@ This document explains the organization and purpose of each GitHub Actions workf
 **Jobs**:
 
 - ✅ Pre-merge validation (PR testing)
-- ✅ Auto-increment version on merge
-- ✅ Create Git tags and GitHub releases
-- ✅ Generate release notes
+- ✅ Auto-increment version on merge with ☁️ icon commit
+- ✅ Create Git tags with ☁️ release message
+- ✅ Generate release notes and GitHub releases
+
+**Version Commit Format**: `☁️ Bump version to X.X.X [skip ci]`
+**Tag Message Format**: `☁️ Release vX.X.X`
 
 ---
 
