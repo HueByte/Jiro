@@ -17,6 +17,11 @@ jobs:
   debug:
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
       - name: Debug Event Information
         run: |
           echo "=== GITHUB EVENT DEBUG INFO ==="
@@ -54,13 +59,21 @@ jobs:
       - name: Check project version
         run: |
           echo "=== PROJECT VERSION CHECK ==="
+          echo "Current directory: $(pwd)"
+          echo "Files in current directory:"
+          ls -la
+
+          echo "Looking for .csproj files:"
+          find . -name "*.csproj" -type f | head -10
+
           if [ -f "src/Jiro.Kernel/Jiro.App/Jiro.App.csproj" ]; then
             echo "Found Jiro.App.csproj"
             VERSION=$(grep -oP '<Version>\K[^<]+' src/Jiro.Kernel/Jiro.App/Jiro.App.csproj || echo "not found")
             echo "Version: $VERSION"
           else
-            echo "Jiro.App.csproj not found"
-            find . -name "*.csproj" | head -5
+            echo "Jiro.App.csproj not found at expected path"
+            echo "Searching for Jiro.App.csproj anywhere:"
+            find . -name "Jiro.App.csproj" -type f || echo "No Jiro.App.csproj found"
           fi
 
       - name: List existing tags

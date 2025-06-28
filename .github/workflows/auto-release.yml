@@ -21,11 +21,24 @@ jobs:
         id: get-version
         run: |
           echo "Getting version from Jiro.App.csproj..."
-          VERSION=$(grep -oP '<Version>\K[^<]+' src/Jiro.Kernel/Jiro.App/Jiro.App.csproj 2>/dev/null || echo "")
+          echo "Current directory: $(pwd)"
+          echo "Looking for .csproj files..."
+          find . -name "*.csproj" -type f | head -5
 
-          if [ -z "$VERSION" ]; then
-            echo "No version found in Jiro.App.csproj, trying other .csproj files..."
-            VERSION=$(find . -name "*.csproj" -exec grep -oP '<Version>\K[^<]+' {} \; | head -1)
+          # Try the exact path based on user's file structure
+          if [ -f "src/Jiro.Kernel/Jiro.App/Jiro.App.csproj" ]; then
+            echo "Found Jiro.App.csproj at expected location"
+            VERSION=$(grep -oP '<Version>\K[^<]+' src/Jiro.Kernel/Jiro.App/Jiro.App.csproj 2>/dev/null || echo "")
+          else
+            echo "Jiro.App.csproj not found at expected location, searching..."
+            CSPROJ_PATH=$(find . -name "Jiro.App.csproj" -type f | head -1)
+            if [ -n "$CSPROJ_PATH" ]; then
+              echo "Found Jiro.App.csproj at: $CSPROJ_PATH"
+              VERSION=$(grep -oP '<Version>\K[^<]+' "$CSPROJ_PATH" 2>/dev/null || echo "")
+            else
+              echo "No Jiro.App.csproj found, trying any .csproj file..."
+              VERSION=$(find . -name "*.csproj" -exec grep -oP '<Version>\K[^<]+' {} \; | head -1)
+            fi
           fi
 
           if [ -z "$VERSION" ]; then
