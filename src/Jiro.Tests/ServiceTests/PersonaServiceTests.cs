@@ -15,28 +15,27 @@ public class PersonaServiceTests
 	private readonly Mock<ILogger<PersonaService>> _loggerMock;
 	private readonly Mock<IMessageManager> _messageManagerMock;
 	private readonly Mock<IConversationCoreService> _conversationCoreMock;
-	private readonly Mock<IMemoryCache> _memoryCacheMock;
+	private readonly IMemoryCache _memoryCache; // Use real implementation
 	private readonly Mock<ISemaphoreManager> _semaphoreManagerMock;
 	private readonly IPersonaService _personaService;
-	private readonly Mock<SemaphoreSlim> _semaphoreMock;
 
 	public PersonaServiceTests()
 	{
 		_loggerMock = new Mock<ILogger<PersonaService>>();
 		_messageManagerMock = new Mock<IMessageManager>();
 		_conversationCoreMock = new Mock<IConversationCoreService>();
-		_memoryCacheMock = new Mock<IMemoryCache>();
+		_memoryCache = new MemoryCache(new MemoryCacheOptions()); // Real implementation
 		_semaphoreManagerMock = new Mock<ISemaphoreManager>();
 
-		_semaphoreMock = new Mock<SemaphoreSlim>(1, 1);
+		// Setup semaphore to return a real SemaphoreSlim instead of mocking it
 		_semaphoreManagerMock.Setup(x => x.GetOrCreateInstanceSemaphore(It.IsAny<string>()))
-			.Returns(_semaphoreMock.Object);
+			.Returns(new SemaphoreSlim(1, 1));
 
 		_personaService = new PersonaService(
 			_loggerMock.Object,
 			_messageManagerMock.Object,
 			_conversationCoreMock.Object,
-			_memoryCacheMock.Object,
+			_memoryCache,
 			_semaphoreManagerMock.Object);
 	}
 
@@ -83,9 +82,11 @@ public class PersonaServiceTests
 		// Assert
 		Assert.Equal(expectedPersona, result);
 		_semaphoreManagerMock.Verify(x => x.GetOrCreateInstanceSemaphore(instanceId), Times.Once);
-		_semaphoreMock.Verify(x => x.WaitAsync(), Times.Once);
-		_semaphoreMock.Verify(x => x.Release(), Times.Once);
 		_messageManagerMock.Verify(x => x.GetPersonaCoreMessageAsync(), Times.Once);
+
+		// Verify the persona was cached using the correct constant
+		Assert.True(_memoryCache.TryGetValue(Jiro.Core.Constants.CacheKeys.ComputedPersonaMessageKey, out var cachedValue));
+		Assert.Equal(expectedPersona, cachedValue);
 	}
 
 	[Fact]
@@ -103,8 +104,9 @@ public class PersonaServiceTests
 			() => _personaService.GetPersonaAsync(instanceId));
 
 		Assert.Equal(expectedException.Message, exception.Message);
-		_semaphoreMock.Verify(x => x.WaitAsync(), Times.Once);
-		_semaphoreMock.Verify(x => x.Release(), Times.Once);
+
+		// Verify that semaphore manager was called to get the semaphore
+		_semaphoreManagerMock.Verify(x => x.GetOrCreateInstanceSemaphore(instanceId), Times.Once);
 
 		// Verify error was logged
 		_loggerMock.Verify(
@@ -125,16 +127,15 @@ public class PersonaServiceTests
 		const string cachedPersona = "Existing persona";
 		const string expectedUpdatedPersona = $"{cachedPersona}\nThis is your summary of recent conversations: {updateMessage}";
 
-		_memoryCacheMock.Setup(x => x.Get<string>("computed_persona_message"))
-			.Returns(cachedPersona);
-		_memoryCacheMock.Setup(x => x.Set("computed_persona_message", expectedUpdatedPersona, TimeSpan.FromDays(1)));
+		// Pre-populate cache with existing persona
+		_memoryCache.Set(Jiro.Core.Constants.CacheKeys.ComputedPersonaMessageKey, cachedPersona);
 
 		// Act
 		await _personaService.AddSummaryAsync(updateMessage);
 
-		// Assert
-		_memoryCacheMock.Verify(x => x.Get<string>("computed_persona_message"), Times.Once);
-		_memoryCacheMock.Verify(x => x.Set("computed_persona_message", expectedUpdatedPersona, TimeSpan.FromDays(1)), Times.Once);
+		// Assert - Check that the cache was updated with the summary
+		Assert.True(_memoryCache.TryGetValue(Jiro.Core.Constants.CacheKeys.ComputedPersonaMessageKey, out var updatedValue));
+		Assert.Equal(expectedUpdatedPersona, updatedValue);
 
 		// Verify info was logged
 		_loggerMock.Verify(
@@ -155,19 +156,19 @@ public class PersonaServiceTests
 		const string personaFromSource = "Persona from source";
 		const string expectedUpdatedPersona = $"{personaFromSource}\nThis is your summary of recent conversations: {updateMessage}";
 
-		_memoryCacheMock.Setup(x => x.Get<string>("computed_persona_message"))
-			.Returns((string?)null);
+		// Don't put anything in cache, so it will load from source
 		_messageManagerMock.Setup(x => x.GetPersonaCoreMessageAsync())
 			.ReturnsAsync(personaFromSource);
-		_memoryCacheMock.Setup(x => x.Set("computed_persona_message", expectedUpdatedPersona, TimeSpan.FromDays(1)));
 
 		// Act
 		await _personaService.AddSummaryAsync(updateMessage);
 
 		// Assert
-		_memoryCacheMock.Verify(x => x.Get<string>("computed_persona_message"), Times.Once);
 		_messageManagerMock.Verify(x => x.GetPersonaCoreMessageAsync(), Times.Once);
-		_memoryCacheMock.Verify(x => x.Set("computed_persona_message", expectedUpdatedPersona, TimeSpan.FromDays(1)), Times.Once);
+
+		// Verify the cache was updated with the combined message
+		Assert.True(_memoryCache.TryGetValue(Jiro.Core.Constants.CacheKeys.ComputedPersonaMessageKey, out var updatedValue));
+		Assert.Equal(expectedUpdatedPersona, updatedValue);
 
 		// Verify both info logs
 		_loggerMock.Verify(
@@ -196,8 +197,9 @@ public class PersonaServiceTests
 		const string updateMessage = "Recent conversation summary";
 		var expectedException = new InvalidOperationException("Test exception");
 
-		_memoryCacheMock.Setup(x => x.Get<string>("computed_persona_message"))
-			.Throws(expectedException);
+		// Setup the message manager to throw when called
+		_messageManagerMock.Setup(x => x.GetPersonaCoreMessageAsync())
+			.ThrowsAsync(expectedException);
 
 		// Act & Assert
 		var exception = await Assert.ThrowsAsync<InvalidOperationException>(
@@ -226,14 +228,14 @@ public class PersonaServiceTests
 		const string cachedPersona = "Existing persona";
 		var expectedUpdatedPersona = $"{cachedPersona}\nThis is your summary of recent conversations: {updateMessage}";
 
-		_memoryCacheMock.Setup(x => x.Get<string>("computed_persona_message"))
-			.Returns(cachedPersona);
-		_memoryCacheMock.Setup(x => x.Set("computed_persona_message", expectedUpdatedPersona, TimeSpan.FromDays(1)));
+		// Pre-populate cache with existing persona
+		_memoryCache.Set(Jiro.Core.Constants.CacheKeys.ComputedPersonaMessageKey, cachedPersona);
 
 		// Act
 		await _personaService.AddSummaryAsync(updateMessage!);
 
-		// Assert
-		_memoryCacheMock.Verify(x => x.Set("computed_persona_message", expectedUpdatedPersona, TimeSpan.FromDays(1)), Times.Once);
+		// Assert - Check that the cache was updated even with empty/null message
+		Assert.True(_memoryCache.TryGetValue(Jiro.Core.Constants.CacheKeys.ComputedPersonaMessageKey, out var updatedValue));
+		Assert.Equal(expectedUpdatedPersona, updatedValue);
 	}
 }

@@ -16,19 +16,30 @@ public class GeolocationService : IGeolocationService
 
 	public async Task<GeoLocationResponse?> GetGeolocationAsync(string city)
 	{
-		if (string.IsNullOrEmpty(city))
+		if (string.IsNullOrWhiteSpace(city))
 			throw new JiroException(new ArgumentException("city was null or empty", nameof(city)), "Please provide city");
 
-		HttpResponseMessage response = await _geoClient.GetAsync($"search?city={city}&format=json");
+		try
+		{
+			HttpResponseMessage response = await _geoClient.GetAsync($"search?city={city}&format=json");
 
-		if (response.IsSuccessStatusCode)
-		{
-			List<GeoLocationResponse?>? result = await response.Content.ReadFromJsonAsync<List<GeoLocationResponse?>>();
-			return result?.FirstOrDefault();
+			if (response.IsSuccessStatusCode)
+			{
+				List<GeoLocationResponse?>? result = await response.Content.ReadFromJsonAsync<List<GeoLocationResponse?>>();
+				return result?.FirstOrDefault();
+			}
+			else
+			{
+				throw new JiroException("Couldn't find the desired city");
+			}
 		}
-		else
+		catch (HttpRequestException ex)
 		{
-			throw new JiroException("Couldn't find the desired city");
+			throw new JiroException(ex, "Error while fetching geolocation data");
+		}
+		catch (Exception ex)
+		{
+			throw new JiroException(ex, "An unexpected error occurred while fetching geolocation data");
 		}
 	}
 }

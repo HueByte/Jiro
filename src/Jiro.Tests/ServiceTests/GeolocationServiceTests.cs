@@ -57,6 +57,6 @@ public class GeolocationServiceTests
 	public async Task GetGeolocationAsync_WithWrongCity(string? city)
 	{
 		// Act & Asssert
-		await Assert.ThrowsAsync<JiroException>(async () => await _geolocationService.GetGeolocationAsync(city));
+		await Assert.ThrowsAsync<JiroException>(async () => await _geolocationService.GetGeolocationAsync(city!));
 	}
 }
