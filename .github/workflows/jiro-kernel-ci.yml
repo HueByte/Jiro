@@ -3,14 +3,13 @@ name: .NET CI
 on:
   push:
     branches: ["main"]
-    paths:
-      - "src/**"
-      - ".github/workflows/jiro-kernel-ci.yml"
   pull_request:
     branches: ["main", "dev"]
     paths:
       - "src/**"
       - ".github/workflows/jiro-kernel-ci.yml"
+      - "*.sln"
+      - "**/*.csproj"
 
 env:
   DOTNET_VERSION: "9.0.x"
