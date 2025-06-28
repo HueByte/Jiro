@@ -1,0 +1,85 @@
+name: Deploy Documentation to GitHub Pages
+
+# Trigger the action on push to main branch
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "src/docs/**"
+      - "src/docfx.json"
+      - ".github/workflows/deploy-docs.yml"
+  workflow_dispatch:
+
+# Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
+permissions:
+  actions: read
+  pages: write
+  id-token: write
+
+# Allow only one concurrent deployment, skipping runs queued between the run in-progress and latest queued.
+# However, do NOT cancel in-progress runs as we want to allow these production deployments to complete.
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  publish-docs:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Fetch all history for proper git information
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 9.x # Updated to match project's .NET version
+
+      - name: Setup DocFX
+        run: dotnet tool update -g docfx --version 2.75.3
+
+      - name: Restore dependencies for API documentation
+        run: dotnet restore src/Main.sln
+        continue-on-error: true # API docs will still generate even if restore fails
+
+      - name: Build .NET projects for XML generation
+        run: |
+          cd src
+          dotnet build Jiro.Kernel/Jiro.Core/Jiro.Core.csproj --configuration Release --no-restore
+          dotnet build Jiro.Kernel/Jiro.App/Jiro.App.csproj --configuration Release --no-restore
+          dotnet build Jiro.Kernel/Jiro.Infrastructure/Jiro.Infrastructure.csproj --configuration Release --no-restore
+        continue-on-error: true # Continue even if some projects fail to build
+
+      - name: Build documentation
+        run: |
+          cd src
+          docfx docfx.json
+        env:
+          DOCFX_SOURCE_BRANCH_NAME: ${{ github.ref_name }}
+
+      - name: Verify build output
+        run: |
+          if [ ! -d "src/docs/build" ]; then
+            echo "❌ DocFX build failed - docs/build directory not found"
+            exit 1
+          fi
+          echo "✅ DocFX build successful"
+          echo "Generated files:"
+          ls -la src/docs/build/
+
+      - name: Upload documentation artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: "src/docs/build"
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+
+      - name: Output deployment URL
+        run: |
+          echo "📚 Documentation deployed successfully!"
+          echo "🔗 URL: ${{ steps.deployment.outputs.page_url }}"

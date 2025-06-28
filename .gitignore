@@ -3,6 +3,11 @@
 ##
 ## Get latest from https://github.com/github/gitignore/blob/master/VisualStudio.gitignore
 
+# DocFX generated files
+generated/
+api/*.yml
+api/.manifest
+
 .vscode
 **/env
 appsettings.json
@@ -11,6 +16,7 @@ appsettings.development.json
 .env.development
 .env.development.local
 **/build/*
+src/docs/build/
 
 # generated client
 **/api/core
