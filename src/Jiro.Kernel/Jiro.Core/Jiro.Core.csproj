@@ -27,8 +27,4 @@
     <PackageReference Include="TiktokenSharp" Version="1.1.7" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Interfaces\IRepositories\" />
-  </ItemGroup>
-
 </Project>

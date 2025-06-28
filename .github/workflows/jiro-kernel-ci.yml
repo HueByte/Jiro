@@ -1,20 +1,20 @@
-name: Jiro.Kernel CI/CD
+name: Jiro CI/CD
 
 on:
   push:
-    branches: ["master", "main", "develop"]
+    branches: ["master", "main", "develop", "dev"]
     paths:
-      - "src/Jiro.Kernel/**"
+      - "src/**"
       - ".github/workflows/jiro-kernel-ci.yml"
   pull_request:
-    branches: ["master", "main", "develop"]
+    branches: ["master", "main", "develop", "dev"]
     paths:
-      - "src/Jiro.Kernel/**"
+      - "src/**"
       - ".github/workflows/jiro-kernel-ci.yml"
 
 env:
   DOTNET_VERSION: "9.0.x"
-  SOLUTION_PATH: "./src/Jiro.Kernel/Jiro.Kernel.sln"
+  SOLUTION_PATH: "./src/Main.sln"
   DOCKER_IMAGE_NAME: "jiro-kernel"
   REGISTRY: ghcr.io
 

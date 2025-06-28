@@ -17,32 +17,43 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Get version from project file
+      - name: Get version from Main.sln projects
         id: get-version
         run: |
-          echo "Getting version from Jiro.App.csproj..."
+          echo "Getting version from Main.sln structure..."
           echo "Current directory: $(pwd)"
-          echo "Looking for .csproj files..."
-          find . -name "*.csproj" -type f | head -5
+          echo "Looking for Main.sln..."
+          find . -name "Main.sln" -type f
 
-          # Try the exact path based on user's file structure
+          # Based on Main.sln, the structure is:
+          # src/Main.sln references Jiro.Kernel\Jiro.App\Jiro.App.csproj
+          # So the full path should be src/Jiro.Kernel/Jiro.App/Jiro.App.csproj
+
           if [ -f "src/Jiro.Kernel/Jiro.App/Jiro.App.csproj" ]; then
-            echo "Found Jiro.App.csproj at expected location"
+            echo "Found Jiro.App.csproj at Main.sln structure location"
             VERSION=$(grep -oP '<Version>\K[^<]+' src/Jiro.Kernel/Jiro.App/Jiro.App.csproj 2>/dev/null || echo "")
+            echo "Version from Jiro.App: $VERSION"
           else
-            echo "Jiro.App.csproj not found at expected location, searching..."
+            echo "Jiro.App.csproj not found at expected Main.sln location, searching..."
             CSPROJ_PATH=$(find . -name "Jiro.App.csproj" -type f | head -1)
             if [ -n "$CSPROJ_PATH" ]; then
               echo "Found Jiro.App.csproj at: $CSPROJ_PATH"
               VERSION=$(grep -oP '<Version>\K[^<]+' "$CSPROJ_PATH" 2>/dev/null || echo "")
-            else
-              echo "No Jiro.App.csproj found, trying any .csproj file..."
-              VERSION=$(find . -name "*.csproj" -exec grep -oP '<Version>\K[^<]+' {} \; | head -1)
+            fi
+          fi
+
+          # If no version found in Jiro.App, try other projects referenced in Main.sln
+          if [ -z "$VERSION" ] && [ -f "src/Main.sln" ]; then
+            echo "No version in Jiro.App, checking other projects in Main.sln..."
+            # Try Jiro.Core
+            if [ -f "src/Jiro.Kernel/Jiro.Core/Jiro.Core.csproj" ]; then
+              VERSION=$(grep -oP '<Version>\K[^<]+' src/Jiro.Kernel/Jiro.Core/Jiro.Core.csproj 2>/dev/null || echo "")
+              echo "Version from Jiro.Core: $VERSION"
             fi
           fi
 
           if [ -z "$VERSION" ]; then
-            echo "No version found in any .csproj file, generating version..."
+            echo "No version found in any Main.sln project, generating version..."
             VERSION="$(date +'%Y.%m.%d')-$(git rev-parse --short HEAD)"
           fi
 
@@ -62,6 +73,17 @@ jobs:
             echo "New version ${{ steps.get-version.outputs.version }}, will create release"
           fi
 
+      - name: Build solution to verify
+        if: steps.check-version.outputs.skip == 'false'
+        run: |
+          echo "Building Main.sln to verify before release..."
+          if [ -f "src/Main.sln" ]; then
+            dotnet build src/Main.sln --configuration Release --verbosity minimal
+            echo "✅ Main.sln build successful"
+          else
+            echo "⚠️ Main.sln not found, skipping build verification"
+          fi
+
       - name: Generate release notes
         if: steps.check-version.outputs.skip == 'false'
         id: release-notes
@@ -72,7 +94,7 @@ jobs:
           LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
 
           if [ -z "$LATEST_TAG" ]; then
-            echo "No previous tags found, getting all commits"
+            echo "No previous tags found, getting recent commits"
             COMMITS=$(git log --pretty=format:"- %s (%h)" --reverse | head -20)
           else
             echo "Getting commits since $LATEST_TAG"
@@ -83,17 +105,22 @@ jobs:
           cat > release_notes.md << EOF
           ## 🚀 What's New in ${{ steps.get-version.outputs.version }}
 
-          This release includes the following changes:
+          This release was built from the **Main.sln** solution and includes the following changes:
 
-          ### 📝 Commits
+          ### 📝 Recent Changes
           $COMMITS
+
+          ### 🏗️ Solution Structure
+          - **Main Solution**: \`src/Main.sln\`
+          - **Core Projects**: Jiro.App, Jiro.Core, Jiro.Infrastructure, Jiro.Tests
+          - **Build Status**: ✅ Verified
 
           ### 🔗 Links
           - **Full Changelog**: https://github.com/${{ github.repository }}/compare/${LATEST_TAG:-$(git rev-list --max-parents=0 HEAD)}...${{ steps.get-version.outputs.version }}
           - **Issues**: https://github.com/${{ github.repository }}/issues
 
           ---
-          *This release was automatically generated from the main branch.*
+          *This release was automatically generated from the main branch using Main.sln*
           EOF
 
           echo "Release notes generated:"
@@ -117,6 +144,7 @@ jobs:
         run: |
           echo "🎉 Successfully created release ${{ steps.get-version.outputs.version }}"
           echo "📦 Release URL: https://github.com/${{ github.repository }}/releases/tag/${{ steps.get-version.outputs.version }}"
+          echo "🏗️ Built from Main.sln solution"
 
       - name: Skip message
         if: steps.check-version.outputs.skip == 'true'

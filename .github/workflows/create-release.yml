@@ -31,23 +31,37 @@ jobs:
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "9.0.x"
+
+      - name: Verify Main.sln exists and build
+        run: |
+          if [ ! -f "./src/Main.sln" ]; then
+            echo "❌ Main.sln not found at ./src/Main.sln"
+            exit 1
+          fi
+
+          echo "✅ Main.sln found, attempting to build..."
+          dotnet build ./src/Main.sln --configuration Release
+
       - name: Get version from project file
         id: get-version
         run: |
-          # Try to extract version from .csproj files
-          VERSION=$(find . -name "*.csproj" -exec grep -h "<Version>" {} \; | head -1 | sed 's/.*<Version>\(.*\)<\/Version>.*/\1/' | tr -d '[:space:]')
+          # Get version specifically from Jiro.App.csproj
+          VERSION=$(grep -h "<Version>" "./src/Jiro.Kernel/Jiro.App/Jiro.App.csproj" | sed 's/.*<Version>\(.*\)<\/Version>.*/\1/' | tr -d '[:space:]')
 
           if [ -z "$VERSION" ]; then
-            # Fallback to AssemblyVersion
-            VERSION=$(find . -name "*.csproj" -exec grep -h "<AssemblyVersion>" {} \; | head -1 | sed 's/.*<AssemblyVersion>\(.*\)<\/AssemblyVersion>.*/\1/' | tr -d '[:space:]')
-          fi
-
-          if [ -z "$VERSION" ]; then
-            # Generate version based on date and commit
-            VERSION="v$(date +'%Y.%m.%d')-$(git rev-parse --short HEAD)"
+            echo "❌ Could not find version in Jiro.App.csproj"
+            # Generate version based on date and commit as fallback
+            VERSION="$(date +'%Y.%m.%d')-$(git rev-parse --short HEAD)"
+            echo "🔄 Using generated version: $VERSION"
           else
-            VERSION="v$VERSION"
+            echo "✅ Found version in Jiro.App.csproj: $VERSION"
           fi
+
+          VERSION="v$VERSION"
 
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "Version: $VERSION"
