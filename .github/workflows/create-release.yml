@@ -46,10 +46,83 @@ jobs:
           echo "✅ Main.sln found, attempting to build..."
           dotnet build ./src/Main.sln --configuration Release
 
+      - name: Check if triggered by GitHub Actions
+        id: check-github-actions
+        run: |
+          LAST_COMMIT_AUTHOR=$(git log -1 --pretty=format:"%an")
+          LAST_COMMIT_EMAIL=$(git log -1 --pretty=format:"%ae")
+
+          echo "Last commit author: $LAST_COMMIT_AUTHOR"
+          echo "Last commit email: $LAST_COMMIT_EMAIL"
+          echo "GitHub actor: ${{ github.actor }}"
+
+          # Check if the last commit was made by GitHub Actions
+          if [[ "$LAST_COMMIT_AUTHOR" == "github-actions[bot]" ]] || [[ "$LAST_COMMIT_EMAIL" == "github-actions[bot]@users.noreply.github.com" ]]; then
+            echo "is-github-actions=true" >> $GITHUB_OUTPUT
+            echo "⚠️ Last commit was made by GitHub Actions, skipping auto-increment to prevent loops"
+          else
+            echo "is-github-actions=false" >> $GITHUB_OUTPUT
+            echo "✅ Last commit was made by human user, proceeding with auto-increment"
+          fi
+
+      - name: Auto-increment version
+        id: increment-version
+        if: steps.check-github-actions.outputs.is-github-actions == 'false'
+        run: |
+          # Get current version from Jiro.App.csproj
+          CURRENT_VERSION=$(grep -h "<Version>" "./src/Jiro.Kernel/Jiro.App/Jiro.App.csproj" | sed 's/.*<Version>\(.*\)<\/Version>.*/\1/' | tr -d '[:space:]')
+
+          if [ -z "$CURRENT_VERSION" ]; then
+            echo "❌ Could not find version in Jiro.App.csproj"
+            echo "Setting initial version to 0.1.0"
+            NEW_VERSION="0.1.0"
+          else
+            echo "✅ Current version: $CURRENT_VERSION"
+            
+            # Parse version parts (major.minor.patch)
+            IFS='.' read -ra VERSION_PARTS <<< "$CURRENT_VERSION"
+            MAJOR=${VERSION_PARTS[0]}
+            MINOR=${VERSION_PARTS[1]}
+            PATCH=${VERSION_PARTS[2]}
+            
+            # Increment patch version
+            NEW_PATCH=$((PATCH + 1))
+            NEW_VERSION="$MAJOR.$MINOR.$NEW_PATCH"
+          fi
+
+          echo "🚀 New version: $NEW_VERSION"
+
+          # Update the csproj file
+          sed -i "s/<Version>.*<\/Version>/<Version>$NEW_VERSION<\/Version>/" "./src/Jiro.Kernel/Jiro.App/Jiro.App.csproj"
+
+          # Verify the change
+          UPDATED_VERSION=$(grep -h "<Version>" "./src/Jiro.Kernel/Jiro.App/Jiro.App.csproj" | sed 's/.*<Version>\(.*\)<\/Version>.*/\1/' | tr -d '[:space:]')
+          echo "✅ Version updated to: $UPDATED_VERSION"
+
+          # Set outputs
+          echo "new-version=$NEW_VERSION" >> $GITHUB_OUTPUT
+          echo "current-version=$CURRENT_VERSION" >> $GITHUB_OUTPUT
+
+      - name: Commit version bump
+        if: steps.check-github-actions.outputs.is-github-actions == 'false'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          # Check if there are changes to commit
+          if git diff --quiet; then
+            echo "No changes to commit"
+          else
+            git add "./src/Jiro.Kernel/Jiro.App/Jiro.App.csproj"
+            git commit -m "🔖 Bump version to ${{ steps.increment-version.outputs.new-version }}"
+            git push origin main
+            echo "✅ Version bump committed and pushed"
+          fi
+
       - name: Get version from project file
         id: get-version
         run: |
-          # Get version specifically from Jiro.App.csproj
+          # Get the current version from Jiro.App.csproj
           VERSION=$(grep -h "<Version>" "./src/Jiro.Kernel/Jiro.App/Jiro.App.csproj" | sed 's/.*<Version>\(.*\)<\/Version>.*/\1/' | tr -d '[:space:]')
 
           if [ -z "$VERSION" ]; then
@@ -65,6 +138,17 @@ jobs:
 
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "Version: $VERSION"
+
+          # Set version info for release notes
+          if [ "${{ steps.check-github-actions.outputs.is-github-actions }}" == "true" ]; then
+            echo "version-was-bumped=false" >> $GITHUB_OUTPUT
+            echo "current-version-for-notes=$VERSION" >> $GITHUB_OUTPUT
+            echo "new-version-for-notes=$VERSION" >> $GITHUB_OUTPUT
+          else
+            echo "version-was-bumped=true" >> $GITHUB_OUTPUT
+            echo "current-version-for-notes=${{ steps.increment-version.outputs.current-version }}" >> $GITHUB_OUTPUT
+            echo "new-version-for-notes=${{ steps.increment-version.outputs.new-version }}" >> $GITHUB_OUTPUT
+          fi
 
       - name: Check if tag exists
         id: check-tag
@@ -92,18 +176,40 @@ jobs:
             COMMITS=$(git log ${LATEST_TAG}..HEAD --pretty=format:"- %s (%h)" --reverse)
           fi
 
-          # Create release notes
-          cat > release_notes.md << EOF
-          ## What's Changed
+          # Create release notes based on whether version was bumped
+          if [ "${{ steps.get-version.outputs.version-was-bumped }}" == "true" ]; then
+            # Version was auto-incremented
+            cat > release_notes.md << EOF
+          ## 🚀 What's Changed
 
-          ### Commits in this release:
+          ### 📝 Version Update
+          - **Previous Version**: ${{ steps.get-version.outputs.current-version-for-notes }}
+          - **New Version**: ${{ steps.get-version.outputs.new-version-for-notes }}
+
+          ### 📋 Commits in this release:
           $COMMITS
 
-          ### Merged from dev to main
-          This release includes all changes that were merged from the \`dev\` branch to \`main\`.
+          ### 🔄 Automatic Release
+          This release was automatically created with version auto-increment when changes were pushed to the \`main\` branch.
 
           **Full Changelog**: https://github.com/${{ github.repository }}/compare/${LATEST_TAG:-$(git rev-list --max-parents=0 HEAD)}...${{ steps.get-version.outputs.version }}
           EOF
+          else
+            # Version bump commit triggered the workflow
+            cat > release_notes.md << EOF
+          ## 🚀 What's Changed
+
+          ### 📝 Release for Version ${{ steps.get-version.outputs.new-version-for-notes }}
+
+          ### 📋 Recent changes:
+          $COMMITS
+
+          ### 🏷️ Version Bump Release
+          This release was created for the version bump commit.
+
+          **Full Changelog**: https://github.com/${{ github.repository }}/compare/${LATEST_TAG:-$(git rev-list --max-parents=0 HEAD)}...${{ steps.get-version.outputs.version }}
+          EOF
+          fi
 
           echo "Release notes generated"
           cat release_notes.md
@@ -114,7 +220,7 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git tag -a "${{ steps.get-version.outputs.version }}" -m "Release ${{ steps.get-version.outputs.version }}"
-          git push origin "${{ steps.get-version.outputs.version }}"
+          git push origin --tags
 
       - name: Create GitHub Release
         if: steps.check-tag.outputs.tag-exists == 'false'
