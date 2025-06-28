@@ -2,12 +2,9 @@ name: Debug Workflow Triggers
 
 on:
   push:
-    branches:
-      - main
-      - dev
+    branches: ["main"]
   pull_request:
-    branches:
-      - main
+    branches: ["main", "dev"]
     types:
       - opened
       - closed
