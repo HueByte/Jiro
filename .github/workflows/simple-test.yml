@@ -1,0 +1,32 @@
+name: Simple Push Test
+
+on:
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - "src/**" # Avoid overlap with main CI workflow
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Simple test
+        run: |
+          echo "✅ Workflow triggered successfully on push to main!"
+          echo "Repository: ${{ github.repository }}"
+          echo "Commit: ${{ github.sha }}"
+          echo "Branch: ${{ github.ref_name }}"
+
+      - name: List files
+        run: |
+          echo "Files in repository:"
+          ls -la
+
+      - name: Check for version
+        run: |
+          echo "Looking for version in project files:"
+          find . -name "*.csproj" -exec grep -H "Version" {} \; || echo "No version found"

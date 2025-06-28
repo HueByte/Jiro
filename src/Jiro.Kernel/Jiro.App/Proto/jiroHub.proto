@@ -2,9 +2,11 @@
 
 option csharp_namespace = "JiroCloud.Api.Proto";
 
+import "google/protobuf/timestamp.proto";
 package JiroHubProto;
 
 service JiroHubProto {
+    rpc GetUserSessions (Empty) returns (SessionsReply);
 	rpc InstanceCommand (stream ClientMessage) returns (stream ServerMessage);
     rpc Hello (HelloRequest) returns (HelloReply);
 }
@@ -18,6 +20,8 @@ message ClientMessage {
 	}
     bool isSuccess = 5;
     string commandSyncId = 6;
+    repeated Pair parameters = 7;
+	string sessionId = 8;
 }
 
 enum CommandType {
@@ -39,9 +43,11 @@ message GraphResult {
 }
 
 message ServerMessage {
-    string instanceName = 1;
+    string instanceId = 1;
 	string command = 2;
     string commandSyncId = 3;
+    string sessionId = 4;
+    repeated Pair parameters = 5;
 }
 
 message HelloRequest {
@@ -50,4 +56,25 @@ message HelloRequest {
 
 message HelloReply {
     string message = 1;
+}
+
+message SessionsReply {
+    repeated Session sessions = 1;
+}
+
+message Session {
+	string id = 1;
+	string name = 2;
+	string description = 3;
+	google.protobuf.Timestamp createdAt = 4;
+	google.protobuf.Timestamp updatedAt = 5;
+}
+
+message Pair {
+    string key = 1;
+    string value = 2;
+}
+
+message Empty {
+
 }

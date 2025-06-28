@@ -1,0 +1,75 @@
+# .dockerignore for Jiro.Kernel
+
+# Binaries
+**/bin/
+**/obj/
+
+# Test results
+TestResults/
+**/TestResults/
+
+# Build artifacts
+**/publish/
+**/build/
+
+# IDE files
+**/.vs/
+**/.vscode/
+**/*.user
+**/*.suo
+**/*.cache
+**/.idea/
+
+# Package files
+**/*.nupkg
+**/*.snupkg
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# Documentation
+**/*.md
+LICENSE
+
+# Node.js (if any)
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Temporary files
+**/.tmp/
+**/tmp/
+**/*.tmp
+**/*.temp
+
+# Logs
+**/*.log
+logs/
+
+# Database files
+**/*.db
+**/*.sqlite
+**/*.sqlite3
+
+# Coverage reports
+**/coverage/
+**/*.coverage
+
+# Environment files
+**/.env
+**/.env.*
+!**/.env.example
+
+# Keep only necessary files for Docker build
+!Jiro.App/
+!Jiro.Core/
+!Jiro.Infrastructure/
+!Jiro.Kernel.sln
+!Directory.Build.props
+!nuget.config

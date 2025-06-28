@@ -1,0 +1,301 @@
+name: Jiro CI/CD
+
+on:
+  push:
+    branches: ["main"]
+    paths:
+      - "src/**"
+      - ".github/workflows/jiro-kernel-ci.yml"
+  pull_request:
+    branches: ["main", "dev"]
+    paths:
+      - "src/**"
+      - ".github/workflows/jiro-kernel-ci.yml"
+
+env:
+  DOTNET_VERSION: "9.0.x"
+  SOLUTION_PATH: "./src/Main.sln"
+  DOCKER_IMAGE_NAME: "jiro-kernel"
+  REGISTRY: ghcr.io
+
+jobs:
+  # Build and Test Job
+  build-and-test:
+    runs-on: ubuntu-latest
+    name: Build, Test & Format Check
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Prepare configuration files
+        run: |
+          if [ ! -f ./src/Jiro.Kernel/Jiro.App/appsettings.json ]; then
+            cp ./src/Jiro.Kernel/Jiro.App/appsettings.example.json ./src/Jiro.Kernel/Jiro.App/appsettings.json
+          fi
+
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/packages.lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
+
+      - name: Restore dependencies
+        run: dotnet restore ${{ env.SOLUTION_PATH }}
+
+      - name: Build solution
+        run: dotnet build ${{ env.SOLUTION_PATH }} --no-restore --configuration Release
+
+      - name: Check code formatting
+        run: dotnet format ${{ env.SOLUTION_PATH }} --no-restore --verify-no-changes --verbosity diagnostic
+
+      - name: Run tests
+        run: dotnet test ${{ env.SOLUTION_PATH }} --no-build --configuration Release --logger trx --collect:"XPlat Code Coverage" --results-directory ./TestResults
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-results
+          path: ./TestResults
+
+      - name: Upload code coverage to Codecov
+        uses: codecov/codecov-action@v4
+        if: always()
+        with:
+          directory: ./TestResults
+          flags: jiro-kernel
+          fail_ci_if_error: false
+
+  # Markdown Linting
+  markdown-lint:
+    runs-on: ubuntu-latest
+    name: Markdown Linting
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "18"
+
+      - name: Install markdownlint-cli
+        run: npm install -g markdownlint-cli
+
+      - name: Run markdownlint
+        run: markdownlint '**/*.md' --ignore node_modules --ignore TestResults --ignore src/docs/build --config .markdownlint.json || true
+
+      - name: Create markdownlint config if not exists
+        run: |
+          if [ ! -f .markdownlint.json ]; then
+            cat > .markdownlint.json << 'EOF'
+          {
+            "MD013": false,
+            "MD033": false,
+            "MD041": false
+          }
+          EOF
+          fi
+
+  # Security Vulnerability Scanning
+  security-scan:
+    runs-on: ubuntu-latest
+    name: Security Vulnerability Scan
+    needs: build-and-test
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Prepare configuration files
+        run: |
+          if [ ! -f ./src/Jiro.Kernel/Jiro.App/appsettings.json ]; then
+            cp ./src/Jiro.Kernel/Jiro.App/appsettings.example.json ./src/Jiro.Kernel/Jiro.App/appsettings.json
+          fi
+
+      - name: Restore dependencies
+        run: dotnet restore ${{ env.SOLUTION_PATH }}
+
+      - name: Run .NET security audit
+        run: dotnet list ${{ env.SOLUTION_PATH }} package --vulnerable --include-transitive
+
+      - name: Install Snyk CLI
+        run: |
+          curl -L https://static.snyk.io/cli/latest/snyk-linux -o snyk
+          chmod +x ./snyk
+
+      - name: Run Snyk security scan
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        run: |
+          if [ -n "$SNYK_TOKEN" ]; then
+            ./snyk test --severity-threshold=high --file=${{ env.SOLUTION_PATH }} || true
+          else
+            echo "Snyk token not configured, skipping Snyk scan"
+          fi
+
+      - name: Run CodeQL Analysis
+        uses: github/codeql-action/init@v3
+        with:
+          languages: csharp
+
+      - name: Autobuild for CodeQL
+        uses: github/codeql-action/autobuild@v3
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+
+  # Docker Build and Verification
+  docker-build:
+    runs-on: ubuntu-latest
+    name: Docker Build & Verification
+    needs: build-and-test
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Container Registry
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.DOCKER_IMAGE_NAME }}
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=raw,value=latest,enable={{is_default_branch}}
+            type=sha,format=short
+
+      - name: Build Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./src/Jiro.Kernel
+          file: ./src/Jiro.Kernel/Dockerfile
+          push: false
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          load: true
+
+      - name: Test Docker image
+        run: |
+          # Get the first tag for testing
+          IMAGE_TAG=$(echo "${{ steps.meta.outputs.tags }}" | head -n1)
+          echo "Testing Docker image: $IMAGE_TAG"
+
+          # Run basic container health check
+          docker run --rm -d --name jiro-kernel-test $IMAGE_TAG || exit 1
+          sleep 10
+
+          # Check if container is running
+          if docker ps | grep -q jiro-kernel-test; then
+            echo "✅ Container started successfully"
+            docker stop jiro-kernel-test
+          else
+            echo "❌ Container failed to start"
+            docker logs jiro-kernel-test || true
+            exit 1
+          fi
+
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ${{ fromJSON(steps.meta.outputs.json).tags[0] }}
+          format: "sarif"
+          output: "trivy-results.sarif"
+        continue-on-error: true
+
+      - name: Check Trivy results file
+        id: check-trivy-results
+        run: |
+          if [ -f "trivy-results.sarif" ]; then
+            echo "trivy-file-exists=true" >> $GITHUB_OUTPUT
+            echo "✅ Trivy results file created successfully"
+            ls -la trivy-results.sarif
+          else
+            echo "trivy-file-exists=false" >> $GITHUB_OUTPUT
+            echo "⚠️ Trivy results file not found"
+            echo "Files in current directory:"
+            ls -la
+          fi
+
+      - name: Upload Trivy scan results
+        uses: github/codeql-action/upload-sarif@v3
+        if: always() && steps.check-trivy-results.outputs.trivy-file-exists == 'true'
+        with:
+          sarif_file: "trivy-results.sarif"
+
+      - name: Push Docker image
+        if: github.event_name != 'pull_request'
+        uses: docker/build-push-action@v5
+        with:
+          context: ./src/Jiro.Kernel
+          file: ./src/Jiro.Kernel/Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  # Quality Gate Summary
+  quality-gate:
+    runs-on: ubuntu-latest
+    name: Quality Gate
+    needs: [build-and-test, markdown-lint, security-scan, docker-build]
+    if: always()
+
+    steps:
+      - name: Check job results
+        run: |
+          echo "Build and Test: ${{ needs.build-and-test.result }}"
+          echo "Markdown Lint: ${{ needs.markdown-lint.result }}"
+          echo "Security Scan: ${{ needs.security-scan.result }}"
+          echo "Docker Build: ${{ needs.docker-build.result }}"
+
+          if [[ "${{ needs.build-and-test.result }}" == "failure" ]]; then
+            echo "❌ Build and test failed"
+            exit 1
+          fi
+
+          if [[ "${{ needs.markdown-lint.result }}" == "failure" ]]; then
+            echo "⚠️ Markdown linting failed"
+            # Don't fail the pipeline for markdown lint failures, but warn
+          fi
+
+          if [[ "${{ needs.security-scan.result }}" == "failure" ]]; then
+            echo "⚠️ Security scan failed"
+            # Don't fail the pipeline for security scan failures, but warn
+          fi
+
+          if [[ "${{ needs.docker-build.result }}" == "failure" ]]; then
+            echo "❌ Docker build failed"
+            exit 1
+          fi
+
+          echo "✅ Quality gate passed"

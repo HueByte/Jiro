@@ -1,0 +1,85 @@
+{
+  "$schema": "https://raw.githubusercontent.com/dotnet/docfx/main/schemas/docfx.schema.json",
+  "metadata": [
+    {
+      "src": [
+        {
+          "src": "Jiro.Kernel",
+          "files": [
+            "Jiro.Core/**/*.csproj",
+            "Jiro.App/**/*.csproj",
+            "Jiro.Infrastructure/**/*.csproj"
+          ]
+        }
+      ],
+      "output": "_temp/api",
+      "properties": {
+        "TargetFramework": "net9.0"
+      },
+      "filter": "filterConfig.yml",
+      "disableGitFeatures": false
+    }
+  ],
+  "build": {
+    "content": [
+      {
+        "src": ".",
+        "dest": ".",
+        "files": ["toc.yml"]
+      },
+      {
+        "src": "docs",
+        "dest": "documentation",
+        "files": ["*.md", "toc.yml"],
+        "exclude": [
+          "api/**",
+          "build/**",
+          "_site/**",
+          "_temp/**",
+          "**/bin/**",
+          "**/obj/**",
+          "**/TestResults/**"
+        ]
+      },
+      {
+        "src": "_temp/api",
+        "dest": "api",
+        "files": ["*.yml", ".manifest"]
+      }
+    ],
+    "resource": [
+      {
+        "files": ["docs/images/**", "assets/**"]
+      }
+    ],
+    "overwrite": [
+      {
+        "files": ["docs/overwrite/**/*.md"],
+        "exclude": [
+          "docs/build/**",
+          "_site/**",
+          "_temp/**",
+          "**/bin/**",
+          "**/obj/**"
+        ]
+      }
+    ],
+    "output": "_site",
+    "template": ["default", "modern"],
+    "globalMetadata": {
+      "_appName": "Jiro - AI Assistant",
+      "_appTitle": "Jiro Documentation",
+      "_enableSearch": true,
+      "_enableNewTab": true,
+      "_disableNavbar": false,
+      "_disableBreadcrumb": false,
+      "_gitContribute": {
+        "repo": "https://github.com/HueByte/Jiro",
+        "branch": "main",
+        "path": "src"
+      },
+      "_gitUrlPattern": "github",
+      "pdf": false
+    }
+  }
+}

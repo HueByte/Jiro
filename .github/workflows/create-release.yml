@@ -1,0 +1,141 @@
+name: Create Release on Main Branch
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+    types:
+      - closed
+
+jobs:
+  create-release:
+    # Run on direct push to main OR when PR from dev to main is merged
+    if: |
+      (github.event_name == 'push' && github.ref == 'refs/heads/main') ||
+      (github.event_name == 'pull_request' && 
+       github.event.pull_request.merged == true && 
+       github.event.pull_request.base.ref == 'main' && 
+       github.event.pull_request.head.ref == 'dev')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: read
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "9.0.x"
+
+      - name: Verify Main.sln exists and build
+        run: |
+          if [ ! -f "./src/Main.sln" ]; then
+            echo "❌ Main.sln not found at ./src/Main.sln"
+            exit 1
+          fi
+
+          echo "✅ Main.sln found, attempting to build..."
+          dotnet build ./src/Main.sln --configuration Release
+
+      - name: Get version from project file
+        id: get-version
+        run: |
+          # Get version specifically from Jiro.App.csproj
+          VERSION=$(grep -h "<Version>" "./src/Jiro.Kernel/Jiro.App/Jiro.App.csproj" | sed 's/.*<Version>\(.*\)<\/Version>.*/\1/' | tr -d '[:space:]')
+
+          if [ -z "$VERSION" ]; then
+            echo "❌ Could not find version in Jiro.App.csproj"
+            # Generate version based on date and commit as fallback
+            VERSION="$(date +'%Y.%m.%d')-$(git rev-parse --short HEAD)"
+            echo "🔄 Using generated version: $VERSION"
+          else
+            echo "✅ Found version in Jiro.App.csproj: $VERSION"
+          fi
+
+          VERSION="v$VERSION"
+
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Version: $VERSION"
+
+      - name: Check if tag exists
+        id: check-tag
+        run: |
+          if git tag -l "${{ steps.get-version.outputs.version }}" | grep -q "${{ steps.get-version.outputs.version }}"; then
+            echo "tag-exists=true" >> $GITHUB_OUTPUT
+            echo "Tag ${{ steps.get-version.outputs.version }} already exists"
+          else
+            echo "tag-exists=false" >> $GITHUB_OUTPUT
+            echo "Tag ${{ steps.get-version.outputs.version }} does not exist"
+          fi
+
+      - name: Generate release notes
+        id: release-notes
+        if: steps.check-tag.outputs.tag-exists == 'false'
+        run: |
+          # Get the latest tag to compare
+          LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
+
+          if [ -z "$LATEST_TAG" ]; then
+            # If no previous tag, get all commits
+            COMMITS=$(git log --pretty=format:"- %s (%h)" --reverse)
+          else
+            # Get commits since the latest tag
+            COMMITS=$(git log ${LATEST_TAG}..HEAD --pretty=format:"- %s (%h)" --reverse)
+          fi
+
+          # Create release notes
+          cat > release_notes.md << EOF
+          ## What's Changed
+
+          ### Commits in this release:
+          $COMMITS
+
+          ### Merged from dev to main
+          This release includes all changes that were merged from the \`dev\` branch to \`main\`.
+
+          **Full Changelog**: https://github.com/${{ github.repository }}/compare/${LATEST_TAG:-$(git rev-list --max-parents=0 HEAD)}...${{ steps.get-version.outputs.version }}
+          EOF
+
+          echo "Release notes generated"
+          cat release_notes.md
+
+      - name: Create Git tag
+        if: steps.check-tag.outputs.tag-exists == 'false'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git tag -a "${{ steps.get-version.outputs.version }}" -m "Release ${{ steps.get-version.outputs.version }}"
+          git push origin "${{ steps.get-version.outputs.version }}"
+
+      - name: Create GitHub Release
+        if: steps.check-tag.outputs.tag-exists == 'false'
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ steps.get-version.outputs.version }}
+          name: Release ${{ steps.get-version.outputs.version }}
+          body_path: release_notes.md
+          draft: false
+          prerelease: false
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Notify success
+        if: steps.check-tag.outputs.tag-exists == 'false'
+        run: |
+          echo "🎉 Successfully created release ${{ steps.get-version.outputs.version }}"
+          echo "📦 Release URL: https://github.com/${{ github.repository }}/releases/tag/${{ steps.get-version.outputs.version }}"
+
+      - name: Skip release creation
+        if: steps.check-tag.outputs.tag-exists == 'true'
+        run: |
+          echo "⚠️ Skipping release creation - tag ${{ steps.get-version.outputs.version }} already exists"

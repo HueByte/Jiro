@@ -1,0 +1,92 @@
+name: Jiro Security Scan
+
+on:
+  schedule:
+    # Run security scan every Monday at 2 AM UTC
+    - cron: "0 2 * * 1"
+  workflow_dispatch:
+
+env:
+  DOTNET_VERSION: "9.0.x"
+  SOLUTION_PATH: "./src/Main.sln"
+
+jobs:
+  security-audit:
+    runs-on: ubuntu-latest
+    name: Weekly Security Audit
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Prepare configuration files
+        run: |
+          if [ ! -f ./src/Jiro.Kernel/Jiro.App/appsettings.json ]; then
+            cp ./src/Jiro.Kernel/Jiro.App/appsettings.example.json ./src/Jiro.Kernel/Jiro.App/appsettings.json
+          fi
+
+      - name: Restore dependencies
+        run: dotnet restore ${{ env.SOLUTION_PATH }}
+
+      - name: Run .NET security audit
+        run: |
+          echo "## .NET Package Vulnerability Report" >> $GITHUB_STEP_SUMMARY
+          echo "Date: $(date)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          # Check for vulnerable packages
+          VULN_OUTPUT=$(dotnet list ${{ env.SOLUTION_PATH }} package --vulnerable --include-transitive 2>&1 || true)
+
+          if echo "$VULN_OUTPUT" | grep -q "vulnerable"; then
+            echo "⚠️ **Vulnerabilities Found:**" >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+            echo "$VULN_OUTPUT" >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+          else
+            echo "✅ **No vulnerabilities found in NuGet packages**" >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: Run OSSAR
+        uses: github/ossar-action@v1
+        id: ossar
+
+      - name: Upload OSSAR results
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: ${{ steps.ossar.outputs.sarifFile }}
+
+      - name: Dependency Review
+        uses: actions/dependency-review-action@v4
+        with:
+          fail-on-severity: high
+
+      - name: Create security report issue
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const title = `Security vulnerabilities found - ${new Date().toISOString().split('T')[0]}`;
+            const body = `
+            Security scan found vulnerabilities in Jiro.Kernel project.
+
+            **Workflow:** ${{ github.workflow }}
+            **Run:** ${{ github.run_id }}
+            **Commit:** ${{ github.sha }}
+
+            Please review the security scan results and update dependencies as needed.
+
+            [View workflow run](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
+            `;
+
+            github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: title,
+              body: body,
+              labels: ['security', 'jiro-kernel']
+            });

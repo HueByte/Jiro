@@ -15,7 +15,7 @@ namespace Jiro.Infrastructure.Migrations
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder.HasAnnotation("ProductVersion", "7.0.4");
+            modelBuilder.HasAnnotation("ProductVersion", "9.0.6");
 
             modelBuilder.Entity("Jiro.Core.Models.AppRole", b =>
                 {
@@ -125,6 +125,66 @@ namespace Jiro.Infrastructure.Migrations
                     b.ToTable("AspNetUserRoles", (string)null);
                 });
 
+            modelBuilder.Entity("Jiro.Core.Models.ChatSession", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("LastUpdatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ChatSessions");
+                });
+
+            modelBuilder.Entity("Jiro.Core.Models.Message", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("ChatSessionId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("InstanceId")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("IsUser")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("SessionId")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Type")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ChatSessionId");
+
+                    b.ToTable("Messages");
+                });
+
             modelBuilder.Entity("Jiro.Core.Models.RefreshToken", b =>
                 {
                     b.Property<int>("Id")
@@ -159,7 +219,7 @@ namespace Jiro.Infrastructure.Migrations
 
                     b.HasIndex("AppUserId");
 
-                    b.ToTable("RefreshToken");
+                    b.ToTable("RefreshTokens");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -268,6 +328,13 @@ namespace Jiro.Infrastructure.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("Jiro.Core.Models.Message", b =>
+                {
+                    b.HasOne("Jiro.Core.Models.ChatSession", null)
+                        .WithMany("Messages")
+                        .HasForeignKey("ChatSessionId");
+                });
+
             modelBuilder.Entity("Jiro.Core.Models.RefreshToken", b =>
                 {
                     b.HasOne("Jiro.Core.Models.AppUser", null)
@@ -321,6 +388,11 @@ namespace Jiro.Infrastructure.Migrations
                     b.Navigation("RefreshTokens");
 
                     b.Navigation("UserRoles");
+                });
+
+            modelBuilder.Entity("Jiro.Core.Models.ChatSession", b =>
+                {
+                    b.Navigation("Messages");
                 });
 #pragma warning restore 612, 618
         }

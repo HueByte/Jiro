@@ -1,10 +1,12 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
 		<OutputType>Exe</OutputType>
-		<TargetFramework>net8.0</TargetFramework>
+		<TargetFramework>net9.0</TargetFramework>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
+    <Version>0.1.0</Version>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -13,7 +15,7 @@
 
 	<ItemGroup>
 		<None Update="appsettings.example.json">
-		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</None>
 		<None Update="appsettings.json">
 			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
@@ -21,23 +23,21 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="AutoMapper" Version="12.0.1" />
-		<PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="12.0.1" />
-		<PackageReference Include="Google.Protobuf" Version="3.25.1" />
-		<PackageReference Include="Grpc.Core" Version="2.46.6" />
-		<PackageReference Include="Grpc.Net.Client" Version="2.59.0" />
-		<PackageReference Include="Grpc.Net.ClientFactory" Version="2.59.0" />
-		<PackageReference Include="Grpc.Tools" Version="2.59.0">
+		<PackageReference Include="AutoMapper" Version="14.0.0" />
+		<PackageReference Include="Google.Protobuf" Version="3.31.1" />
+		<PackageReference Include="Grpc.Net.Client" Version="2.71.0" />
+		<PackageReference Include="Grpc.Net.ClientFactory" Version="2.71.0" />
+		<PackageReference Include="Grpc.Tools" Version="2.72.0">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
-		<PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.0" />
-		<PackageReference Include="Serilog.AspNetCore" Version="8.0.0" />
-		<PackageReference Include="Serilog.Extensions.Logging" Version="8.0.0" />
-		<PackageReference Include="Serilog.Settings.Configuration" Version="8.0.0" />
-		<PackageReference Include="Serilog.Sinks.Async" Version="1.5.0" />
-		<PackageReference Include="Serilog.Sinks.Console" Version="5.0.1" />
-		<PackageReference Include="Serilog.Sinks.File" Version="5.0.0" />
+		<PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.6" />
+		<PackageReference Include="Serilog.AspNetCore" Version="9.0.0" />
+		<PackageReference Include="Serilog.Extensions.Logging" Version="9.0.3-dev-02320" />
+		<PackageReference Include="Serilog.Settings.Configuration" Version="9.0.1-dev-02317" />
+		<PackageReference Include="Serilog.Sinks.Async" Version="2.1.0" />
+		<PackageReference Include="Serilog.Sinks.Console" Version="6.0.1-dev-00953" />
+		<PackageReference Include="Serilog.Sinks.File" Version="7.0.0" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -47,6 +47,12 @@
 
 	<ItemGroup>
 		<Protobuf Include="Proto\jiroHub.proto" GrpcServices="Client" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<None Include="Messages\**\*">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
 	</ItemGroup>
 
 </Project>

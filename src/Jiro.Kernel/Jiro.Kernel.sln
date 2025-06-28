@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Jiro.Api", "Jiro.Api\Jiro.Api.csproj", "{87E048B0-583D-4074-BBD4-FD05083BF728}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Jiro.App", "Jiro.App\Jiro.App.csproj", "{87E048B0-583D-4074-BBD4-FD05083BF728}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Jiro.Core", "Jiro.Core\Jiro.Core.csproj", "{A6B68289-90F8-404A-ADF3-A0E7F14F7DE3}"
 EndProject

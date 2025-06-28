@@ -1,32 +1,80 @@
-FROM mcr.microsoft.com/dotnet/aspnet:7.0 AS base
-WORKDIR /app
-EXPOSE 80
-EXPOSE 443
+FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
+ARG MAIN_WORK_DIR=/home/app/jiro
+WORKDIR ${MAIN_WORK_DIR}
+
+# Update and install required dependencies
+RUN apt-get update && apt-get -y upgrade && apt-get install -y \
+	build-essential gcc g++ curl tar pkg-config libtool m4 \
+	libpng-dev libjpeg-dev libxi6 libgl1-mesa-glx
+
+# Install Node.js for any frontend dependencies
+RUN curl -fsSL https://deb.nodesource.com/setup_lts.x | bash - && \
+	apt-get install -y nodejs
+
+WORKDIR ${MAIN_WORK_DIR}
+
+# Copy solution and project files for dependency caching
+COPY Jiro.Kernel.sln ./
+COPY Jiro.App/Jiro.App.csproj ./Jiro.App/
+COPY Jiro.Core/Jiro.Core.csproj ./Jiro.Core/
+COPY Jiro.Infrastructure/Jiro.Infrastructure.csproj ./Jiro.Infrastructure/
+
+# Restore dependencies
+RUN dotnet restore Jiro.Kernel.sln
+
+# Copy the rest of the source code and build the application
+COPY . ./
+RUN dotnet publish Jiro.App/Jiro.App.csproj -c Release -o build \
+	--runtime linux-x64 \
+	--self-contained true \
+	/p:PublishSingleFile=false \
+	/p:PublishTrimmed=true \
+	/p:UseAppHost=true
+
+# Stage 2: Runtime image
+FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS runtime
+ARG MAIN_WORK_DIR=/home/app/jiro
+WORKDIR ${MAIN_WORK_DIR}
+
+# Create a non-root user
+RUN useradd -ms /bin/bash jiro
+
+# For self-contained apps, minimal dependencies are needed
+RUN apt-get update && apt-get install -y \
+	ca-certificates \
+	&& apt-get clean \
+	&& rm -rf /var/lib/apt/lists/*
+
+# Copy build output
+COPY --from=build ${MAIN_WORK_DIR}/build ${MAIN_WORK_DIR}/build
+
+# Set up directories
+ARG LOGS_PATH=${MAIN_WORK_DIR}/Data/Logs
+ARG SHARED_PATH=${MAIN_WORK_DIR}/Data/Shared
+ENV LOGS_PATH=${LOGS_PATH}
+ENV SHARED_PATH=${SHARED_PATH}
+ENV ASPNETCORE_ENVIRONMENT=Production
+ENV ASPNETCORE_URLS=http://+:8080;https://+:8443
+
+RUN mkdir -p ${LOGS_PATH} ${SHARED_PATH} && \
+	chown -R jiro:jiro ${MAIN_WORK_DIR}
+
+WORKDIR ${MAIN_WORK_DIR}/build
+
+# Expose ports
+EXPOSE 8080
+EXPOSE 8443
 EXPOSE 18090
-ENV PASSWORD_SEED_PROMPT=false
 
-FROM mcr.microsoft.com/dotnet/sdk:7.0 AS build
+# Update dynamic linker bindings
+RUN ldconfig
 
-# Prepare Node
-RUN apt-get update
-RUN apt-get install -y curl
-RUN apt-get install -y libpng-dev libjpeg-dev curl libxi6 build-essential libgl1-mesa-glx
-RUN curl -sL https://deb.nodesource.com/setup_lts.x | bash -
-RUN apt-get install -y nodejs
+# Switch to non-root user
+USER jiro
 
-COPY ["Jiro.Api/Jiro.Api.csproj", "Jiro.Api/"]
-COPY ["Jiro.Core/Jiro.Core.csproj", "Jiro.Core/"]
-COPY ["Jiro.Infrastructure/Jiro.Infrastructure.csproj", "Jiro.Infrastructure/"]
-RUN dotnet restore "Jiro.Api/Jiro.Api.csproj"
-COPY . .
-WORKDIR "/Jiro.Api"
-RUN dotnet tool restore
-RUN dotnet build "Jiro.Api.csproj" -c Release -o /app/build
+# Health check
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+	CMD pgrep -f "dotnet.*Jiro.App.dll" > /dev/null || exit 1
 
-FROM build AS publish
-RUN dotnet publish "Jiro.Api.csproj" -c Release -o /app/publish /p:UseAppHost=false
-
-FROM base AS final
-WORKDIR /app
-COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "Jiro.Api.dll"]
+# Run the application
+ENTRYPOINT ["dotnet", "Jiro.App.dll"]
