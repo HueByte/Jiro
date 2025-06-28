@@ -8,13 +8,16 @@ assignees: ''
 ---
 
 ## Description
-*Put your description here*
+
+Put your description here
 
 ## Goals
+
 - [ ] Task1
 - [ ] Task2
 - [ ] Task3
 
 ## Related Issues
+
 - #11
 - user/repo#13

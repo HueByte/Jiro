@@ -36,7 +36,7 @@
 
 Jiro follows a **clean architecture** pattern with clear separation of concerns:
 
-```
+```cs
 ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
 │   Presentation  │    │    Application  │    │   Infrastructure│
 │                 │    │                 │    │                 │
@@ -430,7 +430,7 @@ services:
 
 ## 📁 Project Structure
 
-```
+```cs
 Jiro/
 ├── src/
 │   ├── Jiro.Kernel/                 # Main application kernel

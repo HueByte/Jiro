@@ -54,7 +54,7 @@ This directory contains the documentation for the Jiro AI Assistant project, bui
    ```bash
    docfx docfx.json --serve
    ```
-   
+
    The documentation will be available at `http://localhost:8080`
 
 ## 🌐 Automatic Deployment

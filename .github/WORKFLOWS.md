@@ -7,12 +7,15 @@ This document explains the organization and purpose of each GitHub Actions workf
 ### 🚀 **Core CI/CD Workflows**
 
 #### 1. `jiro-kernel-ci.yml` - .NET CI
+
 **Purpose**: Core .NET build, test, and code quality checks
-**Triggers**: 
+**Triggers**:
+
 - Push to main (src changes)
 - Pull requests to main/dev (src changes)
 
 **Jobs**:
+
 - ✅ Build solution with .NET 9.0
 - ✅ Run unit tests with coverage
 - ✅ Code formatting verification
@@ -21,12 +24,15 @@ This document explains the organization and purpose of each GitHub Actions workf
 ---
 
 #### 2. `create-release.yml` - Auto Release
+
 **Purpose**: Automated versioning and release creation
-**Triggers**: 
+**Triggers**:
+
 - Push to main
 - Pull requests to main
 
 **Jobs**:
+
 - ✅ Pre-merge validation (PR testing)
 - ✅ Auto-increment version on merge
 - ✅ Create Git tags and GitHub releases
@@ -37,12 +43,15 @@ This document explains the organization and purpose of each GitHub Actions workf
 ### 🔒 **Security & Quality Workflows**
 
 #### 3. `jiro-kernel-security.yml` - Security Scanning
+
 **Purpose**: Automated security vulnerability scanning
-**Triggers**: 
+**Triggers**:
+
 - Weekly schedule (Mondays at 2 AM UTC)
 - Manual workflow dispatch
 
 **Jobs**:
+
 - ✅ .NET security audit
 - ✅ CodeQL analysis
 - ✅ Dependency vulnerability checks
@@ -52,12 +61,15 @@ This document explains the organization and purpose of each GitHub Actions workf
 ### 🐳 **Infrastructure Workflows**
 
 #### 4. `docker-build.yml` - Container Build
+
 **Purpose**: Docker image building and container security
-**Triggers**: 
+**Triggers**:
+
 - Push to main (src/Dockerfile changes)
 - Pull requests (src/Dockerfile changes)
 
 **Jobs**:
+
 - ✅ Build Docker images
 - ✅ Container testing
 - ✅ Trivy security scanning
@@ -68,24 +80,30 @@ This document explains the organization and purpose of each GitHub Actions workf
 ### 📝 **Documentation & Linting**
 
 #### 5. `markdown-lint.yml` - Documentation Quality
+
 **Purpose**: Markdown file linting and formatting
-**Triggers**: 
+**Triggers**:
+
 - Push to main (*.md changes)
 - Pull requests (*.md changes)
 
 **Jobs**:
+
 - ✅ Markdown linting with markdownlint-cli
 - ✅ Auto-configuration setup
 
 ---
 
 #### 6. `deploy-docs.yml` - Documentation Deployment
+
 **Purpose**: Build and deploy project documentation
-**Triggers**: 
+**Triggers**:
+
 - Push to main
 - Manual workflow dispatch
 
 **Jobs**:
+
 - ✅ DocFX documentation generation
 - ✅ API documentation from XML comments
 - ✅ GitHub Pages deployment
@@ -95,12 +113,15 @@ This document explains the organization and purpose of each GitHub Actions workf
 ### 🔧 **Performance & Testing**
 
 #### 7. `jiro-kernel-performance.yml` - Performance Testing
+
 **Purpose**: Performance benchmarking and monitoring
-**Triggers**: 
+**Triggers**:
+
 - Scheduled runs
 - Manual dispatch
 
 **Jobs**:
+
 - ✅ Performance benchmarks
 - ✅ Performance regression detection
 
@@ -109,12 +130,14 @@ This document explains the organization and purpose of each GitHub Actions workf
 ### 🐛 **Development & Debugging**
 
 #### 8. `simple-test.yml` - Quick Tests
+
 **Purpose**: Fast development testing
 **Triggers**: Various development events
 
 ---
 
 #### 9. `debug-triggers.yml` - Workflow Debugging
+
 **Purpose**: Debug and troubleshoot workflow triggers
 **Triggers**: Development and debugging scenarios
 
@@ -123,21 +146,25 @@ This document explains the organization and purpose of each GitHub Actions workf
 ## Workflow Separation Benefits
 
 ### ✅ **Improved Organization**
+
 - Each workflow has a single, clear responsibility
 - Easier to maintain and debug individual components
 - Parallel execution reduces overall CI/CD time
 
 ### ✅ **Targeted Triggers**
+
 - Workflows only run when relevant files change
 - Reduced resource usage and faster feedback
 - Security scans run on schedule vs. every commit
 
 ### ✅ **Independent Scaling**
+
 - Can modify one workflow without affecting others
 - Different permission requirements per workflow
 - Easier to add new workflows for specific needs
 
 ### ✅ **Clear Failure Isolation**
+
 - Failed Docker build doesn't block .NET tests
 - Documentation issues don't stop releases
 - Security warnings don't break development flow

@@ -52,7 +52,7 @@ This directory contains GitHub Actions workflows specifically designed for the J
 
 Add these to your repository secrets (`Settings > Secrets and variables > Actions`):
 
-```
+```cs
 SNYK_TOKEN (optional) - For Snyk security scanning
 ```
 
