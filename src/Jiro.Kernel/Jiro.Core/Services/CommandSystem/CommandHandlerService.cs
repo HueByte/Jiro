@@ -13,13 +13,13 @@ public partial class CommandHandlerService : ICommandHandlerService
 	private readonly ILogger _logger;
 	private readonly Regex pattern = RegexCommandParserPattern();
 	public event Action<string, object[]>? OnLog;
-	public CommandHandlerService (CommandsContext commandModule, ILogger<CommandHandlerService> logger)
+	public CommandHandlerService(CommandsContext commandModule, ILogger<CommandHandlerService> logger)
 	{
 		_commandsModule = commandModule;
 		_logger = logger;
 	}
 
-	public async Task<CommandResponse> ExecuteCommandAsync (IServiceProvider scopedProvider, string prompt)
+	public async Task<CommandResponse> ExecuteCommandAsync(IServiceProvider scopedProvider, string prompt)
 	{
 		CommandResponse? result = null;
 		var watch = Stopwatch.StartNew();
@@ -65,7 +65,7 @@ public partial class CommandHandlerService : ICommandHandlerService
 		return result;
 	}
 
-	private string GetCommandName (string[] tokens)
+	private string GetCommandName(string[] tokens)
 	{
 		if (tokens.Length >= 1)
 		{
@@ -77,7 +77,7 @@ public partial class CommandHandlerService : ICommandHandlerService
 		return _commandsModule.DefaultCommand;
 	}
 
-	private CommandInfo GetCommand (string? commandName)
+	private CommandInfo GetCommand(string? commandName)
 	{
 		if (string.IsNullOrEmpty(commandName) || !_commandsModule.Commands.TryGetValue(commandName, out CommandInfo? commandInfo))
 			_commandsModule.Commands.TryGetValue(_commandsModule.DefaultCommand, out commandInfo);
@@ -88,7 +88,7 @@ public partial class CommandHandlerService : ICommandHandlerService
 		return commandInfo;
 	}
 
-	private string[] ParseTokens (string input)
+	private string[] ParseTokens(string input)
 	{
 		var matches = pattern.Matches(input);
 		var tokens = new string[matches.Count];
@@ -106,5 +106,5 @@ public partial class CommandHandlerService : ICommandHandlerService
 	}
 
 	[GeneratedRegex("[\\\"].+?[\\\"]|[^ ]+", RegexOptions.Compiled)]
-	private static partial Regex RegexCommandParserPattern ();
+	private static partial Regex RegexCommandParserPattern();
 }

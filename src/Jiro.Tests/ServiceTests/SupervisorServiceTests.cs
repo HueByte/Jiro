@@ -6,13 +6,13 @@ public class SupervisorServiceTests
 {
 	private readonly SupervisorService _supervisorService;
 
-	public SupervisorServiceTests ()
+	public SupervisorServiceTests()
 	{
 		_supervisorService = new SupervisorService();
 	}
 
 	[Fact]
-	public void Constructor_ShouldCreateInstance ()
+	public void Constructor_ShouldCreateInstance()
 	{
 		// Arrange & Act
 		var service = new SupervisorService();
@@ -22,7 +22,7 @@ public class SupervisorServiceTests
 	}
 
 	[Fact]
-	public void OnConnected_ShouldAllowEventSubscription ()
+	public void OnConnected_ShouldAllowEventSubscription()
 	{
 		// Arrange
 		Func<Task> handler = () => Task.CompletedTask;
@@ -38,7 +38,7 @@ public class SupervisorServiceTests
 	}
 
 	[Fact]
-	public void OnDisconnected_ShouldAllowEventSubscription ()
+	public void OnDisconnected_ShouldAllowEventSubscription()
 	{
 		// Arrange
 		Func<Task> handler = () => Task.CompletedTask;
@@ -54,7 +54,7 @@ public class SupervisorServiceTests
 	}
 
 	[Fact]
-	public void OnMessageReceived_ShouldAllowEventSubscription ()
+	public void OnMessageReceived_ShouldAllowEventSubscription()
 	{
 		// Arrange
 		Func<string, Task> handler = (message) => Task.CompletedTask;
@@ -70,7 +70,7 @@ public class SupervisorServiceTests
 	}
 
 	[Fact]
-	public void OnMessageSent_ShouldAllowEventSubscription ()
+	public void OnMessageSent_ShouldAllowEventSubscription()
 	{
 		// Arrange
 		Func<string, Task> handler = (message) => Task.CompletedTask;

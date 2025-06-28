@@ -14,7 +14,7 @@ public class ChatCommand : ICommandBase
 	private readonly ICommandContext _commandContext;
 	private readonly IMessageManager _messageManager;
 
-	public ChatCommand (IPersonalizedConversationService chatService, ICommandContext commandContext, IMessageManager messageManager)
+	public ChatCommand(IPersonalizedConversationService chatService, ICommandContext commandContext, IMessageManager messageManager)
 	{
 		_messageManager = messageManager ?? throw new ArgumentNullException(nameof(messageManager), "Chat storage service cannot be null.");
 		_chatService = chatService ?? throw new ArgumentNullException(nameof(chatService), "Chat service cannot be null.");
@@ -22,7 +22,7 @@ public class ChatCommand : ICommandBase
 	}
 
 	[Command("chat")]
-	public async Task<ICommandResult> Chat (string prompt)
+	public async Task<ICommandResult> Chat(string prompt)
 	{
 		var sessionId = _commandContext.SessionId;
 		if (string.IsNullOrEmpty(sessionId))
@@ -34,7 +34,7 @@ public class ChatCommand : ICommandBase
 	}
 
 	[Command("getSessions")]
-	public async Task<ICommandResult> GetSessions ()
+	public async Task<ICommandResult> GetSessions()
 	{
 		if (_commandContext.InstanceId == null)
 			throw new JiroException("User not found");
@@ -45,7 +45,7 @@ public class ChatCommand : ICommandBase
 	}
 
 	[Command("getSessionHistory")]
-	public async Task<ICommandResult> GetSessionMessages (string sessionId)
+	public async Task<ICommandResult> GetSessionMessages(string sessionId)
 	{
 		if (_commandContext.InstanceId == null)
 			throw new JiroException("User not found");
@@ -62,7 +62,7 @@ public class ChatCommand : ICommandBase
 	}
 
 	[Command("reset", commandDescription: "Clears the current session")]
-	public Task ClearSession ()
+	public Task ClearSession()
 	{
 		_commandContext.Data.TryGetValue("sessionId", out var chatSessionId);
 

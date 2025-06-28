@@ -4,5 +4,5 @@ namespace Jiro.Core.Services.Geolocation;
 
 public interface IGeolocationService
 {
-    Task<GeoLocationResponse?> GetGeolocationAsync(string city);
+	Task<GeoLocationResponse?> GetGeolocationAsync(string city);
 }

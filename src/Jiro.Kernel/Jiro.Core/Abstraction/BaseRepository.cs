@@ -8,12 +8,12 @@ public class BaseRepository<TKeyType, TEntity, TContext> : IRepository<TKeyType,
 	where TContext : DbContext, new()
 {
 	protected internal readonly TContext _context;
-	public BaseRepository (TContext context)
+	public BaseRepository(TContext context)
 	{
 		_context = context ?? new TContext();
 	}
 
-	public virtual async Task<bool> AddAsync (TEntity? entity)
+	public virtual async Task<bool> AddAsync(TEntity? entity)
 	{
 		if (entity is null)
 			return false;
@@ -32,7 +32,7 @@ public class BaseRepository<TKeyType, TEntity, TContext> : IRepository<TKeyType,
 		return true;
 	}
 
-	public virtual async Task<bool> AddRangeAsync (IEnumerable<TEntity> entities)
+	public virtual async Task<bool> AddRangeAsync(IEnumerable<TEntity> entities)
 	{
 		if (entities is null)
 			return false;
@@ -44,19 +44,19 @@ public class BaseRepository<TKeyType, TEntity, TContext> : IRepository<TKeyType,
 		return true;
 	}
 
-	public virtual IQueryable<TEntity> AsQueryable ()
+	public virtual IQueryable<TEntity> AsQueryable()
 	{
 		return _context.Set<TEntity>().AsQueryable();
 	}
 
-	public virtual Task<TEntity?> GetAsync (TKeyType id)
+	public virtual Task<TEntity?> GetAsync(TKeyType id)
 	{
 		return _context
 			.Set<TEntity>()
 			.FirstOrDefaultAsync(entry => entry.Id.Equals(id));
 	}
 
-	public virtual async Task<bool> RemoveAsync (TKeyType id)
+	public virtual async Task<bool> RemoveAsync(TKeyType id)
 	{
 		TEntity entity = new()
 		{
@@ -77,7 +77,7 @@ public class BaseRepository<TKeyType, TEntity, TContext> : IRepository<TKeyType,
 		return true;
 	}
 
-	public virtual async Task<bool> RemoveAsync (TEntity? entity)
+	public virtual async Task<bool> RemoveAsync(TEntity? entity)
 	{
 		if (entity is null)
 			return false;
@@ -96,7 +96,7 @@ public class BaseRepository<TKeyType, TEntity, TContext> : IRepository<TKeyType,
 		return true;
 	}
 
-	public virtual Task UpdateAsync (TEntity? entity)
+	public virtual Task UpdateAsync(TEntity? entity)
 	{
 		if (entity is null)
 			return Task.CompletedTask;
@@ -108,7 +108,7 @@ public class BaseRepository<TKeyType, TEntity, TContext> : IRepository<TKeyType,
 		return Task.CompletedTask;
 	}
 
-	public virtual Task UpdateRange (IEnumerable<TEntity> entities)
+	public virtual Task UpdateRange(IEnumerable<TEntity> entities)
 	{
 		_context
 			.Set<TEntity>()
@@ -117,12 +117,12 @@ public class BaseRepository<TKeyType, TEntity, TContext> : IRepository<TKeyType,
 		return Task.CompletedTask;
 	}
 
-	public virtual Task SaveChangesAsync ()
+	public virtual Task SaveChangesAsync()
 	{
 		return _context.SaveChangesAsync();
 	}
 
-	public Task<bool> RemoveRangeAsync (IEnumerable<TEntity> entity)
+	public Task<bool> RemoveRangeAsync(IEnumerable<TEntity> entity)
 	{
 		if (entity is null)
 			return Task.FromResult(false);

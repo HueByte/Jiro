@@ -15,18 +15,18 @@ public class HistoryOptimizerService : IHistoryOptimizerService
 	private readonly IConversationCoreService _chatCoreService;
 	private readonly int _maxTokens = 10000;
 
-	public HistoryOptimizerService (ILogger<HistoryOptimizerService> logger, IConversationCoreService chatCoreService)
+	public HistoryOptimizerService(ILogger<HistoryOptimizerService> logger, IConversationCoreService chatCoreService)
 	{
 		_logger = logger;
 		_chatCoreService = chatCoreService;
 	}
 
-	public bool ShouldOptimizeMessageHistory (ChatTokenUsage tokenUsage)
+	public bool ShouldOptimizeMessageHistory(ChatTokenUsage tokenUsage)
 	{
 		return tokenUsage.TotalTokenCount - (tokenUsage.InputTokenDetails.CachedTokenCount / 2) > _maxTokens;
 	}
 
-	public async Task<OptimizerResult> OptimizeMessageHistory (int currentTokenCount, List<ChatMessage> messages, ChatMessage? personaMessage = null)
+	public async Task<OptimizerResult> OptimizeMessageHistory(int currentTokenCount, List<ChatMessage> messages, ChatMessage? personaMessage = null)
 	{
 		var targetTokenCount = _maxTokens / 2;
 		var messagesToRemoveCount = 0;
@@ -73,7 +73,7 @@ public class HistoryOptimizerService : IHistoryOptimizerService
 		}
 	}
 
-	private async Task<string> SummarizeMessagesAsync (List<ChatMessage> messages, ChatMessage? personaMessage = null)
+	private async Task<string> SummarizeMessagesAsync(List<ChatMessage> messages, ChatMessage? personaMessage = null)
 	{
 		StringBuilder sb = new();
 

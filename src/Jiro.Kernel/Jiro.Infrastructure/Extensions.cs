@@ -5,7 +5,7 @@ namespace Jiro.Infrastructure;
 
 public static class Extensions
 {
-	public static IServiceCollection AddJiroMySQLContext (this IServiceCollection services, string conn)
+	public static IServiceCollection AddJiroMySQLContext(this IServiceCollection services, string conn)
 	{
 		services.AddDbContext<JiroContext>(options =>
 		{
@@ -16,7 +16,7 @@ public static class Extensions
 		return services;
 	}
 
-	public static IServiceCollection AddJiroSQLiteContext (this IServiceCollection services, string conn)
+	public static IServiceCollection AddJiroSQLiteContext(this IServiceCollection services, string conn)
 	{
 		services.AddDbContext<JiroContext>(options =>
 		{

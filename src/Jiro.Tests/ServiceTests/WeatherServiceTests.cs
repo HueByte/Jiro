@@ -21,9 +21,9 @@ public class WeatherServiceTests
 	private const string _lat = "51.5074";
 	private const string _lon = "-0.1274";
 	private const string _weatherBaseAddress = "https://api.open-meteo.com/v1";
-	private static string WeatherEndpoint (string lat, string lon) => $"https://api.open-meteo.com/forecast?latitude={_lat}&longitude={_lon}&current_weather=true&hourly=temperature_2m,rain,surface_pressure,windspeed_10m";
+	private static string WeatherEndpoint(string lat, string lon) => $"https://api.open-meteo.com/forecast?latitude={_lat}&longitude={_lon}&current_weather=true&hourly=temperature_2m,rain,surface_pressure,windspeed_10m";
 
-	public WeatherServiceTests ()
+	public WeatherServiceTests()
 	{
 		// weather
 		WeatherResponse correctWeatherResponse = new()
@@ -77,7 +77,7 @@ public class WeatherServiceTests
 	}
 
 	[Fact]
-	public async Task GetWeatherStringAsync_WithCorrectCity ()
+	public async Task GetWeatherStringAsync_WithCorrectCity()
 	{
 		// Act
 		var result = await _weatherService.GetWeatherStringAsync(_city);
@@ -89,14 +89,14 @@ public class WeatherServiceTests
 	}
 
 	[Fact]
-	public async Task GetWeatherStringAsync_WithWrongCity ()
+	public async Task GetWeatherStringAsync_WithWrongCity()
 	{
 		// Act & Assert
 		await Assert.ThrowsAsync<JiroException>(async () => await _weatherService.GetWeatherStringAsync("WrongCity"));
 	}
 
 	[Fact]
-	public async Task GetWeatherAsync_WithCorrectCity ()
+	public async Task GetWeatherAsync_WithCorrectCity()
 	{
 		// Act
 		var result = await _weatherService.GetWeatherAsync(_city);
@@ -111,7 +111,7 @@ public class WeatherServiceTests
 	}
 
 	[Fact]
-	public async Task GetWeatherAsync_WithWrongCity ()
+	public async Task GetWeatherAsync_WithWrongCity()
 	{
 		// Act & Assert
 		await Assert.ThrowsAsync<JiroException>(async () => await _weatherService.GetWeatherAsync("WrongCity"));

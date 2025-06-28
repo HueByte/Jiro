@@ -8,14 +8,14 @@ public class TestDatabaseInitializer
 {
 	private readonly DbContextOptions<JiroContext> _dbContextOptions;
 
-	public TestDatabaseInitializer ()
+	public TestDatabaseInitializer()
 	{
 		_dbContextOptions = new DbContextOptionsBuilder<JiroContext>()
 			.UseSqlite("DataSource=:memory:") // Use an in-memory SQLite database for testing
 		.Options;
 	}
 
-	public JiroContext CreateDbContext ()
+	public JiroContext CreateDbContext()
 	{
 		var dbContext = new JiroContext(_dbContextOptions);
 		dbContext.Database.OpenConnection();
@@ -23,7 +23,7 @@ public class TestDatabaseInitializer
 		return dbContext;
 	}
 
-	public void SeedData ()
+	public void SeedData()
 	{
 		using var dbContext = CreateDbContext();
 		// Perform data seeding
@@ -33,7 +33,7 @@ public class TestDatabaseInitializer
 		dbContext.SaveChanges();
 	}
 
-	public void CleanData ()
+	public void CleanData()
 	{
 		using var dbContext = CreateDbContext();
 

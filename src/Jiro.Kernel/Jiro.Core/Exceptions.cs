@@ -5,15 +5,15 @@ public class JiroException : Exception
 	public string UserMessage { get; set; }
 	public string[] Details { get; set; }
 
-	public JiroException (string userMessage) : this(userMessage, []) { }
-	public JiroException (string userMessage, params string[] details) : base(userMessage)
+	public JiroException(string userMessage) : this(userMessage, []) { }
+	public JiroException(string userMessage, params string[] details) : base(userMessage)
 	{
 		UserMessage = userMessage;
 		Details = details;
 	}
 
-	public JiroException (Exception exception, string userMessage) : this(exception, userMessage, []) { }
-	public JiroException (Exception exception, string userMessage, params string[] details) : base(exception.Message, exception)
+	public JiroException(Exception exception, string userMessage) : this(exception, userMessage, []) { }
+	public JiroException(Exception exception, string userMessage, params string[] details) : base(exception.Message, exception)
 	{
 		UserMessage = userMessage;
 		Details = details;
@@ -22,5 +22,5 @@ public class JiroException : Exception
 
 public class TokenException : Exception
 {
-	public TokenException (string exceptionMessage) : base(exceptionMessage) { }
+	public TokenException(string exceptionMessage) : base(exceptionMessage) { }
 }

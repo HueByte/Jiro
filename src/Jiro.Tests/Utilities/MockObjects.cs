@@ -15,7 +15,7 @@ namespace Jiro.Tests.Utilities;
 
 public static class MockObjects
 {
-	public static Mock<UserManager<TIdentityUser>> GetUserManagerMock<TIdentityUser> () where TIdentityUser : IdentityUser
+	public static Mock<UserManager<TIdentityUser>> GetUserManagerMock<TIdentityUser>() where TIdentityUser : IdentityUser
 	{
 		return new Mock<UserManager<TIdentityUser>>(
 				new Mock<IUserStore<TIdentityUser>>().Object,
@@ -29,7 +29,7 @@ public static class MockObjects
 				new Mock<ILogger<UserManager<TIdentityUser>>>().Object);
 	}
 
-	public static Mock<RoleManager<TIdentityRole>> GetRoleManagerMock<TIdentityRole> () where TIdentityRole : IdentityRole
+	public static Mock<RoleManager<TIdentityRole>> GetRoleManagerMock<TIdentityRole>() where TIdentityRole : IdentityRole
 	{
 		return new Mock<RoleManager<TIdentityRole>>(
 				new Mock<IRoleStore<TIdentityRole>>().Object,
@@ -39,7 +39,7 @@ public static class MockObjects
 				new Mock<ILogger<RoleManager<TIdentityRole>>>().Object);
 	}
 
-	public static Mock<TRepository> CreateMockRepository<TRepository, TKey, TEntity> (List<TEntity>? entries = null)
+	public static Mock<TRepository> CreateMockRepository<TRepository, TKey, TEntity>(List<TEntity>? entries = null)
 		where TRepository : class, IRepository<TKey, TEntity>
 		where TKey : IConvertible
 		where TEntity : DbModel<TKey>
@@ -52,7 +52,7 @@ public static class MockObjects
 		return mock;
 	}
 
-	public static Mock<SignInManager<TIdentityUser>> GetSignInManagerMock<TIdentityUser> () where TIdentityUser : IdentityUser
+	public static Mock<SignInManager<TIdentityUser>> GetSignInManagerMock<TIdentityUser>() where TIdentityUser : IdentityUser
 	{
 		return new Mock<SignInManager<TIdentityUser>>(
 			GetUserManagerMock<TIdentityUser>().Object,
@@ -64,7 +64,7 @@ public static class MockObjects
 			/* IUserConfirmation<TUser> confirmation */null);
 	}
 
-	public static Mock<DbSet<T>> GetMockDbSet<T> (IEnumerable<T> data) where T : class
+	public static Mock<DbSet<T>> GetMockDbSet<T>(IEnumerable<T> data) where T : class
 	{
 		return data.AsQueryable().BuildMockDbSet();
 	}

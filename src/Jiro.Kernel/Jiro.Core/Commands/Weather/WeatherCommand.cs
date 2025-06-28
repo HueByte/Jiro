@@ -11,14 +11,14 @@ public class WeatherCommand : ICommandBase
 {
 	private readonly IWeatherService _weatherService;
 	private readonly IMessageManager _messageManager;
-	public WeatherCommand (IWeatherService weatherService, IMessageManager messageManager)
+	public WeatherCommand(IWeatherService weatherService, IMessageManager messageManager)
 	{
 		_weatherService = weatherService ?? throw new ArgumentNullException(nameof(weatherService), "Weather service cannot be null.");
 		_messageManager = messageManager ?? throw new ArgumentNullException(nameof(messageManager), "Message manager cannot be null.");
 	}
 
 	[Command("weather", CommandType.Graph, "weather \"Location\" [daysRange]", "Shows weather forecast for the specified location (24 hours by default)")]
-	public async Task<ICommandResult> Weather (string location, int daysRange)
+	public async Task<ICommandResult> Weather(string location, int daysRange)
 	{
 		// Validate and adjust daysRange
 		daysRange = Math.Clamp(daysRange, 1, 7);

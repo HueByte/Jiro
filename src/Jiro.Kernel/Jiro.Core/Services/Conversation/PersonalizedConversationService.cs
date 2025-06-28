@@ -23,7 +23,7 @@ public class PersonalizedConversationService : IPersonalizedConversationService
 	private const float PRICING_INPUT_CACHED = 0.075f;
 	private const float ONE_MILLION = 1_000_000;
 
-	public PersonalizedConversationService (ILogger<PersonalizedConversationService> logger, IConversationCoreService chatCoreService, IPersonaService personaService, IMessageManager messageCacheService, IHistoryOptimizerService historyOptimizerService, ICommandContext commandContext)
+	public PersonalizedConversationService(ILogger<PersonalizedConversationService> logger, IConversationCoreService chatCoreService, IPersonaService personaService, IMessageManager messageCacheService, IHistoryOptimizerService historyOptimizerService, ICommandContext commandContext)
 	{
 		_logger = logger ?? throw new ArgumentNullException(nameof(logger), "Logger cannot be null.");
 		_chatCoreService = chatCoreService ?? throw new ArgumentNullException(nameof(chatCoreService), "Chat core service cannot be null.");
@@ -33,7 +33,7 @@ public class PersonalizedConversationService : IPersonalizedConversationService
 		_commandContext = commandContext ?? throw new ArgumentNullException(nameof(commandContext), "Command context cannot be null.");
 	}
 
-	public async Task<string> ChatAsync (string instanceId, string sessionId, string message)
+	public async Task<string> ChatAsync(string instanceId, string sessionId, string message)
 	{
 		try
 		{
@@ -96,13 +96,13 @@ public class PersonalizedConversationService : IPersonalizedConversationService
 		}
 	}
 
-	public async Task<string> ExchangeMessageAsync (string message)
+	public async Task<string> ExchangeMessageAsync(string message)
 	{
 		var persona = await _personaService.GetPersonaAsync();
 		return await _chatCoreService.ExchangeMessageAsync(message, persona);
 	}
 
-	private void LogTokenUsage (ChatTokenUsage usage)
+	private void LogTokenUsage(ChatTokenUsage usage)
 	{
 		_logger.LogInformation("Chat used [Total: {totalTokens}] ~ [Input: {inputTokens}] ~ [CachedInput: {cachedInputTokens}] ~ [Output: {outputTokens}] ~ [JiroCounter: {JiroTokens}] tokens",
 			usage.TotalTokenCount, usage.InputTokenCount, usage.InputTokenDetails.CachedTokenCount, usage.OutputTokenCount, usage.TotalTokenCount - (usage.InputTokenDetails.CachedTokenCount / 2));
@@ -110,7 +110,7 @@ public class PersonalizedConversationService : IPersonalizedConversationService
 		_logger.LogInformation("Estimated message price: {messagePrice}$", CalculateMessagePrice(usage));
 	}
 
-	private async Task<(List<ChatMessageWithMetadata>, List<ChatMessageWithMetadata>, Session session)> PrepareMessageHistory (string sessionId, string message)
+	private async Task<(List<ChatMessageWithMetadata>, List<ChatMessageWithMetadata>, Session session)> PrepareMessageHistory(string sessionId, string message)
 	{
 		Session session = await _messageCacheService.GetOrCreateChatSessionAsync(sessionId);
 		if (session is null)
@@ -142,7 +142,7 @@ public class PersonalizedConversationService : IPersonalizedConversationService
 		return (conversationForChat, conversationHistory, session)!;
 	}
 
-	private float CalculateMessagePrice (ChatTokenUsage tokenUsage)
+	private float CalculateMessagePrice(ChatTokenUsage tokenUsage)
 	{
 		var messagePrice =
 			(tokenUsage.InputTokenCount - tokenUsage.InputTokenDetails.CachedTokenCount) / ONE_MILLION * PRICING_INPUT
@@ -152,7 +152,7 @@ public class PersonalizedConversationService : IPersonalizedConversationService
 		return messagePrice;
 	}
 
-	private List<Core.Models.Message> CreateMessageModels (string sessionId, ChatMessage userMessage, ChatMessage JiroMessage)
+	private List<Core.Models.Message> CreateMessageModels(string sessionId, ChatMessage userMessage, ChatMessage JiroMessage)
 	{
 		var modelMessages = new List<Core.Models.Message>
 		{

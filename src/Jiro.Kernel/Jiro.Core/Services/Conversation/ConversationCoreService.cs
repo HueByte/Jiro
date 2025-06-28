@@ -15,7 +15,7 @@ public class ConversationCoreService : IConversationCoreService
 	private readonly ISemaphoreManager _chatSemaphoreManager;
 	private const float TEMPERATURE = 0.6f;
 
-	public ConversationCoreService (ILogger<ConversationCoreService> logger, IMessageManager messageCacheService, ChatClient openAIClient, ISemaphoreManager chatSemaphoreManager)
+	public ConversationCoreService(ILogger<ConversationCoreService> logger, IMessageManager messageCacheService, ChatClient openAIClient, ISemaphoreManager chatSemaphoreManager)
 	{
 		_logger = logger;
 		_messageCacheService = messageCacheService;
@@ -23,7 +23,7 @@ public class ConversationCoreService : IConversationCoreService
 		_chatSemaphoreManager = chatSemaphoreManager;
 	}
 
-	public async Task<ChatCompletion> ChatAsync (string instanceId, List<ChatMessage> messageHistory, ChatMessage? personaMessage = null)
+	public async Task<ChatCompletion> ChatAsync(string instanceId, List<ChatMessage> messageHistory, ChatMessage? personaMessage = null)
 	{
 		// Use a semaphore to prevent concurrent updates for the same channel.
 		SemaphoreSlim instanceSemaphore = _chatSemaphoreManager.GetOrCreateInstanceSemaphore(instanceId);
@@ -64,7 +64,7 @@ public class ConversationCoreService : IConversationCoreService
 		}
 	}
 
-	public async Task<string> ExchangeMessageAsync (string message, ChatMessage? developerPersonaChatMessage = null, int tokenLimit = 1200)
+	public async Task<string> ExchangeMessageAsync(string message, ChatMessage? developerPersonaChatMessage = null, int tokenLimit = 1200)
 	{
 		try
 		{
@@ -96,7 +96,7 @@ public class ConversationCoreService : IConversationCoreService
 		}
 	}
 
-	private async Task<ChatMessage> GetCorePersonaAsync ()
+	private async Task<ChatMessage> GetCorePersonaAsync()
 	{
 		var personaMessage = await _messageCacheService.GetPersonaCoreMessageAsync();
 		return ChatMessage.CreateDeveloperMessage(personaMessage);

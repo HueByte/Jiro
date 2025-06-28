@@ -6,12 +6,12 @@ public class EnvironmentConfigurator
 {
 	private readonly ConfigurationManager _config;
 
-	public EnvironmentConfigurator (ConfigurationManager config)
+	public EnvironmentConfigurator(ConfigurationManager config)
 	{
 		_config = config;
 	}
 
-	public EnvironmentConfigurator PrepareDefaultFolders ()
+	public EnvironmentConfigurator PrepareDefaultFolders()
 	{
 		if (!Directory.Exists(Path.Join(AppContext.BaseDirectory, "logs")))
 			Directory.CreateDirectory(Path.Join(AppContext.BaseDirectory, "logs"));
@@ -25,7 +25,7 @@ public class EnvironmentConfigurator
 		return this;
 	}
 
-	public EnvironmentConfigurator PrepareLogsFolder ()
+	public EnvironmentConfigurator PrepareLogsFolder()
 	{
 		var logsPath = _config.GetValue<string>("API_LOGS_PATH");
 		if (string.IsNullOrEmpty(logsPath))
@@ -46,7 +46,7 @@ public class EnvironmentConfigurator
 		return this;
 	}
 
-	public EnvironmentConfigurator PrepareConfigFiles ()
+	public EnvironmentConfigurator PrepareConfigFiles()
 	{
 		string finalPath = "";
 		try

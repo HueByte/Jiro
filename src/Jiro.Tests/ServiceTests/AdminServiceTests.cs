@@ -4,27 +4,27 @@ namespace Jiro.Tests.ServiceTests;
 
 public class AdminServiceTests
 {
-    private readonly AdminService _adminService;
+	private readonly AdminService _adminService;
 
-    public AdminServiceTests ()
-    {
-        _adminService = new AdminService();
-    }
+	public AdminServiceTests()
+	{
+		_adminService = new AdminService();
+	}
 
-    [Fact]
-    public void Constructor_ShouldCreateInstance ()
-    {
-        // Arrange & Act
-        var service = new AdminService();
+	[Fact]
+	public void Constructor_ShouldCreateInstance()
+	{
+		// Arrange & Act
+		var service = new AdminService();
 
-        // Assert
-        Assert.NotNull(service);
-    }
+		// Assert
+		Assert.NotNull(service);
+	}
 
-    [Fact]
-    public void AdminService_ShouldBeInstantiable ()
-    {
-        // Arrange & Act & Assert
-        Assert.NotNull(_adminService);
-    }
+	[Fact]
+	public void AdminService_ShouldBeInstantiable()
+	{
+		// Arrange & Act & Assert
+		Assert.NotNull(_adminService);
+	}
 }

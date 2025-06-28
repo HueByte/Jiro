@@ -8,7 +8,7 @@ namespace Jiro.Infrastructure.Migrations
 	public partial class ChatSessions_Clear : Migration
 	{
 		/// <inheritdoc />
-		protected override void Up (MigrationBuilder migrationBuilder)
+		protected override void Up(MigrationBuilder migrationBuilder)
 		{
 			migrationBuilder.DropColumn(
 				name: "SessionId",
@@ -16,7 +16,7 @@ namespace Jiro.Infrastructure.Migrations
 		}
 
 		/// <inheritdoc />
-		protected override void Down (MigrationBuilder migrationBuilder)
+		protected override void Down(MigrationBuilder migrationBuilder)
 		{
 			migrationBuilder.AddColumn<string>(
 				name: "SessionId",

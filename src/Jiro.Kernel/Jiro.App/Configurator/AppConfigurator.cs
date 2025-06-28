@@ -10,20 +10,20 @@ public class AppConfigurator
 {
 	private readonly IHost _app;
 	private readonly EventsConfigurator _eventsConfigurator;
-	public AppConfigurator (IHost app)
+	public AppConfigurator(IHost app)
 	{
 		_app = app;
 		_eventsConfigurator = app.Services.GetRequiredService<EventsConfigurator>();
 	}
 
-	public AppConfigurator ConfigureEvents ()
+	public AppConfigurator ConfigureEvents()
 	{
 		_eventsConfigurator?.ConfigureLoggingEvents();
 
 		return this;
 	}
 
-	public AppConfigurator Migrate ()
+	public AppConfigurator Migrate()
 	{
 		using var scope = _app.Services.CreateScope();
 		var context = scope.ServiceProvider.GetRequiredService<JiroContext>();

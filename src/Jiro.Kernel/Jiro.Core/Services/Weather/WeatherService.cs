@@ -10,13 +10,13 @@ public class WeatherService : IWeatherService
 {
 	private readonly HttpClient _weatherClient;
 	private readonly IGeolocationService _geolocationService;
-	public WeatherService (IHttpClientFactory clientFactory, IGeolocationService geolocationService)
+	public WeatherService(IHttpClientFactory clientFactory, IGeolocationService geolocationService)
 	{
 		_weatherClient = clientFactory.CreateClient(HttpClients.WEATHER_CLIENT);
 		_geolocationService = geolocationService;
 	}
 
-	public async Task<string?> GetWeatherStringAsync (string city)
+	public async Task<string?> GetWeatherStringAsync(string city)
 	{
 		var locationInfo = await _geolocationService.GetGeolocationAsync(city);
 
@@ -39,7 +39,7 @@ public class WeatherService : IWeatherService
 		return await response.Content.ReadAsStringAsync();
 	}
 
-	public async Task<WeatherResponse?> GetWeatherAsync (string city)
+	public async Task<WeatherResponse?> GetWeatherAsync(string city)
 	{
 		WeatherResponse? response = null;
 

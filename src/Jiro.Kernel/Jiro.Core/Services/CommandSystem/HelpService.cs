@@ -10,14 +10,14 @@ public class HelpService : IHelpService
 	}
 	private readonly CommandsContext _commandsContainer;
 
-	public HelpService (CommandsContext commandsContainer)
+	public HelpService(CommandsContext commandsContainer)
 	{
 		HelpMessage = "";
 		_commandsContainer = commandsContainer;
 		CreateHelpMessage();
 	}
 
-	public void CreateHelpMessage ()
+	public void CreateHelpMessage()
 	{
 		var commands = _commandsContainer.Commands;
 		var modules = _commandsContainer.CommandModules.Select(e => e.Value);

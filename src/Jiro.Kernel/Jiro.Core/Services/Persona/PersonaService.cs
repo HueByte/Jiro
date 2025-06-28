@@ -15,7 +15,7 @@ public class PersonaService : IPersonaService
 	private readonly IMemoryCache _memoryCache;
 	private readonly ISemaphoreManager _chatSemaphoreManager;
 
-	public PersonaService (ILogger<PersonaService> logger, IMessageManager messageCacheService, IConversationCoreService chatService, IMemoryCache memoryCache, ISemaphoreManager chatSemaphoreManager)
+	public PersonaService(ILogger<PersonaService> logger, IMessageManager messageCacheService, IConversationCoreService chatService, IMemoryCache memoryCache, ISemaphoreManager chatSemaphoreManager)
 	{
 		_logger = logger;
 		_messageCacheService = messageCacheService;
@@ -24,7 +24,7 @@ public class PersonaService : IPersonaService
 		_chatSemaphoreManager = chatSemaphoreManager;
 	}
 
-	public async Task<string> GetPersonaAsync (string instanceId = "")
+	public async Task<string> GetPersonaAsync(string instanceId = "")
 	{
 		if (string.IsNullOrEmpty(instanceId))
 		{
@@ -53,7 +53,7 @@ public class PersonaService : IPersonaService
 		return personaMessage;
 	}
 
-	public async Task AddSummaryAsync (string updateMessage)
+	public async Task AddSummaryAsync(string updateMessage)
 	{
 		try
 		{
@@ -76,7 +76,7 @@ public class PersonaService : IPersonaService
 		}
 	}
 
-	private async Task<string> GetPersonaInternalAsync ()
+	private async Task<string> GetPersonaInternalAsync()
 	{
 		try
 		{

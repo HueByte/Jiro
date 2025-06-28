@@ -16,13 +16,13 @@ public class IdentityBaseRepository<TKeyType, TEntity, TContext> : IIdentityRepo
 {
 	protected internal readonly TContext _context;
 	private readonly ICommandContext _currentUser;
-	public IdentityBaseRepository (TContext context, ICommandContext currentUser)
+	public IdentityBaseRepository(TContext context, ICommandContext currentUser)
 	{
 		_context = context ?? new TContext();
 		_currentUser = currentUser;
 	}
 
-	public virtual async Task<bool> AddAsync (TEntity? entity)
+	public virtual async Task<bool> AddAsync(TEntity? entity)
 	{
 		if (entity is null)
 			return false;
@@ -40,7 +40,7 @@ public class IdentityBaseRepository<TKeyType, TEntity, TContext> : IIdentityRepo
 		return true;
 	}
 
-	public virtual Task<bool> AddRangeAsync (IEnumerable<TEntity> entities)
+	public virtual Task<bool> AddRangeAsync(IEnumerable<TEntity> entities)
 	{
 		if (entities is null)
 			return Task.FromResult(false);
@@ -51,26 +51,26 @@ public class IdentityBaseRepository<TKeyType, TEntity, TContext> : IIdentityRepo
 		return Task.FromResult(true);
 	}
 
-	public virtual IQueryable<TEntity> AsQueryable ()
+	public virtual IQueryable<TEntity> AsQueryable()
 	{
 		return _context.Set<TEntity>()
 			.AsQueryable();
 	}
 
-	public virtual IQueryable<TEntity> AsIdentityQueryable ()
+	public virtual IQueryable<TEntity> AsIdentityQueryable()
 	{
 		return _context.Set<TEntity>()
 			.Where(cat => cat.UserId == _currentUser.InstanceId)
 			.AsQueryable();
 	}
 
-	public virtual async Task<TEntity?> GetAsync (TKeyType id)
+	public virtual async Task<TEntity?> GetAsync(TKeyType id)
 	{
 		return await _context.Set<TEntity>()
 			.FirstOrDefaultAsync(entry => entry.Id.Equals(id) && entry.UserId.Equals(_currentUser.InstanceId));
 	}
 
-	public virtual async Task<bool> RemoveAsync (TKeyType id)
+	public virtual async Task<bool> RemoveAsync(TKeyType id)
 	{
 		TEntity entity = new()
 		{
@@ -87,7 +87,7 @@ public class IdentityBaseRepository<TKeyType, TEntity, TContext> : IIdentityRepo
 		return true;
 	}
 
-	public virtual async Task<bool> RemoveAsync (TEntity? entity)
+	public virtual async Task<bool> RemoveAsync(TEntity? entity)
 	{
 		if (entity is null)
 			return false;
@@ -101,7 +101,7 @@ public class IdentityBaseRepository<TKeyType, TEntity, TContext> : IIdentityRepo
 		return true;
 	}
 
-	public virtual Task UpdateAsync (TEntity? entity)
+	public virtual Task UpdateAsync(TEntity? entity)
 	{
 		if (entity is null)
 			return Task.CompletedTask;
@@ -111,19 +111,19 @@ public class IdentityBaseRepository<TKeyType, TEntity, TContext> : IIdentityRepo
 		return Task.CompletedTask;
 	}
 
-	public virtual Task UpdateRange (IEnumerable<TEntity> entities)
+	public virtual Task UpdateRange(IEnumerable<TEntity> entities)
 	{
 		_context.Set<TEntity>().UpdateRange(entities);
 
 		return Task.CompletedTask;
 	}
 
-	public virtual async Task SaveChangesAsync ()
+	public virtual async Task SaveChangesAsync()
 	{
 		await _context.SaveChangesAsync();
 	}
 
-	public Task<bool> RemoveRangeAsync (IEnumerable<TEntity> entity)
+	public Task<bool> RemoveRangeAsync(IEnumerable<TEntity> entity)
 	{
 		if (entity is null)
 			return Task.FromResult(true);

@@ -12,14 +12,14 @@ public class HelpServiceTests
 	private readonly Mock<CommandsContext> _commandsContextMock;
 	private readonly IHelpService _helpService;
 
-	public HelpServiceTests ()
+	public HelpServiceTests()
 	{
 		_commandsContextMock = new Mock<CommandsContext>();
 		SetupMockCommandsContext();
 		_helpService = new HelpService(_commandsContextMock.Object);
 	}
 
-	private void SetupMockCommandsContext ()
+	private void SetupMockCommandsContext()
 	{
 		// Setup empty contexts for basic testing
 		var commandModules = new Dictionary<string, CommandModuleInfo>();
@@ -30,14 +30,14 @@ public class HelpServiceTests
 	}
 
 	[Fact]
-	public void Constructor_ShouldCreateHelpMessage ()
+	public void Constructor_ShouldCreateHelpMessage()
 	{
 		// Act & Assert
 		Assert.NotNull(_helpService.HelpMessage);
 	}
 
 	[Fact]
-	public void Constructor_ShouldSetHelpMessageProperty ()
+	public void Constructor_ShouldSetHelpMessageProperty()
 	{
 		// Act
 		var helpMessage = _helpService.HelpMessage;
@@ -48,7 +48,7 @@ public class HelpServiceTests
 	}
 
 	[Fact]
-	public void CreateHelpMessage_ShouldUpdateHelpMessage ()
+	public void CreateHelpMessage_ShouldUpdateHelpMessage()
 	{
 		// Arrange
 		var originalMessage = _helpService.HelpMessage;
@@ -61,7 +61,7 @@ public class HelpServiceTests
 	}
 
 	[Fact]
-	public void HelpMessage_WithEmptyCommands_ShouldHandleGracefully ()
+	public void HelpMessage_WithEmptyCommands_ShouldHandleGracefully()
 	{
 		// Arrange - Already setup with empty commands in constructor
 
@@ -75,7 +75,7 @@ public class HelpServiceTests
 	}
 
 	[Fact]
-	public void CreateHelpMessage_ShouldCallCommandsContextProperties ()
+	public void CreateHelpMessage_ShouldCallCommandsContextProperties()
 	{
 		// Act
 		_helpService.CreateHelpMessage();

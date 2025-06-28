@@ -22,7 +22,7 @@ public class MessageManager : IMessageManager
 	private readonly int _messageFetchCount = 40;
 	private const int MEMORY_CACHE_EXPIRATION = 5;
 
-	public MessageManager (ILogger<MessageManager> logger, IMemoryCache memoryCache, IMessageRepository messageRepository, IChatSessionRepository chatSessionRepository, IConfiguration configuration, ICommandContext commandContext)
+	public MessageManager(ILogger<MessageManager> logger, IMemoryCache memoryCache, IMessageRepository messageRepository, IChatSessionRepository chatSessionRepository, IConfiguration configuration, ICommandContext commandContext)
 	{
 		_logger = logger;
 		_memoryCache = memoryCache;
@@ -32,7 +32,7 @@ public class MessageManager : IMessageManager
 		_commandContext = commandContext ?? throw new ArgumentNullException(nameof(commandContext), "Command context cannot be null.");
 	}
 
-	public void ClearMessageCache ()
+	public void ClearMessageCache()
 	{
 		// Log cache clear action
 		_logger?.LogInformation("Clearing persona and core persona message cache.");
@@ -40,7 +40,7 @@ public class MessageManager : IMessageManager
 		_memoryCache.Remove(Constants.CacheKeys.CorePersonaMessageKey);
 	}
 
-	public async Task<List<ChatSession>> GetChatSessionsAsync (string instanceId)
+	public async Task<List<ChatSession>> GetChatSessionsAsync(string instanceId)
 	{
 		try
 		{
@@ -69,7 +69,7 @@ public class MessageManager : IMessageManager
 		}
 	}
 
-	public async Task<Session?> GetSessionAsync (string sessionId)
+	public async Task<Session?> GetSessionAsync(string sessionId)
 	{
 		if (!_memoryCache.TryGetValue(sessionId, out Session? session))
 		{
@@ -97,12 +97,12 @@ public class MessageManager : IMessageManager
 		return session;
 	}
 
-	public async Task<string?> GetPersonaCoreMessageAsync ()
+	public async Task<string?> GetPersonaCoreMessageAsync()
 	{
 		return await GetMessageAsync(Constants.CacheKeys.CorePersonaMessageKey);
 	}
 
-	public int GetChatMessageCount (string instanceId)
+	public int GetChatMessageCount(string instanceId)
 	{
 		if (_memoryCache.TryGetValue(instanceId, out List<ChatMessage>? channelMessages))
 		{
@@ -112,7 +112,7 @@ public class MessageManager : IMessageManager
 		return 0;
 	}
 
-	public async Task<Session> GetOrCreateChatSessionAsync (string sessionId)
+	public async Task<Session> GetOrCreateChatSessionAsync(string sessionId)
 	{
 		try
 		{
@@ -163,7 +163,7 @@ public class MessageManager : IMessageManager
 		}
 	}
 
-	public async Task AddChatExchangeAsync (string sessionId, List<ChatMessageWithMetadata> messages, List<Message> modelMessages)
+	public async Task AddChatExchangeAsync(string sessionId, List<ChatMessageWithMetadata> messages, List<Message> modelMessages)
 	{
 		try
 		{
@@ -201,7 +201,7 @@ public class MessageManager : IMessageManager
 		}
 	}
 
-	public void ClearOldMessages (string sessionId, int range)
+	public void ClearOldMessages(string sessionId, int range)
 	{
 		if (!_memoryCache.TryGetValue(sessionId, out Session? session))
 		{
@@ -215,12 +215,12 @@ public class MessageManager : IMessageManager
 		}
 	}
 
-	public void ModifyMessage (string key, string message, int minutes = 30)
+	public void ModifyMessage(string key, string message, int minutes = 30)
 	{
 		_memoryCache.Set(key, message, TimeSpan.FromMinutes(minutes));
 	}
 
-	private async Task<string?> GetMessageAsync (string key)
+	private async Task<string?> GetMessageAsync(string key)
 	{
 		if (_memoryCache.TryGetValue(key, out string? message))
 		{
@@ -236,7 +236,7 @@ public class MessageManager : IMessageManager
 		return null;
 	}
 
-	private async Task<List<ChatSession>> FetchChatSessionsAsync (string instanceId)
+	private async Task<List<ChatSession>> FetchChatSessionsAsync(string instanceId)
 	{
 		try
 		{

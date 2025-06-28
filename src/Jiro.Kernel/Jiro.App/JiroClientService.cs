@@ -35,14 +35,14 @@ internal class JiroClientService : IHostedService
 	private CancellationToken _cancellationToken;
 	private int _retryCount;
 
-	public JiroClientService (IServiceScopeFactory scopeFactory, ILogger<JiroClientService> logger, ICommandHandlerService commandHandlerService)
+	public JiroClientService(IServiceScopeFactory scopeFactory, ILogger<JiroClientService> logger, ICommandHandlerService commandHandlerService)
 	{
 		_scopeFactory = scopeFactory;
 		_logger = logger;
 		_commandHandler = commandHandlerService;
 	}
 
-	public async Task StartAsync (CancellationToken cancellationToken)
+	public async Task StartAsync(CancellationToken cancellationToken)
 	{
 		//await SayHello();
 		_cancellationToken = cancellationToken;
@@ -107,7 +107,7 @@ internal class JiroClientService : IHostedService
 		} while (!cancellationToken.IsCancellationRequested && _retryCount++ < MAX_RETRY_COUNT);
 	}
 
-	private async Task StartListeningLoopAsync (AsyncDuplexStreamingCall<ClientMessage, ServerMessage>? callInstance)
+	private async Task StartListeningLoopAsync(AsyncDuplexStreamingCall<ClientMessage, ServerMessage>? callInstance)
 	{
 		if (callInstance is null)
 		{
@@ -158,7 +158,7 @@ internal class JiroClientService : IHostedService
 		}
 	}
 
-	private async Task StartKeepAliveLoopAsync (AsyncDuplexStreamingCall<ClientMessage, ServerMessage>? callInstance)
+	private async Task StartKeepAliveLoopAsync(AsyncDuplexStreamingCall<ClientMessage, ServerMessage>? callInstance)
 	{
 		while (!_cancellationToken.IsCancellationRequested)
 		{
@@ -184,7 +184,7 @@ internal class JiroClientService : IHostedService
 		}
 	}
 
-	private async Task ExecuteCommandAsync (string scopedCommandSyncId, string instanceId, string sessionId, string command, AsyncDuplexStreamingCall<ClientMessage, ServerMessage> callInstance)
+	private async Task ExecuteCommandAsync(string scopedCommandSyncId, string instanceId, string sessionId, string command, AsyncDuplexStreamingCall<ClientMessage, ServerMessage> callInstance)
 	{
 		try
 		{
@@ -211,7 +211,7 @@ internal class JiroClientService : IHostedService
 		}
 	}
 
-	private ClientMessage CreateMessage (string syncId, CommandResponse commandResult)
+	private ClientMessage CreateMessage(string syncId, CommandResponse commandResult)
 	{
 		// todo
 		// use mapper later
@@ -266,7 +266,7 @@ internal class JiroClientService : IHostedService
 		return response;
 	}
 
-	private async Task WriteMessageToServer (AsyncDuplexStreamingCall<ClientMessage, ServerMessage> stream, ClientMessage message)
+	private async Task WriteMessageToServer(AsyncDuplexStreamingCall<ClientMessage, ServerMessage> stream, ClientMessage message)
 	{
 		await _semaphore.WaitAsync(_cancellationToken);
 		try
@@ -279,12 +279,12 @@ internal class JiroClientService : IHostedService
 		}
 	}
 
-	public Task StopAsync (CancellationToken cancellationToken)
+	public Task StopAsync(CancellationToken cancellationToken)
 	{
 		return Task.CompletedTask;
 	}
 
-	private static JiroCloud.Api.Proto.CommandType GetCommandType (Jiro.Commands.CommandType commandType) => (int)commandType switch
+	private static JiroCloud.Api.Proto.CommandType GetCommandType(Jiro.Commands.CommandType commandType) => (int)commandType switch
 	{
 		0 => JiroCloud.Api.Proto.CommandType.Text,
 		1 => JiroCloud.Api.Proto.CommandType.Graph,

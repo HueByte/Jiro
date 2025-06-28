@@ -10,16 +10,16 @@ public class JiroContext : IdentityDbContext<AppUser, AppRole, string,
 	IdentityUserClaim<string>, AppUserRole, IdentityUserLogin<string>,
 	IdentityRoleClaim<string>, IdentityUserToken<string>>
 {
-	public JiroContext ()
+	public JiroContext()
 	{
 	}
-	public JiroContext (DbContextOptions<JiroContext> options) : base(options) { }
+	public JiroContext(DbContextOptions<JiroContext> options) : base(options) { }
 
-	protected override void OnConfiguring (DbContextOptionsBuilder optionsBuilder)
+	protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 	{
 	}
 
-	protected override void OnModelCreating (ModelBuilder builder)
+	protected override void OnModelCreating(ModelBuilder builder)
 	{
 		base.OnModelCreating(builder);
 

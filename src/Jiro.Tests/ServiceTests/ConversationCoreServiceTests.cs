@@ -19,7 +19,7 @@ public class ConversationCoreServiceTests
 	private readonly Mock<SemaphoreSlim> _semaphoreMock;
 	private readonly ConversationCoreService _conversationCoreService;
 
-	public ConversationCoreServiceTests ()
+	public ConversationCoreServiceTests()
 	{
 		_loggerMock = new Mock<ILogger<ConversationCoreService>>();
 		_messageCacheServiceMock = new Mock<IMessageManager>();
@@ -40,7 +40,7 @@ public class ConversationCoreServiceTests
 	}
 
 	[Fact]
-	public void Constructor_WithValidParameters_ShouldCreateInstance ()
+	public void Constructor_WithValidParameters_ShouldCreateInstance()
 	{
 		// Arrange & Act
 		var service = new ConversationCoreService(
@@ -55,14 +55,14 @@ public class ConversationCoreServiceTests
 	}
 
 	[Fact]
-	public void ConversationCoreService_ShouldImplementIConversationCoreService ()
+	public void ConversationCoreService_ShouldImplementIConversationCoreService()
 	{
 		// Arrange & Act & Assert
 		Assert.IsAssignableFrom<IConversationCoreService>(_conversationCoreService);
 	}
 
 	[Fact]
-	public void Constructor_ShouldSetupDependencies ()
+	public void Constructor_ShouldSetupDependencies()
 	{
 		// Arrange & Act & Assert
 		Assert.NotNull(_conversationCoreService);
@@ -81,7 +81,7 @@ public class ConversationCoreServiceTests
 	// with a test OpenAI client would be more appropriate.
 
 	[Fact]
-	public async Task ChatAsync_ShouldUseSemaphoreForConcurrencyControl ()
+	public async Task ChatAsync_ShouldUseSemaphoreForConcurrencyControl()
 	{
 		// Arrange
 		const string instanceId = "test-instance";

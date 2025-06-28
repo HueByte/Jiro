@@ -2,7 +2,7 @@ namespace Jiro.Core.Services.CommandHandler;
 
 public interface ICommandHandlerService
 {
-    event Action<string, object[]>? OnLog;
+	event Action<string, object[]>? OnLog;
 
-    Task<CommandResponse> ExecuteCommandAsync(IServiceProvider scopedProvider, string prompt);
+	Task<CommandResponse> ExecuteCommandAsync(IServiceProvider scopedProvider, string prompt);
 }

@@ -44,11 +44,11 @@ public class VerifiedUserDTO
 		get; set;
 	}
 
-	public VerifiedUserDTO ()
+	public VerifiedUserDTO()
 	{
 	}
 
-	public VerifiedUserDTO (AppUser user, string[] roles, string jwtToken, string email, RefreshToken refreshToken, DateTime accessTokenExireDate)
+	public VerifiedUserDTO(AppUser user, string[] roles, string jwtToken, string email, RefreshToken refreshToken, DateTime accessTokenExireDate)
 	{
 		Username = user.UserName;
 		Roles = roles;

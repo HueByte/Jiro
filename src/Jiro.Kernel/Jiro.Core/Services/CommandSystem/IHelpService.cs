@@ -2,7 +2,7 @@ namespace Jiro.Core.Services.CommandSystem;
 
 public interface IHelpService
 {
-    string HelpMessage { get; }
+	string HelpMessage { get; }
 
-    void CreateHelpMessage();
+	void CreateHelpMessage();
 }

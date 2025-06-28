@@ -10,13 +10,13 @@ public class CommandHandlerServiceTests
 {
 	private readonly Mock<ILogger<CommandHandlerService>> _loggerMock;
 
-	public CommandHandlerServiceTests ()
+	public CommandHandlerServiceTests()
 	{
 		_loggerMock = new Mock<ILogger<CommandHandlerService>>();
 	}
 
 	[Fact]
-	public void CommandHandlerService_ShouldImplementICommandHandlerService ()
+	public void CommandHandlerService_ShouldImplementICommandHandlerService()
 	{
 		// Arrange
 		// Note: CommandHandlerService requires CommandsContext which is an external dependency
@@ -29,7 +29,7 @@ public class CommandHandlerServiceTests
 	}
 
 	[Fact]
-	public void ICommandHandlerService_ShouldHaveRequiredMethods ()
+	public void ICommandHandlerService_ShouldHaveRequiredMethods()
 	{
 		// Arrange & Act
 		var interfaceType = typeof(ICommandHandlerService);

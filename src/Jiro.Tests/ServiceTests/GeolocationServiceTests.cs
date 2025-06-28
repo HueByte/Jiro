@@ -17,9 +17,9 @@ public class GeolocationServiceTests
 	private readonly IGeolocationService _geolocationService;
 	private const string _city = "London";
 	private const string _geoBaseAddress = "https://nominatim.openstreetmap.org/";
-	private static string GeoEndpoint (string city) => $"https://nominatim.openstreetmap.org/search?city={city}&format=json";
+	private static string GeoEndpoint(string city) => $"https://nominatim.openstreetmap.org/search?city={city}&format=json";
 
-	public GeolocationServiceTests ()
+	public GeolocationServiceTests()
 	{
 		// geo
 		MockHttpMessageHandler geoHttpMock = new();
@@ -40,7 +40,7 @@ public class GeolocationServiceTests
 	}
 
 	[Fact]
-	public async Task GetGeolocationAsync_WithCorrectCity ()
+	public async Task GetGeolocationAsync_WithCorrectCity()
 	{
 		// Act
 		var result = await _geolocationService.GetGeolocationAsync(_city);
@@ -54,7 +54,7 @@ public class GeolocationServiceTests
 	[InlineData("")]
 	[InlineData(" ")]
 	[InlineData(null)]
-	public async Task GetGeolocationAsync_WithWrongCity (string? city)
+	public async Task GetGeolocationAsync_WithWrongCity(string? city)
 	{
 		// Act & Asssert
 		await Assert.ThrowsAsync<JiroException>(async () => await _geolocationService.GetGeolocationAsync(city));

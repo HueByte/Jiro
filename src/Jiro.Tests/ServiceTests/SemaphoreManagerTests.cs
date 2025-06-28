@@ -13,14 +13,14 @@ public class SemaphoreManagerTests
 	private readonly Mock<ILogger<SemaphoreManager>> _loggerMock;
 	private readonly ISemaphoreManager _semaphoreManager;
 
-	public SemaphoreManagerTests ()
+	public SemaphoreManagerTests()
 	{
 		_loggerMock = new Mock<ILogger<SemaphoreManager>>();
 		_semaphoreManager = new SemaphoreManager(_loggerMock.Object);
 	}
 
 	[Fact]
-	public void GetOrCreateInstanceSemaphore_WithNewInstanceId_ShouldCreateNewSemaphore ()
+	public void GetOrCreateInstanceSemaphore_WithNewInstanceId_ShouldCreateNewSemaphore()
 	{
 		// Arrange
 		const string instanceId = "test-instance-1";
@@ -34,7 +34,7 @@ public class SemaphoreManagerTests
 	}
 
 	[Fact]
-	public void GetOrCreateInstanceSemaphore_WithSameInstanceId_ShouldReturnSameSemaphore ()
+	public void GetOrCreateInstanceSemaphore_WithSameInstanceId_ShouldReturnSameSemaphore()
 	{
 		// Arrange
 		const string instanceId = "test-instance-2";
@@ -50,7 +50,7 @@ public class SemaphoreManagerTests
 	}
 
 	[Fact]
-	public void GetOrCreateInstanceSemaphore_WithDifferentInstanceIds_ShouldReturnDifferentSemaphores ()
+	public void GetOrCreateInstanceSemaphore_WithDifferentInstanceIds_ShouldReturnDifferentSemaphores()
 	{
 		// Arrange
 		const string instanceId1 = "test-instance-3";
@@ -71,7 +71,7 @@ public class SemaphoreManagerTests
 	[InlineData(" ")]
 	[InlineData("test-instance")]
 	[InlineData("complex-instance-id-with-dashes-123")]
-	public void GetOrCreateInstanceSemaphore_WithVariousInstanceIds_ShouldCreateValidSemaphores (string instanceId)
+	public void GetOrCreateInstanceSemaphore_WithVariousInstanceIds_ShouldCreateValidSemaphores(string instanceId)
 	{
 		// Act
 		var semaphore = _semaphoreManager.GetOrCreateInstanceSemaphore(instanceId);
@@ -82,7 +82,7 @@ public class SemaphoreManagerTests
 	}
 
 	[Fact]
-	public async Task GetOrCreateInstanceSemaphore_ConcurrentAccess_ShouldHandleProperly ()
+	public async Task GetOrCreateInstanceSemaphore_ConcurrentAccess_ShouldHandleProperly()
 	{
 		// Arrange
 		const string instanceId = "concurrent-test";
@@ -103,7 +103,7 @@ public class SemaphoreManagerTests
 	}
 
 	[Fact]
-	public async Task GetOrCreateInstanceSemaphore_SemaphoreUsage_ShouldWorkCorrectly ()
+	public async Task GetOrCreateInstanceSemaphore_SemaphoreUsage_ShouldWorkCorrectly()
 	{
 		// Arrange
 		const string instanceId = "usage-test";

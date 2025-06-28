@@ -10,9 +10,9 @@ public class SessionResult
 	public DateTime LastUpdatedAt { get; set; }
 	public List<TrimmedMessageResult> Messages { get; set; } = [];
 
-	public SessionResult () { }
+	public SessionResult() { }
 
-	public SessionResult (Session session)
+	public SessionResult(Session session)
 	{
 		SessionId = session.SessionId;
 		CreatedAt = session.CreatedAt;

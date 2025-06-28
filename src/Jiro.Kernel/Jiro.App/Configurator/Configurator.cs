@@ -24,7 +24,7 @@ namespace Jiro.App.Configurator;
 
 public static class Configurator
 {
-	public static IServiceCollection AddServices (this IServiceCollection services, IConfiguration config)
+	public static IServiceCollection AddServices(this IServiceCollection services, IConfiguration config)
 	{
 		services.AddSingleton<ICommandHandlerService, CommandHandlerService>();
 		services.AddSingleton<IHelpService, HelpService>();
@@ -66,7 +66,7 @@ public static class Configurator
 		return services;
 	}
 
-	public static IServiceCollection AddOptions (this IServiceCollection services, IConfiguration configuration)
+	public static IServiceCollection AddOptions(this IServiceCollection services, IConfiguration configuration)
 	{
 		services.AddOptions();
 		services.Configure<ChatOptions>(configuration.GetSection(ChatOptions.Chat));
@@ -76,7 +76,7 @@ public static class Configurator
 		return services;
 	}
 
-	public static IServiceCollection AddHttpClients (this IServiceCollection services, IConfiguration configuration)
+	public static IServiceCollection AddHttpClients(this IServiceCollection services, IConfiguration configuration)
 	{
 		services.AddHttpClient(HttpClients.WEATHER_CLIENT, httpClient =>
 		{

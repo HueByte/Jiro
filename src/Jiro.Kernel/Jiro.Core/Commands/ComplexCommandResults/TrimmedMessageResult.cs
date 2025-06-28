@@ -11,9 +11,9 @@ public class TrimmedMessageResult
 	public DateTime CreatedAt { get; set; }
 	public MessageType Type { get; set; } = MessageType.Text;
 
-	public TrimmedMessageResult () { }
+	public TrimmedMessageResult() { }
 
-	public TrimmedMessageResult (string id, string content, bool isUser, DateTime createdAt, MessageType type)
+	public TrimmedMessageResult(string id, string content, bool isUser, DateTime createdAt, MessageType type)
 	{
 		Id = id;
 		Content = content;

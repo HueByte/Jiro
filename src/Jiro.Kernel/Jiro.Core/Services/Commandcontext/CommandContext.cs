@@ -6,7 +6,7 @@ public class CommandContext : ICommandContext
 	public string SessionId { get; private set; } = string.Empty;
 	public Dictionary<string, object> Data { get; } = [];
 
-	public void SetData (IEnumerable<KeyValuePair<string, object>> data)
+	public void SetData(IEnumerable<KeyValuePair<string, object>> data)
 	{
 		foreach ((string key, object value) in data)
 		{
@@ -15,7 +15,7 @@ public class CommandContext : ICommandContext
 		}
 	}
 
-	public void SetCurrentInstance (string? instanceId)
+	public void SetCurrentInstance(string? instanceId)
 	{
 		if (string.IsNullOrEmpty(instanceId))
 			throw new JiroException(new ArgumentException(null, nameof(instanceId)), "Something went wrong with parsing current instance", "Try to relogin");
@@ -23,7 +23,7 @@ public class CommandContext : ICommandContext
 		InstanceId = instanceId;
 	}
 
-	public void SetSessionId (string sessionId)
+	public void SetSessionId(string sessionId)
 	{
 		if (string.IsNullOrEmpty(sessionId))
 			throw new JiroException(new ArgumentException(null, nameof(sessionId)), "Something went wrong with parsing session", "Try to relogin");
