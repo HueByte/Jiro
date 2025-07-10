@@ -201,7 +201,7 @@ function Invoke-DocumentationTests {
                 Write-Host "Testing DocFX build..." -ForegroundColor Cyan
                 Push-Location "./src"
                 try {
-                    docfx docfx.json --dry-run
+                    docfx docfx.json
                     Write-Success "DocFX configuration is valid"
                 }
                 catch {

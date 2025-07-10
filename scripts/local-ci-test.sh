@@ -230,7 +230,7 @@ documentation_tests() {
         if command -v docfx &> /dev/null; then
             echo "Testing DocFX build..."
             cd "./src" || exit 1
-            if docfx docfx.json --dry-run; then
+            if docfx docfx.json; then
                 print_success "DocFX configuration is valid"
             else
                 print_warning "DocFX build test failed"
