@@ -13,6 +13,7 @@ src/api/.manifest
 
 # Auto-generated documentation files
 docs/project-structure.md
+DEV-SETUP.md
 
 # VS Code and development files
 .vscode
