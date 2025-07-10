@@ -4,6 +4,7 @@ This document shows the complete project structure for the Jiro AI Assistant pro
 Generated on 2025-07-11 00:48:50 using eza with git-aware filtering.
 
 ## Key Components
+
 - **src/Jiro.Kernel/**: Main application kernel containing core services
 - **src/Jiro.Communication/**: Python communication layer and graph generation
 - **assets/**: Project assets including images and documentation diagrams

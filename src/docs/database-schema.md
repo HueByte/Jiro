@@ -15,6 +15,7 @@
 Baza danych Jiro wykorzystuje **ASP.NET Core Identity** do zarządzania użytkownikami i autoryzacją, oraz **Entity Framework Core** z podejściem Code-First do zarządzania schematem.
 
 ### **Główne komponenty:**
+
 - **System Identity** - zarządzanie użytkownikami, rolami i tokenami
 - **System konwersacji** - sesje czatów i wiadomości
 - **System autoryzacji** - refresh tokeny i bezpieczeństwo
@@ -24,6 +25,7 @@ Baza danych Jiro wykorzystuje **ASP.NET Core Identity** do zarządzania użytkow
 ## 🔐 Tabele systemu Identity
 
 ### **AspNetUsers** - Użytkownicy systemu
+
 **Bazuje na:** `AppUser : IdentityUser`
 
 | Kolumna | Typ | Opis | Constraints |
@@ -46,6 +48,7 @@ Baza danych Jiro wykorzystuje **ASP.NET Core Identity** do zarządzania użytkow
 | `AccountCreatedDate` | `DateTime` | Data utworzenia konta | NOT NULL |
 
 ### **AspNetRoles** - Role systemu
+
 **Bazuje na:** `AppRole : IdentityRole`
 
 | Kolumna | Typ | Opis | Constraints |
@@ -56,6 +59,7 @@ Baza danych Jiro wykorzystuje **ASP.NET Core Identity** do zarządzania użytkow
 | `ConcurrencyStamp` | `string` | Wersjonowanie optymistyczne | |
 
 ### **AspNetUserRoles** - Relacja użytkownik-rola
+
 **Bazuje na:** `AppUserRole : IdentityUserRole<string>`
 
 | Kolumna | Typ | Opis | Constraints |
@@ -64,6 +68,7 @@ Baza danych Jiro wykorzystuje **ASP.NET Core Identity** do zarządzania użytkow
 | `RoleId` | `string` | ID roli | **PK**, **FK** → AspNetRoles.Id |
 
 ### **AspNetUserClaims** - Claims użytkowników
+
 **System Identity**
 
 | Kolumna | Typ | Opis | Constraints |
@@ -74,6 +79,7 @@ Baza danych Jiro wykorzystuje **ASP.NET Core Identity** do zarządzania użytkow
 | `ClaimValue` | `string` | Wartość claim | |
 
 ### **AspNetRoleClaims** - Claims ról
+
 **System Identity**
 
 | Kolumna | Typ | Opis | Constraints |
@@ -84,6 +90,7 @@ Baza danych Jiro wykorzystuje **ASP.NET Core Identity** do zarządzania użytkow
 | `ClaimValue` | `string` | Wartość claim | |
 
 ### **AspNetUserLogins** - Zewnętrzne logowania
+
 **System Identity**
 
 | Kolumna | Typ | Opis | Constraints |
@@ -94,6 +101,7 @@ Baza danych Jiro wykorzystuje **ASP.NET Core Identity** do zarządzania użytkow
 | `UserId` | `string` | ID użytkownika | **FK** → AspNetUsers.Id |
 
 ### **AspNetUserTokens** - Tokeny użytkowników
+
 **System Identity**
 
 | Kolumna | Typ | Opis | Constraints |
@@ -108,6 +116,7 @@ Baza danych Jiro wykorzystuje **ASP.NET Core Identity** do zarządzania użytkow
 ## 💬 Tabele aplikacji Jiro
 
 ### **ChatSessions** - Sesje konwersacji
+
 **Model:** `ChatSession : DbModel<string>`
 
 | Kolumna | Typ | Opis | Constraints |
@@ -119,9 +128,11 @@ Baza danych Jiro wykorzystuje **ASP.NET Core Identity** do zarządzania użytkow
 | `LastUpdatedAt` | `DateTime` | Data ostatniej aktualizacji | NOT NULL |
 
 **Relacje:**
+
 - `1:N` → Messages (jedna sesja ma wiele wiadomości)
 
 ### **Messages** - Wiadomości w konwersacjach
+
 **Model:** `Message : DbModel<string>`
 
 | Kolumna | Typ | Opis | Constraints |
@@ -136,14 +147,17 @@ Baza danych Jiro wykorzystuje **ASP.NET Core Identity** do zarządzania użytkow
 | `Type` | `int` | Typ wiadomości (enum) | NOT NULL |
 
 **Enum MessageType:**
+
 - `0` - Text (tekst)
 - `1` - Graph (wykres)
 - `2` - Image (obraz)
 
 **Relacje:**
+
 - `N:1` → ChatSessions (wiele wiadomości należy do jednej sesji)
 
 ### **RefreshTokens** - Tokeny odświeżania
+
 **Model:** `RefreshToken : DbModel<int>`
 
 | Kolumna | Typ | Opis | Constraints |
@@ -159,11 +173,13 @@ Baza danych Jiro wykorzystuje **ASP.NET Core Identity** do zarządzania użytkow
 | `AppUserId` | `string` | ID właściciela tokenu | **FK** → AspNetUsers.Id |
 
 **Właściwości obliczane (nie w bazie):**
+
 - `IsExpired` - czy token wygasł
 - `IsRevoked` - czy token został unieważniony  
 - `IsActive` - czy token jest aktywny
 
 **Relacje:**
+
 - `N:1` → AspNetUsers (wiele tokenów należy do jednego użytkownika)
 
 ---
@@ -236,7 +252,7 @@ erDiagram
    - Relacja many-to-many przez tabelę pośrednią
    - Umożliwia przypisanie wielu ról do użytkownika
 
-2. **AspNetUsers → RefreshTokens** 
+2. **AspNetUsers → RefreshTokens**
    - Relacja one-to-many
    - Jeden użytkownik może mieć wiele aktywnych tokenów
 
@@ -476,6 +492,7 @@ LIMIT 50;
 ---
 
 **Schemat bazy danych Jiro zapewnia:**
+
 - ✅ Pełną integrację z ASP.NET Core Identity
 - ✅ Efektywne zarządzanie sesjami konwersacji  
 - ✅ Bezpieczne przechowywanie tokenów

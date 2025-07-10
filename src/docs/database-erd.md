@@ -162,21 +162,25 @@ erDiagram
 ## 🔍 Kluczowe decyzje projektowe
 
 ### **InstanceId vs UserId**
+
 - `Messages.InstanceId` zamiast bezpośredniego FK do `AspNetUsers`
 - Pozwala na konwersacje dla niezalogowanych użytkowników
 - Jeden użytkownik może mieć wiele równoczesnych sesji
 
 ### **Duplikacja SessionId**
+
 - `Messages.SessionId` duplikuje `Messages.ChatSessionId`
 - Optymalizacja dla częstych zapytań bez joinów
 - Trade-off: przestrzeń vs. wydajność
 
 ### **Soft Delete Pattern**
+
 - `RefreshTokens.Revoked` - NULL oznacza aktywny token
 - Umożliwia audit trail dla bezpieczeństwa
 - Możliwość przywrócenia przypadkowo unieważnionych tokenów
 
 ### **DateTime jako TEXT**
+
 - SQLite przechowuje daty jako TEXT w formacie ISO 8601
 - Entity Framework automatycznie konwertuje
 - Kompatybilność z różnymi bazami danych
