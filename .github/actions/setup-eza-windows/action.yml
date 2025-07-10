@@ -1,0 +1,74 @@
+name: 'Setup Eza (Windows)'
+description: 'Install eza on Windows using winget with cargo fallback'
+inputs:
+  force-install:
+    description: 'Force install eza even if already present'
+    required: false
+    default: 'false'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Check if eza is already installed
+      id: check-eza
+      shell: pwsh
+      run: |
+        try {
+          $null = Get-Command eza -ErrorAction Stop
+          if ("${{ inputs.force-install }}" -ne "true") {
+            echo "eza-present=true" >> $env:GITHUB_OUTPUT
+            Write-Host "✅ eza is already available"
+          } else {
+            echo "eza-present=false" >> $env:GITHUB_OUTPUT
+            Write-Host "⚠️ Force install requested"
+          }
+        } catch {
+          echo "eza-present=false" >> $env:GITHUB_OUTPUT
+          Write-Host "⚠️ eza not found"
+        }
+
+    - name: Install eza via winget
+      if: steps.check-eza.outputs.eza-present == 'false'
+      shell: pwsh
+      run: |
+        try {
+          Write-Host "📦 Installing eza via winget..."
+          winget install eza.eza --accept-source-agreements --accept-package-agreements
+          if ($LASTEXITCODE -eq 0) {
+            Write-Host "✅ eza installed successfully via winget"
+            echo "winget-success=true" >> $env:GITHUB_OUTPUT
+          } else {
+            Write-Host "⚠️ winget installation failed"
+            echo "winget-success=false" >> $env:GITHUB_OUTPUT
+          }
+        } catch {
+          Write-Host "⚠️ winget not available or failed"
+          echo "winget-success=false" >> $env:GITHUB_OUTPUT
+        }
+
+    - name: Setup Rust toolchain (fallback)
+      if: steps.check-eza.outputs.eza-present == 'false' && steps.install-winget.outputs.winget-success == 'false'
+      uses: actions-rs/toolchain@v1
+      with:
+        toolchain: stable
+        override: true
+        profile: minimal
+
+    - name: Install eza via cargo (fallback)
+      if: steps.check-eza.outputs.eza-present == 'false' && steps.install-winget.outputs.winget-success == 'false'
+      shell: pwsh
+      run: |
+        Write-Host "📦 Installing eza via cargo (fallback)..."
+        cargo install eza
+        Write-Host "✅ eza installed via cargo"
+
+    - name: Verify eza installation
+      shell: pwsh
+      run: |
+        try {
+          $ezaPath = Get-Command eza -ErrorAction Stop
+          Write-Host "✅ eza is available: $($ezaPath.Source)"
+          eza --version
+        } catch {
+          Write-Host "⚠️ eza installation may have failed, but scripts will handle fallback"
+        }

@@ -4,16 +4,16 @@
     Generates project structure documentation for the Jiro AI Assistant project.
 
 .DESCRIPTION
-    This script uses eza (or erdtree/tree as fallback) to generate a clean project structure 
-    that respects .gitignore patterns. The output is formatted as markdown and 
-    includes project descriptions and architecture overview.
+    This script uses eza to generate a clean project structure that respects .gitignore patterns. 
+    If eza is not found, it will attempt to install it automatically via winget (Windows) or 
+    cargo (Linux/macOS). Falls back to tree command if eza installation fails.
 
 .PARAMETER OutputPath
     The path where the project structure markdown file will be generated.
     Default: docs/project-structure.md
 
 .PARAMETER UseTreeFallback
-    Use the 'tree' command as fallback if 'eza' and 'erdtree' are not available.
+    Skip eza installation attempt and use the 'tree' command directly.
 
 .EXAMPLE
     .\generate-project-structure.ps1
@@ -45,7 +45,7 @@ Write-Host "📄 Output file: $OutputFile" -ForegroundColor Cyan
 Push-Location $ProjectRoot
 
 try {
-    # Check if eza is available
+    # Check if eza is available, install if not found
     $EzaAvailable = $false
     try {
         $null = Get-Command eza -ErrorAction Stop
@@ -53,7 +53,44 @@ try {
         Write-Host "✅ Found eza command" -ForegroundColor Green
     }
     catch {
-        Write-Host "⚠️ eza command not found" -ForegroundColor Yellow
+        Write-Host "⚠️ eza command not found, attempting to install..." -ForegroundColor Yellow
+        
+        # Try to install eza
+        if ($IsWindows -or $env:OS -eq "Windows_NT") {
+            # Use winget on Windows
+            try {
+                Write-Host "📦 Installing eza via winget..." -ForegroundColor Blue
+                winget install eza.eza --accept-source-agreements --accept-package-agreements
+                if ($LASTEXITCODE -eq 0) {
+                    Write-Host "✅ Successfully installed eza via winget" -ForegroundColor Green
+                    $EzaAvailable = $true
+                }
+                else {
+                    Write-Host "⚠️ winget installation failed, trying cargo..." -ForegroundColor Yellow
+                }
+            }
+            catch {
+                Write-Host "⚠️ winget not available or failed, trying cargo..." -ForegroundColor Yellow
+            }
+        }
+        
+        # Try cargo install if winget failed or on non-Windows
+        if (-not $EzaAvailable) {
+            try {
+                Write-Host "📦 Installing eza via cargo..." -ForegroundColor Blue
+                cargo install eza
+                if ($LASTEXITCODE -eq 0) {
+                    Write-Host "✅ Successfully installed eza via cargo" -ForegroundColor Green
+                    $EzaAvailable = $true
+                }
+                else {
+                    Write-Host "❌ Failed to install eza via cargo" -ForegroundColor Red
+                }
+            }
+            catch {
+                Write-Host "❌ cargo not available or failed to install eza" -ForegroundColor Red
+            }
+        }
     }
 
     # Generate the tree structure
@@ -62,48 +99,24 @@ try {
         Write-Host "🌳 Generating tree structure with eza..." -ForegroundColor Blue
         $TreeOutput = eza --tree --git --icons --git-ignore 2>$null
         if ($LASTEXITCODE -ne 0) {
-            Write-Host "⚠️ eza failed, falling back to basic tree" -ForegroundColor Yellow
+            Write-Host "⚠️ eza with git-ignore failed, trying basic eza..." -ForegroundColor Yellow
             $TreeOutput = eza --tree --icons 2>$null
         }
     }
     else {
-        # Check for erdtree on Linux/macOS
-        $ErdtreeAvailable = $false
-        if (-not ($IsWindows -or $env:OS -eq "Windows_NT")) {
-            try {
-                $null = Get-Command erdtree -ErrorAction Stop
-                $ErdtreeAvailable = $true
-                Write-Host "✅ Found erdtree command" -ForegroundColor Green
-            }
-            catch {
-                Write-Host "⚠️ erdtree command not found" -ForegroundColor Yellow
-            }
-        }
-
-        if ($ErdtreeAvailable) {
-            # Use erdtree with git-aware filtering
-            Write-Host "🌳 Generating tree structure with erdtree..." -ForegroundColor Blue
-            $TreeOutput = erdtree --icons --gitignore --hidden 2>$null
-            if ($LASTEXITCODE -ne 0) {
-                Write-Host "⚠️ erdtree failed, falling back to basic erdtree" -ForegroundColor Yellow
-                $TreeOutput = erdtree --icons 2>$null
-            }
+        # Fallback to tree command
+        Write-Host "🌳 Generating tree structure with tree command..." -ForegroundColor Blue
+        if ($IsWindows -or $env:OS -eq "Windows_NT") {
+            $TreeOutput = tree /F /A 2>$null
         }
         else {
-            # Fallback to tree command (Windows/Linux)
-            Write-Host "🌳 Generating tree structure with tree command..." -ForegroundColor Blue
-            if ($IsWindows -or $env:OS -eq "Windows_NT") {
-                $TreeOutput = tree /F /A 2>$null
-            }
-            else {
-                $TreeOutput = tree -a -I 'bin|obj|_site|_temp|node_modules|.git' 2>$null
-            }
+            $TreeOutput = tree -a -I 'bin|obj|_site|_temp|node_modules|.git' 2>$null
         }
     }
 
     if ([string]::IsNullOrWhiteSpace($TreeOutput)) {
         Write-Host "❌ Failed to generate tree structure" -ForegroundColor Red
-        $TreeOutput = "Unable to generate tree structure. Please install eza or tree command."
+        $TreeOutput = "Unable to generate tree structure. Please install eza manually or ensure tree command is available."
     }
 
     # Generate current timestamp

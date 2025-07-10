@@ -1,0 +1,54 @@
+name: 'Setup Eza'
+description: 'Install eza for better tree output with automatic fallback handling'
+inputs:
+  force-install:
+    description: 'Force install eza even if already present'
+    required: false
+    default: 'false'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Check if eza is already installed
+      id: check-eza
+      shell: bash
+      run: |
+        if command -v eza &> /dev/null && [ "${{ inputs.force-install }}" != "true" ]; then
+          echo "eza-present=true" >> $GITHUB_OUTPUT
+          echo "✅ eza is already available"
+        else
+          echo "eza-present=false" >> $GITHUB_OUTPUT
+          echo "⚠️ eza not found or force install requested"
+        fi
+
+    - name: Setup Rust toolchain
+      if: steps.check-eza.outputs.eza-present == 'false'
+      uses: actions-rs/toolchain@v1
+      with:
+        toolchain: stable
+        override: true
+        profile: minimal
+
+    - name: Install eza via cargo
+      if: steps.check-eza.outputs.eza-present == 'false'
+      shell: bash
+      run: |
+        echo "📦 Installing eza via cargo..."
+        cargo install eza
+        echo "✅ eza installed successfully"
+
+    - name: Add cargo bin to PATH
+      shell: bash
+      run: |
+        echo "$HOME/.cargo/bin" >> $GITHUB_PATH
+        echo "📝 Added cargo bin directory to PATH"
+
+    - name: Verify eza installation
+      shell: bash
+      run: |
+        if command -v eza &> /dev/null; then
+          echo "✅ eza is available: $(which eza)"
+          eza --version
+        else
+          echo "⚠️ eza installation may have failed, but scripts will handle fallback"
+        fi

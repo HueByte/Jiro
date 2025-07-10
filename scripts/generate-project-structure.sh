@@ -2,7 +2,7 @@
 # 
 # Generate project structure documentation for Jiro AI Assistant project
 # This script serves as a Linux/macOS compatible version of the PowerShell script
-# Uses eza (or erdtree/tree as fallback) to generate clean project structure
+# Uses eza to generate clean project structure with automatic installation if needed
 #
 
 set -euo pipefail
@@ -20,19 +20,38 @@ echo "📄 Output file: $OUTPUT_FILE"
 # Change to project root
 cd "$PROJECT_ROOT"
 
-# Check for eza command
+# Check for eza command and install if not found
 if command -v eza &> /dev/null; then
     echo "✅ Found eza command"
     TREE_OUTPUT=$(eza --tree --git --icons --git-ignore 2>/dev/null || eza --tree --icons 2>/dev/null || echo "Failed to generate tree with eza")
-elif command -v erdtree &> /dev/null; then
-    echo "✅ Found erdtree command"
-    TREE_OUTPUT=$(erdtree --icons --gitignore --hidden 2>/dev/null || erdtree --icons 2>/dev/null || echo "Failed to generate tree with erdtree")
-elif command -v tree &> /dev/null; then
-    echo "⚠️  eza and erdtree not found, using tree command"
-    TREE_OUTPUT=$(tree -a -I 'bin|obj|_site|_temp|node_modules|.git|*.dll|*.exe|*.pdb|packages' 2>/dev/null || echo "Failed to generate tree with tree command")
 else
-    echo "❌ No tree generation command found (eza, erdtree, or tree)"
-    TREE_OUTPUT="Unable to generate tree structure. Please install eza, erdtree, or tree command."
+    echo "⚠️  eza command not found, attempting to install..."
+    
+    # Try to install eza via cargo
+    if command -v cargo &> /dev/null; then
+        echo "📦 Installing eza via cargo..."
+        if cargo install eza; then
+            echo "✅ Successfully installed eza via cargo"
+            # Try to use eza after installation
+            if command -v eza &> /dev/null; then
+                TREE_OUTPUT=$(eza --tree --git --icons --git-ignore 2>/dev/null || eza --tree --icons 2>/dev/null || echo "Failed to generate tree with eza")
+            else
+                echo "⚠️  eza not found in PATH after installation, using tree fallback"
+                TREE_OUTPUT=$(tree -a -I 'bin|obj|_site|_temp|node_modules|.git|*.dll|*.exe|*.pdb|packages' 2>/dev/null || echo "Failed to generate tree with tree command")
+            fi
+        else
+            echo "❌ Failed to install eza via cargo, using tree fallback"
+            TREE_OUTPUT=$(tree -a -I 'bin|obj|_site|_temp|node_modules|.git|*.dll|*.exe|*.pdb|packages' 2>/dev/null || echo "Failed to generate tree with tree command")
+        fi
+    else
+        echo "❌ cargo not available, cannot install eza. Using tree fallback"
+        if command -v tree &> /dev/null; then
+            TREE_OUTPUT=$(tree -a -I 'bin|obj|_site|_temp|node_modules|.git|*.dll|*.exe|*.pdb|packages' 2>/dev/null || echo "Failed to generate tree with tree command")
+        else
+            echo "❌ No tree generation command available"
+            TREE_OUTPUT="Unable to generate tree structure. Please install eza via 'cargo install eza' or install tree command."
+        fi
+    fi
 fi
 
 # Ensure output directory exists
