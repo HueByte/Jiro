@@ -9,9 +9,10 @@ param(
 )
 
 # Configuration
-$SolutionPath = "./src/Jiro.Kernel/Jiro.Kernel.sln"
-$DockerfilePath = "./src/Jiro.Kernel/Dockerfile"
+$SolutionPath = "./src/Main.sln"
+$DockerfilePath = "./src/Jiro.Kernel/Jiro.App/Dockerfile"
 $DockerImageName = "jiro-kernel-test"
+$ProjectPath = "./src/Jiro.Kernel"
 
 # Helper functions
 function Write-Header {
@@ -127,7 +128,7 @@ function Invoke-DockerBuild {
     Write-Header "Docker Build and Test"
     
     Write-Host "Building Docker image..." -ForegroundColor Cyan
-    docker build -t $DockerImageName -f $DockerfilePath ./src/Jiro.Kernel/
+    docker build -t $DockerImageName -f $DockerfilePath $ProjectPath
     if ($LASTEXITCODE -ne 0) { throw "Docker build failed" }
     Write-Success "Docker image built successfully"
     
@@ -136,6 +137,7 @@ function Invoke-DockerBuild {
     try {
         # Start container in background
         $containerId = docker run -d --name jiro-kernel-test $DockerImageName
+        if ($LASTEXITCODE -ne 0) { throw "Failed to start container" }
         
         # Wait a moment for startup
         Start-Sleep -Seconds 5
@@ -143,7 +145,7 @@ function Invoke-DockerBuild {
         # Check if container is running
         $runningContainers = docker ps --format "table {{.Names}}"
         if ($runningContainers -match "jiro-kernel-test") {
-            Write-Success "Container started successfully"
+            Write-Success "Container started successfully (ID: $($containerId.Substring(0,12)))"
             
             # Check logs for any immediate errors
             Write-Host "Container logs:" -ForegroundColor Cyan
@@ -170,6 +172,58 @@ function Invoke-DockerBuild {
     }
 }
 
+function Invoke-DocumentationTests {
+    Write-Header "Documentation Tests"
+    
+    Write-Host "Testing project structure generation..." -ForegroundColor Cyan
+    try {
+        & "./scripts/generate-project-structure.ps1" -OutputPath "temp-project-structure.md"
+        if (Test-Path "temp-project-structure.md") {
+            Write-Success "Project structure generation test passed"
+            Remove-Item "temp-project-structure.md" -Force
+        }
+        else {
+            Write-Warning "Project structure generation did not create output file"
+        }
+    }
+    catch {
+        Write-Warning "Project structure generation test failed: $($_.Exception.Message)"
+    }
+    
+    Write-Host "Checking for DocFX configuration..." -ForegroundColor Cyan
+    if (Test-Path "./src/docfx.json") {
+        Write-Success "DocFX configuration found"
+        
+        # Test DocFX build if available
+        try {
+            $docfxVersion = docfx --version 2>$null
+            if ($docfxVersion) {
+                Write-Host "Testing DocFX build..." -ForegroundColor Cyan
+                Push-Location "./src"
+                try {
+                    docfx docfx.json --dry-run
+                    Write-Success "DocFX configuration is valid"
+                }
+                catch {
+                    Write-Warning "DocFX build test failed: $($_.Exception.Message)"
+                }
+                finally {
+                    Pop-Location
+                }
+            }
+            else {
+                Write-Warning "DocFX not installed. Install with: dotnet tool install -g docfx"
+            }
+        }
+        catch {
+            Write-Warning "DocFX not available for testing"
+        }
+    }
+    else {
+        Write-Warning "DocFX configuration not found at ./src/docfx.json"
+    }
+}
+
 function Invoke-PerformanceTests {
     if ($SkipPerformance) {
         Write-Warning "Skipping performance tests"
@@ -193,7 +247,7 @@ function Invoke-PerformanceTests {
     
     # Check for benchmark projects
     Write-Host "Looking for benchmark projects..." -ForegroundColor Cyan
-    $benchmarkProjects = Get-ChildItem -Path "./src/Jiro.Kernel" -Filter "*.csproj" -Recurse | 
+    $benchmarkProjects = Get-ChildItem -Path $ProjectPath -Filter "*.csproj" -Recurse | 
     Where-Object { (Get-Content $_.FullName) -match "BenchmarkDotNet" }
     
     if ($benchmarkProjects) {
@@ -243,6 +297,7 @@ function Main {
         Test-Prerequisites
         Invoke-BuildAndTest
         Invoke-SecurityChecks
+        Invoke-DocumentationTests
         Invoke-DockerBuild
         Invoke-PerformanceTests
         Write-Report

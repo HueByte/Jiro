@@ -5,6 +5,48 @@
 
 set -e
 
+# Parse command line arguments
+SKIP_DOCKER=false
+SKIP_SECURITY=false
+SKIP_PERFORMANCE=false
+CONFIGURATION="Release"
+
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        --skip-docker)
+            SKIP_DOCKER=true
+            shift
+            ;;
+        --skip-security)
+            SKIP_SECURITY=true
+            shift
+            ;;
+        --skip-performance)
+            SKIP_PERFORMANCE=true
+            shift
+            ;;
+        --configuration)
+            CONFIGURATION="$2"
+            shift 2
+            ;;
+        -h|--help)
+            echo "Usage: $0 [OPTIONS]"
+            echo "Options:"
+            echo "  --skip-docker       Skip Docker build and tests"
+            echo "  --skip-security     Skip security checks"
+            echo "  --skip-performance  Skip performance tests"
+            echo "  --configuration     Build configuration (Debug|Release, default: Release)"
+            echo "  -h, --help         Show this help message"
+            exit 0
+            ;;
+        *)
+            echo "Unknown option: $1"
+            echo "Use -h or --help for usage information"
+            exit 1
+            ;;
+    esac
+done
+
 # Colors for output
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -13,9 +55,10 @@ BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
 # Configuration
-SOLUTION_PATH="./src/Jiro.Kernel/Jiro.Kernel.sln"
-DOCKERFILE_PATH="./src/Jiro.Kernel/Dockerfile"
+SOLUTION_PATH="./src/Main.sln"
+DOCKERFILE_PATH="./src/Jiro.Kernel/Jiro.App/Dockerfile"
 DOCKER_IMAGE_NAME="jiro-kernel-test"
+PROJECT_PATH="./src/Jiro.Kernel"
 
 # Helper functions
 print_header() {
@@ -49,19 +92,14 @@ check_prerequisites() {
     DOTNET_VERSION=$(dotnet --version)
     print_success ".NET SDK version: $DOTNET_VERSION"
     
-    # Check Docker
-    if ! command -v docker &> /dev/null; then
-        print_warning "Docker not found. Docker tests will be skipped."
-        SKIP_DOCKER=true
-    else
-        print_success "Docker is available"
-        SKIP_DOCKER=false
-    fi
-    
     # Prepare configuration files
     if [ ! -f "./src/Jiro.Kernel/Jiro.App/appsettings.json" ]; then
-        cp "./src/Jiro.Kernel/Jiro.App/appsettings.example.json" "./src/Jiro.Kernel/Jiro.App/appsettings.json"
-        print_success "Copied appsettings.example.json to appsettings.json"
+        if [ -f "./src/Jiro.Kernel/Jiro.App/appsettings.example.json" ]; then
+            cp "./src/Jiro.Kernel/Jiro.App/appsettings.example.json" "./src/Jiro.Kernel/Jiro.App/appsettings.json"
+            print_success "Copied appsettings.example.json to appsettings.json"
+        else
+            print_warning "No appsettings.example.json found"
+        fi
     fi
 }
 
@@ -74,7 +112,7 @@ build_and_test() {
     print_success "Dependencies restored"
     
     echo "Building solution..."
-    dotnet build "$SOLUTION_PATH" --no-restore --configuration Release
+    dotnet build "$SOLUTION_PATH" --no-restore --configuration "$CONFIGURATION"
     print_success "Build completed"
     
     echo "Checking code formatting..."
@@ -85,12 +123,17 @@ build_and_test() {
     fi
     
     echo "Running tests..."
-    dotnet test "$SOLUTION_PATH" --no-build --configuration Release --logger "console;verbosity=normal"
+    dotnet test "$SOLUTION_PATH" --no-build --configuration "$CONFIGURATION" --logger "console;verbosity=normal"
     print_success "Tests completed"
 }
 
 # Security checks
 security_checks() {
+    if [ "$SKIP_SECURITY" = true ]; then
+        print_warning "Skipping security checks"
+        return
+    fi
+    
     print_header "Security Checks"
     
     echo "Checking for vulnerable packages..."
@@ -112,6 +155,12 @@ security_checks() {
 # Docker build and test
 docker_build() {
     if [ "$SKIP_DOCKER" = true ]; then
+        print_warning "Skipping Docker tests (--skip-docker flag)"
+        return
+    fi
+    
+    # Check if Docker is available
+    if ! command -v docker &> /dev/null; then
         print_warning "Skipping Docker tests (Docker not available)"
         return
     fi
@@ -119,7 +168,7 @@ docker_build() {
     print_header "Docker Build and Test"
     
     echo "Building Docker image..."
-    docker build -t "$DOCKER_IMAGE_NAME" -f "$DOCKERFILE_PATH" ./src/Jiro.Kernel/
+    docker build -t "$DOCKER_IMAGE_NAME" -f "$DOCKERFILE_PATH" "$PROJECT_PATH"
     print_success "Docker image built successfully"
     
     echo "Testing Docker image..."
@@ -157,8 +206,51 @@ docker_build() {
     fi
 }
 
+# Documentation tests
+documentation_tests() {
+    print_header "Documentation Tests"
+    
+    echo "Testing project structure generation..."
+    if ./scripts/generate-project-structure.sh "temp-project-structure.md"; then
+        if [ -f "temp-project-structure.md" ]; then
+            print_success "Project structure generation test passed"
+            rm -f "temp-project-structure.md"
+        else
+            print_warning "Project structure generation did not create output file"
+        fi
+    else
+        print_warning "Project structure generation test failed"
+    fi
+    
+    echo "Checking for DocFX configuration..."
+    if [ -f "./src/docfx.json" ]; then
+        print_success "DocFX configuration found"
+        
+        # Test DocFX build if available
+        if command -v docfx &> /dev/null; then
+            echo "Testing DocFX build..."
+            cd "./src" || exit 1
+            if docfx docfx.json --dry-run; then
+                print_success "DocFX configuration is valid"
+            else
+                print_warning "DocFX build test failed"
+            fi
+            cd - > /dev/null || exit 1
+        else
+            print_warning "DocFX not installed. Install with: dotnet tool install -g docfx"
+        fi
+    else
+        print_warning "DocFX configuration not found at ./src/docfx.json"
+    fi
+}
+
 # Performance tests
 performance_tests() {
+    if [ "$SKIP_PERFORMANCE" = true ]; then
+        print_warning "Skipping performance tests"
+        return
+    fi
+    
     print_header "Performance Tests"
     
     echo "Looking for performance tests..."
@@ -166,20 +258,20 @@ performance_tests() {
     
     if [ -n "$PERF_TESTS" ]; then
         echo "Running performance tests..."
-        dotnet test "$SOLUTION_PATH" --no-build --configuration Release --filter "Category=Performance"
+        dotnet test "$SOLUTION_PATH" --no-build --configuration "$CONFIGURATION" --filter "Category=Performance"
         print_success "Performance tests completed"
     else
         print_warning "No performance tests found. Consider adding tests with [Category(\"Performance\")] attribute."
     fi
     
     # Check for benchmark projects
-    BENCHMARK_PROJECTS=$(find ./src/Jiro.Kernel -name "*.csproj" -exec grep -l "BenchmarkDotNet" {} \; 2>/dev/null || true)
+    BENCHMARK_PROJECTS=$(find "$PROJECT_PATH" -name "*.csproj" -exec grep -l "BenchmarkDotNet" {} \; 2>/dev/null || true)
     
     if [ -n "$BENCHMARK_PROJECTS" ]; then
         echo "Found benchmark projects. Running benchmarks..."
         for project in $BENCHMARK_PROJECTS; do
             echo "Running benchmarks in $project"
-            dotnet run --project "$project" --configuration Release --framework net9.0 -- --filter "*" || true
+            dotnet run --project "$project" --configuration "$CONFIGURATION" --framework net9.0 -- --filter "*" || true
         done
         print_success "Benchmarks completed"
     else
@@ -216,6 +308,7 @@ main() {
     check_prerequisites
     build_and_test
     security_checks
+    documentation_tests
     docker_build
     performance_tests
     generate_report
