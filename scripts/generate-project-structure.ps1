@@ -4,7 +4,7 @@
     Generates project structure documentation for the Jiro AI Assistant project.
 
 .DESCRIPTION
-    This script uses eza (or tree as fallback) to generate a clean project structure 
+    This script uses eza (or erdtree/tree as fallback) to generate a clean project structure 
     that respects .gitignore patterns. The output is formatted as markdown and 
     includes project descriptions and architecture overview.
 
@@ -13,7 +13,7 @@
     Default: docs/project-structure.md
 
 .PARAMETER UseTreeFallback
-    Use the 'tree' command as fallback if 'eza' is not available.
+    Use the 'tree' command as fallback if 'eza' and 'erdtree' are not available.
 
 .EXAMPLE
     .\generate-project-structure.ps1
@@ -67,13 +67,37 @@ try {
         }
     }
     else {
-        # Fallback to tree command (Windows/Linux)
-        Write-Host "🌳 Generating tree structure with tree command..." -ForegroundColor Blue
-        if ($IsWindows -or $env:OS -eq "Windows_NT") {
-            $TreeOutput = tree /F /A 2>$null
+        # Check for erdtree on Linux/macOS
+        $ErdtreeAvailable = $false
+        if (-not ($IsWindows -or $env:OS -eq "Windows_NT")) {
+            try {
+                $null = Get-Command erdtree -ErrorAction Stop
+                $ErdtreeAvailable = $true
+                Write-Host "✅ Found erdtree command" -ForegroundColor Green
+            }
+            catch {
+                Write-Host "⚠️ erdtree command not found" -ForegroundColor Yellow
+            }
+        }
+
+        if ($ErdtreeAvailable) {
+            # Use erdtree with git-aware filtering
+            Write-Host "🌳 Generating tree structure with erdtree..." -ForegroundColor Blue
+            $TreeOutput = erdtree --icons --gitignore --hidden 2>$null
+            if ($LASTEXITCODE -ne 0) {
+                Write-Host "⚠️ erdtree failed, falling back to basic erdtree" -ForegroundColor Yellow
+                $TreeOutput = erdtree --icons 2>$null
+            }
         }
         else {
-            $TreeOutput = tree -a -I 'bin|obj|_site|_temp|node_modules|.git' 2>$null
+            # Fallback to tree command (Windows/Linux)
+            Write-Host "🌳 Generating tree structure with tree command..." -ForegroundColor Blue
+            if ($IsWindows -or $env:OS -eq "Windows_NT") {
+                $TreeOutput = tree /F /A 2>$null
+            }
+            else {
+                $TreeOutput = tree -a -I 'bin|obj|_site|_temp|node_modules|.git' 2>$null
+            }
         }
     }
 
