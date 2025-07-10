@@ -1,6 +1,0 @@
-- name: Documentation
-  href: docs/
-  homepage: docs/README.md
-- name: API
-  href: api/
-  homepage: api/index.md

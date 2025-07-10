@@ -23,9 +23,12 @@ To create plugins, refer to [github](https://github.com/HueByte/Jiro.Libs) <http
 
 ## 📚 Documentation
 
-For comprehensive documentation, visit our [DocFX documentation site](generated/index.html) or build it locally:
+For comprehensive documentation, visit our [DocFX documentation site](src/_site/index.html) or build it locally:
 
 ```bash
+# Navigate to src directory
+cd src
+
 # Build documentation
 docfx docfx.json
 
@@ -35,8 +38,8 @@ docfx docfx.json --serve
 
 The documentation includes:
 
-- **[Documentation](generated/docs/)** - Project guides, architecture, and user documentation
-- **[API Reference](generated/api/)** - Complete .NET API documentation generated from source code
+- **[Documentation](src/_site/documentation/)** - Project guides, architecture, and user documentation
+- **[API Reference](src/_site/api/)** - Complete .NET API documentation generated from source code
 
 ## How to run
 

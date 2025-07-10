@@ -5,25 +5,37 @@
 
 # DocFX generated files
 generated/
-api/*.yml
-api/.manifest
+src/_site/
+src/_temp/
+src/api/*.yml
+src/api/.manifest
+!src/JiroBanner.png
 
+# Auto-generated documentation files
+docs/project-structure.md
+
+# VS Code and development files
 .vscode
-**/env
+env
 appsettings.json
 appsettings.development.json
 .env
 .env.development
 .env.development.local
-**/build/*
+build/*
 src/docs/build/
 
+# Docker and containerization
+src/docker-compose.override.yml
+src/docker-compose.*.yml
+!src/docker-compose.yml
+
 # generated client
-**/api/core
-**/api/models
-**/api/services
-**/api/index.ts
-**/api/swagger.json
+src/**/api/core
+src/**/api/models
+src/**/api/services
+src/**/api/index.ts
+src/**/api/swagger.json
 
 # User-specific files
 *.rsuser

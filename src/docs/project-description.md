@@ -311,9 +311,26 @@ service JiroHubProto {
 
 ### **Database Schema**
 
-- **ChatSessions**: User conversation sessions
-- **Messages**: Individual message records
-- **Users**: User management (via authentication)
+Jiro utilizes **ASP.NET Core Identity** for user management combined with custom business entities for conversation management.
+
+#### **Core Database Tables**
+
+##### **Identity System**
+- **AspNetUsers**: User accounts with extended properties (`AccountCreatedDate`)
+- **AspNetRoles**: System roles and permissions
+- **AspNetUserRoles**: Many-to-many user-role relationships
+- **RefreshTokens**: JWT refresh token management with IP tracking
+
+##### **Conversation System**  
+- **ChatSessions**: Conversation sessions with metadata
+- **Messages**: Individual messages with type classification and user attribution
+
+#### **Key Relationships**
+- `Users 1:N RefreshTokens` - Token-based authentication
+- `ChatSessions 1:N Messages` - Session-based conversations
+- `Users M:N Roles` - Role-based authorization
+
+For detailed database schema documentation, see [Database Schema](database-schema.md).
 
 ### **Entity Framework Configuration**
 
@@ -455,11 +472,12 @@ Jiro/
 │   ├── project-description.md   # This comprehensive project overview
 │   ├── user-guide.md           # End-user documentation  
 │   ├── workflow-pipelines.md   # ☁️ CI/CD automation documentation
+│   ├── database-schema.md      # 🗄️ Complete database schema documentation
 │   ├── api-index.md            # API documentation index
 │   └── README.md               # Documentation setup guide
 ├── assets/                      # Documentation assets (logos, images)
 ├── scripts/                     # Build and deployment scripts
-├── generated/                   # DocFX build output (auto-generated)
+├── _site/                       # DocFX build output (auto-generated)
 ├── api/                         # Generated API documentation (auto-generated)
 ├── docfx.json                  # DocFX documentation configuration
 ├── toc.yml                     # Main navigation structure

@@ -12,7 +12,7 @@ This directory contains the documentation for the Jiro AI Assistant project, bui
 │   ├── user-guide.md       # End-user documentation
 │   ├── workflow-pipelines.md  # CI/CD workflows
 │   └── README.md           # This file
-├── generated/              # Generated documentation (after build)
+├── _site/                  # Generated documentation (after build)
 │   ├── docs/               # Documentation output
 │   ├── api/                # API reference output
 │   └── assets/             # Static assets (images, CSS, etc.)

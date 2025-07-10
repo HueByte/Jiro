@@ -2,6 +2,10 @@
 _layout: landing
 ---
 
+<p align="center">
+    <img src="JiroBanner.png" alt="Jiro Banner" style="max-width: 100%; height: auto; border-radius: 15px;" />
+</p>
+
 # Welcome to Jiro
 
 **Jiro** is a comprehensive application framework designed for building modern, scalable applications with powerful command handling, conversation management, and extensible architecture.
@@ -31,6 +35,7 @@ Get started with Jiro in minutes:
 - Getting started guides
 - User documentation
 - Workflow and pipelines
+- Changelog and version history
 
 ### [🔧 API Reference](api/)
 
@@ -53,4 +58,4 @@ We welcome contributions! Please see our documentation for guidelines on how to 
 
 ---
 
-*Ready to dive in? Start with our [Documentation](docs/) or explore the [API Reference](api/).*
+*Ready to dive in? Start with [Documentation](docs/) or explore the [API Reference](api/).*

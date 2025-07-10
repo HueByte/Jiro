@@ -12,6 +12,7 @@ on:
       - "index.md"
       - "toc.yml"
       - "src/**/*.cs"
+      - "scripts/generate-project-structure.ps1"
       - ".github/workflows/deploy-docs.yml"
   workflow_dispatch:
 
@@ -45,6 +46,25 @@ jobs:
       - name: Setup DocFX
         run: dotnet tool update -g docfx --version 2.75.3
 
+      - name: Generate project structure documentation
+        run: |
+          # Install eza if not available (for better tree output)
+          if ! command -v eza &> /dev/null; then
+            echo "Installing eza for better tree output..."
+            if [[ "$RUNNER_OS" == "Linux" ]]; then
+              # Install eza on Ubuntu
+              wget -c https://github.com/eza-community/eza/releases/latest/download/eza_x86_64-unknown-linux-gnu.tar.gz -O - | tar xz
+              sudo mv eza /usr/local/bin/
+            else
+              echo "eza not available, will use tree command fallback"
+            fi
+          fi
+
+          # Generate project structure documentation
+          chmod +x scripts/generate-project-structure.ps1
+          pwsh scripts/generate-project-structure.ps1
+        continue-on-error: true # Don't fail the build if structure generation fails
+
       - name: Restore dependencies for API documentation
         run: dotnet restore src/Main.sln
         continue-on-error: true # API docs will still generate even if restore fails
@@ -58,28 +78,29 @@ jobs:
 
       - name: Build documentation with DocFX
         run: |
+          cd src
           docfx docfx.json
         env:
           DOCFX_SOURCE_BRANCH_NAME: ${{ github.ref_name }}
 
       - name: Verify build output
         run: |
-          if [ ! -d "generated" ]; then
-            echo "❌ DocFX build failed - generated directory not found"
+          if [ ! -d "src/_site" ]; then
+            echo "❌ DocFX build failed - _site directory not found"
             exit 1
           fi
           echo "✅ DocFX build successful"
           echo "Generated files:"
-          ls -la generated/
+          ls -la src/_site/
           echo ""
           echo "Documentation structure:"
-          find generated -type f -name "*.html" | head -10
+          find src/_site -type f -name "*.html" | head -10
 
       - name: Deploy to web branch
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./generated
+          publish_dir: ./src/_site
           publish_branch: web
           force_orphan: true
 

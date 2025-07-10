@@ -25,7 +25,7 @@
       {
         "src": ".",
         "dest": ".",
-        "files": ["toc.yml"]
+        "files": ["toc.yml", "index.md"]
       },
       {
         "src": "docs",
@@ -42,6 +42,11 @@
         ]
       },
       {
+        "src": "api",
+        "dest": "api",
+        "files": ["index.md"]
+      },
+      {
         "src": "_temp/api",
         "dest": "api",
         "files": ["*.yml", ".manifest"]
@@ -49,7 +54,11 @@
     ],
     "resource": [
       {
-        "files": ["docs/images/**", "assets/**"]
+        "files": ["docs/images/**", "JiroBanner.png"]
+      },
+      {
+        "files": ["../assets/**"],
+        "dest": "assets"
       }
     ],
     "overwrite": [

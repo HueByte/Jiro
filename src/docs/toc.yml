@@ -2,9 +2,17 @@
   href: README.md
 - name: Project Description
   href: project-description.md
+- name: Project Structure
+  href: project-structure.md
+- name: Database Schema
+  href: database-schema.md
+- name: Database ERD
+  href: database-erd.md
 - name: User Guide
   href: user-guide.md
 - name: Workflow Pipelines
   href: workflow-pipelines.md
+- name: Changelog
+  href: changelog.md
 - name: API Index
   href: api-index.md

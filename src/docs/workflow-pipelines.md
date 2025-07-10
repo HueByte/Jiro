@@ -516,7 +516,7 @@ This comprehensive pipeline ensures high code quality, security, and reliable de
 3. **Documentation Generation**
    - Run `docfx docfx.json` to build complete documentation
    - Generate both documentation and API reference
-   - Create static website in `generated/` directory
+   - Create static website in `_site/` directory
 
 4. **Deployment to GitHub Pages**
    - Upload generated site as Pages artifact
