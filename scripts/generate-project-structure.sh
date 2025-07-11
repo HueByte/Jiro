@@ -23,7 +23,18 @@ cd "$PROJECT_ROOT"
 # Check for eza command and install if not found
 if command -v eza &> /dev/null; then
     echo "✅ Found eza command"
-    TREE_OUTPUT=$(eza --tree --git --icons --git-ignore 2>/dev/null || eza --tree --icons 2>/dev/null || echo "Failed to generate tree with eza")
+    # Set locale to ensure proper UTF-8 handling
+    export LC_ALL=C.UTF-8
+    export LANG=C.UTF-8
+    
+    # Try with git-ignore first, with level limit and proper encoding
+    TREE_OUTPUT=$(eza --tree --git --git-ignore --level 4 --color=never 2>/dev/null | tr -d '\r' || eza --tree --level 4 --color=never 2>/dev/null | tr -d '\r' || echo "Failed to generate tree with eza")
+    
+    # Check if output contains problematic characters and fall back to tree if needed
+    if [[ "$TREE_OUTPUT" == *"Failed"* ]] || [[ -z "$TREE_OUTPUT" ]]; then
+        echo "⚠️  eza failed, falling back to tree command"
+        TREE_OUTPUT=$(tree -a -I 'bin|obj|_site|_temp|node_modules|.git|*.dll|*.exe|*.pdb|packages' 2>/dev/null | tr -d '\r' || echo "Failed to generate tree with tree command")
+    fi
 else
     echo "⚠️  eza command not found, attempting to install..."
     
@@ -34,19 +45,21 @@ else
             echo "✅ Successfully installed eza via cargo"
             # Try to use eza after installation
             if command -v eza &> /dev/null; then
-                TREE_OUTPUT=$(eza --tree --git --icons --git-ignore 2>/dev/null || eza --tree --icons 2>/dev/null || echo "Failed to generate tree with eza")
+                export LC_ALL=C.UTF-8
+                export LANG=C.UTF-8
+                TREE_OUTPUT=$(eza --tree --git --git-ignore --level 4 --color=never 2>/dev/null | tr -d '\r' || eza --tree --level 4 --color=never 2>/dev/null | tr -d '\r' || echo "Failed to generate tree with eza")
             else
                 echo "⚠️  eza not found in PATH after installation, using tree fallback"
-                TREE_OUTPUT=$(tree -a -I 'bin|obj|_site|_temp|node_modules|.git|*.dll|*.exe|*.pdb|packages' 2>/dev/null || echo "Failed to generate tree with tree command")
+                TREE_OUTPUT=$(tree -a -I 'bin|obj|_site|_temp|node_modules|.git|*.dll|*.exe|*.pdb|packages' 2>/dev/null | tr -d '\r' || echo "Failed to generate tree with tree command")
             fi
         else
             echo "❌ Failed to install eza via cargo, using tree fallback"
-            TREE_OUTPUT=$(tree -a -I 'bin|obj|_site|_temp|node_modules|.git|*.dll|*.exe|*.pdb|packages' 2>/dev/null || echo "Failed to generate tree with tree command")
+            TREE_OUTPUT=$(tree -a -I 'bin|obj|_site|_temp|node_modules|.git|*.dll|*.exe|*.pdb|packages' 2>/dev/null | tr -d '\r' || echo "Failed to generate tree with tree command")
         fi
     else
         echo "❌ cargo not available, cannot install eza. Using tree fallback"
         if command -v tree &> /dev/null; then
-            TREE_OUTPUT=$(tree -a -I 'bin|obj|_site|_temp|node_modules|.git|*.dll|*.exe|*.pdb|packages' 2>/dev/null || echo "Failed to generate tree with tree command")
+            TREE_OUTPUT=$(tree -a -I 'bin|obj|_site|_temp|node_modules|.git|*.dll|*.exe|*.pdb|packages' 2>/dev/null | tr -d '\r' || echo "Failed to generate tree with tree command")
         else
             echo "❌ No tree generation command available"
             TREE_OUTPUT="Unable to generate tree structure. Please install eza via 'cargo install eza' or install tree command."

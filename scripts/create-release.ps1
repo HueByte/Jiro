@@ -15,12 +15,12 @@ Usage: .\create-release.ps1 [options]
 
 Options:
     -Version <version>    Specify version (e.g., "v1.2.3")
-    -DryRun              Show what would be done without executing
-    -Help                Show this help message
+    -DryRun               Show what would be done without executing
+    -Help                 Show this help message
 
 Examples:
     .\create-release.ps1                    # Auto-generate version
-    .\create-release.ps1 -Version "v1.2.3" # Use specific version
+    .\create-release.ps1 -Version "v1.2.3"  # Use specific version
     .\create-release.ps1 -DryRun            # Preview actions
 "@
     exit 0

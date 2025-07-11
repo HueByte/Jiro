@@ -25,7 +25,7 @@
 #>
 
 param(
-    [string]$OutputPath = "docs/project-structure.md",
+    [string]$OutputPath = "src/docs/project-structure.md",
     [switch]$UseTreeFallback = $false
 )
 
@@ -97,20 +97,50 @@ try {
     $TreeOutput = ""
     if ($EzaAvailable -and -not $UseTreeFallback) {
         Write-Host "🌳 Generating tree structure with eza..." -ForegroundColor Blue
-        $TreeOutput = eza --tree --git --icons --git-ignore 2>$null
-        if ($LASTEXITCODE -ne 0) {
-            Write-Host "⚠️ eza with git-ignore failed, trying basic eza..." -ForegroundColor Yellow
-            $TreeOutput = eza --tree --icons 2>$null
+        
+        # Set console encoding to UTF-8 to handle Unicode characters properly
+        $originalEncoding = [Console]::OutputEncoding
+        try {
+            [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+            
+            # Try with git-ignore first, fallback to basic if it fails
+            $RawOutput = & eza --tree --git --git-ignore --level 4 --color=never 2>$null
+            if ($LASTEXITCODE -ne 0 -or [string]::IsNullOrWhiteSpace($RawOutput)) {
+                Write-Host "⚠️ eza with git-ignore failed, trying basic eza..." -ForegroundColor Yellow
+                $RawOutput = & eza --tree --level 4 --color=never 2>$null
+            }
+            
+            # Process output to ensure proper line breaks
+            if ($RawOutput) {
+                $TreeOutput = ($RawOutput -split "`r?`n" | Where-Object { $_.Trim() -ne "" }) -join "`n"
+            }
+        }
+        finally {
+            # Restore original encoding
+            [Console]::OutputEncoding = $originalEncoding
+        }
+        
+        # If eza still fails or output is garbled, fall back to tree command
+        if ($LASTEXITCODE -ne 0 -or [string]::IsNullOrWhiteSpace($TreeOutput) -or $TreeOutput.Contains("�")) {
+            Write-Host "⚠️ eza output failed or contains encoding issues, falling back to tree command..." -ForegroundColor Yellow
+            $UseTreeFallback = $true
+            $EzaAvailable = $false
         }
     }
-    else {
+    
+    if (-not $EzaAvailable -or $UseTreeFallback) {
         # Fallback to tree command
         Write-Host "🌳 Generating tree structure with tree command..." -ForegroundColor Blue
         if ($IsWindows -or $env:OS -eq "Windows_NT") {
-            $TreeOutput = tree /F /A 2>$null
+            # Use tree command with proper encoding and convert to proper lines
+            $RawTreeOutput = & cmd /c "tree /F /A" 2>$null
+            if ($RawTreeOutput) {
+                # Split the output into lines and rejoin with proper line breaks
+                $TreeOutput = ($RawTreeOutput -split "`r?`n" | Where-Object { $_.Trim() -ne "" }) -join "`n"
+            }
         }
         else {
-            $TreeOutput = tree -a -I 'bin|obj|_site|_temp|node_modules|.git' 2>$null
+            $TreeOutput = & tree -a -I 'bin|obj|_site|_temp|node_modules|.git' 2>$null
         }
     }
 
@@ -156,7 +186,7 @@ The project follows Clean Architecture principles with clear separation of conce
 
 ## Project Tree
 
-``````text
+``````js
 $TreeOutput
 ``````
 
