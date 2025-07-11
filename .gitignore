@@ -25,6 +25,7 @@ appsettings.development.json
 .env.development.local
 build/*
 src/docs/build/
+dev/
 
 # Docker and containerization
 src/docker-compose.override.yml
