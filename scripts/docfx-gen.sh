@@ -214,6 +214,21 @@ case $ACTION in
             echo
         fi
         
+        # Generate project structure documentation
+        print_info "🏗️ Generating project structure documentation..."
+        STRUCTURE_SCRIPT="$SCRIPT_DIR/generate-project-structure.sh"
+        if [[ -f "$STRUCTURE_SCRIPT" ]]; then
+            if bash "$STRUCTURE_SCRIPT" "src/docs/project-structure.md"; then
+                print_success "✅ Project structure documentation generated"
+            else
+                print_warning "⚠️  Failed to generate project structure"
+                print_info "Continuing with documentation build..."
+            fi
+        else
+            print_warning "⚠️  Project structure script not found, skipping..."
+        fi
+        echo
+        
         print_info "🔨 Building documentation..."
         
         DOCFX_ARGS=("$CONFIG_PATH")
@@ -240,6 +255,21 @@ case $ACTION in
         ;;
         
     "serve")
+        # Generate project structure documentation
+        print_info "🏗️ Generating project structure documentation..."
+        STRUCTURE_SCRIPT="$SCRIPT_DIR/generate-project-structure.sh"
+        if [[ -f "$STRUCTURE_SCRIPT" ]]; then
+            if bash "$STRUCTURE_SCRIPT" "src/docs/project-structure.md"; then
+                print_success "✅ Project structure documentation generated"
+            else
+                print_warning "⚠️  Failed to generate project structure"
+                print_info "Continuing with documentation build..."
+            fi
+        else
+            print_warning "⚠️  Project structure script not found, skipping..."
+        fi
+        echo
+        
         # Build first
         print_info "🔨 Building documentation before serving..."
         
