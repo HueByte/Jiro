@@ -126,26 +126,48 @@ else
     log_info "Latest tag: $LATEST_TAG"
 fi
 
-# Generate commit list
+# Generate commit list with better formatting
 log_info "📝 Generating release notes..."
 if [ -n "$LATEST_TAG" ]; then
-    COMMITS=$(git log "$LATEST_TAG..HEAD" --pretty=format:"- %s (%h)" --reverse)
+    COMMITS_RAW=$(git log "$LATEST_TAG..HEAD" --pretty=format:"%h|%s|%an|%ad" --date=short --reverse)
 else
-    COMMITS=$(git log --pretty=format:"- %s (%h)" --reverse)
+    COMMITS_RAW=$(git log --pretty=format:"%h|%s|%an|%ad" --date=short --reverse)
 fi
+
+# Format commits properly
+FORMATTED_COMMITS=""
+if [ -n "$COMMITS_RAW" ]; then
+    while IFS='|' read -r hash message author date; do
+        if [ -n "$hash" ] && [ -n "$message" ]; then
+            FORMATTED_COMMITS="$FORMATTED_COMMITS- **$message** ([\`$hash\`](https://github.com/huebyte/Jiro/commit/$hash)) by @$author on $date
+"
+        fi
+    done <<< "$COMMITS_RAW"
+fi
+
+if [ -z "$FORMATTED_COMMITS" ]; then
+    FORMATTED_COMMITS="No commits found."
+fi
+
+# Generate changelog link  
+CHANGELOG_PATH="docs/changelog/$VERSION.md"
 
 # Create release notes
 RELEASE_NOTES="## What's Changed
 
-### Commits in this release:
-$COMMITS
+### 📋 Detailed Changelog
+For detailed information about changes, new features, and breaking changes, see the [**📖 Changelog**]($CHANGELOG_PATH).
 
-### Release Information
+### 🔄 Commits in this release:
+$FORMATTED_COMMITS
+
+### ℹ️ Release Information
 - **Version**: $VERSION
 - **Branch**: $CURRENT_BRANCH
 - **Generated on**: $(date -u +'%Y-%m-%d %H:%M:%S UTC')
+- **Changelog**: [$CHANGELOG_PATH]($CHANGELOG_PATH)
 
-**Full Changelog**: https://github.com/REPOSITORY_OWNER/REPOSITORY_NAME/compare/$LATEST_TAG...$VERSION"
+**Full Changelog**: https://github.com/huebyte/Jiro/compare/$LATEST_TAG...$VERSION"
 
 log_warning "📋 Release Notes Preview:"
 echo "$RELEASE_NOTES"

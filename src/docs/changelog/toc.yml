@@ -5,5 +5,7 @@ items:
   items:
   - name: v1.0.0 (Unreleased)
     href: v1.0.0-unreleased.md
+  - name: v0.1.0-beta
+    href: v0.1.0-beta.md
   - name: v0.1.0-alpha
     href: v0.1.0-alpha.md

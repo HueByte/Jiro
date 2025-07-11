@@ -118,27 +118,53 @@ else {
     Write-ColorOutput "Latest tag: $latestTag" "Cyan"
 }
 
-# Generate commit list
+# Generate commit list with better formatting
 Write-ColorOutput "📝 Generating release notes..." "Cyan"
 if ($latestTag) {
-    $commits = git log "$latestTag..HEAD" --pretty=format:"- %s (%h)" --reverse
+    $commitsRaw = git log "$latestTag..HEAD" --pretty=format:"%h|%s|%an|%ad" --date=short --reverse
 }
 else {
-    $commits = git log --pretty=format:"- %s (%h)" --reverse
+    $commitsRaw = git log --pretty=format:"%h|%s|%an|%ad" --date=short --reverse
 }
+
+# Format commits properly
+$formattedCommits = @()
+if ($commitsRaw) {
+    foreach ($commit in $commitsRaw) {
+        if (-not [string]::IsNullOrWhiteSpace($commit)) {
+            $parts = $commit -split '\|', 4
+            if ($parts.Length -eq 4) {
+                $hash = $parts[0].Trim()
+                $message = $parts[1].Trim()
+                $author = $parts[2].Trim()
+                $date = $parts[3].Trim()
+                $formattedCommits += "- **$message** ([``$hash``](https://github.com/huebyte/Jiro/commit/$hash)) by @$author on $date"
+            }
+        }
+    }
+}
+
+$commits = if ($formattedCommits.Count -gt 0) { $formattedCommits -join "`n" } else { "No commits found." }
+
+# Generate changelog link
+$changelogPath = "docs/changelog/$Version.md"
 
 $releaseNotes = @"
 ## What's Changed
 
-### Commits in this release:
+### 📋 Detailed Changelog
+For detailed information about changes, new features, and breaking changes, see the [**📖 Changelog**]($changelogPath).
+
+### 🔄 Commits in this release:
 $commits
 
-### Release Information
+### ℹ️ Release Information
 - **Version**: $Version
-- **Branch**: $currentBranch
+- **Branch**: $currentBranch  
 - **Generated on**: $(Get-Date -Format "yyyy-MM-dd HH:mm:ss UTC")
+- **Changelog**: [$changelogPath]($changelogPath)
 
-**Full Changelog**: https://github.com/REPOSITORY_OWNER/REPOSITORY_NAME/compare/$latestTag...$Version
+**Full Changelog**: https://github.com/huebyte/Jiro/compare/$latestTag...$Version
 "@
 
 Write-ColorOutput "📋 Release Notes Preview:" "Yellow"
