@@ -1,69 +1,69 @@
 version: "3.8"
 
 services:
-  jiro-kernel:
-    container_name: jiro-kernel
-    build:
-      context: ./src/Jiro.Kernel
-      dockerfile: dockerfile
-    ports:
-      - "${JIRO_HTTP_PORT}:8080"
-      - "${JIRO_HTTPS_PORT}:8443"
-      - "${JIRO_ADDITIONAL_PORT}:18090"
-    environment:
-      - ConnectionStrings__DefaultConnection=Server=${DB_SERVER};Database=${MYSQL_DATABASE};Uid=${MYSQL_USER};Pwd=${MYSQL_PASSWORD};
-    volumes:
-      - jiro_shared:/home/app/jiro/Data/Shared
-      - jiro_logs:/home/app/jiro/Data/Logs
-    depends_on:
-      mysql:
-        condition: service_healthy
-    networks:
-      - jiro-network
-    restart: unless-stopped
+    jiro-kernel:
+        container_name: jiro-kernel
+        build:
+            context: ./Jiro.Kernel
+            dockerfile: Dockerfile
+        ports:
+            - "${JIRO_HTTP_PORT}:8080"
+            - "${JIRO_HTTPS_PORT}:8443"
+            - "${JIRO_ADDITIONAL_PORT}:18090"
+        environment:
+            - ConnectionStrings__DefaultConnection=Server=${DB_SERVER};Database=${MYSQL_DATABASE};Uid=${MYSQL_USER};Pwd=${MYSQL_PASSWORD};
+        volumes:
+            - jiro_shared:/home/app/jiro/Data/Shared
+            - jiro_logs:/home/app/jiro/Data/Logs
+        depends_on:
+            mysql:
+                condition: service_healthy
+        networks:
+            - jiro-network
+        restart: unless-stopped
 
-  mysql:
-    container_name: jiro-mysql
-    image: mysql:8.0
-    environment:
-      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
-      - MYSQL_DATABASE=${MYSQL_DATABASE}
-      - MYSQL_USER=${MYSQL_USER}
-      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
-    ports:
-      - "${MYSQL_PORT}:3306"
-    volumes:
-      - mysql_data:/var/lib/mysql
-      - mysql_config:/etc/mysql/conf.d
-    networks:
-      - jiro-network
-    restart: unless-stopped
-    healthcheck:
-      test:
-        [
-          "CMD",
-          "mysqladmin",
-          "ping",
-          "-h",
-          "localhost",
-          "-u${MYSQL_USER}",
-          "-p${MYSQL_PASSWORD}",
-        ]
-      interval: ${MYSQL_HEALTH_CHECK_INTERVAL}
-      timeout: ${MYSQL_HEALTH_CHECK_TIMEOUT}
-      retries: ${MYSQL_HEALTH_CHECK_RETRIES}
-      start_period: ${MYSQL_HEALTH_CHECK_START_PERIOD}
+    mysql:
+        container_name: jiro-mysql
+        image: mysql:8.0
+        environment:
+            - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+            - MYSQL_DATABASE=${MYSQL_DATABASE}
+            - MYSQL_USER=${MYSQL_USER}
+            - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+        ports:
+            - "${MYSQL_PORT}:3306"
+        volumes:
+            - mysql_data:/var/lib/mysql
+            - mysql_config:/etc/mysql/conf.d
+        networks:
+            - jiro-network
+        restart: unless-stopped
+        healthcheck:
+            test:
+                [
+                    "CMD",
+                    "mysqladmin",
+                    "ping",
+                    "-h",
+                    "localhost",
+                    "-u${MYSQL_USER}",
+                    "-p${MYSQL_PASSWORD}",
+                ]
+            interval: ${MYSQL_HEALTH_CHECK_INTERVAL}
+            timeout: ${MYSQL_HEALTH_CHECK_TIMEOUT}
+            retries: ${MYSQL_HEALTH_CHECK_RETRIES}
+            start_period: ${MYSQL_HEALTH_CHECK_START_PERIOD}
 
 volumes:
-  jiro_shared:
-    driver: local
-  jiro_logs:
-    driver: local
-  mysql_data:
-    driver: local
-  mysql_config:
-    driver: local
+    jiro_shared:
+        driver: local
+    jiro_logs:
+        driver: local
+    mysql_data:
+        driver: local
+    mysql_config:
+        driver: local
 
 networks:
-  jiro-network:
-    driver: bridge
+    jiro-network:
+        driver: bridge

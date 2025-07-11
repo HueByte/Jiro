@@ -31,6 +31,15 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Prepare configuration files
+        run: |
+          if [ ! -f ./src/Jiro.Kernel/Jiro.App/appsettings.json ]; then
+            cp ./src/Jiro.Kernel/Jiro.App/appsettings.example.json ./src/Jiro.Kernel/Jiro.App/appsettings.json
+            echo "✅ Copied appsettings.example.json to appsettings.json"
+          else
+            echo "✅ appsettings.json already exists"
+          fi
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
