@@ -1,0 +1,52 @@
+name: 'Setup .NET Project'
+description: 'Common setup steps for .NET projects (assumes code is already checked out)'
+inputs:
+  dotnet-version:
+    description: '.NET version to setup'
+    required: false
+    default: '9.0.x'
+  restore-dependencies:
+    description: 'Whether to restore dependencies'
+    required: false
+    default: 'true'
+  prepare-config:
+    description: 'Whether to prepare configuration files'
+    required: false
+    default: 'true'
+  solution-path:
+    description: 'Path to the solution file'
+    required: false
+    default: './src/Main.sln'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: ${{ inputs.dotnet-version }}
+
+    - name: Prepare configuration files
+      if: inputs.prepare-config == 'true'
+      shell: bash
+      run: |
+        if [ ! -f ./src/Jiro.Kernel/Jiro.App/appsettings.json ]; then
+          cp ./src/Jiro.Kernel/Jiro.App/appsettings.example.json ./src/Jiro.Kernel/Jiro.App/appsettings.json
+          echo "✅ Copied appsettings.example.json to appsettings.json"
+        else
+          echo "✅ appsettings.json already exists"
+        fi
+
+    - name: Cache NuGet packages
+      if: inputs.restore-dependencies == 'true'
+      uses: actions/cache@v4
+      with:
+        path: ~/.nuget/packages
+        key: ${{ runner.os }}-nuget-${{ hashFiles('**/packages.lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-nuget-
+
+    - name: Restore dependencies
+      if: inputs.restore-dependencies == 'true'
+      shell: bash
+      run: dotnet restore ${{ inputs.solution-path }}

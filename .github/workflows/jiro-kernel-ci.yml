@@ -27,27 +27,11 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v4
+      - name: Setup .NET Project
+        uses: ./.github/actions/setup-dotnet-project
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
-
-      - name: Prepare configuration files
-        run: |
-          if [ ! -f ./src/Jiro.Kernel/Jiro.App/appsettings.json ]; then
-            cp ./src/Jiro.Kernel/Jiro.App/appsettings.example.json ./src/Jiro.Kernel/Jiro.App/appsettings.json
-          fi
-
-      - name: Cache NuGet packages
-        uses: actions/cache@v4
-        with:
-          path: ~/.nuget/packages
-          key: ${{ runner.os }}-nuget-${{ hashFiles('**/packages.lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-nuget-
-
-      - name: Restore dependencies
-        run: dotnet restore ${{ env.SOLUTION_PATH }}
+          solution-path: ${{ env.SOLUTION_PATH }}
 
       - name: Build solution
         run: dotnet build ${{ env.SOLUTION_PATH }} --no-restore --configuration Release

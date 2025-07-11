@@ -4,42 +4,8 @@ on:
   push:
     tags:
       - "v*.*.*"
-  pull_request:
-    branches: [main]
-    paths:
-      - "src/**"
 
 jobs:
-  validate-pr:
-    name: Validate Pull Request
-    runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request'
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: "9.0.x"
-
-      - name: Restore dependencies
-        run: dotnet restore src/Main.sln
-
-      - name: Build
-        run: dotnet build src/Main.sln --no-restore --configuration Release
-
-      - name: Run tests
-        run: dotnet test src/Main.sln --no-build --configuration Release --verbosity normal
-
-      - name: Check code formatting
-        run: dotnet format src/Main.sln --verify-no-changes --verbosity diagnostic
-
-      - name: Security scan with CodeQL
-        uses: github/codeql-action/analyze@v3
-        continue-on-error: true
-
   build-and-release:
     name: Build Release Artifacts
     runs-on: ubuntu-latest
@@ -63,20 +29,11 @@ jobs:
           echo "version=$version" >> $GITHUB_OUTPUT
           echo "Release version: $version"
 
-      - name: Restore dependencies
-        run: dotnet restore src/Main.sln
-
-      - name: Build Release
-        run: |
-          dotnet build src/Main.sln --no-restore --configuration Release
-          dotnet test src/Main.sln --no-build --configuration Release --verbosity normal
-
       - name: Publish Release Artifacts
         run: |
-          # Publish for multiple platforms
+          # Publish for multiple platforms with fresh restore for each runtime
           dotnet publish src/Jiro.Kernel/Jiro.App/Jiro.App.csproj \
             --configuration Release \
-            --no-build \
             --output ./publish/linux-x64 \
             --runtime linux-x64 \
             --self-contained true \
@@ -85,7 +42,6 @@ jobs:
             
           dotnet publish src/Jiro.Kernel/Jiro.App/Jiro.App.csproj \
             --configuration Release \
-            --no-build \
             --output ./publish/win-x64 \
             --runtime win-x64 \
             --self-contained true \
@@ -94,7 +50,6 @@ jobs:
             
           dotnet publish src/Jiro.Kernel/Jiro.App/Jiro.App.csproj \
             --configuration Release \
-            --no-build \
             --output ./publish/osx-x64 \
             --runtime osx-x64 \
             --self-contained true \

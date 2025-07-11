@@ -4,6 +4,8 @@
 param(
     [string]$Version = "",
     [switch]$DryRun = $false,
+    [switch]$AttachBuilds = $false,
+    [string]$BuildPath = "",
     [switch]$Help = $false
 )
 
@@ -14,14 +16,18 @@ Create Release Script
 Usage: .\create-release.ps1 [options]
 
 Options:
-    -Version <version>    Specify version (e.g., "v1.2.3")
-    -DryRun               Show what would be done without executing
-    -Help                 Show this help message
+    -Version <version>      Specify version (e.g., "v1.2.3")
+    -DryRun                 Show what would be done without executing
+    -AttachBuilds           Attach build artifacts to the release
+    -BuildPath <path>       Path to build artifacts (default: auto-detect)
+    -Help                   Show this help message
 
 Examples:
-    .\create-release.ps1                    # Auto-generate version
-    .\create-release.ps1 -Version "v1.2.3"  # Use specific version
-    .\create-release.ps1 -DryRun            # Preview actions
+    .\create-release.ps1                              # Auto-generate version
+    .\create-release.ps1 -Version "v1.2.3"            # Use specific version
+    .\create-release.ps1 -DryRun                      # Preview actions
+    .\create-release.ps1 -AttachBuilds                # Include build artifacts
+    .\create-release.ps1 -AttachBuilds -BuildPath "dist" # Custom build path
 "@
     exit 0
 }
@@ -175,6 +181,12 @@ if ($DryRun) {
     Write-ColorOutput "1. Create git tag: $Version" "Cyan"
     Write-ColorOutput "2. Push tag to origin" "Cyan"
     Write-ColorOutput "3. Create GitHub release with above notes" "Cyan"
+    if ($AttachBuilds -and $buildArtifacts.Count -gt 0) {
+        Write-ColorOutput "4. Attach $($buildArtifacts.Count) build artifact(s)" "Cyan"
+        foreach ($artifact in $buildArtifacts) {
+            Write-ColorOutput "   - $($artifact.Name)" "White"
+        }
+    }
     Write-ColorOutput "`nTo actually create the release, run without -DryRun flag" "Yellow"
     exit 0
 }
@@ -205,9 +217,90 @@ $releaseNotes | Out-File -FilePath $releaseNotesFile -Encoding UTF8
 
 Write-ColorOutput "📦 Creating GitHub release..." "Cyan"
 Write-ColorOutput "Release notes saved to: $releaseNotesFile" "Cyan"
-Write-ColorOutput "You can now create a GitHub release manually using the GitHub web interface or GitHub CLI" "Yellow"
-Write-ColorOutput "GitHub CLI command: gh release create $Version --notes-file $releaseNotesFile" "Cyan"
+
+if ($AttachBuilds -and $buildArtifacts.Count -gt 0) {
+    Write-ColorOutput "Build artifacts found - you can attach them using GitHub CLI:" "Yellow"
+    $artifactPaths = ($buildArtifacts | ForEach-Object { "`"$($_.Path)`"" }) -join " "
+    Write-ColorOutput "GitHub CLI command: gh release create $Version --notes-file $releaseNotesFile $artifactPaths" "Cyan"
+}
+else {
+    Write-ColorOutput "GitHub CLI command: gh release create $Version --notes-file $releaseNotesFile" "Cyan"
+}
+
+Write-ColorOutput "You can also create a GitHub release manually using the GitHub web interface" "Yellow"
 
 Write-ColorOutput "`n🎉 Release preparation completed!" "Green"
 Write-ColorOutput "Tag: $Version" "Green"
 Write-ColorOutput "Release notes: $releaseNotesFile" "Green"
+
+# Handle build artifacts if requested
+$buildArtifacts = @()
+if ($AttachBuilds) {
+    Write-ColorOutput "📦 Searching for build artifacts..." "Cyan"
+    $buildArtifacts = Get-BuildArtifacts -CustomPath $BuildPath
+    
+    if ($buildArtifacts.Count -gt 0) {
+        Write-ColorOutput "Found $($buildArtifacts.Count) artifact(s):" "Green"
+        foreach ($artifact in $buildArtifacts) {
+            Write-ColorOutput "  - $($artifact.Name) ($($artifact.Size) MB)" "White"
+        }
+    }
+    else {
+        Write-ColorOutput "⚠️ No build artifacts found" "Yellow"
+        if (-not $DryRun) {
+            $continue = Read-Host "Continue without artifacts? (y/N)"
+            if ($continue -ne "y" -and $continue -ne "Y") {
+                Write-ColorOutput "Aborted by user" "Yellow"
+                exit 0
+            }
+        }
+    }
+}
+
+# Function to find build artifacts
+function Get-BuildArtifacts {
+    param(
+        [string]$CustomPath = ""
+    )
+    
+    $artifacts = @()
+    $searchPaths = @()
+    
+    if (-not [string]::IsNullOrWhiteSpace($CustomPath)) {
+        $searchPaths += $CustomPath
+    }
+    else {
+        # Common build output paths for .NET projects
+        $searchPaths += @(
+            "src\bin\Release",
+            "bin\Release", 
+            "publish",
+            "artifacts",
+            "dist",
+            "build"
+        )
+    }
+    
+    foreach ($path in $searchPaths) {
+        if (Test-Path $path) {
+            Write-ColorOutput "🔍 Searching for artifacts in: $path" "Cyan"
+            
+            # Look for common artifact types
+            $files = Get-ChildItem -Path $path -Recurse -File | Where-Object {
+                $_.Extension -in @('.zip', '.tar.gz', '.exe', '.msi', '.nupkg', '.dll') -or
+                $_.Name -like '*publish*' -or
+                $_.Name -like '*release*'
+            }
+            
+            foreach ($file in $files) {
+                $artifacts += @{
+                    Path = $file.FullName
+                    Name = $file.Name
+                    Size = [math]::Round($file.Length / 1MB, 2)
+                }
+            }
+        }
+    }
+    
+    return $artifacts
+}

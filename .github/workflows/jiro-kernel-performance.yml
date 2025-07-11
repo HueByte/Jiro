@@ -24,19 +24,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v4
+      - name: Setup .NET Project
+        uses: ./.github/actions/setup-dotnet-project
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
-
-      - name: Prepare configuration files
-        run: |
-          if [ ! -f ./src/Jiro.Kernel/Jiro.App/appsettings.json ]; then
-            cp ./src/Jiro.Kernel/Jiro.App/appsettings.example.json ./src/Jiro.Kernel/Jiro.App/appsettings.json
-          fi
-
-      - name: Restore dependencies
-        run: dotnet restore ${{ env.SOLUTION_PATH }}
+          solution-path: ${{ env.SOLUTION_PATH }}
 
       - name: Build in Release mode
         run: dotnet build ${{ env.SOLUTION_PATH }} --no-restore --configuration Release

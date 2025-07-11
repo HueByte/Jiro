@@ -5,6 +5,8 @@
 
 VERSION=""
 DRY_RUN=false
+ATTACH_BUILDS=false
+BUILD_PATH=""
 HELP=false
 
 # Parse command line arguments
@@ -17,6 +19,14 @@ while [[ $# -gt 0 ]]; do
         --dry-run)
             DRY_RUN=true
             shift
+            ;;
+        --attach-builds)
+            ATTACH_BUILDS=true
+            shift
+            ;;
+        --build-path)
+            BUILD_PATH="$2"
+            shift 2
             ;;
         -h|--help)
             HELP=true
@@ -38,12 +48,16 @@ Usage: ./create-release.sh [options]
 Options:
     -v, --version <version>    Specify version (e.g., "v1.2.3")
     --dry-run                 Show what would be done without executing
+    --attach-builds           Attach build artifacts to the release
+    --build-path <path>       Path to build artifacts (default: auto-detect)
     -h, --help                Show this help message
 
 Examples:
-    ./create-release.sh                      # Auto-generate version
-    ./create-release.sh -v "v1.2.3"         # Use specific version
-    ./create-release.sh --dry-run            # Preview actions
+    ./create-release.sh                            # Auto-generate version
+    ./create-release.sh -v "v1.2.3"               # Use specific version
+    ./create-release.sh --dry-run                 # Preview actions
+    ./create-release.sh --attach-builds           # Include build artifacts
+    ./create-release.sh --attach-builds --build-path "dist" # Custom build path
 EOF
     exit 0
 fi
@@ -70,6 +84,38 @@ function log_warning() {
 
 function log_error() {
     echo -e "${RED}$1${NC}"
+}
+
+# Function to find build artifacts
+function find_build_artifacts() {
+    local custom_path="$1"
+    local artifacts=()
+    local search_paths=()
+    
+    if [ -n "$custom_path" ]; then
+        search_paths=("$custom_path")
+    else
+        # Common build output paths for .NET projects
+        search_paths=("src/bin/Release" "bin/Release" "publish" "artifacts" "dist" "build")
+    fi
+    
+    for path in "${search_paths[@]}"; do
+        if [ -d "$path" ]; then
+            log_info "🔍 Searching for artifacts in: $path"
+            
+            # Look for common artifact types
+            while IFS= read -r -d '' file; do
+                if [[ "$file" =~ \.(zip|tar\.gz|exe|msi|nupkg|dll)$ ]] || 
+                   [[ "$(basename "$file")" =~ publish ]] || 
+                   [[ "$(basename "$file")" =~ release ]]; then
+                    size=$(du -m "$file" 2>/dev/null | cut -f1 || echo "0")
+                    artifacts+=("$file|$(basename "$file")|$size")
+                fi
+            done < <(find "$path" -type f -print0 2>/dev/null)
+        fi
+    done
+    
+    printf '%s\n' "${artifacts[@]}"
 }
 
 # Check if we're in a git repository
@@ -172,12 +218,47 @@ $FORMATTED_COMMITS
 log_warning "📋 Release Notes Preview:"
 echo "$RELEASE_NOTES"
 
+# Handle build artifacts if requested
+BUILD_ARTIFACTS=()
+if [ "$ATTACH_BUILDS" = true ]; then
+    log_info "📦 Searching for build artifacts..."
+    
+    while IFS= read -r line; do
+        [ -n "$line" ] && BUILD_ARTIFACTS+=("$line")
+    done < <(find_build_artifacts "$BUILD_PATH")
+    
+    if [ ${#BUILD_ARTIFACTS[@]} -gt 0 ]; then
+        log_success "Found ${#BUILD_ARTIFACTS[@]} artifact(s):"
+        for artifact in "${BUILD_ARTIFACTS[@]}"; do
+            IFS='|' read -r path name size <<< "$artifact"
+            echo "  - $name ($size MB)"
+        done
+    else
+        log_warning "⚠️ No build artifacts found"
+        if [ "$DRY_RUN" != true ]; then
+            read -p "Continue without artifacts? (y/N): " -n 1 -r
+            echo
+            if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+                log_warning "Aborted by user"
+                exit 0
+            fi
+        fi
+    fi
+fi
+
 if [ "$DRY_RUN" = true ]; then
     log_warning ""
     log_warning "🔍 DRY RUN - Actions that would be performed:"
     log_info "1. Create git tag: $VERSION"
     log_info "2. Push tag to origin"
     log_info "3. Create GitHub release with above notes"
+    if [ "$ATTACH_BUILDS" = true ] && [ ${#BUILD_ARTIFACTS[@]} -gt 0 ]; then
+        log_info "4. Attach ${#BUILD_ARTIFACTS[@]} build artifact(s)"
+        for artifact in "${BUILD_ARTIFACTS[@]}"; do
+            IFS='|' read -r path name size <<< "$artifact"
+            echo "   - $name"
+        done
+    fi
     log_warning ""
     log_warning "To actually create the release, run without --dry-run flag"
     exit 0
@@ -207,8 +288,20 @@ echo "$RELEASE_NOTES" > "$RELEASE_NOTES_FILE"
 
 log_info "📦 Creating GitHub release..."
 log_info "Release notes saved to: $RELEASE_NOTES_FILE"
-log_warning "You can now create a GitHub release manually using the GitHub web interface or GitHub CLI"
-log_info "GitHub CLI command: gh release create $VERSION --notes-file $RELEASE_NOTES_FILE"
+
+if [ "$ATTACH_BUILDS" = true ] && [ ${#BUILD_ARTIFACTS[@]} -gt 0 ]; then
+    log_warning "Build artifacts found - you can attach them using GitHub CLI:"
+    ARTIFACT_PATHS=""
+    for artifact in "${BUILD_ARTIFACTS[@]}"; do
+        IFS='|' read -r path name size <<< "$artifact"
+        ARTIFACT_PATHS="$ARTIFACT_PATHS \"$path\""
+    done
+    log_info "GitHub CLI command: gh release create $VERSION --notes-file $RELEASE_NOTES_FILE$ARTIFACT_PATHS"
+else
+    log_info "GitHub CLI command: gh release create $VERSION --notes-file $RELEASE_NOTES_FILE"
+fi
+
+log_warning "You can also create a GitHub release manually using the GitHub web interface"
 
 echo ""
 log_success "🎉 Release preparation completed!"

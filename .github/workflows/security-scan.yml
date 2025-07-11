@@ -1,19 +1,10 @@
-name: Security Scanning
+name: CodeQL Security Analysis
 
 on:
-  push:
-    branches: ["main"]
-    paths:
-      - "src/**"
-      - ".github/workflows/security-scan.yml"
-  pull_request:
-    branches: ["main", "dev"]
-    paths:
-      - "src/**"
-      - ".github/workflows/security-scan.yml"
   schedule:
-    # Run security scan weekly on Sundays at 2 AM UTC
-    - cron: "0 2 * * 0"
+    # Run CodeQL analysis weekly on Fridays at 2 AM UTC (different day from security audit)
+    - cron: "0 2 * * 5"
+  workflow_dispatch:
 
 env:
   DOTNET_VERSION: "9.0.x"
