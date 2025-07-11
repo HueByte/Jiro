@@ -30,7 +30,7 @@
       {
         "src": "docs",
         "dest": "documentation",
-        "files": ["*.md", "toc.yml"],
+        "files": ["**/*.md", "**/toc.yml"],
         "exclude": [
           "api/**",
           "build/**",
