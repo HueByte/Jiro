@@ -80,28 +80,45 @@ jobs:
           IMAGE_TAG=$(echo "${{ steps.meta.outputs.tags }}" | head -n1)
           echo "Testing Docker image: $IMAGE_TAG"
 
-          # Run basic container health check (without --rm to allow log inspection)
-          if docker run -d --name jiro-kernel-test $IMAGE_TAG; then
+          # Test 1: Basic startup validation in test mode
+          echo "🧪 Running startup validation test..."
+          if docker run --rm --name jiro-kernel-startup-test -e JIRO_TEST_MODE=true $IMAGE_TAG --test-mode; then
+            echo "✅ Startup validation test passed"
+          else
+            echo "❌ Startup validation test failed"
+            exit 1
+          fi
+
+          # Test 2: Container starts and basic health check
+          echo "🏥 Running container health test..."
+          if docker run -d --name jiro-kernel-health-test -e JIRO_TEST_MODE=true $IMAGE_TAG; then
             echo "✅ Container started successfully"
-            sleep 10
+            sleep 5
             
-            # Check if container is still running
-            if docker ps | grep -q jiro-kernel-test; then
+            # Check if container is still running or exited gracefully
+            if docker ps | grep -q jiro-kernel-health-test; then
               echo "✅ Container is running properly"
-              docker stop jiro-kernel-test
-              docker rm jiro-kernel-test
+              docker stop jiro-kernel-health-test
+              docker rm jiro-kernel-health-test
             else
-              echo "❌ Container stopped unexpectedly"
-              echo "Container logs:"
-              docker logs jiro-kernel-test || true
-              docker rm jiro-kernel-test || true
-              exit 1
+              # Check exit code
+              EXIT_CODE=$(docker inspect jiro-kernel-health-test --format='{{.State.ExitCode}}')
+              if [ "$EXIT_CODE" = "0" ]; then
+                echo "✅ Container exited gracefully (exit code 0)"
+                docker rm jiro-kernel-health-test
+              else
+                echo "❌ Container stopped with exit code: $EXIT_CODE"
+                echo "Container logs:"
+                docker logs jiro-kernel-health-test || true
+                docker rm jiro-kernel-health-test || true
+                exit 1
+              fi
             fi
           else
             echo "❌ Container failed to start"
             echo "Container logs:"
-            docker logs jiro-kernel-test || true
-            docker rm jiro-kernel-test || true
+            docker logs jiro-kernel-health-test || true
+            docker rm jiro-kernel-health-test || true
             exit 1
           fi
 

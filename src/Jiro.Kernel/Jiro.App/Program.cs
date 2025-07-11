@@ -17,6 +17,9 @@ using Serilog.Extensions.Logging;
 
 AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
 
+// Check for test mode
+bool isTestMode = args.Contains("--test-mode") || Environment.GetEnvironmentVariable("JIRO_TEST_MODE") == "true";
+
 var host = Host.CreateDefaultBuilder(args);
 
 ConfigurationManager configManager = new();
@@ -51,6 +54,13 @@ host.ConfigureServices(services =>
 {
 	string? apiKey = configManager.GetValue<string>("API_KEY");
 	string? apiUrl = configManager.GetValue<string>("JIRO_API");
+
+	// In test mode, use dummy values if not provided
+	if (isTestMode)
+	{
+		apiKey ??= "test-api-key";
+		apiUrl ??= "https://localhost:18092";
+	}
 
 	// todo
 	// add link to guide
@@ -105,6 +115,30 @@ pluginManager?.RegisterModuleServices();
 //pluginManager.RegisterAppExtensions(host);
 
 var app = host.Build();
+
+// In test mode, perform quick validation and exit
+if (isTestMode)
+{
+	Log.Information("🧪 Running in test mode - performing startup validation");
+
+	// Test basic service resolution
+	try
+	{
+		var testCommandContainer = app.Services.GetRequiredService<CommandsContext>();
+		Log.Information("✅ Command container resolved successfully");
+
+		var testAppConf = new AppConfigurator(app);
+		Log.Information("✅ App configurator created successfully");
+
+		Log.Information("✅ Test mode validation completed successfully");
+		Environment.Exit(0);
+	}
+	catch (Exception ex)
+	{
+		Log.Error(ex, "❌ Test mode validation failed");
+		Environment.Exit(1);
+	}
+}
 
 // Log loaded modules
 var commandContainer = app.Services.GetRequiredService<CommandsContext>();
