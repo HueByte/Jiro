@@ -11,6 +11,6 @@
 - name: Workflow Pipelines
   href: workflow-pipelines.md
 - name: Changelog
-  href: changelog.md
+  href: changelog/
 - name: API Index
   href: api-index.md
