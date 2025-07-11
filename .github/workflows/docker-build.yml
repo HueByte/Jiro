@@ -71,17 +71,28 @@ jobs:
           IMAGE_TAG=$(echo "${{ steps.meta.outputs.tags }}" | head -n1)
           echo "Testing Docker image: $IMAGE_TAG"
 
-          # Run basic container health check
-          docker run --rm -d --name jiro-kernel-test $IMAGE_TAG || exit 1
-          sleep 10
-
-          # Check if container is running
-          if docker ps | grep -q jiro-kernel-test; then
+          # Run basic container health check (without --rm to allow log inspection)
+          if docker run -d --name jiro-kernel-test $IMAGE_TAG; then
             echo "✅ Container started successfully"
-            docker stop jiro-kernel-test
+            sleep 10
+            
+            # Check if container is still running
+            if docker ps | grep -q jiro-kernel-test; then
+              echo "✅ Container is running properly"
+              docker stop jiro-kernel-test
+              docker rm jiro-kernel-test
+            else
+              echo "❌ Container stopped unexpectedly"
+              echo "Container logs:"
+              docker logs jiro-kernel-test || true
+              docker rm jiro-kernel-test || true
+              exit 1
+            fi
           else
             echo "❌ Container failed to start"
+            echo "Container logs:"
             docker logs jiro-kernel-test || true
+            docker rm jiro-kernel-test || true
             exit 1
           fi
 
