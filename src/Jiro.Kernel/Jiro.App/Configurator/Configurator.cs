@@ -22,8 +22,17 @@ using OpenAI.Chat;
 
 namespace Jiro.App.Configurator;
 
+/// <summary>
+/// Provides static extension methods for configuring services, options, and HTTP clients for the Jiro application.
+/// </summary>
 public static class Configurator
 {
+	/// <summary>
+	/// Adds all required services to the dependency injection container, including command handlers, AI clients, repositories, and core services.
+	/// </summary>
+	/// <param name="services">The service collection to add services to.</param>
+	/// <param name="config">The configuration instance used to configure services.</param>
+	/// <returns>The service collection with added services for method chaining.</returns>
 	public static IServiceCollection AddServices(this IServiceCollection services, IConfiguration config)
 	{
 		services.AddSingleton<ICommandHandlerService, CommandHandlerService>();
@@ -66,6 +75,12 @@ public static class Configurator
 		return services;
 	}
 
+	/// <summary>
+	/// Configures application options from the provided configuration, including chat, logging, and JWT options.
+	/// </summary>
+	/// <param name="services">The service collection to configure options for.</param>
+	/// <param name="configuration">The configuration instance containing option values.</param>
+	/// <returns>The service collection with configured options for method chaining.</returns>
 	public static IServiceCollection AddOptions(this IServiceCollection services, IConfiguration configuration)
 	{
 		services.AddOptions();
@@ -76,6 +91,12 @@ public static class Configurator
 		return services;
 	}
 
+	/// <summary>
+	/// Configures HTTP clients for external API communication, including weather, geolocation, and general-purpose clients.
+	/// </summary>
+	/// <param name="services">The service collection to add HTTP clients to.</param>
+	/// <param name="configuration">The configuration instance for HTTP client settings.</param>
+	/// <returns>The service collection with configured HTTP clients for method chaining.</returns>
 	public static IServiceCollection AddHttpClients(this IServiceCollection services, IConfiguration configuration)
 	{
 		services.AddHttpClient(HttpClients.WEATHER_CLIENT, httpClient =>

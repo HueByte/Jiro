@@ -2,15 +2,26 @@ using Microsoft.Extensions.Configuration;
 
 namespace Jiro.App.Configurator;
 
+/// <summary>
+/// Provides configuration functionality for environment setup, including folder creation and configuration file management.
+/// </summary>
 public class EnvironmentConfigurator
 {
 	private readonly ConfigurationManager _config;
 
+	/// <summary>
+	/// Initializes a new instance of the <see cref="EnvironmentConfigurator"/> class.
+	/// </summary>
+	/// <param name="config">The configuration manager used for environment setup.</param>
 	public EnvironmentConfigurator(ConfigurationManager config)
 	{
 		_config = config;
 	}
 
+	/// <summary>
+	/// Creates default application folders (logs, save, modules) if they don't exist.
+	/// </summary>
+	/// <returns>The current <see cref="EnvironmentConfigurator"/> instance for method chaining.</returns>
 	public EnvironmentConfigurator PrepareDefaultFolders()
 	{
 		if (!Directory.Exists(Path.Join(AppContext.BaseDirectory, "logs")))
@@ -25,6 +36,11 @@ public class EnvironmentConfigurator
 		return this;
 	}
 
+	/// <summary>
+	/// Prepares the logs folder based on the API_LOGS_PATH configuration value, creating directories as needed.
+	/// </summary>
+	/// <returns>The current <see cref="EnvironmentConfigurator"/> instance for method chaining.</returns>
+	/// <exception cref="Exception">Thrown when the API_LOGS_PATH configuration points to an invalid directory.</exception>
 	public EnvironmentConfigurator PrepareLogsFolder()
 	{
 		var logsPath = _config.GetValue<string>("API_LOGS_PATH");
@@ -46,6 +62,11 @@ public class EnvironmentConfigurator
 		return this;
 	}
 
+	/// <summary>
+	/// Prepares and loads configuration files, handling custom CONFIG_PATH settings and creating default configuration files as needed.
+	/// </summary>
+	/// <returns>The current <see cref="EnvironmentConfigurator"/> instance for method chaining.</returns>
+	/// <exception cref="Exception">Thrown when configuration file loading fails or when CONFIG_PATH points to an invalid location.</exception>
 	public EnvironmentConfigurator PrepareConfigFiles()
 	{
 		string finalPath = "";

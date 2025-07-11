@@ -20,6 +20,10 @@ using static JiroCloud.Api.Proto.JiroHubProto;
 
 namespace Jiro.App;
 
+/// <summary>
+/// A hosted service that manages gRPC client connections to the Jiro server, handling bidirectional streaming communication,
+/// command execution, and automatic reconnection with retry logic.
+/// </summary>
 internal class JiroClientService : IHostedService
 {
 	private const string SERVER_ALIVE = "SERVER_ALIVE";
@@ -35,6 +39,12 @@ internal class JiroClientService : IHostedService
 	private CancellationToken _cancellationToken;
 	private int _retryCount;
 
+	/// <summary>
+	/// Initializes a new instance of the <see cref="JiroClientService"/> class.
+	/// </summary>
+	/// <param name="scopeFactory">Factory for creating service scopes for dependency injection.</param>
+	/// <param name="logger">Logger instance for recording service events and errors.</param>
+	/// <param name="commandHandlerService">Service responsible for executing commands received from the server.</param>
 	public JiroClientService(IServiceScopeFactory scopeFactory, ILogger<JiroClientService> logger, ICommandHandlerService commandHandlerService)
 	{
 		_scopeFactory = scopeFactory;
@@ -42,6 +52,12 @@ internal class JiroClientService : IHostedService
 		_commandHandler = commandHandlerService;
 	}
 
+	/// <summary>
+	/// Starts the gRPC client service, establishing connection to the server and beginning the main communication loop.
+	/// Implements automatic reconnection with exponential backoff on failures.
+	/// </summary>
+	/// <param name="cancellationToken">Token to signal cancellation of the service startup.</param>
+	/// <returns>A task representing the asynchronous start operation.</returns>
 	public async Task StartAsync(CancellationToken cancellationToken)
 	{
 		//await SayHello();
@@ -107,6 +123,11 @@ internal class JiroClientService : IHostedService
 		} while (!cancellationToken.IsCancellationRequested && _retryCount++ < MAX_RETRY_COUNT);
 	}
 
+	/// <summary>
+	/// Starts the main listening loop for processing incoming server messages and commands.
+	/// </summary>
+	/// <param name="callInstance">The active gRPC streaming call instance for communication.</param>
+	/// <returns>A task representing the asynchronous listening operation.</returns>
 	private async Task StartListeningLoopAsync(AsyncDuplexStreamingCall<ClientMessage, ServerMessage>? callInstance)
 	{
 		if (callInstance is null)
@@ -158,6 +179,12 @@ internal class JiroClientService : IHostedService
 		}
 	}
 
+	/// <summary>
+	/// Maintains a keep-alive connection with the server by sending periodic ping messages.
+	/// Resets retry count on successful pings and handles connection health monitoring.
+	/// </summary>
+	/// <param name="callInstance">The active gRPC streaming call instance for communication.</param>
+	/// <returns>A task representing the asynchronous keep-alive operation.</returns>
 	private async Task StartKeepAliveLoopAsync(AsyncDuplexStreamingCall<ClientMessage, ServerMessage>? callInstance)
 	{
 		while (!_cancellationToken.IsCancellationRequested)
@@ -184,6 +211,15 @@ internal class JiroClientService : IHostedService
 		}
 	}
 
+	/// <summary>
+	/// Executes a command received from the server within a scoped context and sends the result back.
+	/// </summary>
+	/// <param name="scopedCommandSyncId">Unique identifier for the command synchronization.</param>
+	/// <param name="instanceId">The instance ID for command context.</param>
+	/// <param name="sessionId">The session ID for command context.</param>
+	/// <param name="command">The command string to execute.</param>
+	/// <param name="callInstance">The active gRPC streaming call instance for sending responses.</param>
+	/// <returns>A task representing the asynchronous command execution.</returns>
 	private async Task ExecuteCommandAsync(string scopedCommandSyncId, string instanceId, string sessionId, string command, AsyncDuplexStreamingCall<ClientMessage, ServerMessage> callInstance)
 	{
 		try
@@ -211,6 +247,12 @@ internal class JiroClientService : IHostedService
 		}
 	}
 
+	/// <summary>
+	/// Creates a protobuf client message from a command response, handling different command result types.
+	/// </summary>
+	/// <param name="syncId">The synchronization ID for the command.</param>
+	/// <param name="commandResult">The command execution result to serialize.</param>
+	/// <returns>A protobuf client message ready for transmission.</returns>
 	private ClientMessage CreateMessage(string syncId, CommandResponse commandResult)
 	{
 		// todo
@@ -266,6 +308,12 @@ internal class JiroClientService : IHostedService
 		return response;
 	}
 
+	/// <summary>
+	/// Thread-safe method for writing messages to the server stream using a semaphore for synchronization.
+	/// </summary>
+	/// <param name="stream">The gRPC streaming call instance.</param>
+	/// <param name="message">The client message to send to the server.</param>
+	/// <returns>A task representing the asynchronous write operation.</returns>
 	private async Task WriteMessageToServer(AsyncDuplexStreamingCall<ClientMessage, ServerMessage> stream, ClientMessage message)
 	{
 		await _semaphore.WaitAsync(_cancellationToken);
@@ -279,11 +327,21 @@ internal class JiroClientService : IHostedService
 		}
 	}
 
+	/// <summary>
+	/// Stops the hosted service gracefully when the application is shutting down.
+	/// </summary>
+	/// <param name="cancellationToken">Token to signal cancellation of the service shutdown.</param>
+	/// <returns>A completed task representing the shutdown operation.</returns>
 	public Task StopAsync(CancellationToken cancellationToken)
 	{
 		return Task.CompletedTask;
 	}
 
+	/// <summary>
+	/// Converts internal command types to protobuf command types for network communication.
+	/// </summary>
+	/// <param name="commandType">The internal command type to convert.</param>
+	/// <returns>The corresponding protobuf command type.</returns>
 	private static JiroCloud.Api.Proto.CommandType GetCommandType(Jiro.Commands.CommandType commandType) => (int)commandType switch
 	{
 		0 => JiroCloud.Api.Proto.CommandType.Text,
