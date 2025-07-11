@@ -16,6 +16,12 @@ on:
       - "scripts/generate-project-structure.sh"
       - ".github/workflows/deploy-docs.yml"
   workflow_dispatch:
+    inputs:
+      force_rebuild:
+        description: "Force rebuild even if no changes detected"
+        required: false
+        default: false
+        type: boolean
 
 # Sets permissions of the GITHUB_TOKEN to allow pushing to gh-pages branch
 permissions:
