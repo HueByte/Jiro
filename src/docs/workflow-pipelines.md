@@ -649,125 +649,110 @@ The project includes scripts for local testing of CI/CD workflows:
 - Provides colored output for better readability
 - Validates changes before pushing to remote
 
-#### **local-ci-test.ps1** (Windows PowerShell)
+### **Development Automation Scripts**
 
-- Windows equivalent of the bash script
-- PowerShell-based automation
-- Cross-platform .NET testing
-- Local Docker validation
+The `scripts/` directory contains a comprehensive set of automation tools for developers and CI/CD workflows:
 
-#### **create-release.sh** / **create-release.ps1**
+#### **Setup and Onboarding Scripts**
 
-- Local release preparation scripts
-- Version validation and tagging
-- Release notes generation
-- Pre-release testing capabilities
+##### **setup-dev.ps1 / setup-dev.sh**
 
-## 📊 Workflow Orchestration
+- **Purpose**: Automated development environment setup for new contributors
+- **Features**: Tool validation, dependency installation, configuration file setup
+- **Usage**: First-time developer onboarding and environment validation
+- **Integration**: Used by CI/CD for environment preparation
 
-### **Execution Flow:**
+#### **Documentation Scripts**
+
+##### **docfx-gen.ps1 / docfx-gen.sh**
+
+- **Purpose**: Generate API documentation using DocFX
+- **Features**: Build and serve documentation locally
+- **Integration**: Used by `deploy-docs.yml` workflow for documentation deployment
+
+##### **markdown-lint.ps1 / markdown-lint.sh**
+
+- **Purpose**: Ensure markdown quality and consistency
+- **Features**: Lint checking with auto-fix capabilities
+- **Integration**: Used by `markdown-lint.yml` workflow for documentation quality
+
+##### **generate-project-structure.ps1 / generate-project-structure.sh**
+
+- **Purpose**: Generate project structure documentation
+- **Features**: Tree view generation with smart filtering
+- **Integration**: Keeps project documentation up-to-date automatically
+
+#### **Testing and Validation Scripts**
+
+##### **local-ci-test.ps1 / local-ci-test.sh**
+
+- **Purpose**: Run complete CI/CD pipeline locally
+- **Features**: Build, test, documentation, and linting validation
+- **Benefits**: Pre-push validation to catch issues early
+- **Parallel to**: All GitHub Actions workflows
+
+#### **Release Management Scripts**
+
+##### **create-release.ps1 / create-release.sh**
+
+- **Purpose**: Automated release process
+- **Features**: Version management, tagging, and artifact preparation
+- **Integration**: Supports the `create-release.yml` workflow
+
+#### **Cross-Platform Compatibility**
+
+All scripts are available in both PowerShell (`.ps1`) and Bash (`.sh`) versions:
+
+- **Windows**: PowerShell scripts with Windows PowerShell or PowerShell Core
+- **Linux/macOS**: Bash scripts or PowerShell Core
+- **CI/CD**: Platform-appropriate scripts selected automatically
+- **Developer Choice**: Use preferred shell environment
+
+#### **Script Integration with Workflows**
 
 ```mermaid
 graph TD
-    A[Code Push/PR] --> B{Trigger Type}
-    B -->|src/** changes| C[Main CI/CD Pipeline]
-    B -->|other changes| D[Simple Push Test]
-    B -->|Manual| E[Debug Triggers]
+    A[Developer Scripts] --> B[Local Testing]
+    A --> C[CI/CD Workflows]
     
-    C --> F[Build & Test]
-    C --> G[Security Scan]
-    C --> H[Docker Build]
-    F --> I[Quality Gate]
-    G --> I
-    H --> I
+    B --> B1[setup-dev.ps1/sh]
+    B --> B2[local-ci-test.ps1/sh]
+    B --> B3[docfx-gen.ps1/sh]
+    B --> B4[markdown-lint.ps1/sh]
     
-    I -->|Success + Main Branch| J[Create Release]
-    J --> K[Auto Release]
+    C --> C1[deploy-docs.yml]
+    C --> C2[markdown-lint.yml]
+    C --> C3[jiro-kernel-ci.yml]
+    C --> C4[create-release.yml]
     
-    L[Schedule] --> M[Security Scan Weekly]
-    L --> N[Performance Test Weekly]
+    B1 --> |Environment Setup| C3
+    B2 --> |Local Validation| C3
+    B3 --> |Documentation Build| C1
+    B4 --> |Quality Check| C2
 ```
 
-### **Quality Assurance Pipeline:**
+For detailed information about all available scripts, see [Scripts Reference](scripts-reference.md).
 
-1. **Code Quality:** Format checking, compilation, and testing
-2. **Security:** Vulnerability scanning and static analysis
-3. **Containerization:** Docker build and security scanning
-4. **Integration:** End-to-end validation
-5. **Release:** Automated version management and distribution
+## 🔄 Workflow Integration Matrix
 
-## 🎯 Best Practices Implemented
+The following table shows how development scripts integrate with GitHub Actions workflows:
 
-### **Performance Optimization:**
+| Script/Workflow                  | `jiro-kernel-ci.yml` | `create-release.yml` | `docker-build.yml` | `jiro-kernel-security.yml` | `markdown-lint.yml` | `deploy-docs.yml` |
+|----------------------------------|----------------------|----------------------|--------------------|---------------------------|---------------------|-------------------|
+| `setup-dev.ps1` / `setup-dev.sh`| No                   | No                   | No                 | No                        | No                  | No                |
+| `docfx-gen.ps1` / `docfx-gen.sh`| No                   | No                   | No                 | No                        | No                  | Yes                |
+| `markdown-lint.ps1` / `markdown-lint.sh`| No                   | No                   | No                 | No                        | Yes                 | No                |
+| `generate-project-structure.ps1` / `generate-project-structure.sh`| No                   | No                   | No                 | No                        | No                  | No                |
+| `local-ci-test.ps1` / `local-ci-test.sh`| Yes                  | No                   | Yes                | Yes                       | Yes                 | Yes                |
+| `create-release.ps1` / `create-release.sh`| No                   | Yes                  | No                 | No                        | No                  | No                |
 
-- **Caching:** NuGet packages and Docker layers
-- **Parallel Execution:** Independent jobs run concurrently
-- **Conditional Logic:** Skip unnecessary steps based on context
+This table summarizes the integration of development automation scripts with the various CI/CD workflows in the Jiro project. Scripts like `local-ci-test` are integral to multiple workflows for local testing, security scanning, and documentation generation. Other scripts, such as `create-release`, are specifically tied to release automation workflows. This modular approach allows for flexible and comprehensive automation coverage across the development lifecycle.
 
-### **Security First:**
-
-- **Multi-layered Security:** Package, code, and container scanning
-- **Regular Audits:** Scheduled security reviews
-- **Automated Updates:** Dependency vulnerability monitoring
-
-### **Developer Experience:**
-
-- **Clear Feedback:** Detailed success/failure reporting
-- **Fast Feedback:** Parallel job execution
-- **Local Testing:** Scripts for pre-commit validation
-
-### **Reliability:**
-
-- **Error Handling:** Graceful failure management
-- **Retry Logic:** Resilient against transient failures
-- **Monitoring:** Comprehensive logging and reporting
-
-## 🔧 Configuration Management
-
-### **Environment Variables:**
-
-- `DOTNET_VERSION`: .NET SDK version (9.0.x)
-- `SOLUTION_PATH`: Path to main solution file
-- `DOCKER_IMAGE_NAME`: Docker image naming convention
-- `REGISTRY`: Container registry URL (ghcr.io)
-
-### **Secrets Management:**
-
-- `GITHUB_TOKEN`: Automatic GitHub authentication
-- `SNYK_TOKEN`: Optional Snyk security scanning
-- `CODECOV_TOKEN`: Code coverage reporting
-
-### **Path Filtering:**
-
-- Source code changes trigger full CI/CD
-- Documentation changes trigger minimal workflows
-- Workflow file changes trigger full validation
-
-## 📈 Monitoring and Observability
-
-### **Metrics Collected:**
-
-- **Build Success Rate:** Track pipeline reliability
-- **Test Coverage:** Monitor code quality trends
-- **Security Vulnerabilities:** Track security posture
-- **Performance Metrics:** Monitor application performance
-- **Release Frequency:** Track deployment cadence
-
-### **Reporting:**
-
-- **GitHub Actions Summary:** Detailed step-by-step reporting
-- **Codecov Integration:** Code coverage trends
-- **Security Tab:** Vulnerability tracking
-- **Release Notes:** Automated change documentation
-
-## 🚀 Future Enhancements
-
-### **Planned Improvements:**
-
-- **Multi-environment Deployment:** Staging and production pipelines
-- **Integration Testing:** End-to-end test automation
-- **Performance Benchmarking:** Historical performance tracking
-- **Dependency Updates:** Automated dependency management
-- **Container Registry:** Multi-registry support
-
-This comprehensive workflow system ensures that the Jiro project maintains high quality, security, and reliability throughout its development lifecycle while providing developers with fast feedback and automated deployment capabilities.
+| Script | GitHub Workflow | Purpose | Integration Type |
+|--------|----------------|---------|-----------------|
+| `setup-dev.ps1/.sh` | Environment Setup | Developer onboarding | Manual/CI preparation |
+| `local-ci-test.ps1/.sh` | All workflows | Local validation | Developer testing |
+| `docfx-gen.ps1/.sh` | `deploy-docs.yml` | Documentation build | Automated deployment |
+| `markdown-lint.ps1/.sh` | `markdown-lint.yml` | Quality assurance | Automated validation |
+| `generate-project-structure.ps1/.sh` | Manual/Scheduled | Documentation update | Manual/Automated |
+| `create-release.ps1/.sh` | `create-release.yml` | Release management | Manual/Triggered |

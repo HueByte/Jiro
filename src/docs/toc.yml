@@ -10,6 +10,8 @@
   href: database-erd.md
 - name: User Guide
   href: user-guide.md
+- name: Scripts Reference
+  href: scripts-reference.md
 - name: Workflow Pipelines
   href: workflow-pipelines.md
 - name: Changelog

@@ -13,7 +13,7 @@ Generated on 2025-07-11 00:48:50 using eza with git-aware filtering.
 
 ## Project Tree
 
-```
+```jsx
 .
 ├── assets
 │   ├── Jiro0-40px.png
