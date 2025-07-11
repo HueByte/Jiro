@@ -9,9 +9,10 @@ This directory contains the documentation for the Jiro AI Assistant project, bui
 ├── docs/                    # Documentation content
 │   ├── api-index.md        # API documentation index
 │   ├── project-description.md  # Project overview
+│   ├── project-structure.md   # Auto-generated project structure
 │   ├── user-guide.md       # End-user documentation
 │   ├── workflow-pipelines.md  # CI/CD workflows
-│   └── README.md           # This file
+│   └── index.md           # This file
 ├── _site/                  # Generated documentation (after build)
 │   ├── docs/               # Documentation output
 │   ├── api/                # API reference output

@@ -180,6 +180,24 @@ try {
                 Write-ColorOutput ""
             }
             
+            # Generate project structure documentation
+            Write-ColorOutput "🏗️ Generating project structure documentation..." $InfoColor
+            try {
+                $structureScript = Join-Path $scriptDir "generate-project-structure.ps1"
+                if (Test-Path $structureScript) {
+                    & $structureScript -OutputPath "src/docs/project-structure.md"
+                    Write-ColorOutput "✅ Project structure documentation generated" $SuccessColor
+                }
+                else {
+                    Write-ColorOutput "⚠️  Project structure script not found, skipping..." $WarningColor
+                }
+            }
+            catch {
+                Write-ColorOutput "⚠️  Failed to generate project structure: $_" $WarningColor
+                Write-ColorOutput "Continuing with documentation build..." $InfoColor
+            }
+            Write-ColorOutput ""
+            
             Write-ColorOutput "🔨 Building documentation..." $InfoColor
             
             $docfxArgs = @($ConfigPath)
@@ -214,6 +232,24 @@ try {
         }
         
         "Serve" {
+            # Generate project structure documentation
+            Write-ColorOutput "🏗️ Generating project structure documentation..." $InfoColor
+            try {
+                $structureScript = Join-Path $scriptDir "generate-project-structure.ps1"
+                if (Test-Path $structureScript) {
+                    & $structureScript -OutputPath "src/docs/project-structure.md"
+                    Write-ColorOutput "✅ Project structure documentation generated" $SuccessColor
+                }
+                else {
+                    Write-ColorOutput "⚠️  Project structure script not found, skipping..." $WarningColor
+                }
+            }
+            catch {
+                Write-ColorOutput "⚠️  Failed to generate project structure: $_" $WarningColor
+                Write-ColorOutput "Continuing with documentation build..." $InfoColor
+            }
+            Write-ColorOutput ""
+            
             # Build first
             Write-ColorOutput "🔨 Building documentation before serving..." $InfoColor
             

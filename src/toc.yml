@@ -1,6 +1,6 @@
 - name: Documentation
   href: docs/
-  homepage: docs/README.md
+  homepage: docs/index.md
 - name: API
   href: api/
   homepage: api/index.md
