@@ -33,20 +33,18 @@ jobs:
       - name: Install markdownlint-cli
         run: npm install -g markdownlint-cli
 
-      - name: Create markdownlint config if not exists
-        run: |
-          if [ ! -f .markdownlint.json ]; then
-            cat > .markdownlint.json << 'EOF'
-          {
-            "MD013": false,
-            "MD033": false,
-            "MD041": false
-          }
-          EOF
-          fi
-
       - name: Run markdownlint
-        run: markdownlint '**/*.md' --ignore node_modules --ignore TestResults --ignore src/docs/build --config .markdownlint.json
+        run: |
+          markdownlint '**/*.md' \
+            --ignore node_modules \
+            --ignore TestResults \
+            --ignore src/_site \
+            --ignore src/_temp \
+            --ignore src/api \
+            --ignore _site \
+            --ignore bin \
+            --ignore obj \
+            --config src/.markdownlint.json
 
       - name: Markdown linting completed
         run: echo "✅ Markdown linting completed successfully"
