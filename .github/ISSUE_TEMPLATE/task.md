@@ -13,9 +13,12 @@ Put your description here
 
 ## Goals
 
-- [ ] Task1
-- [ ] Task2
-- [ ] Task3
+- [ ] Run markdown lint
+- [ ] Add tests
+- [ ] Update documentation
+- [ ] Add entry to changelog
+- [ ] Update `toc.yml` for new documentation
+- [ ] Update index of change log
 
 ## Related Issues
 
