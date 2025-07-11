@@ -150,7 +150,7 @@ if [ -z "$FORMATTED_COMMITS" ]; then
 fi
 
 # Generate changelog link  
-CHANGELOG_PATH="docs/changelog/$VERSION.md"
+CHANGELOG_PATH="https://huebyte.github.io/Jiro/documentation/changelog/$VERSION.html"
 
 # Create release notes
 RELEASE_NOTES="## What's Changed

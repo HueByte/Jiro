@@ -147,7 +147,7 @@ if ($commitsRaw) {
 $commits = if ($formattedCommits.Count -gt 0) { $formattedCommits -join "`n" } else { "No commits found." }
 
 # Generate changelog link
-$changelogPath = "docs/changelog/$Version.md"
+$changelogPath = "https://huebyte.github.io/Jiro/documentation/changelog/$Version.html"
 
 $releaseNotes = @"
 ## What's Changed
