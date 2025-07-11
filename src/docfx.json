@@ -54,11 +54,7 @@
     ],
     "resource": [
       {
-        "files": ["docs/images/**", "JiroBanner.png"]
-      },
-      {
-        "files": ["../assets/**"],
-        "dest": "assets"
+        "files": ["docs/images/**", "JiroBanner.png", "Jiro-Icon.png"]
       }
     ],
     "overwrite": [
@@ -74,10 +70,12 @@
       }
     ],
     "output": "_site",
-    "template": ["default", "modern"],
+    "template": ["default", "modern", "templates/jiro-modern"],
     "globalMetadata": {
       "_appName": "Jiro - AI Assistant",
       "_appTitle": "Jiro Documentation",
+      "_appLogoPath": "Jiro-Icon.png",
+      "_appFaviconPath": "Jiro-Icon.png",
       "_enableSearch": true,
       "_enableNewTab": true,
       "_disableNavbar": false,
