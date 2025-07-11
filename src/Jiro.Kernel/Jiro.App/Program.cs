@@ -1,5 +1,6 @@
 using Jiro.App;
 using Jiro.App.Configurator;
+using Jiro.App.Extensions;
 using Jiro.Commands.Base;
 using Jiro.Commands.Models;
 using Jiro.Core.Commands.Chat;
@@ -103,6 +104,10 @@ host.ConfigureServices(services =>
 	services.RegisterCommands(nameof(ChatCommand.Chat));
 	services.AddHttpClients(configManager);
 	services.AddOptions(configManager);
+
+	// Add the new communication services (WebSocket for receiving, gRPC for sending)
+	services.AddJiroCommunication(configManager);
+
 	services.AddHostedService<JiroClientService>();
 	services.AddHttpContextAccessor();
 });
