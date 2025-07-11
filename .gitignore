@@ -12,7 +12,7 @@ src/api/.manifest
 !src/JiroBanner.png
 
 # Auto-generated documentation files
-docs/project-structure.md
+**/docs/project-structure.md
 DEV-SETUP.md
 
 # VS Code and development files
