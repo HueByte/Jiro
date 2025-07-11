@@ -28,7 +28,7 @@ RUN dotnet publish Jiro.App/Jiro.App.csproj -c Release -o build \
 	--runtime linux-x64 \
 	--self-contained true \
 	/p:PublishSingleFile=false \
-	/p:PublishTrimmed=true \
+	/p:PublishTrimmed=false \
 	/p:UseAppHost=true
 
 # Stage 2: Runtime image

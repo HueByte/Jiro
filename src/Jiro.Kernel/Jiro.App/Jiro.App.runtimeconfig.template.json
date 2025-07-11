@@ -1,0 +1,7 @@
+{
+  "configProperties": {
+    "Microsoft.Extensions.DependencyInjection.VerifyOpenGenericServiceTrimmability": false,
+    "System.ComponentModel.TypeConverter.EnableUnsafeBinaryFormatterSerialization": false,
+    "System.Runtime.Serialization.EnableUnsafeBinaryFormatterSerialization": false
+  }
+}

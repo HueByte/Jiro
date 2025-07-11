@@ -7,6 +7,9 @@
 		<Nullable>enable</Nullable>
     <Version>0.1.6</Version>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <!-- Trim warnings suppressions for Serilog dynamic loading -->
+    <SuppressTrimAnalysisWarnings>true</SuppressTrimAnalysisWarnings>
+    <TrimmerDefaultAction>link</TrimmerDefaultAction>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -38,6 +41,13 @@
 		<PackageReference Include="Serilog.Sinks.Async" Version="2.1.0" />
 		<PackageReference Include="Serilog.Sinks.Console" Version="6.0.1-dev-00953" />
 		<PackageReference Include="Serilog.Sinks.File" Version="7.0.0" />
+	</ItemGroup>
+
+	<!-- Preserve Serilog assemblies for trimming -->
+	<ItemGroup>
+		<TrimmerRootAssembly Include="Serilog.Sinks.Console" />
+		<TrimmerRootAssembly Include="Serilog.Sinks.File" />
+		<TrimmerRootAssembly Include="Serilog.Settings.Configuration" />
 	</ItemGroup>
 
 	<ItemGroup>
