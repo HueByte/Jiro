@@ -3,7 +3,7 @@ _layout: landing
 ---
 
 <p align="center">
-    <img src="JiroBanner.png" alt="Jiro Banner" style="max-width: 100%; height: auto; border-radius: 15px;" />
+    <img src="assets/JiroBanner.png" alt="Jiro Banner" style="max-width: 100%; height: auto; border-radius: 15px;" />
 </p>
 
 # Welcome to Jiro

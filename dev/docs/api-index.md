@@ -36,9 +36,8 @@ This will build the documentation and serve it locally at `http://localhost:8080
 ## 🔗 Related Documentation
 
 - [Main Documentation](index.md) - Project overview and guides
-- [Getting Started](getting-started.md) - Setup and installation
 - [User Guide](user-guide.md) - End-user documentation
-- [Workflow Pipelines](workflow_pipelines.md) - CI/CD documentation
+- [Workflow Pipelines](workflow-pipelines.md) - CI/CD documentation
 
 ---
 

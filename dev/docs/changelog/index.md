@@ -4,7 +4,7 @@ Welcome to the Jiro AI Assistant changelog. This section contains detailed infor
 
 ## Available Versions
 
-- **[v1.0.0 (Unreleased)](v1.0.0-unreleased.md)** - Major stability and feature improvements
+- **[v0.1.1-beta](v0.1.1-beta.md)** - Project structure optimization and enhanced developer experience
 - **[v0.1.0-beta](v0.1.0-beta.md)** - Infrastructure overhaul with enhanced CI/CD and development tools
 - **[v0.1.0-alpha](v0.1.0-alpha.md)** - Initial alpha release with core functionality
 
