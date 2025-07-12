@@ -191,7 +191,7 @@ function Invoke-DocumentationTests {
     }
     
     Write-Host "Checking for DocFX configuration..." -ForegroundColor Cyan
-    if (Test-Path "./src/docfx.json") {
+    if (Test-Path "./dev/docfx.json") {
         Write-Success "DocFX configuration found"
         
         # Test DocFX build if available
@@ -220,7 +220,7 @@ function Invoke-DocumentationTests {
         }
     }
     else {
-        Write-Warning "DocFX configuration not found at ./src/docfx.json"
+        Write-Warning "DocFX configuration not found at ./dev/docfx.json"
     }
 }
 

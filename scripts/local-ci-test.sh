@@ -223,7 +223,7 @@ documentation_tests() {
     fi
     
     echo "Checking for DocFX configuration..."
-    if [ -f "./src/docfx.json" ]; then
+    if [ -f "./dev/docfx.json" ]; then
         print_success "DocFX configuration found"
         
         # Test DocFX build if available
@@ -240,7 +240,7 @@ documentation_tests() {
             print_warning "DocFX not installed. Install with: dotnet tool install -g docfx"
         fi
     else
-        print_warning "DocFX configuration not found at ./src/docfx.json"
+        print_warning "DocFX configuration not found at ./dev/docfx.json"
     fi
 }
 

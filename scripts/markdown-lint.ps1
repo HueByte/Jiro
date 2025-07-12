@@ -6,7 +6,7 @@
 
 .DESCRIPTION
     This script installs markdownlint-cli if not present and runs it on all Markdown files
-    in the repository, using the configuration from .markdownlint.json.
+    in the repository, using the configuration from dev/config/.markdownlint.json.
 
 .PARAMETER Fix
     Automatically fix issues that can be fixed automatically.
@@ -113,9 +113,9 @@ try {
     Write-ColorOutput ""
 
     # Check for markdownlint configuration
-    if (Test-Path "src\.markdownlint.json") {
-        Write-ColorOutput "📋 Using configuration from src\.markdownlint.json" $InfoColor
-        $configFile = "src\.markdownlint.json"
+    if (Test-Path "dev\config\.markdownlint.json") {
+        Write-ColorOutput "📋 Using configuration from dev\config\.markdownlint.json" $InfoColor
+        $configFile = "dev\config\.markdownlint.json"
     }
     elseif (Test-Path ".markdownlint.json") {
         Write-ColorOutput "📋 Using configuration from .markdownlint.json (root location)" $InfoColor
@@ -138,11 +138,11 @@ try {
     $markdownlintArgs += "--ignore"
     $markdownlintArgs += "TestResults"
     $markdownlintArgs += "--ignore"
-    $markdownlintArgs += "src\_site"
+    $markdownlintArgs += "dev\_site"
     $markdownlintArgs += "--ignore"
-    $markdownlintArgs += "src\_temp"
+    $markdownlintArgs += "dev\_temp"
     $markdownlintArgs += "--ignore"
-    $markdownlintArgs += "src\api"
+    $markdownlintArgs += "dev\api"
     $markdownlintArgs += "--ignore"
     $markdownlintArgs += "_site"
     $markdownlintArgs += "--ignore"

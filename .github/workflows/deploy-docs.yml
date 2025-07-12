@@ -6,11 +6,11 @@ on:
     branches:
       - main
     paths:
-      - "docs/**"
+      - "dev/docs/**"
       - "assets/**"
-      - "docfx.json"
-      - "index.md"
-      - "toc.yml"
+      - "dev/docfx.json"
+      - "dev/index.md"
+      - "dev/toc.yml"
       - "src/**/*.cs"
       - "scripts/generate-project-structure.ps1"
       - "scripts/generate-project-structure.sh"
@@ -77,29 +77,29 @@ jobs:
 
       - name: Build documentation with DocFX
         run: |
-          cd src
+          cd dev
           docfx docfx.json
         env:
           DOCFX_SOURCE_BRANCH_NAME: ${{ github.ref_name }}
 
       - name: Verify build output
         run: |
-          if [ ! -d "src/_site" ]; then
+          if [ ! -d "dev/_site" ]; then
             echo "❌ DocFX build failed - _site directory not found"
             exit 1
           fi
           echo "✅ DocFX build successful"
           echo "Generated files:"
-          ls -la src/_site/
+          ls -la dev/_site/
           echo ""
           echo "Documentation structure:"
-          find src/_site -type f -name "*.html" | head -10
+          find dev/_site -type f -name "*.html" | head -10
 
       - name: Deploy to web branch
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./src/_site
+          publish_dir: ./dev/_site
           publish_branch: web
           force_orphan: true
 

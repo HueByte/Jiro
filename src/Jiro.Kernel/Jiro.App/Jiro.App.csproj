@@ -5,7 +5,7 @@
 		<TargetFramework>net9.0</TargetFramework>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
-    <Version>0.1.6</Version>
+    <Version>v0.1.1-beta</Version>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <!-- Trim warnings suppressions for Serilog dynamic loading -->
     <SuppressTrimAnalysisWarnings>true</SuppressTrimAnalysisWarnings>
