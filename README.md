@@ -34,7 +34,7 @@ Meet **Jiro** – your personal AI assistant that combines the power of ChatGPT 
 🧠 **AI-Powered Conversations** - Leverage ChatGPT's intelligence for natural, context-aware interactions  
 🔌 **Plugin Architecture** - Extend functionality with custom commands and integrations  
 🌤️ **Built-in Weather** - Get real-time weather updates and forecasts  
-� **Session Management** - Maintain conversation context across multiple interactions  
+💬 **Session Management** - Maintain conversation context across multiple interactions  
 🛡️ **Secure & Private** - Your data stays secure with robust authentication  
 🚀 **Modern Tech Stack** - Built with .NET 9, React, and modern web technologies  
 
@@ -152,7 +152,7 @@ graph TB
 
         subgraph "🚀 Jiro.App Layer"
             JiroApp[🎮 Jiro.App<br/>Main Host Application]
-            RestAPI[� REST API<br/>:18090]
+            RestAPI[🌐 REST API<br/>:18090]
             GrpcService[📡 gRPC Service<br/>JiroCloud Integration]
         end
 
@@ -160,18 +160,18 @@ graph TB
             ChatService[💬 Chat Service<br/>Conversation Management]
             CmdSystem[⚡ Command System<br/>Plugin Framework]
             WeatherService[🌤️ Weather Service<br/>Location & Forecasts]
-            PersonaService[� Persona Service<br/>AI Personality]
-            ConversationService[� Conversation Service<br/>Context Management]
+            PersonaService[👤 Persona Service<br/>AI Personality]
+            ConversationService[💬 Conversation Service<br/>Context Management]
         end
 
         subgraph "🗄️ Jiro.Infrastructure Layer"
             EFCore[🗃️ Entity Framework<br/>Data Access]
-            Repositories[� Repositories<br/>Data Operations]
+            Repositories[📊 Repositories<br/>Data Operations]
             Cache[⚡ Memory Cache<br/>Performance]
         end
 
-        subgraph "� Storage"
-            SQLite[� SQLite<br/>Default Database]
+        subgraph "💾 Storage"
+            SQLite[💾 SQLite<br/>Default Database]
             MySQL[🗄️ MySQL<br/>Docker Option]
         end
     end
@@ -233,13 +233,13 @@ graph TB
 
 ### 🔧 Architecture Components
 
-#### **� Jiro.App - Application Host**
+#### **🚀 Jiro.App - Application Host**
 
 - **Main Host**: Central application with dependency injection and configuration
 - **REST API**: Primary interface on port 18090 for client communication
 - **gRPC Service**: Optional integration with JiroCloud for distributed commands
 
-#### **� Jiro.Core - Business Logic**
+#### **💡 Jiro.Core - Business Logic**
 
 - **Chat Service**: Manages conversations and integrates with OpenAI
 - **Command System**: Extensible plugin framework for adding new features
@@ -247,7 +247,7 @@ graph TB
 - **Persona Service**: Handles AI personality and behavior customization
 - **Conversation Service**: Manages chat context and message history
 
-#### **�️ Jiro.Infrastructure - Data Layer**
+#### **🏗️ Jiro.Infrastructure - Data Layer**
 
 - **Entity Framework**: ORM for database operations and migrations
 - **Repositories**: Clean data access patterns with caching support

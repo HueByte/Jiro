@@ -483,7 +483,7 @@ This comprehensive pipeline ensures high code quality, security, and reliable de
 - More aggressive in creating releases
 - Focuses on Main.sln structure compatibility
 
-## � Documentation Deployment
+## 📚 Documentation Deployment
 
 ### **Deploy Documentation to GitHub Pages** (`deploy-docs.yml`)
 
@@ -538,7 +538,7 @@ This comprehensive pipeline ensures high code quality, security, and reliable de
 - **Modern Theme:** DocFX modern template with custom branding
 - **Error Resilience:** Continues deployment even if some .NET projects fail to build
 
-## �🔒 Security Workflows
+## 🔒 Security Workflows
 
 ### **Jiro Security Scan** (`jiro-kernel-security.yml`)
 
