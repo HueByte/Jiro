@@ -1,9 +1,11 @@
 ## What's Changed
 
 ### 📋 Detailed Changelog
+
 For detailed information about changes, new features, and breaking changes, see the [**📖 Changelog**](https://huebyte.github.io/Jiro/documentation/changelog/v0.1.1-beta.html).
 
 ### 🔄 Commits in this release:
+
 - **Optimalized CI/CD** ([`ec8be26`](https://github.com/huebyte/Jiro/commit/ec8be26)) by @HueByte on 2025-07-11
 - **Added option for force docs deployment** ([`7baeba1`](https://github.com/huebyte/Jiro/commit/7baeba1)) by @HueByte on 2025-07-11
 - **added styles to documentation** ([`abd9845`](https://github.com/huebyte/Jiro/commit/abd9845)) by @HueByte on 2025-07-11
@@ -25,9 +27,10 @@ For detailed information about changes, new features, and breaking changes, see 
 - **Changelog Update && Renames && Cleaning** ([`fc25ebe`](https://github.com/huebyte/Jiro/commit/fc25ebe)) by @HueByte on 2025-07-12
 
 ### ℹ️ Release Information
+
 - **Version**: v0.1.1-beta
 - **Branch**: main  
 - **Generated on**: 2025-07-12 19:40:44 UTC
 - **Changelog**: [https://huebyte.github.io/Jiro/documentation/changelog/v0.1.1-beta.html](https://huebyte.github.io/Jiro/documentation/changelog/v0.1.1-beta.html)
 
-**Full Changelog**: https://github.com/huebyte/Jiro/compare/v0.1.0-beta...v0.1.1-beta
+**Full Changelog**: <https://github.com/huebyte/Jiro/compare/v0.1.0-beta...v0.1.1-beta>
