@@ -282,8 +282,10 @@ else
     exit 1
 fi
 
-# Save release notes to file
-RELEASE_NOTES_FILE="release_notes_$VERSION.md"
+
+# Save release notes to dev/tags/{releaseVersion}
+RELEASE_NOTES_FILE="dev/tags/$VERSION"
+mkdir -p dev/tags
 echo "$RELEASE_NOTES" > "$RELEASE_NOTES_FILE"
 
 log_info "📦 Creating GitHub release..."

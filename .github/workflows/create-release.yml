@@ -65,49 +65,18 @@ jobs:
           zip -r jiro-kernel-v${{ steps.get_version.outputs.version }}-win-x64.zip win-x64/*
           tar -czf jiro-kernel-v${{ steps.get_version.outputs.version }}-osx-x64.tar.gz -C osx-x64 .
 
-      - name: Generate release notes
+      - name: Read release notes from dev/tags/{version}
         id: release_notes
         run: |
-          # Get the previous tag for changelog
-          previous_tag=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
-
-          if [ -n "$previous_tag" ]; then
-              changelog=$(git log --pretty=format:"- %s" $previous_tag..HEAD)
-          else
-              changelog=$(git log --pretty=format:"- %s")
-          fi
-
-          # Create release notes
-          {
-              echo "## 🚀 What's Changed"
-              echo ""
-              echo "$changelog"
-              echo ""
-              echo "## 📦 Release Artifacts"
-              echo ""
-              echo "- **Linux x64**: \`jiro-kernel-v${{ steps.get_version.outputs.version }}-linux-x64.tar.gz\`"
-              echo "- **Windows x64**: \`jiro-kernel-v${{ steps.get_version.outputs.version }}-win-x64.zip\`"
-              echo "- **macOS x64**: \`jiro-kernel-v${{ steps.get_version.outputs.version }}-osx-x64.tar.gz\`"
-              echo ""
-              echo "## ℹ️ Version Information"
-              echo "- **Version**: ${{ steps.get_version.outputs.version }}"
-              echo "- **Build Date**: $(date -u +"%Y-%m-%d %H:%M:%S UTC")"
-              echo "- **Commit**: ${{ github.sha }}"
-              echo "- **Runtime**: .NET 9.0"
-          } > release_notes.md
-
-          # Set output for release body
-          {
-              echo "RELEASE_NOTES<<EOF"
-              cat release_notes.md
-              echo "EOF"
-          } >> $GITHUB_OUTPUT
+          echo "RELEASE_NOTES<<EOF" >> $GITHUB_OUTPUT
+          cat dev/tags/${{ steps.get_version.outputs.version }} >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
         with:
           tag_name: "v${{ steps.get_version.outputs.version }}"
-          name: "☁️ Jiro Kernel v${{ steps.get_version.outputs.version }}"
+          name: "v${{ steps.get_version.outputs.version }}"
           body: ${{ steps.release_notes.outputs.RELEASE_NOTES }}
           draft: false
           prerelease: false

@@ -9,17 +9,29 @@
 </p>
 
 <p align="center">
+    <a href="https://github.com/HueByte/Jiro/actions/workflows/create-release.yml">
+        <img src="https://img.shields.io/github/actions/workflow/status/HueByte/Jiro/create-release.yml?branch=main&style=for-the-badge&label=build" alt="Build Status"/>
+    </a>
+    <a href="https://github.com/HueByte/Jiro/releases/latest">
+        <img src="https://img.shields.io/github/v/release/HueByte/Jiro?style=for-the-badge&color=blue" alt="Latest Release"/>
+    </a>
+    <a href="https://github.com/HueByte/Jiro/commits/main">
+        <img src="https://img.shields.io/github/last-commit/HueByte/Jiro?style=for-the-badge&color=orange" alt="Last Commit"/>
+    </a>
     <a href="https://github.com/HueByte/Jiro/stargazers">
-        <img src="https://img.shields.io/github/stars/HueByte/Jiro?style=flat-square&color=yellow" alt="GitHub Stars"/>
+        <img src="https://img.shields.io/github/stars/HueByte/Jiro?style=for-the-badge&color=yellow" alt="GitHub Stars"/>
     </a>
     <a href="https://github.com/HueByte/Jiro/issues">
-        <img src="https://img.shields.io/github/issues/HueByte/Jiro?style=flat-square&color=red" alt="GitHub Issues"/>
+        <img src="https://img.shields.io/github/issues/HueByte/Jiro?style=for-the-badge&color=red" alt="GitHub Issues"/>
     </a>
     <a href="https://github.com/HueByte/Jiro/blob/main/LICENSE">
-        <img src="https://img.shields.io/github/license/HueByte/Jiro?style=flat-square&color=green" alt="License"/>
+        <img src="https://img.shields.io/github/license/HueByte/Jiro?style=for-the-badge&color=green" alt="License"/>
     </a>
     <a href="https://dotnet.microsoft.com/download">
-        <img src="https://img.shields.io/badge/.NET-9.0-purple?style=flat-square" alt=".NET 9.0"/>
+        <img src="https://img.shields.io/badge/.NET-9.0-purple?style=for-the-badge" alt=".NET 9.0"/>
+    </a>
+    <a href="https://github.com/HueByte/Jiro">
+        <img src="https://img.shields.io/github/languages/code-size/HueByte/Jiro?style=for-the-badge&color=purple" alt="Code Size"/>
     </a>
 </p>
 
