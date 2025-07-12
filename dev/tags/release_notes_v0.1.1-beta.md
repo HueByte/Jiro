@@ -12,12 +12,12 @@ For detailed information about changes, new features, and breaking changes, see 
 - **formatting** ([`113ed9e`](https://github.com/huebyte/Jiro/commit/113ed9e)) by @HueByte on 2025-07-12
 - **Changes project structure** ([`a559e9a`](https://github.com/huebyte/Jiro/commit/a559e9a)) by @HueByte on 2025-07-12
 - **Versioning adjustments** ([`d3d4870`](https://github.com/huebyte/Jiro/commit/d3d4870)) by @HueByte on 2025-07-12
-- **Merge pull request #24 from HueByte/dev-websocket-comms-CICD** ([`adf4052`](https://github.com/huebyte/Jiro/commit/adf4052)) by @Hue on 2025-07-12
+- **Merge pull request #24 from HueByte/dev-websocket-comms-CICD** ([`adf4052`](https://github.com/huebyte/Jiro/commit/adf4052)) by @huebyte on 2025-07-12
 - **Cleaning && Changelog** ([`bf7e66a`](https://github.com/huebyte/Jiro/commit/bf7e66a)) by @HueByte on 2025-07-12
 - **Markdown lint** ([`a64f6a4`](https://github.com/huebyte/Jiro/commit/a64f6a4)) by @HueByte on 2025-07-12
-- **Merge pull request #23 from HueByte/dev-websocket-comms** ([`1022ba2`](https://github.com/huebyte/Jiro/commit/1022ba2)) by @Hue on 2025-07-12
+- **Merge pull request #23 from HueByte/dev-websocket-comms** ([`1022ba2`](https://github.com/huebyte/Jiro/commit/1022ba2)) by @huebyte on 2025-07-12
 - **Updated docs** ([`3b281fc`](https://github.com/huebyte/Jiro/commit/3b281fc)) by @HueByte on 2025-07-12
-- **Merge pull request #25 from HueByte/docs-update** ([`23ccf42`](https://github.com/huebyte/Jiro/commit/23ccf42)) by @Hue on 2025-07-12
+- **Merge pull request #25 from HueByte/docs-update** ([`23ccf42`](https://github.com/huebyte/Jiro/commit/23ccf42)) by @huebyte on 2025-07-12
 - **Updated docs** ([`becc8c0`](https://github.com/huebyte/Jiro/commit/becc8c0)) by @HueByte on 2025-07-12
 - **Docs encoding fixes** ([`2d8e6ad`](https://github.com/huebyte/Jiro/commit/2d8e6ad)) by @HueByte on 2025-07-12
 - **Working websocket based communication** ([`23e8b25`](https://github.com/huebyte/Jiro/commit/23e8b25)) by @HueByte on 2025-07-12

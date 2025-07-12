@@ -211,8 +211,10 @@ catch {
     exit 1
 }
 
-# Save release notes to file
-$releaseNotesFile = "release_notes_$Version.md"
+
+# Save release notes to dev/tags/$Version
+$releaseNotesFile = "dev/tags/$Version"
+if (-not (Test-Path "dev/tags")) { New-Item -ItemType Directory -Path "dev/tags" | Out-Null }
 $releaseNotes | Out-File -FilePath $releaseNotesFile -Encoding UTF8
 
 Write-ColorOutput "📦 Creating GitHub release..." "Cyan"
