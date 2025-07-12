@@ -13,15 +13,7 @@ BLUE='\033[0;34m'
 CYAN='\033[0;36m'
 NC='\033[0m' # No Color
 
-#         ;;
-        
-    "build")
-        # Generate project structure documentation
-        print_info "🏗️ Generating project structure documentation..."
-        STRUCTURE_SCRIPT="$SCRIPT_DIR/generate-project-structure.sh"
-        if [[ -f "$STRUCTURE_SCRIPT" ]]; then
-            if bash "$STRUCTURE_SCRIPT" "dev/docs/project-structure.md"; then
-                print_success "✅ Project structure documentation generated"alues
+# Default values
 ACTION="build"
 CONFIG_PATH="dev/docfx.json"
 PORT=8080

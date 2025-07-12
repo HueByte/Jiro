@@ -6,7 +6,8 @@
     the configuration from dev/docfx.json. It can build, serve, or clean the documentation.
 
 .DESCRIPTION
-    This script installs DocFX if not present and buil
+    This script installs DocFX if not present and builds the documentation using
+    the configuration from dev/docfx.json. It can build, serve, or clean the documentation.
 
 .PARAMETER Action
     The action to perform: Build, Serve, Clean, or Init (defaults to Build).
