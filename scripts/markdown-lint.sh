@@ -148,9 +148,9 @@ echo
 
 # Check for markdownlint configuration
 CONFIG_FILE=""
-if [[ -f "src/.markdownlint.json" ]]; then
-    print_info "📋 Using configuration from src/.markdownlint.json"
-    CONFIG_FILE="--config src/.markdownlint.json"
+if [[ -f "dev/config/.markdownlint.json" ]]; then
+    print_info "📋 Using configuration from dev/config/.markdownlint.json"
+    CONFIG_FILE="--config dev/config/.markdownlint.json"
 elif [[ -f ".markdownlint.json" ]]; then
     print_info "📋 Using configuration from .markdownlint.json (root location)"
     CONFIG_FILE="--config .markdownlint.json"
@@ -163,9 +163,9 @@ MARKDOWNLINT_ARGS=(
     "$LINT_PATH"
     --ignore "node_modules"
     --ignore "TestResults"
-    --ignore "src/_site"
-    --ignore "src/_temp"
-    --ignore "src/api"
+    --ignore "dev/_site"
+    --ignore "dev/_temp"
+    --ignore "dev/api"
     --ignore "_site"
     --ignore "bin"
     --ignore "obj"

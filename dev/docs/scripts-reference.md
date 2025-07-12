@@ -53,7 +53,7 @@ The `scripts/` directory contains various PowerShell (`.ps1`) and Bash (`.sh`) s
 
 **What it does**:
 
-- Builds the DocFX documentation site from `src/docfx.json`
+- Builds the DocFX documentation site from `dev/docfx.json`
 - Outputs generated documentation to `src/_site/`
 - Supports both build-only and build-and-serve modes
 
@@ -231,7 +231,7 @@ Scripts use and create the following configuration files:
 - `src/.env`: Environment variables (copied from `src/.env.example`)
 - `src/Jiro.Kernel/Jiro.App/appsettings.json`: Application settings (copied from example)
 - `src/.markdownlint.json`: Markdown linting configuration
-- `src/docfx.json`: DocFX documentation configuration
+- `dev/docfx.json`: DocFX documentation configuration
 - `DEV-SETUP.md`: Generated development setup guide (ignored by git)
 
 ## Error Handling
