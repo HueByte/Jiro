@@ -9,6 +9,11 @@ param(
 )
 
 # Configuration
+# Get script directory and navigate to project root
+$ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
+$ProjectRoot = Split-Path -Parent $ScriptDir
+Push-Location $ProjectRoot
+
 $SolutionPath = "./src/Main.sln"
 $DockerfilePath = "./src/Jiro.Kernel/Jiro.App/Dockerfile"
 $DockerImageName = "jiro-kernel-test"
@@ -309,4 +314,10 @@ function Main {
 }
 
 # Run main function
-Main
+try {
+    Main
+}
+finally {
+    # Return to original directory
+    Pop-Location
+}

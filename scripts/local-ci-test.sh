@@ -55,6 +55,11 @@ BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
 # Configuration
+# Get script directory and navigate to project root
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
+cd "$PROJECT_ROOT"
+
 SOLUTION_PATH="./src/Main.sln"
 DOCKERFILE_PATH="./src/Jiro.Kernel/Jiro.App/Dockerfile"
 DOCKER_IMAGE_NAME="jiro-kernel-test"
