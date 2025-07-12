@@ -5,6 +5,8 @@ items:
   href: project-description.md
 - name: Project Structure
   href: project-structure.md
+- name: WebSocket Communication
+  href: websocket-communication.md
 - name: User Guide
   href: user-guide.md
 - name: Scripts Reference

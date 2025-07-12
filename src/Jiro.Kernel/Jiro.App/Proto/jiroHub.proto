@@ -8,6 +8,7 @@ package JiroHubProto;
 service JiroHubProto {
     rpc GetUserSessions (Empty) returns (SessionsReply);
 	rpc InstanceCommand (stream ClientMessage) returns (stream ServerMessage);
+    rpc SendCommandResult (ClientMessage) returns (CommandResultResponse);
     rpc Hello (HelloRequest) returns (HelloReply);
 }
 
@@ -77,4 +78,9 @@ message Pair {
 
 message Empty {
 
+}
+
+message CommandResultResponse {
+    bool success = 1;
+    string message = 2;
 }

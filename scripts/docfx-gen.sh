@@ -15,7 +15,7 @@ NC='\033[0m' # No Color
 
 # Default values
 ACTION="build"
-CONFIG_PATH="src/docfx.json"
+CONFIG_PATH="dev/docfx.json"
 PORT=8080
 FORCE_CLEAN=false
 VERBOSE_MODE=false
@@ -65,7 +65,7 @@ ACTIONS:
     init        Initialize new DocFX project
 
 OPTIONS:
-    -c, --config PATH   Path to DocFX configuration file (default: src/docfx.json)
+    -c, --config PATH   Path to DocFX configuration file (default: dev/docfx.json)
     -p, --port PORT     Port for serving documentation (default: 8080)
     -f, --force         Force rebuild by cleaning first
     -v, --verbose       Show verbose output during build
@@ -259,7 +259,7 @@ case $ACTION in
         print_info "🏗️ Generating project structure documentation..."
         STRUCTURE_SCRIPT="$SCRIPT_DIR/generate-project-structure.sh"
         if [[ -f "$STRUCTURE_SCRIPT" ]]; then
-            if bash "$STRUCTURE_SCRIPT" "src/docs/project-structure.md"; then
+            if bash "$STRUCTURE_SCRIPT" "dev/docs/project-structure.md"; then
                 print_success "✅ Project structure documentation generated"
             else
                 print_warning "⚠️  Failed to generate project structure"

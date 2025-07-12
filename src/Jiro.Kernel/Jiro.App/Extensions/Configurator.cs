@@ -1,3 +1,4 @@
+using Jiro.App.Configurator;
 using Jiro.Core;
 using Jiro.Core.Constants;
 using Jiro.Core.IRepositories;
@@ -20,7 +21,7 @@ using Microsoft.Extensions.Options;
 using OpenAI;
 using OpenAI.Chat;
 
-namespace Jiro.App.Configurator;
+namespace Jiro.App.Extensions;
 
 /// <summary>
 /// Provides static extension methods for configuring services, options, and HTTP clients for the Jiro application.

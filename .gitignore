@@ -5,11 +5,11 @@
 
 # DocFX generated files
 generated/
-src/_site/
-src/_temp/
-src/api/*.yml
-src/api/.manifest
-!src/JiroBanner.png
+dev/_site/
+dev/_temp/
+dev/api/*.yml
+dev/api/.manifest
+!dev/assets/JiroBanner.png
 
 # Auto-generated documentation files
 **/docs/project-structure.md
@@ -24,13 +24,13 @@ appsettings.development.json
 .env.development
 .env.development.local
 build/*
-src/docs/build/
-dev/
+dev/docs/build/
+dev-local/
 
 # Docker and containerization
-src/docker-compose.override.yml
-src/docker-compose.*.yml
-!src/docker-compose.yml
+docker-compose.override.yml
+docker-compose.*.yml
+!docker-compose.yml
 
 # generated client
 src/**/api/core

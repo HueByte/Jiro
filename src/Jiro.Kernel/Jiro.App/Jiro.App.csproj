@@ -5,7 +5,7 @@
 		<TargetFramework>net9.0</TargetFramework>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
-    <Version>0.1.6</Version>
+    <Version>0.1.1-beta</Version>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <!-- Trim warnings suppressions for Serilog dynamic loading -->
     <SuppressTrimAnalysisWarnings>true</SuppressTrimAnalysisWarnings>
@@ -34,6 +34,7 @@
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
+		<PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="9.0.7" />
 		<PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.6" />
 		<PackageReference Include="Serilog.AspNetCore" Version="9.0.0" />
 		<PackageReference Include="Serilog.Extensions.Logging" Version="9.0.3-dev-02320" />
