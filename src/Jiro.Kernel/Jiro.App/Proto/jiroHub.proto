@@ -7,7 +7,6 @@ package JiroHubProto;
 
 service JiroHubProto {
     rpc GetUserSessions (Empty) returns (SessionsReply);
-	rpc InstanceCommand (stream ClientMessage) returns (stream ServerMessage);
     rpc SendCommandResult (ClientMessage) returns (CommandResultResponse);
     rpc Hello (HelloRequest) returns (HelloReply);
 }
@@ -41,14 +40,6 @@ message GraphResult {
     string xAxis = 4;
     string yAxis = 5;
     map<string, string> units = 6;
-}
-
-message ServerMessage {
-    string instanceId = 1;
-	string command = 2;
-    string commandSyncId = 3;
-    string sessionId = 4;
-    repeated Pair parameters = 5;
 }
 
 message HelloRequest {

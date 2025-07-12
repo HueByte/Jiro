@@ -136,9 +136,15 @@ internal class JiroGrpcService : IJiroGrpcService
 		{
 			if (commandType == JiroCloud.Api.Proto.CommandType.Text)
 			{
+				// TODO: Handle text result serialization properly for JSON responses
+				var responseMessage = commandResult.Result?.Message ?? "";
+
+				// For commands that return JSON data (like getSessions, getSessionHistory),
+				// the message is already a JSON string that should be passed through as-is
+				// to avoid double serialization when the client processes the gRPC response
 				response.TextResult = new()
 				{
-					Response = commandResult.Result?.Message
+					Response = responseMessage
 				};
 			}
 			else if (commandType == JiroCloud.Api.Proto.CommandType.Graph)

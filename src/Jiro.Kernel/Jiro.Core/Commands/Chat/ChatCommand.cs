@@ -41,7 +41,10 @@ public class ChatCommand : ICommandBase
 
 		var sessions = await _messageManager.GetChatSessionsAsync(_commandContext.InstanceId);
 
-		return TextResult.Create(JsonSerializer.Serialize(sessions));
+		// Return serialized JSON directly to avoid double serialization
+		// The client expects JSON data for this command
+		var jsonData = JsonSerializer.Serialize(sessions);
+		return TextResult.Create(jsonData);
 	}
 
 	[Command("getSessionHistory")]
@@ -58,7 +61,10 @@ public class ChatCommand : ICommandBase
 
 		var data = new SessionResult(session);
 
-		return TextResult.Create(JsonSerializer.Serialize(data));
+		// Return serialized JSON directly to avoid double serialization
+		// The client expects JSON data for this command
+		var jsonData = JsonSerializer.Serialize(data);
+		return TextResult.Create(jsonData);
 	}
 
 	[Command("reset", commandDescription: "Clears the current session")]

@@ -36,9 +36,9 @@ public class WebSocketOptions
 	public int ServerTimeoutMs { get; set; } = 30000;
 
 	/// <summary>
-	/// Access token for authentication (optional)
+	/// API key for authentication
 	/// </summary>
-	public string? AccessToken { get; set; }
+	public string? ApiKey { get; set; }
 
 	/// <summary>
 	/// Additional headers to send with the connection

@@ -74,6 +74,7 @@ public class MessageManager : IMessageManager
 		if (!_memoryCache.TryGetValue(sessionId, out Session? session))
 		{
 			session = await _chatSessionRepository.AsQueryable()
+				.Where(x => x.Id == sessionId)
 				.Include(x => x.Messages.OrderBy(m => m.CreatedAt))
 				.Select(x => new Session
 				{
@@ -83,6 +84,9 @@ public class MessageManager : IMessageManager
 					LastUpdatedAt = x.LastUpdatedAt,
 					Messages = x.Messages != null ? x.Messages.Select(m => new ChatMessageWithMetadata()
 					{
+						MessageId = m.Id,
+						IsUser = m.IsUser,
+						CreatedAt = m.CreatedAt,
 						Type = m.Type,
 						Message = m.IsUser
 								? ChatMessage.CreateUserMessage(m.Content)
@@ -91,7 +95,10 @@ public class MessageManager : IMessageManager
 				})
 				.FirstOrDefaultAsync();
 
-			_memoryCache.Set(sessionId, session, TimeSpan.FromDays(MEMORY_CACHE_EXPIRATION));
+			if (session != null)
+			{
+				_memoryCache.Set(sessionId, session, TimeSpan.FromDays(MEMORY_CACHE_EXPIRATION));
+			}
 		}
 
 		return session;
@@ -148,6 +155,9 @@ public class MessageManager : IMessageManager
 					LastUpdatedAt = session.LastUpdatedAt,
 					Messages = session.Messages.Select(x => new ChatMessageWithMetadata()
 					{
+						MessageId = x.Id,
+						IsUser = x.IsUser,
+						CreatedAt = x.CreatedAt,
 						Type = x.Type,
 						Message = x.IsUser
 								? ChatMessage.CreateUserMessage(x.Content)
@@ -242,6 +252,7 @@ public class MessageManager : IMessageManager
 		{
 			var sessions = await _chatSessionRepository.AsQueryable()
 				.Include(x => x.Messages.OrderBy(m => m.CreatedAt))
+				.Where(x => x.Messages.Any(m => m.InstanceId == instanceId) || !x.Messages.Any())
 				.ToListAsync();
 
 			if (sessions == null || !sessions.Any())

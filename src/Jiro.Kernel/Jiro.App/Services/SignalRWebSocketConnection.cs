@@ -65,7 +65,7 @@ public class SignalRWebSocketConnection : IWebSocketConnection
 		{
 			if (_connection?.State == HubConnectionState.Connected)
 			{
-				_logger.LogDebug("Already connected to SignalR hub");
+				_logger.LogDebug("Already connected to hub");
 				return;
 			}
 
@@ -74,17 +74,22 @@ public class SignalRWebSocketConnection : IWebSocketConnection
 				await DisposeConnectionAsync();
 			}
 
-			_logger.LogInformation("Connecting to SignalR hub at {Url}", _options.HubUrl);
+			_logger.LogInformation("Connecting to hub at {Url}", _options.HubUrl);
+
+			// Ensure API key is provided for authentication
+			if (string.IsNullOrEmpty(_options.ApiKey))
+			{
+				throw new InvalidOperationException("API key is required for WebSocket authentication. Please configure 'WebSocket:ApiKey' or 'API_KEY' in your settings.");
+			}
+
+			// Build the hub URL with API key query parameter
+			string hubUrl = _options.HubUrl;
+			var separator = hubUrl.Contains('?') ? "&" : "?";
+			hubUrl = $"{hubUrl}{separator}api_key={Uri.EscapeDataString(_options.ApiKey)}";
 
 			_connection = new HubConnectionBuilder()
-				.WithUrl(_options.HubUrl, options =>
+				.WithUrl(hubUrl, options =>
 				{
-					// Configure authentication if token is provided
-					if (!string.IsNullOrEmpty(_options.AccessToken))
-					{
-						options.AccessTokenProvider = () => Task.FromResult<string?>(_options.AccessToken);
-					}
-
 					// Configure additional headers if provided
 					if (_options.Headers?.Count > 0)
 					{
@@ -113,11 +118,11 @@ public class SignalRWebSocketConnection : IWebSocketConnection
 			// Connect
 			await _connection.StartAsync(cancellationToken);
 
-			_logger.LogInformation("Successfully connected to SignalR hub");
+			_logger.LogInformation("Successfully connected to hub");
 		}
 		catch (Exception ex)
 		{
-			_logger.LogError(ex, "Failed to connect to SignalR hub");
+			_logger.LogError(ex, "Failed to connect to hub");
 			throw;
 		}
 		finally
@@ -138,9 +143,9 @@ public class SignalRWebSocketConnection : IWebSocketConnection
 		{
 			if (_connection != null)
 			{
-				_logger.LogInformation("Disconnecting from SignalR hub");
+				_logger.LogInformation("Disconnecting from hub");
 				await DisposeConnectionAsync();
-				_logger.LogInformation("Disconnected from SignalR hub");
+				_logger.LogInformation("Disconnected from hub");
 			}
 		}
 		finally
@@ -170,7 +175,7 @@ public class SignalRWebSocketConnection : IWebSocketConnection
 		{
 			try
 			{
-				_logger.LogDebug("Received command from SignalR hub: {Command}", commandJson);
+				_logger.LogDebug("Received command from hub: {Command}", commandJson);
 
 				// Deserialize the command message
 				var commandMessage = JsonSerializer.Deserialize<CommandMessage>(commandJson, new JsonSerializerOptions

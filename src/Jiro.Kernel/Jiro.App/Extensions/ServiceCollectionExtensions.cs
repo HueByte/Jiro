@@ -24,7 +24,23 @@ public static class ServiceCollectionExtensions
 	public static IServiceCollection AddJiroCommunication(this IServiceCollection services, IConfiguration configuration)
 	{
 		// Configure options for both WebSocket and gRPC
-		services.Configure<WebSocketOptions>(configuration.GetSection("WebSocket"));
+		services.Configure<WebSocketOptions>(webSocketOptions =>
+		{
+			configuration.GetSection("WebSocket").Bind(webSocketOptions);
+
+			// If ApiKey is not set in WebSocket section, use the global API_KEY
+			if (string.IsNullOrEmpty(webSocketOptions.ApiKey))
+			{
+				webSocketOptions.ApiKey = configuration.GetValue<string>("API_KEY");
+			}
+
+			// Ensure ApiKey is provided
+			if (string.IsNullOrEmpty(webSocketOptions.ApiKey))
+			{
+				throw new InvalidOperationException("WebSocket ApiKey is required. Please provide either 'WebSocket:ApiKey' or 'API_KEY' in configuration.");
+			}
+		});
+
 		services.Configure<GrpcOptions>(configuration.GetSection("Grpc"));
 
 		// Register gRPC service for sending command results

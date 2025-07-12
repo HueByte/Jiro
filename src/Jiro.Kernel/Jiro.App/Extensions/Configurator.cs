@@ -64,7 +64,6 @@ public static class Configurator
 			var configManager = services.GetRequiredService<IConfiguration>();
 			// string openApiKey = configManager.GetValue<string>(Constants.Environment.OpenAiKey)
 			// 	?? services.GetRequiredService<IOptions<BotOptions>>().Value.OpenAIKey;
-
 			string openApiKey = services.GetRequiredService<IOptions<ChatOptions>>().Value.AuthToken;
 			return new ChatClient(Jiro.Core.Constants.AI.Gpt4oMiniModel, openApiKey);
 		});
@@ -77,7 +76,7 @@ public static class Configurator
 	}
 
 	/// <summary>
-	/// Configures application options from the provided configuration, including chat, logging, and JWT options.
+	/// Configures application options from the provided configuration, including chat and logging options.
 	/// </summary>
 	/// <param name="services">The service collection to configure options for.</param>
 	/// <param name="configuration">The configuration instance containing option values.</param>
@@ -87,7 +86,6 @@ public static class Configurator
 		services.AddOptions();
 		services.Configure<ChatOptions>(configuration.GetSection(ChatOptions.Chat));
 		services.Configure<LogOptions>(configuration.GetSection(LogOptions.Log));
-		services.Configure<JWTOptions>(configuration.GetSection(JWTOptions.JWT));
 
 		return services;
 	}

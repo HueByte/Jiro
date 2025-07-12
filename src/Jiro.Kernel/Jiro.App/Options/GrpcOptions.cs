@@ -1,5 +1,6 @@
 namespace Jiro.App.Options;
 
+// TODO: Follow options pattern for gRPC configuration
 /// <summary>
 /// Configuration options for the gRPC service
 /// </summary>

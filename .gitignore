@@ -20,6 +20,8 @@ DEV-SETUP.md
 env
 appsettings.json
 appsettings.development.json
+appsettings.communication.json
+appsettings.jirocloud.json
 .env
 .env.development
 .env.development.local
