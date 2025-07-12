@@ -1,7 +1,5 @@
-using Jiro.Core.Models;
 using Jiro.Core.Services.CommandContext;
 using Jiro.Core.Services.Conversation;
-using Jiro.Core.Services.Conversation.Models;
 using Jiro.Core.Services.MessageCache;
 using Jiro.Core.Services.Persona;
 

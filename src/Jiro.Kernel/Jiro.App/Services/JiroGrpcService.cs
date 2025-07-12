@@ -2,12 +2,10 @@ using System.Text;
 
 using Google.Protobuf;
 
-using Grpc.Core;
 using Grpc.Net.ClientFactory;
 
 using Jiro.App.Options;
 using Jiro.Commands.Models;
-using Jiro.Commands.Results;
 
 using JiroCloud.Api.Proto;
 

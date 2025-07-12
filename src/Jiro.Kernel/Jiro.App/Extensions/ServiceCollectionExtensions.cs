@@ -1,11 +1,8 @@
 using Jiro.App.Options;
 using Jiro.App.Services;
-using Jiro.Core.Services.CommandHandler;
 
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 
 namespace Jiro.App.Extensions;
 
@@ -47,7 +44,7 @@ public static class ServiceCollectionExtensions
 		services.AddScoped<IJiroGrpcService, JiroGrpcService>();
 
 		// Register WebSocket connection implementation for receiving commands
-		services.AddSingleton<IWebSocketConnection, SignalRWebSocketConnection>();
+		services.AddSingleton<IWebSocketConnection, WebSocketConnection>();
 
 		// Register as hosted service to start/stop with the application
 		services.AddHostedService<JiroWebSocketService>();

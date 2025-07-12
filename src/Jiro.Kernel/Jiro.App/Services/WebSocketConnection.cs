@@ -1,5 +1,6 @@
 using System.Text.Json;
 
+using Jiro.App.Models;
 using Jiro.App.Options;
 
 using Microsoft.AspNetCore.SignalR.Client;
@@ -11,9 +12,9 @@ namespace Jiro.App.Services;
 /// <summary>
 /// SignalR implementation of the WebSocket connection interface
 /// </summary>
-public class SignalRWebSocketConnection : IWebSocketConnection
+public class WebSocketConnection : IWebSocketConnection
 {
-	private readonly ILogger<SignalRWebSocketConnection> _logger;
+	private readonly ILogger<WebSocketConnection> _logger;
 	private readonly WebSocketOptions _options;
 	private HubConnection? _connection;
 	private readonly SemaphoreSlim _connectionSemaphore = new(1, 1);
@@ -45,8 +46,8 @@ public class SignalRWebSocketConnection : IWebSocketConnection
 	/// </summary>
 	/// <param name="logger">The logger</param>
 	/// <param name="options">The WebSocket configuration options</param>
-	public SignalRWebSocketConnection(
-		ILogger<SignalRWebSocketConnection> logger,
+	public WebSocketConnection(
+		ILogger<WebSocketConnection> logger,
 		IOptions<WebSocketOptions> options)
 	{
 		_logger = logger ?? throw new ArgumentNullException(nameof(logger));
@@ -99,13 +100,8 @@ public class SignalRWebSocketConnection : IWebSocketConnection
 						}
 					}
 				})
-				.WithAutomaticReconnect(new[]
-				{
-					TimeSpan.Zero,
-					TimeSpan.FromSeconds(2),
-					TimeSpan.FromSeconds(10),
-					TimeSpan.FromSeconds(30)
-				})
+				// Custom reconnection intervals: 0s, 2s, 10s, 30s, 60s, then always 60s
+				.WithAutomaticReconnect(new SocketRetryPolicy())
 				.ConfigureLogging(logging =>
 				{
 					logging.SetMinimumLevel(LogLevel.Information);

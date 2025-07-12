@@ -1,5 +1,6 @@
 using System.Collections.Concurrent;
 
+using Jiro.App.Models;
 using Jiro.App.Options;
 using Jiro.Core.Services.CommandContext;
 using Jiro.Core.Services.CommandHandler;

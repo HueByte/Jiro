@@ -1,4 +1,3 @@
-using Jiro.Core.Models;
 using Jiro.Core.Services.Conversation.Models;
 
 namespace Jiro.Core.Commands.ComplexCommandResults;

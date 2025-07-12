@@ -1,6 +1,6 @@
 using System.Text.Json.Serialization;
 
-namespace Jiro.App.Services;
+namespace Jiro.App.Models;
 
 /// <summary>
 /// Represents a command message received via WebSocket

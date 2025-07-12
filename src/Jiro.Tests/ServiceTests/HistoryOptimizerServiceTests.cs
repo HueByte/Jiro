@@ -1,5 +1,3 @@
-using System.Text.Json;
-
 using Jiro.Core.Services.Conversation;
 using Jiro.Core.Services.Conversation.Models;
 

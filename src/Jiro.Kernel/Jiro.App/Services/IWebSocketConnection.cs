@@ -1,3 +1,5 @@
+using Jiro.App.Models;
+
 namespace Jiro.App.Services;
 
 /// <summary>

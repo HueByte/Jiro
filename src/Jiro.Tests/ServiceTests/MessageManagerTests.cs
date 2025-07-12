@@ -1,4 +1,3 @@
-using Jiro.Core;
 using Jiro.Core.IRepositories;
 using Jiro.Core.Models;
 using Jiro.Core.Services.CommandContext;
@@ -8,7 +7,6 @@ using Jiro.Infrastructure;
 using Jiro.Infrastructure.Repositories;
 using Jiro.Tests.Utilities;
 
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;

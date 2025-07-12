@@ -1,8 +1,6 @@
 using Jiro.Core.Models;
 using Jiro.Core.Services.Conversation.Models;
 
-using OpenAI.Chat;
-
 namespace Jiro.Core.Services.MessageCache;
 
 /// <summary>
