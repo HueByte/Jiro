@@ -587,7 +587,7 @@ To get started with Jiro development:
 4. **Start the application** with `dotnet run`
 5. **Connect clients** via gRPC or Python CLI
 
-For detailed setup instructions, refer to the main [README.md](README.md).
+For detailed setup instructions, refer to the main project README.
 
 ---
 
