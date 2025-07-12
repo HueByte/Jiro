@@ -57,7 +57,8 @@ Jiro: "🌐 Pinging google.com... Response time: 23ms ✅"
 ## 🚀 Quick Start
 
 ### Prerequisites
-- [.NET 9 SDK](https://dotnet.microsoft.com/download) 
+
+- [.NET 9 SDK](https://dotnet.microsoft.com/download)
 - [Node.js](https://nodejs.org/) (for the web interface)
 - [Python 3.8+](https://python.org/) (for tokenizer service)
 - OpenAI API Key (optional, for chat features)
@@ -65,12 +66,14 @@ Jiro: "🌐 Pinging google.com... Response time: 23ms ✅"
 ### 🏃‍♂️ Get Running in 5 Minutes
 
 1. **Clone the repository**
+
    ```bash
    git clone https://github.com/HueByte/Jiro.git
    cd Jiro
    ```
 
 2. **Set up configuration**
+
    ```bash
    # Navigate to the app directory
    cd src/Jiro.Kernel/Jiro.App
@@ -83,6 +86,7 @@ Jiro: "🌐 Pinging google.com... Response time: 23ms ✅"
    ```
 
 3. **Configure your OpenAI key** (optional)
+
    ```json
    // In appsettings.json
    {
@@ -93,6 +97,7 @@ Jiro: "🌐 Pinging google.com... Response time: 23ms ✅"
    ```
 
 4. **Run Jiro**
+
    ```bash
    cd ../  # Back to Jiro.App directory
    dotnet tool restore
@@ -100,6 +105,7 @@ Jiro: "🌐 Pinging google.com... Response time: 23ms ✅"
    ```
 
 5. **Start the tokenizer** (in a new terminal)
+
    ```bash
    cd src/Jiro.TokenApi
    pip install -r requirements.txt
@@ -128,16 +134,138 @@ public class HelloCommand : BaseCommand
 
 ## 🏗️ Architecture Overview
 
-<p align="center">
-    <img src="assets/JiroDevFlow.png" alt="Jiro Development Flow" style="border-radius: 10px;"/>
-</p>
+Jiro is built as a modular, self-contained AI assistant that can run locally while optionally connecting to external services. The architecture follows clean separation of concerns with a focus on extensibility and performance:
 
-Jiro follows a clean, modular architecture:
+```mermaid
+graph TB
+    subgraph "🌐 External Services"
+        JiroCloud[🚀 JiroCloud<br/>Optional Remote Commands]
+        OpenAI[🧠 OpenAI API<br/>Language Models]
+        WeatherAPI[🌤️ Weather Service<br/>Location & Forecast]
+    end
 
-- **🎯 Jiro.Core** - Business logic, commands, and domain models
-- **🗄️ Jiro.Infrastructure** - Data access, repositories, and external services  
-- **🌐 Jiro.App** - Web API and client application
-- **🔧 Jiro.TokenApi** - Python-based tokenization service
+    subgraph "💻 Local Jiro Instance"
+        subgraph "🎯 Client Layer"
+            PythonCLI[🐍 Python CLI<br/>jiro.py]
+            WebClient[🌐 Web Interface<br/>Future Feature]
+        end
+
+        subgraph "🚀 Jiro.App Layer"
+            JiroApp[🎮 Jiro.App<br/>Main Host Application]
+            RestAPI[� REST API<br/>:18090]
+            GrpcService[📡 gRPC Service<br/>JiroCloud Integration]
+        end
+
+        subgraph "💼 Jiro.Core Layer"
+            ChatService[💬 Chat Service<br/>Conversation Management]
+            CmdSystem[⚡ Command System<br/>Plugin Framework]
+            WeatherService[🌤️ Weather Service<br/>Location & Forecasts]
+            PersonaService[� Persona Service<br/>AI Personality]
+            ConversationService[� Conversation Service<br/>Context Management]
+        end
+
+        subgraph "🗄️ Jiro.Infrastructure Layer"
+            EFCore[🗃️ Entity Framework<br/>Data Access]
+            Repositories[� Repositories<br/>Data Operations]
+            Cache[⚡ Memory Cache<br/>Performance]
+        end
+
+        subgraph "� Storage"
+            SQLite[� SQLite<br/>Default Database]
+            MySQL[🗄️ MySQL<br/>Docker Option]
+        end
+    end
+
+    subgraph "🔌 Plugin Ecosystem"
+        BaseCommands[⚡ Base Commands<br/>Built-in Features]
+        CustomPlugins[🔧 Custom Plugins<br/>Extensible via NuGet]
+    end
+
+    %% Client to Application Flow
+    PythonCLI -->|HTTP Requests| RestAPI
+    WebClient -->|HTTP Requests| RestAPI
+    RestAPI --> JiroApp
+
+    %% External Service Integration
+    JiroApp -.->|Optional| GrpcService
+    GrpcService -.->|Commands| JiroCloud
+    ChatService -->|AI Requests| OpenAI
+    WeatherService -->|API Calls| WeatherAPI
+
+    %% Core Service Interactions
+    JiroApp --> ChatService
+    JiroApp --> CmdSystem
+    JiroApp --> WeatherService
+    JiroApp --> PersonaService
+    JiroApp --> ConversationService
+
+    %% Plugin System
+    CmdSystem --> BaseCommands
+    CmdSystem --> CustomPlugins
+
+    %% Data Layer
+    ChatService --> EFCore
+    WeatherService --> EFCore
+    PersonaService --> EFCore
+    ConversationService --> EFCore
+    EFCore --> Repositories
+    Repositories --> Cache
+    EFCore --> SQLite
+    EFCore -.->|Docker| MySQL
+
+    %% Styling
+    classDef external fill:#FFE6CC,stroke:#D79B00,stroke-width:2px
+    classDef client fill:#E1F5FE,stroke:#0277BD,stroke-width:2px
+    classDef app fill:#F3E5F5,stroke:#7B1FA2,stroke-width:2px
+    classDef core fill:#E8F5E8,stroke:#2E7D32,stroke-width:2px
+    classDef infra fill:#FFF3E0,stroke:#F57C00,stroke-width:2px
+    classDef storage fill:#ECEFF1,stroke:#455A64,stroke-width:2px
+    classDef plugins fill:#FCE4EC,stroke:#C2185B,stroke-width:2px
+
+    class JiroCloud,OpenAI,WeatherAPI external
+    class PythonCLI,WebClient client
+    class JiroApp,RestAPI,GrpcService app
+    class ChatService,CmdSystem,WeatherService,PersonaService,ConversationService core
+    class EFCore,Repositories,Cache infra
+    class SQLite,MySQL storage
+    class BaseCommands,CustomPlugins plugins
+```
+
+### 🔧 Architecture Components
+
+#### **� Jiro.App - Application Host**
+
+- **Main Host**: Central application with dependency injection and configuration
+- **REST API**: Primary interface on port 18090 for client communication
+- **gRPC Service**: Optional integration with JiroCloud for distributed commands
+
+#### **� Jiro.Core - Business Logic**
+
+- **Chat Service**: Manages conversations and integrates with OpenAI
+- **Command System**: Extensible plugin framework for adding new features
+- **Weather Service**: Provides location-based weather information
+- **Persona Service**: Handles AI personality and behavior customization
+- **Conversation Service**: Manages chat context and message history
+
+#### **�️ Jiro.Infrastructure - Data Layer**
+
+- **Entity Framework**: ORM for database operations and migrations
+- **Repositories**: Clean data access patterns with caching support
+- **SQLite**: Default lightweight database, MySQL available via Docker
+
+#### **🔌 Plugin Ecosystem**
+
+- **Base Commands**: Built-in functionality (chat, weather, etc.)
+- **Custom Plugins**: Extensible via NuGet packages and the plugin framework
+- **Dynamic Loading**: Runtime discovery and registration of new commands
+
+### 🌟 Key Architectural Benefits
+
+- **🏠 Self-Contained**: Runs completely locally with optional cloud features
+- **🔌 Extensible**: Plugin system allows easy addition of new commands
+- **⚡ Performance**: Memory caching and efficient data access patterns
+- **🐳 Deployable**: Docker support with MySQL for production environments
+- **🛡️ Flexible**: SQLite for development, MySQL for production scaling
 
 ## 📚 Documentation
 
@@ -148,6 +276,7 @@ Explore our comprehensive documentation:
 - **[📝 Changelog](dev/docs/changelog/)** - What's new in each version
 
 ### Build Documentation Locally
+
 ```bash
 # Use our handy script
 ./scripts/docfx-gen.sh        # Linux/macOS
@@ -171,6 +300,7 @@ We love contributions! Here's how you can help make Jiro even better:
 7. 🎉 **Open a Pull Request**
 
 ### Areas We'd Love Help With
+
 - 🔌 New plugin ideas and implementations
 - 🌍 Internationalization and localization
 - 📱 Mobile app development
@@ -181,6 +311,7 @@ We love contributions! Here's how you can help make Jiro even better:
 ## 🛠️ Configuration Reference
 
 ### Core API Settings
+
 | Setting | Description | Default |
 |---------|-------------|---------|
 | `urls` | Hosting URLs | `http://localhost:18090;https://localhost:18091` |
@@ -189,6 +320,7 @@ We love contributions! Here's how you can help make Jiro even better:
 | `JWT:Secret` | JWT signing key | *Change in production!* |
 
 ### Web Client Settings  
+
 | Setting | Description | Default |
 |---------|-------------|---------|
 | `PORT` | Development server port | `3000` |
@@ -231,5 +363,5 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 </p>
 
 <p align="center">
-    Made with ❤️ by <a href="https://github.com/HueByte">HueByte</a> and the Jiro community
+    Made with ❤️ by <a href="https://github.com/HueByte">HueByte</a>
 </p>

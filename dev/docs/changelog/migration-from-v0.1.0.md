@@ -7,11 +7,13 @@ This guide helps you migrate from v0.1.0-alpha to newer versions of Jiro AI Assi
 ## Breaking Changes
 
 ### Configuration Changes
+
 - Environment configuration has been updated
 - Docker configuration structure modified
 - Database schema updates may require migration
 
 ### File Structure Changes
+
 - Documentation moved to `dev/docs/` directory
 - Configuration files reorganized
 - Build scripts updated
@@ -19,6 +21,7 @@ This guide helps you migrate from v0.1.0-alpha to newer versions of Jiro AI Assi
 ## Migration Steps
 
 ### 1. Backup Your Data
+
 ```bash
 # Backup your database
 # Backup your configuration files
@@ -26,6 +29,7 @@ This guide helps you migrate from v0.1.0-alpha to newer versions of Jiro AI Assi
 ```
 
 ### 2. Update Configuration
+
 ```bash
 # Update environment variables
 # Review Docker compose configuration
@@ -33,12 +37,14 @@ This guide helps you migrate from v0.1.0-alpha to newer versions of Jiro AI Assi
 ```
 
 ### 3. Database Migration
+
 ```bash
 # Run Entity Framework migrations
 dotnet ef database update
 ```
 
 ### 4. Verify Installation
+
 ```bash
 # Test the application
 # Verify all features work as expected
@@ -48,6 +54,7 @@ dotnet ef database update
 ## Support
 
 If you encounter issues during migration:
+
 1. Check the [Changelog](index.md) for detailed changes
 2. Review the [User Guide](../user-guide.md) for updated procedures
 3. Create an issue in the GitHub repository
@@ -55,6 +62,7 @@ If you encounter issues during migration:
 ## Post-Migration
 
 After successful migration:
+
 - Update your documentation
 - Test all integrations
 - Update any automation scripts
