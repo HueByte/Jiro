@@ -121,7 +121,12 @@ internal class JiroGrpcService : IJiroGrpcService
 	/// <returns>A protobuf client message ready for transmission.</returns>
 	private ClientMessage CreateMessage(string syncId, CommandResponse commandResult)
 	{
-		var dataType = GetDataType(commandResult.CommandType);
+		var dataType = commandResult.CommandType switch
+		{
+			Jiro.Commands.CommandType.Text => JiroCloud.Api.Proto.DataType.Text,
+			Jiro.Commands.CommandType.Graph => JiroCloud.Api.Proto.DataType.Graph,
+			_ => JiroCloud.Api.Proto.DataType.Text
+		};
 
 		ClientMessage response = new()
 		{
@@ -182,18 +187,6 @@ internal class JiroGrpcService : IJiroGrpcService
 
 		return response;
 	}
-
-	/// <summary>
-	/// Converts internal command types to protobuf data types for network communication.
-	/// </summary>
-	/// <param name="commandType">The internal command type to convert.</param>
-	/// <returns>The corresponding protobuf data type.</returns>
-	private static JiroCloud.Api.Proto.DataType GetDataType(Jiro.Commands.CommandType commandType) => (int)commandType switch
-	{
-		0 => JiroCloud.Api.Proto.DataType.Text,
-		1 => JiroCloud.Api.Proto.DataType.Graph,
-		_ => JiroCloud.Api.Proto.DataType.Text
-	};
 
 	/// <summary>
 	/// Detects the text type based on content analysis for better client-side handling.
