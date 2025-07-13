@@ -80,6 +80,7 @@
 			"_appTitle": "Jiro Documentation",
 			"_appLogoPath": "assets/Jiro-Icon.png",
 			"_appFaviconPath": "assets/Jiro-Icon.png",
+			"_appFooter": "<div class=\"footer-custom\"><div class=\"footer-inner d-flex justify-content-between align-items-center\"><div class=\"footer-text\">Made with <strong>💖</strong> By HueByte</div><div class=\"footer-links\"><a href=\"https://github.com/HueByte/Jiro.Libs\" class=\"footer-link\" target=\"_blank\"><i class=\"fab fa-github\"></i>GitHub</a><a href=\"#\" class=\"footer-link scroll-to-top\" onclick=\"scrollToTop()\"><i class=\"fas fa-arrow-up\"></i>Top</a></div></div></div><script>function scrollToTop(){window.scrollTo({top:0,behavior:'smooth'});}</script>",
 			"_enableSearch": true,
 			"_enableNewTab": true,
 			"_disableNavbar": false,
