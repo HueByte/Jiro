@@ -1,4 +1,5 @@
 using System.Text;
+using System.Text.RegularExpressions;
 
 using Google.Protobuf;
 
@@ -120,56 +121,62 @@ internal class JiroGrpcService : IJiroGrpcService
 	/// <returns>A protobuf client message ready for transmission.</returns>
 	private ClientMessage CreateMessage(string syncId, CommandResponse commandResult)
 	{
-		var commandType = GetCommandType(commandResult.CommandType);
+		var dataType = GetDataType(commandResult.CommandType);
 
 		ClientMessage response = new()
 		{
 			CommandSyncId = syncId,
 			CommandName = commandResult.CommandName,
-			CommandType = commandType,
+			DataType = dataType,
 			IsSuccess = commandResult.IsSuccess
 		};
 
 		try
 		{
-			if (commandType == JiroCloud.Api.Proto.CommandType.Text)
+			switch (dataType)
 			{
-				// TODO: Handle text result serialization properly for JSON responses
-				var responseMessage = commandResult.Result?.Message ?? "";
-
-				// For commands that return JSON data (like getSessions, getSessionHistory),
-				// the message is already a JSON string that should be passed through as-is
-				// to avoid double serialization when the client processes the gRPC response
-				response.TextResult = new()
-				{
-					Response = responseMessage
-				};
-			}
-			else if (commandType == JiroCloud.Api.Proto.CommandType.Graph)
-			{
-				if (commandResult.Result is Jiro.Commands.Results.GraphResult graph)
-				{
-					response.GraphResult = new()
+				case JiroCloud.Api.Proto.DataType.Text:
+					var responseMessage = commandResult.Result?.Message ?? "";
+					var textType = commandResult.Result switch
 					{
-						Message = graph.Message,
-						Note = graph.Note,
-						XAxis = graph.XAxis ?? "",
-						YAxis = graph.YAxis ?? "",
-						GraphData = ByteString.CopyFrom(graph.Data as string ?? "", Encoding.UTF8)
+						Jiro.Commands.Results.JsonResult => JiroCloud.Api.Proto.TextType.Json,
+						Jiro.Commands.Results.TextResult => DetectTextType(responseMessage),
+						_ => DetectTextType(responseMessage)
 					};
 
-					response.GraphResult.Units.Add(graph.Units);
-				}
+					response.TextResult = new()
+					{
+						Response = responseMessage,
+						TextType = textType
+					};
+					break;
+
+				case JiroCloud.Api.Proto.DataType.Graph:
+					if (commandResult.Result is Jiro.Commands.Results.GraphResult graph)
+					{
+						response.GraphResult = new()
+						{
+							Message = graph.Message,
+							Note = graph.Note,
+							XAxis = graph.XAxis ?? "",
+							YAxis = graph.YAxis ?? "",
+							GraphData = ByteString.CopyFrom(graph.Data as string ?? "", Encoding.UTF8)
+						};
+
+						response.GraphResult.Units.Add(graph.Units);
+					}
+					break;
 			}
 		}
 		catch (Exception ex)
 		{
 			_logger.LogError(ex, "Error while creating message.");
 			response.IsSuccess = false;
-			response.CommandType = JiroCloud.Api.Proto.CommandType.Text;
+			response.DataType = JiroCloud.Api.Proto.DataType.Text;
 			response.TextResult = new()
 			{
-				Response = "Error while creating message. Look at logs for more information."
+				Response = "Error while creating message. Look at logs for more information.",
+				TextType = JiroCloud.Api.Proto.TextType.Plain
 			};
 		}
 
@@ -177,14 +184,53 @@ internal class JiroGrpcService : IJiroGrpcService
 	}
 
 	/// <summary>
-	/// Converts internal command types to protobuf command types for network communication.
+	/// Converts internal command types to protobuf data types for network communication.
 	/// </summary>
 	/// <param name="commandType">The internal command type to convert.</param>
-	/// <returns>The corresponding protobuf command type.</returns>
-	private static JiroCloud.Api.Proto.CommandType GetCommandType(Jiro.Commands.CommandType commandType) => (int)commandType switch
+	/// <returns>The corresponding protobuf data type.</returns>
+	private static JiroCloud.Api.Proto.DataType GetDataType(Jiro.Commands.CommandType commandType) => (int)commandType switch
 	{
-		0 => JiroCloud.Api.Proto.CommandType.Text,
-		1 => JiroCloud.Api.Proto.CommandType.Graph,
-		_ => JiroCloud.Api.Proto.CommandType.Text
+		0 => JiroCloud.Api.Proto.DataType.Text,
+		1 => JiroCloud.Api.Proto.DataType.Graph,
+		_ => JiroCloud.Api.Proto.DataType.Text
 	};
+
+	/// <summary>
+	/// Detects the text type based on content analysis for better client-side handling.
+	/// </summary>
+	/// <param name="content">The text content to analyze.</param>
+	/// <returns>The detected text type.</returns>
+	private static JiroCloud.Api.Proto.TextType DetectTextType(string content)
+	{
+		if (string.IsNullOrEmpty(content))
+			return JiroCloud.Api.Proto.TextType.Plain;
+
+		// Check for JSON
+		if (content.TrimStart().StartsWith('{') && content.TrimEnd().EndsWith('}') ||
+			content.TrimStart().StartsWith('[') && content.TrimEnd().EndsWith(']'))
+		{
+			return JiroCloud.Api.Proto.TextType.Json;
+		}
+
+		// Check for Base64 (basic heuristic)
+		if (content.Length % 4 == 0 && System.Text.RegularExpressions.Regex.IsMatch(content, @"^[A-Za-z0-9+/]*={0,2}$"))
+		{
+			return JiroCloud.Api.Proto.TextType.Base64;
+		}
+
+		// Check for Markdown
+		if (content.Contains("```") || content.Contains("# ") || content.Contains("## ") ||
+			content.Contains("**") || content.Contains("*") || content.Contains("[") && content.Contains("]("))
+		{
+			return JiroCloud.Api.Proto.TextType.Markdown;
+		}
+
+		// Check for HTML
+		if (content.Contains("<") && content.Contains(">"))
+		{
+			return JiroCloud.Api.Proto.TextType.Html;
+		}
+
+		return JiroCloud.Api.Proto.TextType.Plain;
+	}
 }

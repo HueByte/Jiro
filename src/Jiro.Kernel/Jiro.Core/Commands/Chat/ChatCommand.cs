@@ -1,5 +1,3 @@
-using System.Text.Json;
-
 using Jiro.Core.Commands.ComplexCommandResults;
 using Jiro.Core.Services.CommandContext;
 using Jiro.Core.Services.Conversation;
@@ -41,10 +39,8 @@ public class ChatCommand : ICommandBase
 
 		var sessions = await _messageManager.GetChatSessionsAsync(_commandContext.InstanceId);
 
-		// Return serialized JSON directly to avoid double serialization
-		// The client expects JSON data for this command
-		var jsonData = JsonSerializer.Serialize(sessions);
-		return TextResult.Create(jsonData);
+		// Return as JsonResult to properly handle JSON data
+		return JsonResult.Create(sessions);
 	}
 
 	[Command("getSessionHistory")]
@@ -61,10 +57,8 @@ public class ChatCommand : ICommandBase
 
 		var data = new SessionResult(session);
 
-		// Return serialized JSON directly to avoid double serialization
-		// The client expects JSON data for this command
-		var jsonData = JsonSerializer.Serialize(data);
-		return TextResult.Create(jsonData);
+		// Return as JsonResult to properly handle JSON data
+		return JsonResult.Create(data);
 	}
 
 	[Command("reset", commandDescription: "Clears the current session")]

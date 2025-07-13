@@ -13,7 +13,7 @@ service JiroHubProto {
 
 message ClientMessage {
     string commandName = 1;
-    CommandType commandType = 2;
+    DataType dataType = 2;
     oneof result {
 		TextResult textResult = 3;
 		GraphResult graphResult = 4;
@@ -24,13 +24,22 @@ message ClientMessage {
 	string sessionId = 8;
 }
 
-enum CommandType {
+enum DataType {
     text = 0;
     graph = 1;
 }
 
+enum TextType {
+    plain = 0;
+    json = 1;
+    base64 = 2;
+    markdown = 3;
+    html = 4;
+}
+
 message TextResult {
     string response = 1;
+    TextType textType = 2;
 }
 
 message GraphResult {
