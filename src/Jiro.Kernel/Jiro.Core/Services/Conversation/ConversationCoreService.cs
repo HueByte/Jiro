@@ -7,6 +7,10 @@ using OpenAI.Chat;
 
 namespace Jiro.Core.Services.Conversation;
 
+/// <summary>
+/// Core conversation service that handles basic chat interactions with AI models.
+/// This service focuses on simple chat functionality without session management.
+/// </summary>
 public class ConversationCoreService : IConversationCoreService
 {
 	private readonly ILogger<ConversationCoreService> _logger;
@@ -15,6 +19,9 @@ public class ConversationCoreService : IConversationCoreService
 	private readonly ISemaphoreManager _chatSemaphoreManager;
 	private const float TEMPERATURE = 0.6f;
 
+	/// <summary>
+	/// Initializes a new instance of the ConversationCoreService.
+	/// </summary>
 	public ConversationCoreService(ILogger<ConversationCoreService> logger, IMessageManager messageCacheService, ChatClient openAIClient, ISemaphoreManager chatSemaphoreManager)
 	{
 		_logger = logger;
@@ -23,6 +30,13 @@ public class ConversationCoreService : IConversationCoreService
 		_chatSemaphoreManager = chatSemaphoreManager;
 	}
 
+	/// <summary>
+	/// Conducts a chat conversation using the specified message history and optional persona message.
+	/// </summary>
+	/// <param name="instanceId">The unique identifier for the conversation instance.</param>
+	/// <param name="messageHistory">The list of previous chat messages that form the conversation context.</param>
+	/// <param name="personaMessage">An optional persona message to influence the AI's behavior and responses.</param>
+	/// <returns>A task that represents the asynchronous operation. The task result contains the chat completion response.</returns>
 	public async Task<ChatCompletion> ChatAsync(string instanceId, List<ChatMessage> messageHistory, ChatMessage? personaMessage = null)
 	{
 		// Use a semaphore to prevent concurrent updates for the same channel.
@@ -64,6 +78,13 @@ public class ConversationCoreService : IConversationCoreService
 		}
 	}
 
+	/// <summary>
+	/// Exchanges a single message with the AI system and receives a response.
+	/// </summary>
+	/// <param name="message">The message to send to the AI system.</param>
+	/// <param name="developerPersonaChatMessage">An optional developer persona message to guide the AI's responses.</param>
+	/// <param name="tokenLimit">The maximum number of tokens to use in the response. Default is 1200.</param>
+	/// <returns>A task that represents the asynchronous operation. The task result contains the AI's response as a string.</returns>
 	public async Task<string> ExchangeMessageAsync(string message, ChatMessage? developerPersonaChatMessage = null, int tokenLimit = 1200)
 	{
 		try

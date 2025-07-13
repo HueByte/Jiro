@@ -136,7 +136,7 @@ public class MessageManager : IMessageManager
 					_logger.LogInformation("No chat session found for instance {InstanceId} and session {SessionId}. Creating new session.", _commandContext.InstanceId, sessionId);
 					session = new ChatSession
 					{
-						Id = _commandContext.SessionId,
+						Id = sessionId,
 						Name = $"Session-{sessionId}",
 						CreatedAt = DateTime.UtcNow,
 						LastUpdatedAt = DateTime.UtcNow,
@@ -178,35 +178,36 @@ public class MessageManager : IMessageManager
 		try
 		{
 			var instanceId = _commandContext.InstanceId ?? throw new InvalidOperationException("Command context or current instance is not set.");
-			if (_memoryCache.TryGetValue(sessionId, out Session? session))
-			{
-				if (session is null)
-				{
-					_logger.LogWarning("Chat session with ID {SessionId} not found in cache. Creating a new session.", sessionId);
-					session = await GetOrCreateChatSessionAsync(sessionId);
-				}
 
-				var sessionMessages = session.Messages ?? [];
-				if (sessionMessages.Count > 0)
-				{
-					sessionMessages.Clear();
-				}
+			// Get or create session first
+			var session = await GetOrCreateChatSessionAsync(sessionId);
 
-				sessionMessages.AddRange(messages);
-				_memoryCache.Set(sessionId, session, TimeSpan.FromDays(MEMORY_CACHE_EXPIRATION));
-			}
-			else
-			{
-				session = await GetOrCreateChatSessionAsync(sessionId);
-				_memoryCache.Set(sessionId, session, TimeSpan.FromDays(MEMORY_CACHE_EXPIRATION));
-			}
+			// Update cache with new messages
+			session.Messages.AddRange(messages);
+			session.LastUpdatedAt = DateTime.UtcNow;
+			_memoryCache.Set(sessionId, session, TimeSpan.FromDays(MEMORY_CACHE_EXPIRATION));
 
+			// Persist to database
 			await _messageRepository.AddRangeAsync(modelMessages);
 			await _messageRepository.SaveChangesAsync();
+
+			// Update the chat session in database as well
+			var dbSession = await _chatSessionRepository.GetAsync(sessionId);
+			if (dbSession != null)
+			{
+				dbSession.LastUpdatedAt = DateTime.UtcNow;
+				await _chatSessionRepository.UpdateAsync(dbSession);
+				await _chatSessionRepository.SaveChangesAsync();
+			}
+
+			// Invalidate sessions cache to ensure fresh data
+			_memoryCache.Remove(Constants.CacheKeys.SessionsKey);
+
+			_logger.LogInformation("Added {MessageCount} messages to session {SessionId}", messages.Count, sessionId);
 		}
 		catch (Exception ex)
 		{
-			_logger?.LogError(ex, "Error adding chat exchange for instance {InstanceId}", sessionId);
+			_logger?.LogError(ex, "Error adding chat exchange for session {SessionId}", sessionId);
 			throw;
 		}
 	}
@@ -230,6 +231,73 @@ public class MessageManager : IMessageManager
 		_memoryCache.Set(key, message, TimeSpan.FromMinutes(minutes));
 	}
 
+	/// <summary>
+	/// Validates session consistency between cache and database.
+	/// </summary>
+	/// <param name="sessionId">The session identifier to validate.</param>
+	/// <returns>True if session is consistent, false otherwise.</returns>
+	public async Task<bool> ValidateSessionConsistencyAsync(string sessionId)
+	{
+		try
+		{
+			var cacheSession = _memoryCache.Get<Session>(sessionId);
+			var dbSession = await _chatSessionRepository.GetAsync(sessionId);
+
+			if (cacheSession == null && dbSession == null)
+				return true; // Both null is consistent
+
+			if (cacheSession == null || dbSession == null)
+			{
+				_logger.LogWarning("Session consistency issue: Cache session: {CacheExists}, DB session: {DbExists}",
+					cacheSession != null, dbSession != null);
+				return false;
+			}
+
+			// Compare basic properties
+			if (cacheSession.SessionId != dbSession.Id ||
+				Math.Abs((cacheSession.LastUpdatedAt - dbSession.LastUpdatedAt).TotalSeconds) > 1)
+			{
+				_logger.LogWarning("Session {SessionId} has inconsistent data between cache and database", sessionId);
+				return false;
+			}
+
+			return true;
+		}
+		catch (Exception ex)
+		{
+			_logger.LogError(ex, "Error validating session consistency for {SessionId}", sessionId);
+			return false;
+		}
+	}
+
+	/// <summary>
+	/// Repairs session consistency issues by refreshing from database.
+	/// </summary>
+	/// <param name="sessionId">The session identifier to repair.</param>
+	/// <returns>True if repair was successful.</returns>
+	public async Task<bool> RepairSessionConsistencyAsync(string sessionId)
+	{
+		try
+		{
+			_memoryCache.Remove(sessionId);
+			var session = await GetSessionAsync(sessionId);
+
+			if (session != null)
+			{
+				_logger.LogInformation("Repaired session consistency for {SessionId}", sessionId);
+				return true;
+			}
+
+			_logger.LogWarning("Could not repair session {SessionId} - session not found", sessionId);
+			return false;
+		}
+		catch (Exception ex)
+		{
+			_logger.LogError(ex, "Error repairing session consistency for {SessionId}", sessionId);
+			return false;
+		}
+	}
+
 	private async Task<string?> GetMessageAsync(string key)
 	{
 		if (_memoryCache.TryGetValue(key, out string? message))
@@ -250,6 +318,9 @@ public class MessageManager : IMessageManager
 	{
 		try
 		{
+			// Return sessions that either:
+			// 1. Have messages from this instance, OR
+			// 2. Have no messages at all (empty sessions that could belong to any instance)
 			var sessions = await _chatSessionRepository.AsQueryable()
 				.Include(x => x.Messages.OrderBy(m => m.CreatedAt))
 				.Where(x => x.Messages.Any(m => m.InstanceId == instanceId) || !x.Messages.Any())
@@ -261,6 +332,7 @@ public class MessageManager : IMessageManager
 				return new List<ChatSession>();
 			}
 
+			_logger.LogInformation("Found {Count} chat sessions for instance {InstanceId}", sessions.Count, instanceId);
 			return sessions;
 		}
 		catch (Exception ex)
