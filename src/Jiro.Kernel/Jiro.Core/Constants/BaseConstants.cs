@@ -19,17 +19,22 @@ public class CacheKeys
 	/// <summary>
 	/// The cache key for storing the core persona message.
 	/// </summary>
-	public const string CorePersonaMessageKey = $"{AgentMetadata.CachePrefix}Persona";
+	public const string CorePersonaMessageKey = $"{AgentMetadata.CachePrefix}::Persona";
 
 	/// <summary>
 	/// The cache key for storing the computed persona message.
 	/// </summary>
-	public const string ComputedPersonaMessageKey = $"{AgentMetadata.CachePrefix}ComputedPersona";
+	public const string ComputedPersonaMessageKey = $"{AgentMetadata.CachePrefix}::ComputedPersona";
 
 	/// <summary>
 	/// The cache key for storing session information.
 	/// </summary>
-	public const string SessionsKey = $"{AgentMetadata.CachePrefix}Sessions";
+	public const string SessionsKey = $"{AgentMetadata.CachePrefix}::Sessions";
+
+	/// <summary>
+	/// The cache key for storing session data.
+	/// </summary>
+	public const string SessionKey = $"{AgentMetadata.CachePrefix}::Session";
 }
 
 /// <summary>
@@ -82,5 +87,5 @@ public class AgentMetadata
 	/// <summary>
 	/// The prefix used for cache keys to identify Jiro-related cached data.
 	/// </summary>
-	public const string CachePrefix = "JIRO_";
+	public const string CachePrefix = "JIRO";
 }

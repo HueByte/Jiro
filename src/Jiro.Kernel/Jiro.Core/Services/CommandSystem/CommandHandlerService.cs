@@ -30,7 +30,9 @@ public partial class CommandHandlerService : ICommandHandlerService
 		try
 		{
 			command = GetCommand(commandName);
-			result = await command.ExecuteAsync(scopedProvider, _commandsModule, tokens);
+			// Pass tokens without the command name (skip first token if it's a command)
+			var argTokens = tokens.Length > 1 && tokens[0].StartsWith('$') ? tokens[1..] : tokens;
+			result = await command.ExecuteAsync(scopedProvider, _commandsModule, argTokens);
 			result.IsSuccess = true;
 			result.CommandName = command.Name;
 		}

@@ -145,7 +145,6 @@ public class PersonalizedConversationService : IPersonalizedConversationService
 			throw;
 		}
 	}
-
 	/// <summary>
 	/// Saves user and assistant messages to the session using EF Core.
 	/// </summary>
@@ -175,20 +174,11 @@ public class PersonalizedConversationService : IPersonalizedConversationService
 				Type = assistantMessage.Type,
 			};
 
-			// Add messages to the session
-			session.Messages.Add(userMessageModel);
-			session.Messages.Add(assistantMessageModel);
-			session.LastUpdatedAt = DateTime.UtcNow;
-
-			// Save to database
-			await _chatSessionRepository.UpdateAsync(session);
-			await _chatSessionRepository.SaveChangesAsync();
-
-			// Update cache with the new message models
-			var cacheMessagesList = new List<Message> { userMessageModel, assistantMessageModel };
+			// Let MessageManager handle all persistence logic
+			var modelMessages = new List<Message> { userMessageModel, assistantMessageModel };
 			await _messageCacheService.AddChatExchangeAsync(session.Id,
 				new List<ChatMessageWithMetadata> { userMessage, assistantMessage },
-				cacheMessagesList);
+				modelMessages);
 
 			_logger.LogInformation("Saved user and assistant messages to session {SessionId}", session.Id);
 		}

@@ -3,6 +3,7 @@ using Jiro.Core.Models;
 using Jiro.Core.Services.CommandContext;
 using Jiro.Core.Services.Conversation.Models;
 using Jiro.Core.Services.MessageCache;
+using Jiro.Core.Services.StaticMessage;
 using Jiro.Infrastructure;
 using Jiro.Infrastructure.Repositories;
 using Jiro.Tests.Utilities;
@@ -25,6 +26,7 @@ public class MessageManagerTests : IDisposable
 	private readonly IChatSessionRepository _chatSessionRepository;
 	private readonly IConfiguration _configuration;
 	private readonly Mock<ICommandContext> _commandContextMock;
+	private readonly Mock<IStaticMessageService> _staticMessageServiceMock;
 	private readonly IMessageManager _messageManager;
 	private readonly JiroContext _dbContext;
 
@@ -51,6 +53,26 @@ public class MessageManagerTests : IDisposable
 			.Build();
 
 		_commandContextMock = new Mock<ICommandContext>();
+		_staticMessageServiceMock = new Mock<IStaticMessageService>();
+
+		// Setup static message service mock to use the same memory cache for testing
+		_staticMessageServiceMock.Setup(x => x.ClearStaticMessageCache())
+			.Callback(() =>
+			{
+				// Remove the same cache entries that the real implementation would remove
+				_memoryCache.Remove(Jiro.Core.Constants.CacheKeys.ComputedPersonaMessageKey);
+				_memoryCache.Remove(Jiro.Core.Constants.CacheKeys.CorePersonaMessageKey);
+			});
+
+		_staticMessageServiceMock.Setup(x => x.SetStaticMessage(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int>()))
+			.Callback<string, string, int>((key, message, minutes) =>
+			{
+				var cacheEntryOptions = new MemoryCacheEntryOptions
+				{
+					AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(minutes)
+				};
+				_memoryCache.Set(key, message, cacheEntryOptions);
+			});
 
 		_messageManager = new MessageManager(
 			_loggerMock.Object,
@@ -58,7 +80,8 @@ public class MessageManagerTests : IDisposable
 			_messageRepository,
 			_chatSessionRepository,
 			_configuration,
-			_commandContextMock.Object);
+			_commandContextMock.Object,
+			_staticMessageServiceMock.Object);
 	}
 
 	public void Dispose()
@@ -86,7 +109,8 @@ public class MessageManagerTests : IDisposable
 			_messageRepository,
 			_chatSessionRepository,
 			configuration,
-			null!));
+			null!,
+			_staticMessageServiceMock.Object));
 	}
 
 	[Fact]
@@ -239,12 +263,17 @@ public class MessageManagerTests : IDisposable
 		_commandContextMock.Setup(x => x.InstanceId).Returns(instanceId);
 
 		// Act
-		await _messageManager.AddChatExchangeAsync(instanceId, chatMessages, modelMessages);
+		await _messageManager.AddChatExchangeAsync(sessionId, chatMessages, modelMessages);
 
 		// Assert - Check that messages were added to database
 		var addedMessages = _dbContext.Messages.Where(m => m.SessionId == sessionId).ToList();
 		Assert.Equal(2, addedMessages.Count);
 		Assert.All(addedMessages, m => Assert.Equal(sessionId, m.SessionId));
+
+		// Also check that cache is updated
+		var cachedSession = await _messageManager.GetSessionAsync(sessionId, includeMessages: true);
+		Assert.NotNull(cachedSession);
+		Assert.Equal(2, cachedSession.Messages.Count);
 	}
 
 	[Theory]
@@ -279,16 +308,27 @@ public class MessageManagerTests : IDisposable
 	[InlineData("empty-session", 0)]
 	public void GetChatMessageCount_WithDifferentSessions_ShouldReturnCorrectCount(string sessionId, int expectedCount)
 	{
-		// Arrange - Add messages to cache
-		var messages = new List<ChatMessage>();
-		for (int i = 0; i < expectedCount; i++)
-		{
-			messages.Add(ChatMessage.CreateUserMessage($"Message {i}"));
-		}
-
+		// Arrange - Add session with messages to cache using the new cache structure
 		if (expectedCount > 0)
 		{
-			_memoryCache.Set(sessionId, messages);
+			var messages = new List<ChatMessageWithMetadata>();
+			for (int i = 0; i < expectedCount; i++)
+			{
+				messages.Add(new ChatMessageWithMetadata
+				{
+					Message = ChatMessage.CreateUserMessage($"Message {i}"),
+					CreatedAt = DateTime.UtcNow
+				});
+			}
+
+			var session = new Session
+			{
+				SessionId = sessionId,
+				InstanceId = "test-instance",
+				Messages = messages
+			};
+
+			_memoryCache.Set($"{sessionId}_with_messages", session);
 		}
 
 		// Act
@@ -346,5 +386,72 @@ public class MessageManagerTests : IDisposable
 				}
 			}
 		}
+	}
+
+	[Fact]
+	public async Task GetSessionAsync_WithSessionContainingMessages_ShouldReturnSessionWithMessages()
+	{
+		// Arrange
+		const string sessionId = "session-with-messages";
+		const string instanceId = "test-instance";
+
+		_commandContextMock.Setup(x => x.InstanceId).Returns(instanceId);
+
+		// Create a session with messages
+		var session = new ChatSession
+		{
+			Id = sessionId,
+			Name = "Session with Messages",
+			CreatedAt = DateTime.UtcNow,
+			LastUpdatedAt = DateTime.UtcNow
+		};
+
+		await _chatSessionRepository.AddAsync(session);
+		await _chatSessionRepository.SaveChangesAsync();
+
+		// Add messages to the session
+		var message1 = new Message
+		{
+			Id = "msg1",
+			Content = "Hello, this is a user message",
+			InstanceId = instanceId,
+			SessionId = sessionId,
+			IsUser = true,
+			CreatedAt = DateTime.UtcNow.AddMinutes(-5),
+			Type = MessageType.Text
+		};
+
+		var message2 = new Message
+		{
+			Id = "msg2",
+			Content = "Hello! This is an assistant response",
+			InstanceId = instanceId,
+			SessionId = sessionId,
+			IsUser = false,
+			CreatedAt = DateTime.UtcNow.AddMinutes(-4),
+			Type = MessageType.Text
+		};
+
+		await _messageRepository.AddAsync(message1);
+		await _messageRepository.AddAsync(message2);
+		await _messageRepository.SaveChangesAsync();
+
+		// Act
+		var result = await _messageManager.GetSessionAsync(sessionId, includeMessages: true);
+
+		// Assert
+		Assert.NotNull(result);
+		Assert.Equal(sessionId, result.SessionId);
+		Assert.NotNull(result.Messages);
+		Assert.Equal(2, result.Messages.Count);
+
+		// Verify messages are ordered by creation time
+		Assert.Equal("msg1", result.Messages[0].MessageId);
+		Assert.Equal("Hello, this is a user message", result.Messages[0].Message.Content.First().Text);
+		Assert.True(result.Messages[0].IsUser);
+
+		Assert.Equal("msg2", result.Messages[1].MessageId);
+		Assert.Equal("Hello! This is an assistant response", result.Messages[1].Message.Content.First().Text);
+		Assert.False(result.Messages[1].IsUser);
 	}
 }

@@ -11,6 +11,7 @@ using Jiro.Core.Services.Geolocation;
 using Jiro.Core.Services.MessageCache;
 using Jiro.Core.Services.Persona;
 using Jiro.Core.Services.Semaphore;
+using Jiro.Core.Services.StaticMessage;
 using Jiro.Core.Services.Weather;
 using Jiro.Infrastructure.Repositories;
 
@@ -56,6 +57,7 @@ public static class Configurator
 		services.AddScoped<IGeolocationService, GeolocationService>();
 		services.AddScoped<IConversationCoreService, ConversationCoreService>();
 		services.AddScoped<IHistoryOptimizerService, HistoryOptimizerService>();
+		services.AddScoped<IStaticMessageService, StaticMessageService>();
 		services.AddScoped<IMessageManager, MessageManager>();
 		services.AddScoped<IPersonaService, PersonaService>();
 		services.AddScoped<IPersonalizedConversationService, PersonalizedConversationService>();

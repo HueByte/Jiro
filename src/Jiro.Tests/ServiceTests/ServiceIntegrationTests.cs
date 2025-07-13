@@ -97,17 +97,17 @@ public class ServiceIntegrationTests
 
 		// Setup message manager
 		_messageManagerMock.Setup(x => x.AddChatExchangeAsync(
-				instanceId,
+				sessionId,
 				It.IsAny<List<Core.Services.Conversation.Models.ChatMessageWithMetadata>>(),
 				It.IsAny<List<Core.Models.Message>>()))
 			.Returns(Task.CompletedTask);
 
 		// Act
-		await _messageManagerMock.Object.AddChatExchangeAsync(instanceId, chatMessages, modelMessages);
+		await _messageManagerMock.Object.AddChatExchangeAsync(sessionId, chatMessages, modelMessages);
 
 		// Assert
 		_messageManagerMock.Verify(x => x.AddChatExchangeAsync(
-			instanceId,
+			sessionId,
 			It.IsAny<List<Core.Services.Conversation.Models.ChatMessageWithMetadata>>(),
 			It.IsAny<List<Core.Models.Message>>()), Times.Once);
 	}
