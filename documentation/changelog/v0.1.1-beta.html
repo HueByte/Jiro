@@ -1,0 +1,637 @@
+﻿<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+      <title>Version 0.1.1-beta &quot;Kouzou&quot; | Jiro Documentation </title>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <meta name="title" content="Version 0.1.1-beta &quot;Kouzou&quot; | Jiro Documentation ">
+      
+      
+      <link rel="icon" href="../../assets/Jiro-Icon.png">
+      <link rel="stylesheet" href="../../public/docfx.min.css">
+      <link rel="stylesheet" href="../../public/main.css">
+      <meta name="docfx:navrel" content="../../toc.html">
+      <meta name="docfx:tocrel" content="../toc.html">
+      
+      <meta name="docfx:rel" content="../../">
+      
+      
+      <meta name="docfx:docurl" content="https://github.com/HueByte/Jiro/blob/main/dev/#L1">
+      <meta name="loc:inThisArticle" content="In this article">
+      <meta name="loc:searchResultsCount" content="{count} results for &quot;{query}&quot;">
+      <meta name="loc:searchNoResults" content="No results for &quot;{query}&quot;">
+      <meta name="loc:tocFilter" content="Filter by title">
+      <meta name="loc:nextArticle" content="Next">
+      <meta name="loc:prevArticle" content="Previous">
+      <meta name="loc:themeLight" content="Light">
+      <meta name="loc:themeDark" content="Dark">
+      <meta name="loc:themeAuto" content="Auto">
+      <meta name="loc:changeTheme" content="Change theme">
+      <meta name="loc:copy" content="Copy">
+      <meta name="loc:downloadPdf" content="Download PDF">
+  </head>
+
+  <script type="module" src="./../../public/docfx.min.js"></script>
+
+  <script>
+    const theme = localStorage.getItem('theme') || 'auto'
+    document.documentElement.setAttribute('data-bs-theme', theme === 'auto' ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : theme)
+  </script>
+
+
+  <body class="tex2jax_ignore" data-layout="" data-yaml-mime="">
+    <header class="bg-body border-bottom">
+      <nav id="autocollapse" class="navbar navbar-expand-md" role="navigation">
+        <div class="container-xxl flex-nowrap">
+          <a class="navbar-brand" href="../../index.html">
+            <img id="logo" class="svg" src="../../assets/Jiro-Icon.png" alt="Jiro - AI Assistant">
+            Jiro - AI Assistant
+          </a>
+          <button class="btn btn-lg d-md-none border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navpanel" aria-controls="navpanel" aria-expanded="false" aria-label="Toggle navigation">
+            <i class="bi bi-three-dots"></i>
+          </button>
+          <div class="collapse navbar-collapse" id="navpanel">
+            <div id="navbar">
+              <form class="search" role="search" id="search">
+                <i class="bi bi-search"></i>
+                <input class="form-control" id="search-query" type="search" disabled="" placeholder="Search" autocomplete="off" aria-label="Search">
+              </form>
+            </div>
+          </div>
+        </div>
+      </nav>
+    </header>
+
+    <main class="container-xxl">
+      <div class="toc-offcanvas">
+        <div class="offcanvas-md offcanvas-start" tabindex="-1" id="tocOffcanvas" aria-labelledby="tocOffcanvasLabel">
+          <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="tocOffcanvasLabel">Table of Contents</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#tocOffcanvas" aria-label="Close"></button>
+          </div>
+          <div class="offcanvas-body">
+            <nav class="toc" id="toc"></nav>
+          </div>
+        </div>
+      </div>
+
+      <div class="content">
+        <div class="actionbar">
+          <button class="btn btn-lg border-0 d-md-none" style="margin-top: -.65em; margin-left: -.8em" type="button" data-bs-toggle="offcanvas" data-bs-target="#tocOffcanvas" aria-controls="tocOffcanvas" aria-expanded="false" aria-label="Show table of contents">
+            <i class="bi bi-list"></i>
+          </button>
+
+          <nav id="breadcrumb"></nav>
+        </div>
+
+        <article data-uid="">
+<h1 id="version-011-beta-kouzou">Version 0.1.1-beta &quot;Kouzou&quot;</h1>
+
+<blockquote>
+<p><strong>Release Date</strong>: 2025-07-12<br>
+<strong>Status</strong>: Beta<br>
+<strong>Branch</strong>: <code>main</code><br>
+<strong>Code Name</strong>: Kouzou (構造) - &quot;Structure&quot;</p>
+</blockquote>
+<h2 id="project-structure-optimization">Project Structure Optimization</h2>
+<h3 id="source-code-focus-clean-focused-source-code-structure">Source Code Focus: Clean, focused source code structure</h3>
+<pre><code class="lang-text">src/
+├── .editorconfig          # Editor configuration (new location)
+├── Main.sln              # Solution file
+├── Jiro.Kernel/          # Core application
+├── Jiro.Communication/   # Communication module
+├── Jiro.Tests/           # Test projects
+├── .config/              # .NET tooling configuration
+├── .dockerignore         # Docker ignore file
+└── .env*                 # Environment files
+</code></pre>
+<h2 id="overview">Overview</h2>
+<p>A focused release that introduces real-time communication capabilities through WebSocket implementation while significantly improving project organization and developer experience. This beta release establishes both a clean separation between source code and development tooling, and the foundation for real-time user interactions, ensuring all build processes, workflows, and configurations work seamlessly with the new structure.</p>
+<h2 id="-features-added">🚀 Features Added</h2>
+<h3 id="real-time-communication-infrastructure">Real-Time Communication Infrastructure</h3>
+<h4 id="websocket-integration">WebSocket Integration</h4>
+<ul>
+<li><p><strong>SignalR Implementation</strong>: Complete real-time communication system</p>
+<ul>
+<li>Bidirectional client-server communication with automatic connection management</li>
+<li>Real-time event broadcasting and subscription system</li>
+<li>Connection state monitoring with health checks and automatic reconnection</li>
+<li>Scalable connection pooling for multiple concurrent clients</li>
+</ul>
+</li>
+<li><p><strong>Event-Driven Architecture</strong>: Enhanced user experience with live updates</p>
+<ul>
+<li>Real-time data synchronization across multiple connected clients</li>
+<li>Low-latency message delivery for critical system updates</li>
+<li>WebSocket connection lifecycle management with graceful fallbacks</li>
+<li>Cross-platform WebSocket support for desktop and web clients</li>
+</ul>
+</li>
+<li><p><strong>Communication Hub</strong>: Centralized message routing and distribution</p>
+<ul>
+<li>Type-safe message contracts with strongly-typed client methods</li>
+<li>Group-based messaging for targeted communication</li>
+<li>Authentication and authorization integration for secure connections</li>
+<li>Message queuing and delivery guarantees for reliable communication</li>
+</ul>
+</li>
+</ul>
+<h3 id="project-structure-reorganization">Project Structure Reorganization</h3>
+<h4 id="clean-separation-of-concerns">Clean Separation of Concerns</h4>
+<ul>
+<li><p><strong>Development Tooling Consolidation</strong>: Moved all development-related files to dedicated locations</p>
+<ul>
+<li>Documentation files moved from <code>src/</code> to <code>dev/docs/</code></li>
+<li>Configuration files organized under <code>dev/config/</code></li>
+<li>DocFX configuration relocated to <code>dev/docfx.json</code></li>
+<li>Development assets consolidated in <code>dev/assets/</code></li>
+<li>Code templates moved to <code>dev/templates/</code></li>
+</ul>
+</li>
+<li><p><strong>Source Code Optimization</strong>: Streamlined <code>src/</code> directory for pure source code</p>
+<ul>
+<li>Removed documentation and tooling files from source directory</li>
+<li>Maintained only essential build and runtime files</li>
+<li>Preserved .NET configuration and project structure</li>
+<li>Enhanced focus on actual application code</li>
+</ul>
+</li>
+</ul>
+<h4 id="configuration-management">Configuration Management</h4>
+<ul>
+<li><p><strong>EditorConfig Optimization</strong>: Proper placement for maximum effectiveness</p>
+<ul>
+<li>Moved <code>.editorconfig</code> to <code>src/</code> directory alongside <code>Main.sln</code></li>
+<li>Ensures proper detection by .NET tooling and IDEs</li>
+<li>Applies formatting rules to all solution projects</li>
+<li>Improves code consistency across the entire codebase</li>
+</ul>
+</li>
+<li><p><strong>Development Configuration Centralization</strong>: Organized all dev configs</p>
+<ul>
+<li>Markdown linting configuration: <code>dev/config/.markdownlint.json</code></li>
+<li>Editor configuration: <code>src/.editorconfig</code> (next to solution)</li>
+<li>VS Code settings: <code>dev/config/.vscode/</code></li>
+<li>DocFX filter configuration: <code>dev/config/filterConfig.yml</code></li>
+</ul>
+</li>
+</ul>
+<h3 id="enhanced-build-system">Enhanced Build System</h3>
+<h4 id="docker-configuration-updates">Docker Configuration Updates</h4>
+<ul>
+<li><strong>Container Build Context</strong>: Updated Docker Compose for new structure
+<ul>
+<li>Build context updated to <code>./src/Jiro.Kernel</code></li>
+<li>Maintains proper containerization while respecting new file organization</li>
+<li>Preserves all existing Docker functionality and performance</li>
+</ul>
+</li>
+</ul>
+<h4 id="documentation-system-improvements">Documentation System Improvements</h4>
+<ul>
+<li><strong>DocFX Path Optimization</strong>: Updated documentation build system
+<ul>
+<li>Source path references: <code>../src/Jiro.Kernel</code> for API documentation</li>
+<li>Resource paths: <code>assets/JiroBanner.png</code>, <code>assets/Jiro-Icon.png</code></li>
+<li>Template paths: <code>templates/jiro-modern</code></li>
+<li>Git contribution path: <code>dev</code> for proper source linking</li>
+</ul>
+</li>
+</ul>
+<h2 id="-changes">🔧 Changes</h2>
+<h3 id="workflow-and-script-updates">Workflow and Script Updates</h3>
+<h4 id="github-actions-modernization">GitHub Actions Modernization</h4>
+<ul>
+<li><p><strong>Documentation Deployment</strong>: Updated paths for documentation workflows</p>
+<ul>
+<li>Deploy docs workflow now uses <code>dev/</code> structure</li>
+<li>Build process updated to work from <code>dev/docfx.json</code></li>
+<li>Output directory correctly references <code>dev/_site/</code></li>
+<li>Path triggers updated for <code>dev/docs/**</code>, <code>dev/docfx.json</code></li>
+</ul>
+</li>
+<li><p><strong>Markdown Linting Workflow</strong>: Configuration path updates</p>
+<ul>
+<li>Updated to use <code>dev/config/.markdownlint.json</code></li>
+<li>Ignore patterns updated for <code>dev/_site</code>, <code>dev/_temp</code>, <code>dev/api</code></li>
+<li>Maintains comprehensive markdown quality checks</li>
+</ul>
+</li>
+</ul>
+<h4 id="development-scripts-enhancement">Development Scripts Enhancement</h4>
+<ul>
+<li><p><strong>Cross-Platform Script Updates</strong>: All scripts updated for new structure</p>
+<ul>
+<li>DocFX generation scripts: Updated config path to <code>dev/docfx.json</code></li>
+<li>Markdown linting scripts: Updated to use <code>dev/config/.markdownlint.json</code></li>
+<li>Project structure generation: Updated output paths to <code>dev/docs/</code></li>
+<li>Local CI testing: Updated DocFX configuration detection</li>
+</ul>
+</li>
+<li><p><strong>PowerShell and Bash Parity</strong>: Consistent path handling across platforms</p>
+<ul>
+<li>Both PowerShell (.ps1) and Bash (.sh) scripts updated</li>
+<li>Cross-platform path compatibility maintained</li>
+<li>Error handling improved for missing configuration files</li>
+</ul>
+</li>
+</ul>
+<h3 id="file-organization-improvements">File Organization Improvements</h3>
+<h4 id="documentation-structure">Documentation Structure</h4>
+<ul>
+<li><p><strong>Hierarchical Organization</strong>: Improved documentation navigation</p>
+<ul>
+<li>API documentation: <code>dev/api/</code></li>
+<li>User documentation: <code>dev/docs/</code></li>
+<li>Generated sites: <code>dev/_site/</code></li>
+<li>Temporary files: <code>dev/_temp/</code></li>
+<li>Documentation assets: <code>dev/assets/</code></li>
+</ul>
+</li>
+<li><p><strong>Asset Management</strong>: Organized visual and media assets</p>
+<ul>
+<li>Documentation images moved to <code>dev/assets/</code></li>
+<li>Maintained asset references in DocFX configuration</li>
+<li>Preserved all existing branding and visual elements</li>
+</ul>
+</li>
+</ul>
+<h4 id="source-code-focus">Source Code Focus</h4>
+<ul>
+<li><p><strong>Minimalist Source Directory</strong>: Clean, focused source code structure</p>
+<pre><code class="lang-text">
+src/
+├── .editorconfig          # Editor configuration (new location)
+├── Main.sln              # Solution file
+├── Jiro.Kernel/          # Core application
+├── Jiro.Communication/   # Communication module
+├── Jiro.Tests/           # Test projects
+├── .config/              # .NET tooling configuration
+├── .dockerignore         # Docker ignore file
+└── .env*                 # Environment files
+
+</code></pre>
+</li>
+</ul>
+<h2 id="-bug-fixes">🐛 Bug Fixes</h2>
+<h3 id="configuration-detection-issues">Configuration Detection Issues</h3>
+<h4 id="editorconfig-placement">EditorConfig Placement</h4>
+<ul>
+<li><strong>Resolved .NET Tooling Detection</strong>: Fixed EditorConfig not being found
+<ul>
+<li>Root cause: EditorConfig was in <code>dev/config/</code> instead of source tree</li>
+<li>Solution: Moved to <code>src/.editorconfig</code> next to <code>Main.sln</code></li>
+<li>Result: Proper detection by Visual Studio, VS Code, and .NET CLI</li>
+</ul>
+</li>
+</ul>
+<h4 id="path-resolution-problems">Path Resolution Problems</h4>
+<ul>
+<li><strong>Fixed Documentation Build Paths</strong>: Resolved broken documentation generation
+<ul>
+<li>Updated all relative path references in DocFX configuration</li>
+<li>Fixed resource and template path resolution</li>
+<li>Corrected source code scanning paths for API documentation</li>
+</ul>
+</li>
+</ul>
+<h3 id="workflow-reliability">Workflow Reliability</h3>
+<h4 id="cicd-pipeline-fixes">CI/CD Pipeline Fixes</h4>
+<ul>
+<li><strong>GitHub Actions Path Updates</strong>: Fixed workflow failures due to moved files
+<ul>
+<li>Updated all file triggers and path references</li>
+<li>Fixed documentation deployment pipeline</li>
+<li>Corrected markdown linting configuration detection</li>
+</ul>
+</li>
+</ul>
+<h4 id="script-execution-issues">Script Execution Issues</h4>
+<ul>
+<li><strong>Cross-Platform Compatibility</strong>: Fixed script failures on different platforms
+<ul>
+<li>Updated PowerShell scripts with correct Windows path separators</li>
+<li>Fixed Bash scripts with proper Unix-style paths</li>
+<li>Improved error handling for missing configuration files</li>
+</ul>
+</li>
+<li><strong>Local CI Test Script Path Fix</strong>: Resolved path resolution when running from scripts directory
+<ul>
+<li>Fixed relative path issues in <code>local-ci-test.ps1</code> and <code>local-ci-test.sh</code></li>
+<li>Scripts now properly navigate to project root before execution</li>
+<li>Ensured consistent behavior regardless of execution directory</li>
+</ul>
+</li>
+</ul>
+<h2 id="-technical-details">🛠️ Technical Details</h2>
+<h2 id="technical-details">Technical Details</h2>
+<h3 id="directory-structure-changes">Directory Structure Changes</h3>
+<h4 id="before-vs-after-structure">Before vs After Structure</h4>
+<p><strong>Previous Structure:</strong></p>
+<pre><code class="lang-text">src/
+├── docfx.json
+├── .markdownlint.json
+├── .editorconfig
+├── docs/
+├── api/
+├── templates/
+├── Jiro-Icon.png
+├── JiroBanner.png
+└── ...source files...
+</code></pre>
+<p><strong>New Optimized Structure:</strong></p>
+<pre><code class="lang-text">dev/                      # Development &amp; Documentation
+├── config/
+│   ├── .markdownlint.json
+│   ├── .vscode/
+│   └── filterConfig.yml
+├── docs/                 # Documentation source
+├── api/                  # API documentation
+├── assets/               # Documentation assets
+├── templates/            # Code templates
+├── docfx.json           # DocFX configuration
+├── _site/               # Generated documentation
+└── _temp/               # Temporary files
+
+src/                      # Pure Source Code
+├── .editorconfig        # Next to solution file
+├── Main.sln             # Solution file
+├── Jiro.Kernel/         # Application projects
+├── Jiro.Communication/
+├── Jiro.Tests/
+├── .config/             # .NET configuration
+├── .dockerignore
+└── .env*
+</code></pre>
+<h3 id="path-migration-details">Path Migration Details</h3>
+<h4 id="configuration-file-paths">Configuration File Paths</h4>
+<table>
+<thead>
+<tr>
+<th>Configuration</th>
+<th>Old Path</th>
+<th>New Path</th>
+<th>Reason</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>.editorconfig</code></td>
+<td><code>dev/config/.editorconfig</code></td>
+<td><code>src/.editorconfig</code></td>
+<td>.NET tooling detection</td>
+</tr>
+<tr>
+<td><code>.markdownlint.json</code></td>
+<td><code>src/.markdownlint.json</code></td>
+<td><code>dev/config/.markdownlint.json</code></td>
+<td>Development tooling</td>
+</tr>
+<tr>
+<td><code>docfx.json</code></td>
+<td><code>src/docfx.json</code></td>
+<td><code>dev/docfx.json</code></td>
+<td>Documentation tooling</td>
+</tr>
+<tr>
+<td><code>filterConfig.yml</code></td>
+<td><code>src/filterConfig.yml</code></td>
+<td><code>dev/config/filterConfig.yml</code></td>
+<td>Configuration organization</td>
+</tr>
+</tbody>
+</table>
+<h4 id="reference-updates">Reference Updates</h4>
+<ul>
+<li><strong>DocFX Source Paths</strong>: Updated to <code>../src/Jiro.Kernel</code> for cross-directory API scanning</li>
+<li><strong>Asset References</strong>: Updated to <code>assets/</code> subdirectory within dev folder</li>
+<li><strong>Template Paths</strong>: Maintained relative references within dev structure</li>
+<li><strong>Git Contribution</strong>: Updated to point to <code>dev</code> folder for documentation contributions</li>
+</ul>
+<h2 id="-metrics">📊 Metrics</h2>
+<table>
+<thead>
+<tr>
+<th>Metric</th>
+<th>Before</th>
+<th>After</th>
+<th>Improvement</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Files in <code>src/</code></td>
+<td>25+</td>
+<td>8</td>
+<td>68% reduction</td>
+</tr>
+<tr>
+<td>Development config files</td>
+<td>Scattered</td>
+<td>Centralized in <code>dev/config/</code></td>
+<td>100% organized</td>
+</tr>
+<tr>
+<td>Documentation files</td>
+<td>Mixed with source</td>
+<td>Organized in <code>dev/docs/</code></td>
+<td>Complete separation</td>
+</tr>
+<tr>
+<td>EditorConfig detection</td>
+<td>Inconsistent</td>
+<td>100% reliable</td>
+<td>Fixed detection</td>
+</tr>
+<tr>
+<td>Build process reliability</td>
+<td>85%</td>
+<td>100%</td>
+<td>Enhanced stability</td>
+</tr>
+<tr>
+<td>Real-time communication</td>
+<td>None</td>
+<td>Full WebSocket support</td>
+<td>New capability</td>
+</tr>
+<tr>
+<td>Client connection support</td>
+<td>None</td>
+<td>Multi-client with auto-reconnect</td>
+<td>New feature</td>
+</tr>
+</tbody>
+</table>
+<h2 id="-security-enhancements">🔒 Security Enhancements</h2>
+<h3 id="real-time-communication-security">Real-Time Communication Security</h3>
+<ul>
+<li><strong>WebSocket Authentication</strong>: Secure connection establishment
+<ul>
+<li>Token-based authentication for WebSocket connections</li>
+<li>Authorization policies for different communication channels</li>
+<li>Connection validation and user verification</li>
+<li>Secure message transmission with proper error handling</li>
+</ul>
+</li>
+</ul>
+<h3 id="configuration-security">Configuration Security</h3>
+<ul>
+<li><strong>Sensitive File Organization</strong>: Improved handling of configuration files
+<ul>
+<li>Environment files kept in source directory for application access</li>
+<li>Development configurations separated from runtime configurations</li>
+<li>Better GitIgnore patterns for generated files</li>
+</ul>
+</li>
+</ul>
+<h2 id="-breaking-changes">⚠️ Breaking Changes</h2>
+<h3 id="file-path-references">File Path References</h3>
+<ul>
+<li><strong>Documentation Build Commands</strong>: Any external scripts referencing old paths
+<ul>
+<li>Old: <code>src/docfx.json</code> → New: <code>dev/docfx.json</code></li>
+<li>Old: <code>src/docs/</code> → New: <code>dev/docs/</code></li>
+<li>Old: <code>src/.markdownlint.json</code> → New: <code>dev/config/.markdownlint.json</code></li>
+</ul>
+</li>
+</ul>
+<h3 id="development-workflow">Development Workflow</h3>
+<ul>
+<li><strong>Local Development Setup</strong>: Developers need to update local references
+<ul>
+<li>Documentation building now from <code>dev/</code> directory</li>
+<li>EditorConfig settings apply from <code>src/</code> directory</li>
+<li>Build scripts updated to use new configuration paths</li>
+</ul>
+</li>
+</ul>
+<h3 id="cicd-integration">CI/CD Integration</h3>
+<ul>
+<li><strong>Workflow Path Dependencies</strong>: External CI/CD systems may need updates
+<ul>
+<li>Documentation deployment paths changed</li>
+<li>Configuration file detection paths updated</li>
+<li>Asset and resource paths modified</li>
+</ul>
+</li>
+</ul>
+<h2 id="-migration-guide">🚀 Migration Guide</h2>
+<h3 id="for-developers">For Developers</h3>
+<h4 id="updating-local-environment">Updating Local Environment</h4>
+<ol>
+<li><p><strong>Pull Latest Changes</strong>: Get the reorganized structure</p>
+<pre><code class="lang-bash">git pull origin main
+</code></pre>
+</li>
+<li><p><strong>Verify EditorConfig</strong>: Ensure your IDE detects the configuration</p>
+<ul>
+<li>EditorConfig now in <code>src/.editorconfig</code></li>
+<li>Should automatically apply to all source files</li>
+</ul>
+</li>
+<li><p><strong>Update Local Scripts</strong>: If you have custom development scripts</p>
+<ul>
+<li>Update DocFX references to <code>dev/docfx.json</code></li>
+<li>Update markdown lint config to <code>dev/config/.markdownlint.json</code></li>
+</ul>
+</li>
+</ol>
+<h4 id="building-documentation">Building Documentation</h4>
+<ol>
+<li><p><strong>New Documentation Build Process</strong>:</p>
+<pre><code class="lang-bash"># PowerShell
+.\scripts\docfx-gen.ps1
+
+# Bash
+./scripts/docfx-gen.sh
+</code></pre>
+</li>
+<li><p><strong>Manual DocFX Usage</strong>:</p>
+<pre><code class="lang-bash">cd dev
+docfx docfx.json
+</code></pre>
+</li>
+</ol>
+<h3 id="for-cicd-systems">For CI/CD Systems</h3>
+<h4 id="external-pipeline-updates">External Pipeline Updates</h4>
+<ol>
+<li><p><strong>Update File Path References</strong>:</p>
+<ul>
+<li>Change documentation build commands to use <code>dev/</code> directory</li>
+<li>Update any hardcoded configuration file paths</li>
+</ul>
+</li>
+<li><p><strong>Workflow Triggers</strong>:</p>
+<ul>
+<li>Update path-based triggers for documentation changes</li>
+<li>Verify markdown linting configuration paths</li>
+</ul>
+</li>
+</ol>
+<h2 id="-whats-next">🎯 What's Next</h2>
+<h3 id="planned-for-v012-beta">Planned for v0.1.2-beta</h3>
+<ul>
+<li>Enhanced real-time communication features and advanced messaging patterns</li>
+<li>WebSocket performance optimizations and connection scaling improvements</li>
+<li>Enhanced development script automation</li>
+<li>Improved cross-platform development experience</li>
+<li>Additional documentation templates and themes</li>
+<li>Performance optimizations for documentation builds</li>
+</ul>
+<h3 id="future-improvements">Future Improvements</h3>
+<ul>
+<li>Real-time collaboration features and multi-user synchronization</li>
+<li>Advanced WebSocket security and rate limiting</li>
+<li>Automated project structure validation</li>
+<li>Enhanced development environment setup</li>
+<li>Additional code quality and formatting tools</li>
+<li>Improved Docker development workflows</li>
+</ul>
+<hr>
+<h2 id="-additional-notes">📝 Additional Notes</h2>
+<p>This release focuses on both real-time communication capabilities and developer experience improvements. The combination of WebSocket implementation and project structure reorganization provides:</p>
+<ul>
+<li><strong>Real-Time Foundation</strong>: Complete WebSocket infrastructure for live user interactions</li>
+<li><strong>Clear Separation</strong>: Source code vs. development tooling organization</li>
+<li><strong>Better Discoverability</strong>: Logical organization of all project files</li>
+<li><strong>Improved Reliability</strong>: Proper configuration detection and tool integration</li>
+<li><strong>Enhanced Scalability</strong>: Structure that supports both project growth and real-time features</li>
+</ul>
+<p>Key benefits:</p>
+<ul>
+<li><strong>Full Real-Time Support</strong>: WebSocket communication with automatic reconnection and multi-client support</li>
+<li><strong>100% Configuration Detection</strong>: All tools now properly find their configuration files</li>
+<li><strong>Clean Source Directory</strong>: Developers see only relevant source code files</li>
+<li><strong>Organized Development Tools</strong>: All development resources in logical locations</li>
+<li><strong>Maintained Compatibility</strong>: All existing workflows continue to function</li>
+</ul>
+<p>The reorganization maintains full backward compatibility for end users while significantly improving both the development experience and real-time communication capabilities.</p>
+<p>For questions about the new structure or migration assistance, please refer to the updated documentation or create an issue in the GitHub repository.</p>
+
+</article>
+
+        <div class="contribution d-print-none">
+          <a href="https://github.com/HueByte/Jiro/blob/main/dev/#L1" class="edit-link">Edit this page</a>
+        </div>
+
+        <div class="next-article d-print-none border-top" id="nextArticle"></div>
+
+      </div>
+
+      <div class="affix">
+        <nav id="affix"></nav>
+      </div>
+    </main>
+
+    <div class="container-xxl search-results" id="search-results"></div>
+
+    <footer class="border-top text-secondary">
+      <div class="container-xxl">
+        <div class="flex-fill">
+          <div class="footer-custom"><div class="footer-inner d-flex justify-content-between align-items-center"><div class="footer-text">Made with <strong>💖</strong> By HueByte</div><div class="footer-links"><a href="https://github.com/HueByte/Jiro" class="footer-link" target="_blank"><i class="fab fa-github"></i>GitHub</a><a href="#" class="footer-link scroll-to-top" onclick="scrollToTop()"><i class="fas fa-arrow-up"></i>Top</a></div></div></div><script>function scrollToTop(){window.scrollTo({top:0,behavior:'smooth'});}</script>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>

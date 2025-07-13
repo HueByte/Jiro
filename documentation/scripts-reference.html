@@ -1,0 +1,338 @@
+﻿<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+      <title>Scripts Reference | Jiro Documentation </title>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <meta name="title" content="Scripts Reference | Jiro Documentation ">
+      
+      
+      <link rel="icon" href="../assets/Jiro-Icon.png">
+      <link rel="stylesheet" href="../public/docfx.min.css">
+      <link rel="stylesheet" href="../public/main.css">
+      <meta name="docfx:navrel" content="../toc.html">
+      <meta name="docfx:tocrel" content="toc.html">
+      
+      <meta name="docfx:rel" content="../">
+      
+      
+      <meta name="docfx:docurl" content="https://github.com/HueByte/Jiro/blob/main/dev/#L1">
+      <meta name="loc:inThisArticle" content="In this article">
+      <meta name="loc:searchResultsCount" content="{count} results for &quot;{query}&quot;">
+      <meta name="loc:searchNoResults" content="No results for &quot;{query}&quot;">
+      <meta name="loc:tocFilter" content="Filter by title">
+      <meta name="loc:nextArticle" content="Next">
+      <meta name="loc:prevArticle" content="Previous">
+      <meta name="loc:themeLight" content="Light">
+      <meta name="loc:themeDark" content="Dark">
+      <meta name="loc:themeAuto" content="Auto">
+      <meta name="loc:changeTheme" content="Change theme">
+      <meta name="loc:copy" content="Copy">
+      <meta name="loc:downloadPdf" content="Download PDF">
+  </head>
+
+  <script type="module" src="./../public/docfx.min.js"></script>
+
+  <script>
+    const theme = localStorage.getItem('theme') || 'auto'
+    document.documentElement.setAttribute('data-bs-theme', theme === 'auto' ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : theme)
+  </script>
+
+
+  <body class="tex2jax_ignore" data-layout="" data-yaml-mime="">
+    <header class="bg-body border-bottom">
+      <nav id="autocollapse" class="navbar navbar-expand-md" role="navigation">
+        <div class="container-xxl flex-nowrap">
+          <a class="navbar-brand" href="../index.html">
+            <img id="logo" class="svg" src="../assets/Jiro-Icon.png" alt="Jiro - AI Assistant">
+            Jiro - AI Assistant
+          </a>
+          <button class="btn btn-lg d-md-none border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navpanel" aria-controls="navpanel" aria-expanded="false" aria-label="Toggle navigation">
+            <i class="bi bi-three-dots"></i>
+          </button>
+          <div class="collapse navbar-collapse" id="navpanel">
+            <div id="navbar">
+              <form class="search" role="search" id="search">
+                <i class="bi bi-search"></i>
+                <input class="form-control" id="search-query" type="search" disabled="" placeholder="Search" autocomplete="off" aria-label="Search">
+              </form>
+            </div>
+          </div>
+        </div>
+      </nav>
+    </header>
+
+    <main class="container-xxl">
+      <div class="toc-offcanvas">
+        <div class="offcanvas-md offcanvas-start" tabindex="-1" id="tocOffcanvas" aria-labelledby="tocOffcanvasLabel">
+          <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="tocOffcanvasLabel">Table of Contents</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#tocOffcanvas" aria-label="Close"></button>
+          </div>
+          <div class="offcanvas-body">
+            <nav class="toc" id="toc"></nav>
+          </div>
+        </div>
+      </div>
+
+      <div class="content">
+        <div class="actionbar">
+          <button class="btn btn-lg border-0 d-md-none" style="margin-top: -.65em; margin-left: -.8em" type="button" data-bs-toggle="offcanvas" data-bs-target="#tocOffcanvas" aria-controls="tocOffcanvas" aria-expanded="false" aria-label="Show table of contents">
+            <i class="bi bi-list"></i>
+          </button>
+
+          <nav id="breadcrumb"></nav>
+        </div>
+
+        <article data-uid="">
+<h1 id="scripts-reference">Scripts Reference</h1>
+
+<p>This document provides an overview of all development and automation scripts available in the Jiro AI Assistant project.</p>
+<h2 id="overview">Overview</h2>
+<p>The <code>scripts/</code> directory contains various PowerShell (<code>.ps1</code>) and Bash (<code>.sh</code>) scripts for development workflow automation, documentation generation, testing, and release management. All scripts are cross-platform compatible.</p>
+<h2 id="development-environment-scripts">Development Environment Scripts</h2>
+<h3 id="setup-devps1--setup-devsh">setup-dev.ps1 / setup-dev.sh</h3>
+<p><strong>Purpose</strong>: Automated development environment setup for new contributors</p>
+<p><strong>What it does</strong>:</p>
+<ul>
+<li>Checks for required development tools (.NET SDK, Git, Node.js, Docker, PowerShell Core)</li>
+<li>Installs global .NET tools (DocFX) and Node.js tools (markdownlint-cli)</li>
+<li>Copies configuration files from examples (<code>.env</code>, <code>appsettings.json</code>)</li>
+<li>Restores .NET project dependencies</li>
+<li>Generates a <code>DEV-SETUP.md</code> guide with manual configuration steps</li>
+</ul>
+<p><strong>Usage</strong>:</p>
+<pre><code class="lang-powershell"># PowerShell
+.\scripts\setup-dev.ps1
+
+# With options
+.\scripts\setup-dev.ps1 -Force -SkipToolCheck
+</code></pre>
+<pre><code class="lang-bash"># Bash
+./scripts/setup-dev.sh
+
+# With options
+./scripts/setup-dev.sh --force --skip-tool-check
+</code></pre>
+<p><strong>Parameters</strong>:</p>
+<ul>
+<li><code>-SkipToolCheck</code> / <code>--skip-tool-check</code>: Skip checking for required development tools</li>
+<li><code>-SkipDependencies</code> / <code>--skip-dependencies</code>: Skip installing project dependencies</li>
+<li><code>-Force</code> / <code>--force</code>: Overwrite existing configuration files</li>
+<li><code>-Verbose</code> / <code>--verbose</code>: Show detailed output during setup</li>
+</ul>
+<h2 id="documentation-scripts">Documentation Scripts</h2>
+<h3 id="docfx-genps1--docfx-gensh">docfx-gen.ps1 / docfx-gen.sh</h3>
+<p><strong>Purpose</strong>: Generate API documentation using DocFX</p>
+<p><strong>What it does</strong>:</p>
+<ul>
+<li>Builds the DocFX documentation site from <code>dev/docfx.json</code></li>
+<li>Outputs generated documentation to <code>src/_site/</code></li>
+<li>Supports both build-only and build-and-serve modes</li>
+</ul>
+<p><strong>Usage</strong>:</p>
+<pre><code class="lang-powershell"># PowerShell
+.\scripts\docfx-gen.ps1           # Build only
+.\scripts\docfx-gen.ps1 -Serve    # Build and serve locally
+</code></pre>
+<pre><code class="lang-bash"># Bash
+./scripts/docfx-gen.sh           # Build only
+./scripts/docfx-gen.sh --serve   # Build and serve locally
+</code></pre>
+<p><strong>Parameters</strong>:</p>
+<ul>
+<li><code>-Serve</code> / <code>--serve</code>: Start a local web server after building documentation</li>
+</ul>
+<h3 id="markdown-lintps1--markdown-lintsh">markdown-lint.ps1 / markdown-lint.sh</h3>
+<p><strong>Purpose</strong>: Lint markdown files for consistency and quality</p>
+<p><strong>What it does</strong>:</p>
+<ul>
+<li>Runs markdownlint-cli on all markdown files in the project</li>
+<li>Uses configuration from <code>src/.markdownlint.json</code></li>
+<li>Ignores generated files and build directories</li>
+<li>Supports fix mode for automatic corrections</li>
+</ul>
+<p><strong>Usage</strong>:</p>
+<pre><code class="lang-powershell"># PowerShell
+.\scripts\markdown-lint.ps1        # Check only
+.\scripts\markdown-lint.ps1 -Fix   # Check and fix issues
+</code></pre>
+<pre><code class="lang-bash"># Bash
+./scripts/markdown-lint.sh        # Check only
+./scripts/markdown-lint.sh --fix  # Check and fix issues
+</code></pre>
+<p><strong>Parameters</strong>:</p>
+<ul>
+<li><code>-Fix</code> / <code>--fix</code>: Automatically fix markdown issues where possible</li>
+</ul>
+<h3 id="generate-project-structureps1--generate-project-structuresh">generate-project-structure.ps1 / generate-project-structure.sh</h3>
+<p><strong>Purpose</strong>: Generate and update project structure documentation</p>
+<p><strong>What it does</strong>:</p>
+<ul>
+<li>Uses <code>eza</code> (modern <code>ls</code> replacement) to generate a tree view of the project</li>
+<li>Auto-installs <code>eza</code> if not present (via cargo or winget)</li>
+<li>Outputs structure to <code>docs/project-structure.md</code></li>
+<li>Filters out common ignore patterns (node_modules, .git, build artifacts)</li>
+</ul>
+<p><strong>Usage</strong>:</p>
+<pre><code class="lang-powershell"># PowerShell
+.\scripts\generate-project-structure.ps1
+</code></pre>
+<pre><code class="lang-bash"># Bash
+./scripts/generate-project-structure.sh
+</code></pre>
+<h2 id="testing-and-ci-scripts">Testing and CI Scripts</h2>
+<h3 id="local-ci-testps1--local-ci-testsh">local-ci-test.ps1 / local-ci-test.sh</h3>
+<p><strong>Purpose</strong>: Run the complete CI/CD pipeline locally for testing</p>
+<p><strong>What it does</strong>:</p>
+<ul>
+<li>Builds the .NET solution</li>
+<li>Runs all unit tests</li>
+<li>Generates documentation</li>
+<li>Lints markdown files</li>
+<li>Validates project structure</li>
+<li>Provides comprehensive error reporting</li>
+</ul>
+<p><strong>Usage</strong>:</p>
+<pre><code class="lang-powershell"># PowerShell
+.\scripts\local-ci-test.ps1                    # Run all tests
+.\scripts\local-ci-test.ps1 -SkipBuild         # Skip build step
+.\scripts\local-ci-test.ps1 -SkipTests         # Skip unit tests
+.\scripts\local-ci-test.ps1 -SkipDocs          # Skip documentation tests
+</code></pre>
+<pre><code class="lang-bash"># Bash
+./scripts/local-ci-test.sh                    # Run all tests
+./scripts/local-ci-test.sh --skip-build       # Skip build step
+./scripts/local-ci-test.sh --skip-tests       # Skip unit tests
+./scripts/local-ci-test.sh --skip-docs        # Skip documentation tests
+</code></pre>
+<p><strong>Parameters</strong>:</p>
+<ul>
+<li><code>-SkipBuild</code> / <code>--skip-build</code>: Skip the build step</li>
+<li><code>-SkipTests</code> / <code>--skip-tests</code>: Skip running unit tests</li>
+<li><code>-SkipDocs</code> / <code>--skip-docs</code>: Skip documentation generation and linting</li>
+<li><code>-Verbose</code> / <code>--verbose</code>: Show detailed output</li>
+</ul>
+<h2 id="release-management-scripts">Release Management Scripts</h2>
+<h3 id="create-releaseps1--create-releasesh">create-release.ps1 / create-release.sh</h3>
+<p><strong>Purpose</strong>: Automate the release process</p>
+<p><strong>What it does</strong>:</p>
+<ul>
+<li>Validates the current state of the repository</li>
+<li>Updates version numbers in project files</li>
+<li>Creates git tags for releases</li>
+<li>Generates release notes</li>
+<li>Prepares release artifacts</li>
+</ul>
+<p><strong>Usage</strong>:</p>
+<pre><code class="lang-powershell"># PowerShell
+.\scripts\create-release.ps1 -Version &quot;1.2.3&quot;
+</code></pre>
+<pre><code class="lang-bash"># Bash
+./scripts/create-release.sh --version &quot;1.2.3&quot;
+</code></pre>
+<h2 id="script-dependencies">Script Dependencies</h2>
+<h3 id="required-tools">Required Tools</h3>
+<ul>
+<li><strong>.NET SDK</strong>: Required for building and running .NET projects</li>
+<li><strong>Git</strong>: Required for version control operations</li>
+<li><strong>PowerShell Core</strong> (recommended): For cross-platform PowerShell script execution</li>
+</ul>
+<h3 id="optional-tools">Optional Tools</h3>
+<ul>
+<li><strong>Node.js</strong>: Required for markdown linting (markdownlint-cli)</li>
+<li><strong>Docker</strong>: Required for containerized development and testing</li>
+<li><strong>Cargo</strong> (Rust): For installing <code>eza</code> on systems without package managers</li>
+</ul>
+<h3 id="auto-installed-tools">Auto-Installed Tools</h3>
+<p>The following tools are automatically installed by the scripts when needed:</p>
+<ul>
+<li><strong>DocFX</strong>: .NET documentation generation tool</li>
+<li><strong>markdownlint-cli</strong>: Markdown linting tool (if Node.js is available)</li>
+<li><strong>eza</strong>: Modern directory listing tool</li>
+</ul>
+<h2 id="cross-platform-compatibility">Cross-Platform Compatibility</h2>
+<p>All scripts are designed to work across platforms:</p>
+<ul>
+<li><strong>Windows</strong>: Use PowerShell scripts (<code>.ps1</code>) with PowerShell Core or Windows PowerShell</li>
+<li><strong>Linux/macOS</strong>: Use Bash scripts (<code>.sh</code>) or PowerShell scripts with PowerShell Core</li>
+<li><strong>Path handling</strong>: Scripts automatically detect and use appropriate path separators</li>
+<li><strong>Tool installation</strong>: Scripts use platform-appropriate package managers (winget, cargo, apt, brew, etc.)</li>
+</ul>
+<h2 id="configuration-files">Configuration Files</h2>
+<p>Scripts use and create the following configuration files:</p>
+<ul>
+<li><code>src/.env</code>: Environment variables (copied from <code>src/.env.example</code>)</li>
+<li><code>src/Jiro.Kernel/Jiro.App/appsettings.json</code>: Application settings (copied from example)</li>
+<li><code>src/.markdownlint.json</code>: Markdown linting configuration</li>
+<li><code>dev/docfx.json</code>: DocFX documentation configuration</li>
+<li><code>DEV-SETUP.md</code>: Generated development setup guide (ignored by git)</li>
+</ul>
+<h2 id="error-handling">Error Handling</h2>
+<p>All scripts include comprehensive error handling:</p>
+<ul>
+<li><strong>Validation</strong>: Check for required tools and files before execution</li>
+<li><strong>Fallbacks</strong>: Provide alternative methods when primary tools are unavailable</li>
+<li><strong>Informative output</strong>: Clear success, warning, and error messages with color coding</li>
+<li><strong>Exit codes</strong>: Proper exit codes for CI/CD integration</li>
+<li><strong>Cleanup</strong>: Automatic cleanup of temporary files and state restoration</li>
+</ul>
+<h2 id="integration-with-cicd">Integration with CI/CD</h2>
+<p>The scripts are designed to integrate seamlessly with GitHub Actions and other CI/CD systems:</p>
+<ul>
+<li><strong>GitHub Actions</strong>: Used in <code>.github/workflows/</code> for automated testing and deployment</li>
+<li><strong>Exit codes</strong>: Proper exit codes for pipeline success/failure detection</li>
+<li><strong>Logging</strong>: Structured output compatible with CI/CD log parsing</li>
+<li><strong>Environment detection</strong>: Automatic detection of CI/CD environments</li>
+</ul>
+<h2 id="best-practices">Best Practices</h2>
+<p>When using or modifying these scripts:</p>
+<ol>
+<li><strong>Test locally</strong>: Always run <code>local-ci-test</code> before pushing changes</li>
+<li><strong>Cross-platform testing</strong>: Test scripts on different operating systems when possible</li>
+<li><strong>Error handling</strong>: Add appropriate error handling for new functionality</li>
+<li><strong>Documentation</strong>: Update this reference when adding new scripts or parameters</li>
+<li><strong>Consistency</strong>: Follow the established patterns for parameters and output formatting</li>
+</ol>
+<h2 id="troubleshooting">Troubleshooting</h2>
+<h3 id="common-issues">Common Issues</h3>
+<ol>
+<li><strong>Tool not found</strong>: Run <code>setup-dev</code> to install required tools</li>
+<li><strong>Permission denied</strong>: Make sure Bash scripts are executable (<code>chmod +x</code>)</li>
+<li><strong>Path issues</strong>: Use the scripts from the project root directory</li>
+<li><strong>Network issues</strong>: Some tools require internet access for installation</li>
+</ol>
+<h3 id="getting-help">Getting Help</h3>
+<ul>
+<li>Run any script with <code>-h</code> or <code>--help</code> for usage information</li>
+<li>Check the <code>DEV-SETUP.md</code> file generated by <code>setup-dev</code> for configuration guidance</li>
+<li>Review the CI/CD logs in GitHub Actions for debugging pipeline issues</li>
+</ul>
+<p>For more detailed information about specific workflows, see <a href="workflow-pipelines.html">Workflow Pipelines</a>.</p>
+
+</article>
+
+        <div class="contribution d-print-none">
+          <a href="https://github.com/HueByte/Jiro/blob/main/dev/#L1" class="edit-link">Edit this page</a>
+        </div>
+
+        <div class="next-article d-print-none border-top" id="nextArticle"></div>
+
+      </div>
+
+      <div class="affix">
+        <nav id="affix"></nav>
+      </div>
+    </main>
+
+    <div class="container-xxl search-results" id="search-results"></div>
+
+    <footer class="border-top text-secondary">
+      <div class="container-xxl">
+        <div class="flex-fill">
+          <div class="footer-custom"><div class="footer-inner d-flex justify-content-between align-items-center"><div class="footer-text">Made with <strong>💖</strong> By HueByte</div><div class="footer-links"><a href="https://github.com/HueByte/Jiro" class="footer-link" target="_blank"><i class="fab fa-github"></i>GitHub</a><a href="#" class="footer-link scroll-to-top" onclick="scrollToTop()"><i class="fas fa-arrow-up"></i>Top</a></div></div></div><script>function scrollToTop(){window.scrollTo({top:0,behavior:'smooth'});}</script>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>
