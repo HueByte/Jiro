@@ -6,6 +6,8 @@ param(
     [switch]$DryRun = $false,
     [switch]$AttachBuilds = $false,
     [string]$BuildPath = "",
+    [switch]$SkipFormat = $false,
+    [switch]$SkipLint = $false,
     [switch]$Help = $false
 )
 
@@ -20,14 +22,16 @@ Options:
     -DryRun                 Show what would be done without executing
     -AttachBuilds           Attach build artifacts to the release
     -BuildPath <path>       Path to build artifacts (default: auto-detect)
+    -SkipFormat             Skip dotnet format step
+    -SkipLint               Skip markdown linting step
     -Help                   Show this help message
 
 Examples:
-    .\create-release.ps1                              # Auto-generate version
+    .\create-release.ps1                              # Auto-generate version with full checks
     .\create-release.ps1 -Version "v1.2.3"            # Use specific version
     .\create-release.ps1 -DryRun                      # Preview actions
+    .\create-release.ps1 -SkipFormat -SkipLint        # Skip quality checks
     .\create-release.ps1 -AttachBuilds                # Include build artifacts
-    .\create-release.ps1 -AttachBuilds -BuildPath "dist" # Custom build path
 "@
     exit 0
 }
@@ -63,6 +67,21 @@ if (-not (Test-Path ".git")) {
     exit 1
 }
 
+# Initialize change tracking
+$hasChanges = $false
+
+# Check for uncommitted changes
+$gitStatus = git status --porcelain
+if ($gitStatus -and -not $DryRun) {
+    Write-ColorOutput "⚠️ Warning: You have uncommitted changes:" "Yellow"
+    git status --short
+    $continue = Read-Host "Continue anyway? (y/N)"
+    if ($continue -ne "y" -and $continue -ne "Y") {
+        Write-ColorOutput "Aborted by user" "Yellow"
+        exit 0
+    }
+}
+
 # Check current branch
 $currentBranch = git branch --show-current
 if ($currentBranch -ne "main") {
@@ -72,6 +91,93 @@ if ($currentBranch -ne "main") {
         Write-ColorOutput "Aborted by user" "Yellow"
         exit 0
     }
+}
+
+# Quality checks section
+Write-ColorOutput "`n🔍 Running quality checks..." "Cyan"
+
+# Step 1: Run dotnet format
+if (-not $SkipFormat) {
+    Write-ColorOutput "🎨 Running dotnet format..." "Cyan"
+    try {
+        if ($DryRun) {
+            Write-ColorOutput "   [DRY RUN] Would run: dotnet format src/Main.sln --verify-no-changes" "Yellow"
+        }
+        else {
+            dotnet format src/Main.sln --verify-no-changes | Out-Null
+            if ($LASTEXITCODE -ne 0) {
+                Write-ColorOutput "⚠️ Code formatting issues detected. Running format..." "Yellow"
+                dotnet format src/Main.sln
+                if ($LASTEXITCODE -eq 0) {
+                    Write-ColorOutput "✅ Code formatted successfully" "Green"
+                    $hasChanges = $true
+                }
+                else {
+                    Write-ColorOutput "❌ Failed to format code" "Red"
+                    exit 1
+                }
+            }
+            else {
+                Write-ColorOutput "✅ Code formatting is already correct" "Green"
+            }
+        }
+    }
+    catch {
+        Write-ColorOutput "❌ Error running dotnet format: $_" "Red"
+        exit 1
+    }
+}
+else {
+    Write-ColorOutput "⏭️ Skipping dotnet format (--SkipFormat specified)" "Yellow"
+}
+
+# Function to find build artifacts
+function Get-BuildArtifacts {
+    param(
+        [string]$CustomPath = ""
+    )
+    
+    $artifacts = @()
+    $searchPaths = @()
+    
+    if (-not [string]::IsNullOrWhiteSpace($CustomPath)) {
+        $searchPaths += $CustomPath
+    }
+    else {
+        # Jiro build output paths for .NET projects
+        $searchPaths += @(
+            "src\Jiro.Communication\bin\Release",
+            "src\Jiro.Kernel\bin\Release", 
+            "bin\Release", 
+            "publish",
+            "artifacts",
+            "dist",
+            "build"
+        )
+    }
+    
+    foreach ($path in $searchPaths) {
+        if (Test-Path $path) {
+            Write-ColorOutput "🔍 Searching for artifacts in: $path" "Cyan"
+            
+            # Look for common artifact types
+            $files = Get-ChildItem -Path $path -Recurse -File | Where-Object {
+                $_.Extension -in @('.zip', '.tar.gz', '.exe', '.msi', '.nupkg', '.dll') -or
+                $_.Name -like '*publish*' -or
+                $_.Name -like '*release*'
+            }
+            
+            foreach ($file in $files) {
+                $artifacts += @{
+                    Path = $file.FullName
+                    Name = $file.Name
+                    Size = [math]::Round($file.Length / 1MB, 2)
+                }
+            }
+        }
+    }
+    
+    return $artifacts
 }
 
 # Auto-generate version if not provided
@@ -173,18 +279,118 @@ $commits
 **Full Changelog**: https://github.com/huebyte/Jiro/compare/$latestTag...$Version
 "@
 
+# Save release notes to dev/tags/release_notes_v{Version}.md
+$releaseNotesFile = "dev/tags/release_notes_$Version.md"
+if (-not (Test-Path "dev/tags")) { New-Item -ItemType Directory -Path "dev/tags" | Out-Null }
+
+Write-ColorOutput "📝 Creating release notes file..." "Cyan"
+if ($DryRun) {
+    Write-ColorOutput "   [DRY RUN] Would create: $releaseNotesFile" "Yellow"
+}
+else {
+    $releaseNotes | Out-File -FilePath $releaseNotesFile -Encoding UTF8
+    Write-ColorOutput "✅ Release notes saved to: $releaseNotesFile" "Green"
+}
+
+# Step 2: Run markdown lint after creating release notes
+if (-not $SkipLint) {
+    Write-ColorOutput "📋 Running markdown lint..." "Cyan"
+    $markdownLintScript = Join-Path $PSScriptRoot "markdown-lint.ps1"
+    
+    if (Test-Path $markdownLintScript) {
+        try {
+            if ($DryRun) {
+                Write-ColorOutput "   [DRY RUN] Would run: $markdownLintScript -Fix" "Yellow"
+            }
+            else {
+                & $markdownLintScript -Fix
+                if ($LASTEXITCODE -eq 0) {
+                    Write-ColorOutput "✅ Markdown linting completed successfully" "Green"
+                    $hasChanges = $true
+                }
+                else {
+                    Write-ColorOutput "❌ Markdown linting failed with errors" "Red"
+                    Write-ColorOutput "   Exit code: $LASTEXITCODE" "Red"
+                    exit 1
+                }
+            }
+        }
+        catch {
+            Write-ColorOutput "❌ Error running markdown lint: $_" "Red"
+            exit 1
+        }
+    }
+    else {
+        Write-ColorOutput "⚠️ Markdown lint script not found at: $markdownLintScript" "Yellow"
+    }
+}
+else {
+    Write-ColorOutput "⏭️ Skipping markdown lint (--SkipLint specified)" "Yellow"
+}
+
+# Commit any changes from formatting or linting
+if ($hasChanges -and -not $DryRun) {
+    Write-ColorOutput "📤 Committing formatting and linting changes..." "Cyan"
+    git add -A
+    git commit -m "chore: format code and lint markdown for release $Version"
+    
+    Write-ColorOutput "📤 Pushing changes to origin..." "Cyan"
+    git push origin $currentBranch
+    Write-ColorOutput "✅ Changes committed and pushed" "Green"
+}
+elseif ($hasChanges -and $DryRun) {
+    Write-ColorOutput "   [DRY RUN] Would commit and push formatting/linting changes" "Yellow"
+}
+
 Write-ColorOutput "📋 Release Notes Preview:" "Yellow"
 Write-Host $releaseNotes
 
+# Handle build artifacts if requested
+$buildArtifacts = @()
+if ($AttachBuilds) {
+    Write-ColorOutput "`n📦 Searching for build artifacts..." "Cyan"
+    $buildArtifacts = Get-BuildArtifacts -CustomPath $BuildPath
+    
+    if ($buildArtifacts.Count -gt 0) {
+        Write-ColorOutput "Found $($buildArtifacts.Count) artifact(s):" "Green"
+        foreach ($artifact in $buildArtifacts) {
+            Write-ColorOutput "  - $($artifact.Name) ($($artifact.Size) MB)" "White"
+        }
+    }
+    else {
+        Write-ColorOutput "⚠️ No build artifacts found" "Yellow"
+        if (-not $DryRun) {
+            $continue = Read-Host "Continue without artifacts? (y/N)"
+            if ($continue -ne "y" -and $continue -ne "Y") {
+                Write-ColorOutput "Aborted by user" "Yellow"
+                exit 0
+            }
+        }
+    }
+}
+
 if ($DryRun) {
     Write-ColorOutput "`n🔍 DRY RUN - Actions that would be performed:" "Yellow"
-    Write-ColorOutput "1. Create git tag: $Version" "Cyan"
-    Write-ColorOutput "2. Push tag to origin" "Cyan"
-    Write-ColorOutput "3. Create GitHub release with above notes" "Cyan"
+    Write-ColorOutput "1. Quality Checks:" "Cyan"
+    if (-not $SkipFormat) {
+        Write-ColorOutput "   - Run dotnet format on solution" "White"
+    }
+    Write-ColorOutput "   - Generate release notes file: $releaseNotesFile" "White"
+    if (-not $SkipLint) {
+        Write-ColorOutput "   - Run markdown lint with auto-fix" "White"
+    }
+    Write-ColorOutput "2. Git Operations:" "Cyan"
+    Write-ColorOutput "   - Commit any formatting/linting changes" "White"
+    Write-ColorOutput "   - Push changes to origin/$currentBranch" "White"
+    Write-ColorOutput "   - Create git tag: $Version" "White"
+    Write-ColorOutput "   - Push tag to origin" "White"
+    Write-ColorOutput "3. Release Creation:" "Cyan"
+    Write-ColorOutput "   - Create GitHub release with generated notes" "White"
     if ($AttachBuilds -and $buildArtifacts.Count -gt 0) {
-        Write-ColorOutput "4. Attach $($buildArtifacts.Count) build artifact(s)" "Cyan"
+        Write-ColorOutput "4. Build Artifacts:" "Cyan"
+        Write-ColorOutput "   - Attach $($buildArtifacts.Count) build artifact(s)" "White"
         foreach ($artifact in $buildArtifacts) {
-            Write-ColorOutput "   - $($artifact.Name)" "White"
+            Write-ColorOutput "     - $($artifact.Name)" "White"
         }
     }
     Write-ColorOutput "`nTo actually create the release, run without -DryRun flag" "Yellow"
@@ -211,14 +417,7 @@ catch {
     exit 1
 }
 
-
-# Save release notes to dev/tags/$Version
-$releaseNotesFile = "dev/tags/$Version"
-if (-not (Test-Path "dev/tags")) { New-Item -ItemType Directory -Path "dev/tags" | Out-Null }
-$releaseNotes | Out-File -FilePath $releaseNotesFile -Encoding UTF8
-
 Write-ColorOutput "📦 Creating GitHub release..." "Cyan"
-Write-ColorOutput "Release notes saved to: $releaseNotesFile" "Cyan"
 
 if ($AttachBuilds -and $buildArtifacts.Count -gt 0) {
     Write-ColorOutput "Build artifacts found - you can attach them using GitHub CLI:" "Yellow"
@@ -234,75 +433,4 @@ Write-ColorOutput "You can also create a GitHub release manually using the GitHu
 Write-ColorOutput "`n🎉 Release preparation completed!" "Green"
 Write-ColorOutput "Tag: $Version" "Green"
 Write-ColorOutput "Release notes: $releaseNotesFile" "Green"
-
-# Handle build artifacts if requested
-$buildArtifacts = @()
-if ($AttachBuilds) {
-    Write-ColorOutput "📦 Searching for build artifacts..." "Cyan"
-    $buildArtifacts = Get-BuildArtifacts -CustomPath $BuildPath
-    
-    if ($buildArtifacts.Count -gt 0) {
-        Write-ColorOutput "Found $($buildArtifacts.Count) artifact(s):" "Green"
-        foreach ($artifact in $buildArtifacts) {
-            Write-ColorOutput "  - $($artifact.Name) ($($artifact.Size) MB)" "White"
-        }
-    }
-    else {
-        Write-ColorOutput "⚠️ No build artifacts found" "Yellow"
-        if (-not $DryRun) {
-            $continue = Read-Host "Continue without artifacts? (y/N)"
-            if ($continue -ne "y" -and $continue -ne "Y") {
-                Write-ColorOutput "Aborted by user" "Yellow"
-                exit 0
-            }
-        }
-    }
-}
-
-# Function to find build artifacts
-function Get-BuildArtifacts {
-    param(
-        [string]$CustomPath = ""
-    )
-    
-    $artifacts = @()
-    $searchPaths = @()
-    
-    if (-not [string]::IsNullOrWhiteSpace($CustomPath)) {
-        $searchPaths += $CustomPath
-    }
-    else {
-        # Common build output paths for .NET projects
-        $searchPaths += @(
-            "src\bin\Release",
-            "bin\Release", 
-            "publish",
-            "artifacts",
-            "dist",
-            "build"
-        )
-    }
-    
-    foreach ($path in $searchPaths) {
-        if (Test-Path $path) {
-            Write-ColorOutput "🔍 Searching for artifacts in: $path" "Cyan"
-            
-            # Look for common artifact types
-            $files = Get-ChildItem -Path $path -Recurse -File | Where-Object {
-                $_.Extension -in @('.zip', '.tar.gz', '.exe', '.msi', '.nupkg', '.dll') -or
-                $_.Name -like '*publish*' -or
-                $_.Name -like '*release*'
-            }
-            
-            foreach ($file in $files) {
-                $artifacts += @{
-                    Path = $file.FullName
-                    Name = $file.Name
-                    Size = [math]::Round($file.Length / 1MB, 2)
-                }
-            }
-        }
-    }
-    
-    return $artifacts
-}
+Write-ColorOutput "Quality checks: Code formatted and markdown linted" "Green"
