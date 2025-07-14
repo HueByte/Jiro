@@ -48,10 +48,9 @@ public class PersonalizedConversationService : IPersonalizedConversationService
 				_logger.LogError("Persona not found for instance {InstanceId}", instanceId);
 				throw new Exception("Persona not found.");
 			}
-
-			// Get or create session with proper EF Core management
-			var session = await GetOrCreateSessionAsync(instanceId, sessionId);
-			var (conversationForChat, conversationHistory) = PrepareMessageHistory(session, message);
+			// Get or create session with proper caching and message loading
+			var sessionWithMessages = await _messageCacheService.GetOrCreateChatSessionAsync(sessionId, includeMessages: true);
+			var (conversationForChat, conversationHistory) = PrepareMessageHistory(sessionWithMessages, message);
 
 			var response = await _chatCoreService.ChatAsync(instanceId, conversationForChat.Select(x => x.Message).ToList(), ChatMessage.CreateDeveloperMessage(persona));
 			var assistantMessages = response.Content;
@@ -73,9 +72,8 @@ public class PersonalizedConversationService : IPersonalizedConversationService
 				CreatedAt = DateTime.UtcNow,
 				Type = MessageType.Text
 			};
-
-			// Save messages to database using EF Core
-			await SaveMessagesToSessionAsync(session, conversationHistory.Last(), jiroMessage);
+			// Save messages to database using MessageManager
+			await SaveMessagesToSessionAsync(sessionWithMessages.SessionId, conversationHistory.Last(), jiroMessage);
 
 			// Handle history optimization
 			if (_historyOptimizerService.ShouldOptimizeMessageHistory(tokenUsage))
@@ -109,46 +107,9 @@ public class PersonalizedConversationService : IPersonalizedConversationService
 	}
 
 	/// <summary>
-	/// Gets or creates a chat session.
+	/// Saves user and assistant messages to the session using MessageManager.
 	/// </summary>
-	private async Task<ChatSession> GetOrCreateSessionAsync(string instanceId, string sessionId)
-	{
-		try
-		{
-			var existingSession = await _chatSessionRepository.GetAsync(sessionId);
-			if (existingSession != null)
-			{
-				_logger.LogInformation("Loaded existing session {SessionId} for instance {InstanceId}", sessionId, instanceId);
-				return existingSession;
-			}
-
-			// Create new session
-			var newSession = new ChatSession
-			{
-				Id = sessionId,
-				Name = $"Session-{sessionId}",
-				Description = $"Chat session for instance {instanceId}",
-				CreatedAt = DateTime.UtcNow,
-				LastUpdatedAt = DateTime.UtcNow,
-				Messages = new List<Message>()
-			};
-
-			await _chatSessionRepository.AddAsync(newSession);
-			await _chatSessionRepository.SaveChangesAsync();
-
-			_logger.LogInformation("Created new session {SessionId} for instance {InstanceId}", sessionId, instanceId);
-			return newSession;
-		}
-		catch (Exception ex)
-		{
-			_logger.LogError(ex, "Error loading or creating session {SessionId} for instance {InstanceId}", sessionId, instanceId);
-			throw;
-		}
-	}
-	/// <summary>
-	/// Saves user and assistant messages to the session using EF Core.
-	/// </summary>
-	private async Task SaveMessagesToSessionAsync(ChatSession session, ChatMessageWithMetadata userMessage, ChatMessageWithMetadata assistantMessage)
+	private async Task SaveMessagesToSessionAsync(string sessionId, ChatMessageWithMetadata userMessage, ChatMessageWithMetadata assistantMessage)
 	{
 		try
 		{
@@ -159,7 +120,7 @@ public class PersonalizedConversationService : IPersonalizedConversationService
 				Content = userMessage.Message.Content.FirstOrDefault()?.Text ?? string.Empty,
 				IsUser = true,
 				CreatedAt = userMessage.CreatedAt,
-				SessionId = session.Id,
+				SessionId = sessionId,
 				Type = userMessage.Type,
 			};
 
@@ -170,21 +131,21 @@ public class PersonalizedConversationService : IPersonalizedConversationService
 				Content = assistantMessage.Message.Content.FirstOrDefault()?.Text ?? string.Empty,
 				IsUser = false,
 				CreatedAt = assistantMessage.CreatedAt,
-				SessionId = session.Id,
+				SessionId = sessionId,
 				Type = assistantMessage.Type,
 			};
 
 			// Let MessageManager handle all persistence logic
 			var modelMessages = new List<Message> { userMessageModel, assistantMessageModel };
-			await _messageCacheService.AddChatExchangeAsync(session.Id,
+			await _messageCacheService.AddChatExchangeAsync(sessionId,
 				new List<ChatMessageWithMetadata> { userMessage, assistantMessage },
 				modelMessages);
 
-			_logger.LogInformation("Saved user and assistant messages to session {SessionId}", session.Id);
+			_logger.LogInformation("Saved user and assistant messages to session {SessionId}", sessionId);
 		}
 		catch (Exception ex)
 		{
-			_logger.LogError(ex, "Error saving messages to session {SessionId}", session.Id);
+			_logger.LogError(ex, "Error saving messages to session {SessionId}", sessionId);
 			throw;
 		}
 	}
@@ -197,25 +158,14 @@ public class PersonalizedConversationService : IPersonalizedConversationService
 		_logger.LogInformation("Estimated message price: {messagePrice}$", CalculateMessagePrice(usage));
 	}
 
-	private (List<ChatMessageWithMetadata>, List<ChatMessageWithMetadata>) PrepareMessageHistory(ChatSession session, string message)
+	private (List<ChatMessageWithMetadata>, List<ChatMessageWithMetadata>) PrepareMessageHistory(Session session, string message)
 	{
 		try
 		{
-			// Load existing messages from session
-			var existingMessages = session.Messages?.OrderBy(m => m.CreatedAt).ToList() ?? new List<Message>();
+			// Load existing messages from session (already loaded from cache with messages)
+			var existingMessages = session.Messages?.OrderBy(m => m.CreatedAt).ToList() ?? new List<ChatMessageWithMetadata>();
 
-			var conversationHistory = new List<ChatMessageWithMetadata>();
-			foreach (var msg in existingMessages)
-			{
-				conversationHistory.Add(new ChatMessageWithMetadata
-				{
-					MessageId = msg.Id,
-					Message = msg.IsUser ? ChatMessage.CreateUserMessage(msg.Content) : ChatMessage.CreateAssistantMessage(msg.Content),
-					CreatedAt = msg.CreatedAt,
-					Type = msg.Type,
-					IsUser = msg.IsUser
-				});
-			}
+			var conversationHistory = new List<ChatMessageWithMetadata>(existingMessages);
 
 			var conversationForChat = new List<ChatMessageWithMetadata>(conversationHistory);
 
@@ -235,7 +185,7 @@ public class PersonalizedConversationService : IPersonalizedConversationService
 		}
 		catch (Exception ex)
 		{
-			_logger.LogError(ex, "Error preparing message history for session {SessionId}", session.Id);
+			_logger.LogError(ex, "Error preparing message history for session {SessionId}", session.SessionId);
 			throw;
 		}
 	}
