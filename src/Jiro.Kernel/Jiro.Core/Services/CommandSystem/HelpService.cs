@@ -2,14 +2,29 @@ using System.Text;
 
 namespace Jiro.Core.Services.CommandSystem;
 
+/// <summary>
+/// Provides functionality to generate and manage help messages for commands and modules.
+/// </summary>
 public class HelpService : IHelpService
 {
+	/// <inheritdoc/>
 	public string HelpMessage
 	{
 		get; private set;
 	}
+
+	/// <inheritdoc/>
+	public List<CommandMetadata> CommandMeta { get; } = new();
+
+	/// <summary>
+	/// The container for commands and modules.
+	/// </summary>
 	private readonly CommandsContext _commandsContainer;
 
+	/// <summary>
+	/// Initializes a new instance of the <see cref="HelpService"/> class.
+	/// </summary>
+	/// <param name="commandsContainer">The container for commands and modules.</param>
 	public HelpService(CommandsContext commandsContainer)
 	{
 		HelpMessage = "";
@@ -17,6 +32,7 @@ public class HelpService : IHelpService
 		CreateHelpMessage();
 	}
 
+	/// <inheritdoc/>
 	public void CreateHelpMessage()
 	{
 		var commands = _commandsContainer.Commands;
@@ -52,6 +68,22 @@ public class HelpService : IHelpService
 					messageBuilder.AppendLine(description);
 				if (!string.IsNullOrEmpty(command.Value.CommandSyntax))
 					messageBuilder.AppendLine(syntax);
+
+				CommandMetadata meta = new CommandMetadata()
+				{
+					CommandName = command.Key,
+					CommandDescription = command.Value.CommandDescription ?? string.Empty,
+					CommandSyntax = command.Value.CommandSyntax ?? string.Empty,
+					ModuleName = module.Name,
+
+					// TODO: Add proper parameter metadata for ML
+					Parameters = command.Value.Parameters
+						.Where(p => p != null && p.ParamType != null)
+						.ToDictionary(p => p?.ToString() ?? string.Empty, p => p!.ParamType),
+
+					// TODO: Implement proper keywords to commands
+					Keywords = [string.Empty]
+				};
 			}
 
 			messageBuilder.AppendLine();

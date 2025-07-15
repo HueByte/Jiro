@@ -1,5 +1,3 @@
-using Microsoft.Extensions.Caching.Memory;
-
 namespace Jiro.Core.Services.StaticMessage;
 
 /// <summary>

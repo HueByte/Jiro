@@ -12,6 +12,7 @@ using Jiro.Core.Services.MessageCache;
 using Jiro.Core.Services.Persona;
 using Jiro.Core.Services.Semaphore;
 using Jiro.Core.Services.StaticMessage;
+using Jiro.Core.Services.System;
 using Jiro.Core.Services.Weather;
 using Jiro.Infrastructure.Repositories;
 
@@ -61,6 +62,11 @@ public static class Configurator
 		services.AddScoped<IMessageManager, MessageManager>();
 		services.AddScoped<IPersonaService, PersonaService>();
 		services.AddScoped<IPersonalizedConversationService, PersonalizedConversationService>();
+
+		// System services
+		services.AddScoped<ILogsProviderService, LogsProviderService>();
+		services.AddScoped<IConfigProviderService, ConfigProviderService>();
+		services.AddScoped<IThemeService, ThemeService>();
 		services.AddScoped<ChatClient>((services) =>
 		{
 			var configManager = services.GetRequiredService<IConfiguration>();

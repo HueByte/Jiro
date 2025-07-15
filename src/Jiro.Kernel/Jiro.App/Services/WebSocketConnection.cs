@@ -2,8 +2,13 @@ using System.Text.Json;
 
 using Jiro.App.Models;
 using Jiro.App.Options;
+using Jiro.Core.Services.CommandSystem;
+using Jiro.Core.Services.MessageCache;
+using Jiro.Core.Services.System;
 
 using Microsoft.AspNetCore.SignalR.Client;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -16,6 +21,7 @@ public class WebSocketConnection : IWebSocketConnection
 {
 	private readonly ILogger<WebSocketConnection> _logger;
 	private readonly WebSocketOptions _options;
+	private readonly IServiceScopeFactory _scopeFactory;
 	private HubConnection? _connection;
 	private readonly SemaphoreSlim _connectionSemaphore = new(1, 1);
 	private bool _disposed = false;
@@ -46,12 +52,15 @@ public class WebSocketConnection : IWebSocketConnection
 	/// </summary>
 	/// <param name="logger">The logger</param>
 	/// <param name="options">The WebSocket configuration options</param>
+	/// <param name="scopeFactory">The service scope factory for creating scoped services</param>
 	public WebSocketConnection(
 		ILogger<WebSocketConnection> logger,
-		IOptions<WebSocketOptions> options)
+		IOptions<WebSocketOptions> options,
+		IServiceScopeFactory scopeFactory)
 	{
 		_logger = logger ?? throw new ArgumentNullException(nameof(logger));
 		_options = options?.Value ?? throw new ArgumentNullException(nameof(options));
+		_scopeFactory = scopeFactory ?? throw new ArgumentNullException(nameof(scopeFactory));
 	}
 
 	/// <summary>
@@ -166,6 +175,7 @@ public class WebSocketConnection : IWebSocketConnection
 	{
 		if (_connection == null) return;
 
+		// TODO: Figure out some nicer system for resolving dependency injection in SignalR handlers
 		// Handle command reception - expecting JSON string that contains CommandMessage
 		_connection.On<string>("ReceiveCommand", async (commandJson) =>
 		{
@@ -191,6 +201,213 @@ public class WebSocketConnection : IWebSocketConnection
 			catch (Exception ex)
 			{
 				_logger.LogError(ex, "Error processing received command: {Command}", commandJson);
+			}
+		});
+
+		// Handle keepalive acknowledgment from server
+		_connection.On("KeepaliveAck", async () =>
+		{
+			try
+			{
+				_logger.LogDebug("Received keepalive acknowledgment from server");
+
+				// Send acknowledgment back to server via SignalR
+				await _connection.InvokeAsync("KeepaliveResponse", new
+				{
+					timestamp = DateTime.UtcNow,
+					status = "acknowledged"
+				});
+			}
+			catch (Exception ex)
+			{
+				_logger.LogError(ex, "Error handling keepalive acknowledgment");
+			}
+		});
+
+		// Handle GetLogs command from server
+		_connection.On<string, int>("GetLogs", async (level, limit) =>
+		{
+			try
+			{
+				_logger.LogInformation("Received GetLogs command from server - Level: {Level}, Limit: {Limit}", level, limit);
+
+				await using var scope = _scopeFactory.CreateAsyncScope();
+				var logsService = scope.ServiceProvider.GetRequiredService<ILogsProviderService>();
+
+				try
+				{
+					var logsResponse = await logsService.GetLogsAsync(level, limit);
+
+					// Send response back to server via SignalR
+					await _connection.InvokeAsync("LogsResponse", logsResponse);
+				}
+				catch (Exception ex)
+				{
+					_logger.LogError(ex, "Error retrieving logs");
+					await _connection.InvokeAsync("ErrorResponse", "GetLogs", $"Error retrieving logs: {ex.Message}");
+				}
+			}
+			catch (Exception ex)
+			{
+				_logger.LogError(ex, "Error handling GetLogs command from server");
+			}
+		});
+
+		// Handle GetSessions command from server
+		_connection.On("GetSessions", async () =>
+		{
+			try
+			{
+				_logger.LogInformation("Received GetSessions command from server");
+
+				await using var scope = _scopeFactory.CreateAsyncScope();
+				var messageManager = scope.ServiceProvider.GetRequiredService<IMessageManager>();
+				var configuration = scope.ServiceProvider.GetRequiredService<IConfiguration>();
+
+				try
+				{
+					// Get instance ID from configuration or use a default
+					var instanceId = configuration.GetValue<string>("INSTANCE_ID") ?? Environment.MachineName;
+
+					var sessions = await messageManager.GetChatSessionsAsync(instanceId);
+					var response = new
+					{
+						InstanceId = instanceId,
+						TotalSessions = sessions.Count,
+						// TODO: Get current session ID from context or configuration
+						CurrentSessionId = (string?)null,
+						Sessions = sessions
+					};
+
+					// Send response back to server via SignalR
+					await _connection.InvokeAsync("SessionsResponse", response);
+				}
+				catch (Exception ex)
+				{
+					_logger.LogError(ex, "Error retrieving sessions");
+					await _connection.InvokeAsync("ErrorResponse", "GetSessions", "Error retrieving sessions: " + ex.Message);
+				}
+			}
+			catch (Exception ex)
+			{
+				_logger.LogError(ex, "Error handling GetSessions command from server");
+				await _connection.InvokeAsync("ErrorResponse", "GetSessions", "Error handling GetSessions command: " + ex.Message);
+			}
+		});
+
+		// Handle GetConfig command from server
+		_connection.On("GetConfig", async () =>
+		{
+			try
+			{
+				_logger.LogInformation("Received GetConfig command from server");
+
+				await using var scope = _scopeFactory.CreateAsyncScope();
+				var configService = scope.ServiceProvider.GetRequiredService<IConfigProviderService>();
+
+				try
+				{
+					var configResponse = await configService.GetConfigAsync();
+
+					// Send response back to server via SignalR
+					await _connection.InvokeAsync("ConfigResponse", configResponse);
+				}
+				catch (Exception ex)
+				{
+					_logger.LogError(ex, "Error retrieving configuration");
+					await _connection.InvokeAsync("ErrorResponse", "GetConfig", $"Error retrieving configuration: {ex.Message}");
+				}
+			}
+			catch (Exception ex)
+			{
+				_logger.LogError(ex, "Error handling GetConfig command from server");
+			}
+		});
+
+		// Handle UpdateConfig command from server
+		_connection.On<string>("UpdateConfig", async (configJson) =>
+		{
+			try
+			{
+				_logger.LogInformation("Received UpdateConfig command from server with config: {Config}", configJson);
+
+				await using var scope = _scopeFactory.CreateAsyncScope();
+				var configService = scope.ServiceProvider.GetRequiredService<IConfigProviderService>();
+
+				try
+				{
+					var updateResponse = await configService.UpdateConfigAsync(configJson);
+
+					// Send response back to server via SignalR
+					await _connection.InvokeAsync("ConfigUpdateResponse", updateResponse);
+				}
+				catch (Exception ex)
+				{
+					_logger.LogError(ex, "Error updating configuration");
+					await _connection.InvokeAsync("ErrorResponse", "UpdateConfig", $"Error updating configuration: {ex.Message}");
+				}
+			}
+			catch (Exception ex)
+			{
+				_logger.LogError(ex, "Error handling UpdateConfig command from server");
+			}
+		});
+
+		// Handle GetCustomThemes command from server
+		_connection.On("GetCustomThemes", async () =>
+		{
+			try
+			{
+				_logger.LogInformation("Received GetCustomThemes command from server");
+
+				await using var scope = _scopeFactory.CreateAsyncScope();
+				var themeService = scope.ServiceProvider.GetRequiredService<IThemeService>();
+
+				try
+				{
+					var themeResponse = await themeService.GetCustomThemesAsync();
+
+					// Send response back to server via SignalR
+					await _connection.InvokeAsync("ThemesResponse", themeResponse);
+				}
+				catch (Exception ex)
+				{
+					_logger.LogError(ex, "Error retrieving custom themes");
+					await _connection.InvokeAsync("ErrorResponse", "GetCustomThemes", $"Error retrieving custom themes: {ex.Message}");
+				}
+			}
+			catch (Exception ex)
+			{
+				_logger.LogError(ex, "Error handling GetCustomThemes command from server");
+			}
+		});
+
+		// Handle GetCommandsMetadata command from server
+		_connection.On("GetCommandsMetadata", async () =>
+		{
+			try
+			{
+				_logger.LogInformation("Received GetCommandsMetadata command from server");
+
+				await using var scope = _scopeFactory.CreateAsyncScope();
+
+				try
+				{
+					var helpService = scope.ServiceProvider.GetRequiredService<IHelpService>();
+					var response = helpService.CommandMeta;
+
+					// Send response back to server via SignalR
+					await _connection.InvokeAsync("CommandsMetadataResponse", response);
+				}
+				catch (Exception ex)
+				{
+					_logger.LogError(ex, "Error retrieving commands metadata");
+					await _connection.InvokeAsync("ErrorResponse", "GetCommandsMetadata", $"Error retrieving commands metadata: {ex.Message}");
+				}
+			}
+			catch (Exception ex)
+			{
+				_logger.LogError(ex, "Error handling GetCommandsMetadata command from server");
 			}
 		});
 
