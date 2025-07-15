@@ -1,2 +1,0 @@
-plotext==5.2.8
-requests==2.28.1
