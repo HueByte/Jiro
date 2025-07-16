@@ -1,9 +1,11 @@
+using Jiro.Core.Services.System.Models;
+
 namespace Jiro.App.Models;
 
 /// <summary>
 /// Represents the response for sessions.
 /// </summary>
-public class SessionsResponse
+public class SessionsResponse : SyncResponse
 {
 	/// <summary>
 	/// Gets or sets the instance ID.

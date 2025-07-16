@@ -1,9 +1,11 @@
+using Jiro.Core.Services.System.Models;
+
 namespace Jiro.App.Models;
 
 /// <summary>
 /// Represents the response for configuration.
 /// </summary>
-public class ConfigResponse
+public class ConfigResponse : SyncResponse
 {
 	/// <summary>
 	/// Gets or sets the application name.

@@ -1,9 +1,11 @@
+using Jiro.Core.Services.System.Models;
+
 namespace Jiro.App.Models;
 
 /// <summary>
 /// Represents the response for errors.
 /// </summary>
-public class ErrorResponse
+public class ErrorResponse : SyncResponse
 {
     /// <summary>
     /// Gets or sets the command name associated with the error.

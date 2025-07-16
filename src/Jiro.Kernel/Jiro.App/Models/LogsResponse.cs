@@ -1,9 +1,11 @@
+using Jiro.Core.Services.System.Models;
+
 namespace Jiro.App.Models;
 
 /// <summary>
 /// Represents the response for logs.
 /// </summary>
-public class LogsResponse
+public class LogsResponse : SyncResponse
 {
     /// <summary>
     /// Gets or sets the total number of logs.

@@ -1,9 +1,11 @@
+using Jiro.Core.Services.System.Models;
+
 namespace Jiro.App.Models;
 
 /// <summary>
 /// Represents the response for keepalive acknowledgment.
 /// </summary>
-public class KeepaliveResponse
+public class KeepaliveResponse : SyncResponse
 {
     /// <summary>
     /// Gets or sets the timestamp of the acknowledgment.

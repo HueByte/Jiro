@@ -211,12 +211,17 @@ public class WebSocketConnection : IWebSocketConnection
 			{
 				_logger.LogDebug("Received keepalive acknowledgment from server");
 
+				// Generate a unique requestId for the keepalive response
+				var requestId = Guid.NewGuid().ToString();
+
 				// Send acknowledgment back to server via SignalR
-				await _connection.InvokeAsync("KeepaliveResponse", new
+				var response = new KeepaliveResponse
 				{
-					timestamp = DateTime.UtcNow,
-					status = "acknowledged"
-				});
+					RequestId = requestId,
+					Timestamp = DateTime.UtcNow,
+					Status = "acknowledged"
+				};
+				await _connection.InvokeAsync("KeepaliveResponse", response);
 			}
 			catch (Exception ex)
 			{
@@ -225,11 +230,15 @@ public class WebSocketConnection : IWebSocketConnection
 		});
 
 		// Handle GetLogs command from server
-		_connection.On<string, int>("GetLogs", async (level, limit) =>
+		_connection.On<GetLogsParameters>("GetLogs", async (parameters) =>
 		{
 			try
 			{
-				_logger.LogInformation("Received GetLogs command from server - Level: {Level}, Limit: {Limit}", level, limit);
+				var requestId = parameters.RequestId;
+				var level = parameters.Level;
+				var limit = parameters.Limit ?? 100;
+
+				_logger.LogInformation("Received GetLogs command from server - Level: {Level}, Limit: {Limit}, RequestId: {RequestId}", level, limit, requestId);
 
 				await using var scope = _scopeFactory.CreateAsyncScope();
 				var logsService = scope.ServiceProvider.GetRequiredService<ILogsProviderService>();
@@ -240,6 +249,7 @@ public class WebSocketConnection : IWebSocketConnection
 
 					var response = new LogsResponse
 					{
+						RequestId = requestId,
 						TotalLogs = logsResponse.TotalLogs,
 						Level = logsResponse.Level,
 						Limit = logsResponse.Limit,
@@ -259,6 +269,7 @@ public class WebSocketConnection : IWebSocketConnection
 					_logger.LogError(ex, "Error retrieving logs");
 					var errorResponse = new ErrorResponse
 					{
+						RequestId = requestId,
 						CommandName = "GetLogs",
 						ErrorMessage = $"Error retrieving logs: {ex.Message}"
 					};
@@ -272,11 +283,13 @@ public class WebSocketConnection : IWebSocketConnection
 		});
 
 		// Handle GetSessions command from server
-		_connection.On("GetSessions", async () =>
+		_connection.On<GetSessionsParameters>("GetSessions", async (parameters) =>
 		{
 			try
 			{
-				_logger.LogInformation("Received GetSessions command from server");
+				var requestId = parameters.RequestId;
+
+				_logger.LogInformation("Received GetSessions command from server with RequestId: {RequestId}", requestId);
 
 				await using var scope = _scopeFactory.CreateAsyncScope();
 				var messageManager = scope.ServiceProvider.GetRequiredService<IMessageManager>();
@@ -289,6 +302,7 @@ public class WebSocketConnection : IWebSocketConnection
 
 					var response = new SessionsResponse
 					{
+						RequestId = requestId,
 						InstanceId = instanceId,
 						TotalSessions = sessions.Count,
 						CurrentSessionId = null, // TODO: Get current session ID from context or configuration
@@ -307,6 +321,7 @@ public class WebSocketConnection : IWebSocketConnection
 					_logger.LogError(ex, "Error retrieving sessions");
 					var errorResponse = new ErrorResponse
 					{
+						RequestId = requestId,
 						CommandName = "GetSessions",
 						ErrorMessage = $"Error retrieving sessions: {ex.Message}"
 					};
@@ -318,6 +333,7 @@ public class WebSocketConnection : IWebSocketConnection
 				_logger.LogError(ex, "Error handling GetSessions command from server");
 				var errorResponse = new ErrorResponse
 				{
+					RequestId = "", // requestId might not be available in this catch block
 					CommandName = "GetSessions",
 					ErrorMessage = $"Error handling GetSessions command: {ex.Message}"
 				};
@@ -326,11 +342,13 @@ public class WebSocketConnection : IWebSocketConnection
 		});
 
 		// Handle GetConfig command from server
-		_connection.On("GetConfig", async () =>
+		_connection.On<GetConfigParameters>("GetConfig", async (parameters) =>
 		{
 			try
 			{
-				_logger.LogInformation("Received GetConfig command from server");
+				var requestId = parameters.RequestId;
+
+				_logger.LogInformation("Received GetConfig command from server with RequestId: {RequestId}", requestId);
 
 				await using var scope = _scopeFactory.CreateAsyncScope();
 				var configService = scope.ServiceProvider.GetRequiredService<IConfigProviderService>();
@@ -338,6 +356,7 @@ public class WebSocketConnection : IWebSocketConnection
 				try
 				{
 					var configResponse = await configService.GetConfigAsync();
+					configResponse.RequestId = requestId;
 
 					await _connection.InvokeAsync("ConfigResponse", configResponse);
 				}
@@ -346,6 +365,7 @@ public class WebSocketConnection : IWebSocketConnection
 					_logger.LogError(ex, "Error retrieving configuration");
 					var errorResponse = new ErrorResponse
 					{
+						RequestId = requestId,
 						CommandName = "GetConfig",
 						ErrorMessage = $"Error retrieving configuration: {ex.Message}"
 					};
@@ -359,11 +379,14 @@ public class WebSocketConnection : IWebSocketConnection
 		});
 
 		// Handle UpdateConfig command from server
-		_connection.On<string>("UpdateConfig", async (configJson) =>
+		_connection.On<UpdateConfigParameters>("UpdateConfig", async (parameters) =>
 		{
 			try
 			{
-				_logger.LogInformation("Received UpdateConfig command from server with config: {Config}", configJson);
+				var requestId = parameters.RequestId;
+				var configJson = JsonSerializer.Serialize(parameters.ConfigData); // Convert object to JSON string
+
+				_logger.LogInformation("Received UpdateConfig command from server with config: {Config}, RequestId: {RequestId}", configJson, requestId);
 
 				await using var scope = _scopeFactory.CreateAsyncScope();
 				var configService = scope.ServiceProvider.GetRequiredService<IConfigProviderService>();
@@ -371,6 +394,7 @@ public class WebSocketConnection : IWebSocketConnection
 				try
 				{
 					var updateResponse = await configService.UpdateConfigAsync(configJson);
+					updateResponse.RequestId = requestId;
 
 					await _connection.InvokeAsync("ConfigUpdateResponse", updateResponse);
 				}
@@ -379,6 +403,7 @@ public class WebSocketConnection : IWebSocketConnection
 					_logger.LogError(ex, "Error updating configuration");
 					var errorResponse = new ErrorResponse
 					{
+						RequestId = requestId,
 						CommandName = "UpdateConfig",
 						ErrorMessage = $"Error updating configuration: {ex.Message}"
 					};
@@ -392,11 +417,13 @@ public class WebSocketConnection : IWebSocketConnection
 		});
 
 		// Handle GetCustomThemes command from server
-		_connection.On("GetCustomThemes", async () =>
+		_connection.On<GetCustomThemesParameters>("GetCustomThemes", async (parameters) =>
 		{
 			try
 			{
-				_logger.LogInformation("Received GetCustomThemes command from server");
+				var requestId = parameters.RequestId;
+
+				_logger.LogInformation("Received GetCustomThemes command from server with RequestId: {RequestId}", requestId);
 
 				await using var scope = _scopeFactory.CreateAsyncScope();
 				var themeService = scope.ServiceProvider.GetRequiredService<IThemeService>();
@@ -404,6 +431,7 @@ public class WebSocketConnection : IWebSocketConnection
 				try
 				{
 					var themeResponse = await themeService.GetCustomThemesAsync();
+					themeResponse.RequestId = requestId;
 
 					await _connection.InvokeAsync("ThemesResponse", themeResponse);
 				}
@@ -412,6 +440,7 @@ public class WebSocketConnection : IWebSocketConnection
 					_logger.LogError(ex, "Error retrieving custom themes");
 					var errorResponse = new ErrorResponse
 					{
+						RequestId = requestId,
 						CommandName = "GetCustomThemes",
 						ErrorMessage = $"Error retrieving custom themes: {ex.Message}"
 					};
@@ -425,18 +454,37 @@ public class WebSocketConnection : IWebSocketConnection
 		});
 
 		// Handle GetCommandsMetadata command from server
-		_connection.On("GetCommandsMetadata", async () =>
+		_connection.On<GetCommandsMetadataParameters>("GetCommandsMetadata", async (parameters) =>
 		{
 			try
 			{
-				_logger.LogInformation("Received GetCommandsMetadata command from server");
+				var requestId = parameters.RequestId;
+
+				_logger.LogInformation("Received GetCommandsMetadata command from server with RequestId: {RequestId}", requestId);
 
 				await using var scope = _scopeFactory.CreateAsyncScope();
 
 				try
 				{
 					var helpService = scope.ServiceProvider.GetRequiredService<IHelpService>();
-					var response = helpService.CommandMeta;
+					var coreCommandMeta = helpService.CommandMeta;
+
+					// Convert Core CommandMetadata to App CommandMetadata
+					var appCommandMeta = coreCommandMeta.Select(c => new App.Models.CommandMetadata
+					{
+						CommandName = c.CommandName,
+						CommandDescription = c.CommandDescription,
+						CommandSyntax = c.CommandSyntax,
+						Parameters = c.Parameters,
+						ModuleName = c.ModuleName,
+						Keywords = c.Keywords
+					}).ToList();
+
+					var response = new CommandsMetadataResponse
+					{
+						RequestId = requestId,
+						Commands = appCommandMeta
+					};
 
 					// Send response back to server via SignalR
 					await _connection.InvokeAsync("CommandsMetadataResponse", response);
@@ -444,7 +492,13 @@ public class WebSocketConnection : IWebSocketConnection
 				catch (Exception ex)
 				{
 					_logger.LogError(ex, "Error retrieving commands metadata");
-					await _connection.InvokeAsync("ErrorResponse", "GetCommandsMetadata", $"Error retrieving commands metadata: {ex.Message}");
+					var errorResponse = new ErrorResponse
+					{
+						RequestId = requestId,
+						CommandName = "GetCommandsMetadata",
+						ErrorMessage = $"Error retrieving commands metadata: {ex.Message}"
+					};
+					await _connection.InvokeAsync("ErrorResponse", errorResponse);
 				}
 			}
 			catch (Exception ex)

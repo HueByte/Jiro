@@ -1,9 +1,20 @@
 namespace Jiro.Core.Services.System.Models;
 
 /// <summary>
+/// Base response class with synchronization ID support
+/// </summary>
+public class SyncResponse
+{
+	/// <summary>
+	/// Gets or sets the request ID for response tracking
+	/// </summary>
+	public string RequestId { get; set; } = string.Empty;
+}
+
+/// <summary>
 /// System configuration response containing application and environment details.
 /// </summary>
-public class ConfigResponse
+public class ConfigResponse : SyncResponse
 {
 	/// <summary>
 	/// Gets or sets the name of the application.
@@ -153,7 +164,7 @@ public class SystemInfo
 /// <summary>
 /// Represents the response for configuration updates.
 /// </summary>
-public class ConfigUpdateResponse
+public class ConfigUpdateResponse : SyncResponse
 {
 	/// <summary>
 	/// Gets or sets a value indicating whether the update was successful.
