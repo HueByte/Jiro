@@ -238,13 +238,31 @@ public class WebSocketConnection : IWebSocketConnection
 				{
 					var logsResponse = await logsService.GetLogsAsync(level, limit);
 
-					// Send response back to server via SignalR
-					await _connection.InvokeAsync("LogsResponse", logsResponse);
+					var response = new LogsResponse
+					{
+						TotalLogs = logsResponse.TotalLogs,
+						Level = logsResponse.Level,
+						Limit = logsResponse.Limit,
+						Logs = logsResponse.Logs.Select(log => new LogEntry
+						{
+							File = log.File,
+							Timestamp = log.Timestamp,
+							Level = log.Level,
+							Message = log.Message
+						}).ToList()
+					};
+
+					await _connection.InvokeAsync("LogsResponse", response);
 				}
 				catch (Exception ex)
 				{
 					_logger.LogError(ex, "Error retrieving logs");
-					await _connection.InvokeAsync("ErrorResponse", "GetLogs", $"Error retrieving logs: {ex.Message}");
+					var errorResponse = new ErrorResponse
+					{
+						CommandName = "GetLogs",
+						ErrorMessage = $"Error retrieving logs: {ex.Message}"
+					};
+					await _connection.InvokeAsync("ErrorResponse", errorResponse);
 				}
 			}
 			catch (Exception ex)
@@ -266,32 +284,44 @@ public class WebSocketConnection : IWebSocketConnection
 
 				try
 				{
-					// Get instance ID from configuration or use a default
 					var instanceId = configuration.GetValue<string>("INSTANCE_ID") ?? Environment.MachineName;
-
 					var sessions = await messageManager.GetChatSessionsAsync(instanceId);
-					var response = new
+
+					var response = new SessionsResponse
 					{
 						InstanceId = instanceId,
 						TotalSessions = sessions.Count,
-						// TODO: Get current session ID from context or configuration
-						CurrentSessionId = (string?)null,
-						Sessions = sessions
+						CurrentSessionId = null, // TODO: Get current session ID from context or configuration
+						Sessions = sessions.Select(session => new ChatSession
+						{
+							SessionId = session.Id, // Mapping DbModel<string> Id to SessionId
+							SessionName = session.Name, // Mapping Name to SessionName
+							CreatedAt = session.CreatedAt
+						}).ToList()
 					};
 
-					// Send response back to server via SignalR
 					await _connection.InvokeAsync("SessionsResponse", response);
 				}
 				catch (Exception ex)
 				{
 					_logger.LogError(ex, "Error retrieving sessions");
-					await _connection.InvokeAsync("ErrorResponse", "GetSessions", "Error retrieving sessions: " + ex.Message);
+					var errorResponse = new ErrorResponse
+					{
+						CommandName = "GetSessions",
+						ErrorMessage = $"Error retrieving sessions: {ex.Message}"
+					};
+					await _connection.InvokeAsync("ErrorResponse", errorResponse);
 				}
 			}
 			catch (Exception ex)
 			{
 				_logger.LogError(ex, "Error handling GetSessions command from server");
-				await _connection.InvokeAsync("ErrorResponse", "GetSessions", "Error handling GetSessions command: " + ex.Message);
+				var errorResponse = new ErrorResponse
+				{
+					CommandName = "GetSessions",
+					ErrorMessage = $"Error handling GetSessions command: {ex.Message}"
+				};
+				await _connection.InvokeAsync("ErrorResponse", errorResponse);
 			}
 		});
 
@@ -309,13 +339,17 @@ public class WebSocketConnection : IWebSocketConnection
 				{
 					var configResponse = await configService.GetConfigAsync();
 
-					// Send response back to server via SignalR
 					await _connection.InvokeAsync("ConfigResponse", configResponse);
 				}
 				catch (Exception ex)
 				{
 					_logger.LogError(ex, "Error retrieving configuration");
-					await _connection.InvokeAsync("ErrorResponse", "GetConfig", $"Error retrieving configuration: {ex.Message}");
+					var errorResponse = new ErrorResponse
+					{
+						CommandName = "GetConfig",
+						ErrorMessage = $"Error retrieving configuration: {ex.Message}"
+					};
+					await _connection.InvokeAsync("ErrorResponse", errorResponse);
 				}
 			}
 			catch (Exception ex)
@@ -338,13 +372,17 @@ public class WebSocketConnection : IWebSocketConnection
 				{
 					var updateResponse = await configService.UpdateConfigAsync(configJson);
 
-					// Send response back to server via SignalR
 					await _connection.InvokeAsync("ConfigUpdateResponse", updateResponse);
 				}
 				catch (Exception ex)
 				{
 					_logger.LogError(ex, "Error updating configuration");
-					await _connection.InvokeAsync("ErrorResponse", "UpdateConfig", $"Error updating configuration: {ex.Message}");
+					var errorResponse = new ErrorResponse
+					{
+						CommandName = "UpdateConfig",
+						ErrorMessage = $"Error updating configuration: {ex.Message}"
+					};
+					await _connection.InvokeAsync("ErrorResponse", errorResponse);
 				}
 			}
 			catch (Exception ex)
@@ -367,13 +405,17 @@ public class WebSocketConnection : IWebSocketConnection
 				{
 					var themeResponse = await themeService.GetCustomThemesAsync();
 
-					// Send response back to server via SignalR
 					await _connection.InvokeAsync("ThemesResponse", themeResponse);
 				}
 				catch (Exception ex)
 				{
 					_logger.LogError(ex, "Error retrieving custom themes");
-					await _connection.InvokeAsync("ErrorResponse", "GetCustomThemes", $"Error retrieving custom themes: {ex.Message}");
+					var errorResponse = new ErrorResponse
+					{
+						CommandName = "GetCustomThemes",
+						ErrorMessage = $"Error retrieving custom themes: {ex.Message}"
+					};
+					await _connection.InvokeAsync("ErrorResponse", errorResponse);
 				}
 			}
 			catch (Exception ex)
