@@ -17,7 +17,7 @@ public class SessionResult
 		CreatedAt = session.CreatedAt;
 		LastUpdatedAt = session.LastUpdatedAt;
 		Messages = [.. session.Messages
-			.Select(m => new TrimmedMessageResult()
+			.Select(static m => new TrimmedMessageResult()
 			{
 				Id = m.MessageId,
 				Content = m.Message.Content.FirstOrDefault()?.Text ?? string.Empty,

@@ -33,9 +33,9 @@ public class WeatherCommand : ICommandBase
 
 		// Prepare weather data for graph
 		var data = weather.Hourly.Time
-			.Zip(weather.Hourly.Temperature2m, (time, temp) => new { time, temp })
-			.Zip(weather.Hourly.Rain, (prev, rain) => new { prev.time, prev.temp, rain })
-			.Zip(weather.Hourly.Windspeed10m, (prev, windSpeed) => new WeatherGraphData
+			.Zip(weather.Hourly.Temperature2m, static (time, temp) => new { time, temp })
+			.Zip(weather.Hourly.Rain, static (prev, rain) => new { prev.time, prev.temp, rain })
+			.Zip(weather.Hourly.Windspeed10m, static (prev, windSpeed) => new WeatherGraphData
 			{
 				Date = prev.time,
 				Temperature = prev.temp,

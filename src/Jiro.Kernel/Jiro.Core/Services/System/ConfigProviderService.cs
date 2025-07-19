@@ -3,6 +3,7 @@ using System.Reflection;
 using System.Text.Json;
 
 using Jiro.Core.Services.System.Models;
+using Jiro.Shared.Websocket.Responses;
 
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
@@ -39,32 +40,36 @@ public class ConfigProviderService : IConfigProviderService
 				Version = Assembly.GetExecutingAssembly().GetName().Version?.ToString(),
 				Environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Production",
 				InstanceId = _configuration.GetValue<string>("INSTANCE_ID") ?? Environment.MachineName,
-				Configuration = new Models.ConfigurationSection
+				Configuration = new Shared.Websocket.Requests.ConfigurationSection
 				{
-					Chat = _configuration.GetSection("Chat").Get<object>(),
-					Logging = new LoggingConfig
-					{
-						LogLevel = _configuration.GetValue<string>("Logging:LogLevel:Default"),
-						EnableConsoleLogging = true,
-						EnableFileLogging = true
-					},
-					Features = new FeaturesConfig
-					{
-						ChatEnabled = _configuration.GetValue<bool>("Chat:Enabled"),
-						WeatherEnabled = true,
-						GrpcEnabled = _configuration.GetSection("Grpc").Exists(),
-						WebSocketEnabled = _configuration.GetSection("WebSocket").Exists()
-					}
+					Values = _configuration.AsEnumerable().ToDictionary(
+						static kvp => kvp.Key,
+						static kvp => (object)(kvp.Value ?? string.Empty)
+					)
 				},
-				SystemInfo = new SystemInfo
+				// {
+				// 	Chat = _configuration.GetSection("Chat").Get<object>(),
+				// 	Logging = new LoggingConfig
+				// 	{
+				// 		LogLevel = _configuration.GetValue<string>("Logging:LogLevel:Default"),
+				// 		EnableConsoleLogging = true,
+				// 		EnableFileLogging = true
+				// 	},
+				// 	Features = new FeaturesConfig
+				// 	{
+				// 		ChatEnabled = _configuration.GetValue<bool>("Chat:Enabled"),
+				// 		WeatherEnabled = true,
+				// 		GrpcEnabled = _configuration.GetSection("Grpc").Exists(),
+				// 		WebSocketEnabled = _configuration.GetSection("WebSocket").Exists()
+				// 	}
+				// },
+				SystemInfo = new Shared.Websocket.Requests.SystemInfo
 				{
-					Platform = Environment.OSVersion.Platform.ToString(),
-					OsVersion = Environment.OSVersion.VersionString,
-					DotnetVersion = Environment.Version.ToString(),
-					WorkingDirectory = Environment.CurrentDirectory,
+					OperatingSystem = Environment.OSVersion.Platform.ToString(),
+					RuntimeVersion = Environment.Version.ToString(),
 					MachineName = Environment.MachineName,
 					ProcessorCount = Environment.ProcessorCount,
-					TotalMemory = GC.GetTotalMemory(false)
+					TotalMemory = GC.GetTotalMemory(false),
 				},
 				Uptime = DateTime.UtcNow - Process.GetCurrentProcess().StartTime.ToUniversalTime()
 			};

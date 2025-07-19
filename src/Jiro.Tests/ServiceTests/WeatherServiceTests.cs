@@ -67,11 +67,11 @@ public class WeatherServiceTests
 
 		// geolocation service
 		_geolocationServiceMock = new();
-		_geolocationServiceMock.Setup(_ => _.GetGeolocationAsync(_city)).ReturnsAsync(new GeoLocationResponse { Lat = _lat, Lon = _lon });
+		_geolocationServiceMock.Setup(static _ => _.GetGeolocationAsync(_city)).ReturnsAsync(new GeoLocationResponse { Lat = _lat, Lon = _lon });
 
 		// client factory
 		_httpClientFactory = new Mock<IHttpClientFactory>();
-		_httpClientFactory.Setup(_ => _.CreateClient(HttpClients.WEATHER_CLIENT)).Returns(weatherClient);
+		_httpClientFactory.Setup(static _ => _.CreateClient(HttpClients.WEATHER_CLIENT)).Returns(weatherClient);
 
 		_weatherService = new WeatherService(_httpClientFactory.Object, _geolocationServiceMock.Object);
 	}

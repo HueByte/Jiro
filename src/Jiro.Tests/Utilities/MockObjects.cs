@@ -47,7 +47,7 @@ public static class MockObjects
 		var mock = new Mock<TRepository>();
 
 		entries ??= new List<TEntity>();
-		mock.Setup(repo => repo.AsQueryable()).Returns(entries.BuildMock());
+		mock.Setup(static repo => repo.AsQueryable()).Returns(entries.BuildMock());
 
 		return mock;
 	}

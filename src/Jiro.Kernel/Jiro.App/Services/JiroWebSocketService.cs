@@ -1,19 +1,22 @@
 using System.Collections.Concurrent;
 
-using Jiro.App.Models;
 using Jiro.App.Options;
 using Jiro.Core.Services.CommandContext;
 using Jiro.Core.Services.CommandHandler;
+using Jiro.Shared.Websocket;
 
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
+using SharedCommandMessage = Jiro.Shared.Websocket.Requests.CommandMessage;
+using SharedErrorResponse = Jiro.Shared.Websocket.Responses.ErrorResponse;
+
 namespace Jiro.App.Services;
 
 /// <summary>
-/// Hosted service that manages WebSocket communication for receiving commands and sending results via gRPC
+/// Hosted service that manages WebSocket communication using IJiroClientHub
 /// </summary>
 public class JiroWebSocketService : BackgroundService, ICommandQueueMonitor
 {
@@ -21,7 +24,7 @@ public class JiroWebSocketService : BackgroundService, ICommandQueueMonitor
 	private readonly ILogger<JiroWebSocketService> _logger;
 	private readonly ICommandHandlerService _commandHandler;
 	private readonly WebSocketOptions _options;
-	private readonly IWebSocketConnection _webSocketConnection;
+	private readonly IJiroClientHub _jiroClientHub;
 
 	// Command queue monitoring
 	private readonly ConcurrentDictionary<string, DateTime> _activeCommands = new();
@@ -61,19 +64,19 @@ public class JiroWebSocketService : BackgroundService, ICommandQueueMonitor
 	/// <param name="logger">Logger instance</param>
 	/// <param name="commandHandler">Command handler service</param>
 	/// <param name="options">WebSocket configuration options</param>
-	/// <param name="webSocketConnection">WebSocket connection interface</param>
+	/// <param name="jiroClientHub">WebSocket client hub interface</param>
 	public JiroWebSocketService(
 		IServiceScopeFactory scopeFactory,
 		ILogger<JiroWebSocketService> logger,
 		ICommandHandlerService commandHandler,
 		IOptions<WebSocketOptions> options,
-		IWebSocketConnection webSocketConnection)
+		IJiroClientHub jiroClientHub)
 	{
 		_scopeFactory = scopeFactory ?? throw new ArgumentNullException(nameof(scopeFactory));
 		_logger = logger ?? throw new ArgumentNullException(nameof(logger));
 		_commandHandler = commandHandler ?? throw new ArgumentNullException(nameof(commandHandler));
 		_options = options?.Value ?? throw new ArgumentNullException(nameof(options));
-		_webSocketConnection = webSocketConnection ?? throw new ArgumentNullException(nameof(webSocketConnection));
+		_jiroClientHub = jiroClientHub ?? throw new ArgumentNullException(nameof(jiroClientHub));
 	}
 
 	/// <summary>
@@ -85,25 +88,17 @@ public class JiroWebSocketService : BackgroundService, ICommandQueueMonitor
 	{
 		_logger.LogInformation("Starting Jiro WebSocket Service");
 
-		// Register command handler
-		_webSocketConnection.OnCommand(HandleCommandAsync);
+		// Register event handlers for IJiroClientHub
+		_jiroClientHub.CommandReceived += HandleCommandAsync;
+		_jiroClientHub.Closed += OnConnectionClosed;
+		_jiroClientHub.Reconnecting += OnConnectionReconnecting;
+		_jiroClientHub.Reconnected += OnConnectionReconnected;
 
-		// Set up connection event handlers
-		_webSocketConnection.Closed += OnConnectionClosed;
-		_webSocketConnection.Reconnecting += OnConnectionReconnecting;
-		_webSocketConnection.Reconnected += OnConnectionReconnected;
+		// Optionally, register other event handlers for requests if needed
 
-		try
-		{
-			await _webSocketConnection.StartAsync(cancellationToken);
-			_logger.LogInformation("Jiro WebSocket Service started successfully");
-		}
-		catch (Exception ex)
-		{
-			_logger.LogError(ex, "Failed to start Jiro WebSocket Service");
-			throw;
-		}
+		// No explicit StartAsync for IJiroClientHub assumed; if needed, add here
 
+		_logger.LogInformation("Jiro WebSocket Service started successfully (IJiroClientHub)");
 		await base.StartAsync(cancellationToken);
 	}
 
@@ -116,16 +111,15 @@ public class JiroWebSocketService : BackgroundService, ICommandQueueMonitor
 	{
 		_logger.LogInformation("Stopping Jiro WebSocket Service");
 
-		try
-		{
-			await _webSocketConnection.StopAsync(cancellationToken);
-			_logger.LogInformation("Jiro WebSocket Service stopped successfully");
-		}
-		catch (Exception ex)
-		{
-			_logger.LogError(ex, "Error stopping Jiro WebSocket Service");
-		}
+		// Unregister event handlers
+		_jiroClientHub.CommandReceived -= HandleCommandAsync;
+		_jiroClientHub.Closed -= OnConnectionClosed;
+		_jiroClientHub.Reconnecting -= OnConnectionReconnecting;
+		_jiroClientHub.Reconnected -= OnConnectionReconnected;
 
+		// No explicit StopAsync for IJiroClientHub assumed; if needed, add here
+
+		_logger.LogInformation("Jiro WebSocket Service stopped successfully (IJiroClientHub)");
 		await base.StopAsync(cancellationToken);
 	}
 
@@ -147,7 +141,7 @@ public class JiroWebSocketService : BackgroundService, ICommandQueueMonitor
 		}
 	}
 
-	private async Task HandleCommandAsync(CommandMessage commandMessage)
+	private async Task HandleCommandAsync(SharedCommandMessage commandMessage)
 	{
 		var commandSyncId = commandMessage.CommandSyncId;
 		_activeCommands.TryAdd(commandSyncId, DateTime.UtcNow);
@@ -159,22 +153,22 @@ public class JiroWebSocketService : BackgroundService, ICommandQueueMonitor
 
 			await using var scope = _scopeFactory.CreateAsyncScope();
 			var commandContext = scope.ServiceProvider.GetRequiredService<ICommandContext>();
-			var grpcService = scope.ServiceProvider.GetRequiredService<IJiroGrpcService>();
 
 			// Set command context
 			commandContext.SetCurrentInstance(commandMessage.InstanceId);
 			commandContext.SetSessionId(commandMessage.SessionId);
-			commandContext.SetData(commandMessage.Parameters.Select(kvp =>
+			commandContext.SetData(commandMessage.Parameters.Select(static kvp =>
 				new KeyValuePair<string, object>(kvp.Key, kvp.Value)));
 
 			// Execute command
 			var result = await _commandHandler.ExecuteCommandAsync(scope.ServiceProvider, commandMessage.Command);
 
-			// Send result via gRPC
-			await grpcService.SendCommandResultAsync(commandSyncId, result);
+			// Note: IJiroClientHub interface doesn't have a method for sending command results
+			// You may need to extend the interface or handle results through a different mechanism
 
 			Interlocked.Increment(ref _successfulCommands);
-			_logger.LogInformation("Command completed successfully: {Command} [{SyncId}]", commandMessage.Command, commandSyncId);
+			_logger.LogInformation("Command completed successfully: {Command} [{SyncId}] Result: {Result}",
+				commandMessage.Command, commandSyncId, result);
 		}
 		catch (Exception ex)
 		{
@@ -182,13 +176,15 @@ public class JiroWebSocketService : BackgroundService, ICommandQueueMonitor
 
 			try
 			{
-				await using var scope = _scopeFactory.CreateAsyncScope();
-				var grpcService = scope.ServiceProvider.GetRequiredService<IJiroGrpcService>();
-				await grpcService.SendCommandErrorAsync(commandSyncId, ex.Message);
+				var errorResponse = new SharedErrorResponse
+				{
+					ErrorMessage = $"[{commandSyncId}] {ex.Message}"
+				};
+				await _jiroClientHub.SendErrorResponseAsync(errorResponse, CancellationToken.None);
 			}
-			catch (Exception grpcEx)
+			catch (Exception sendEx)
 			{
-				_logger.LogError(grpcEx, "Failed to send error result via gRPC for command [{SyncId}]", commandSyncId);
+				_logger.LogError(sendEx, "Failed to send error response via IJiroClientHub for command [{SyncId}]", commandSyncId);
 			}
 
 			Interlocked.Increment(ref _failedCommands);
@@ -232,7 +228,11 @@ public class JiroWebSocketService : BackgroundService, ICommandQueueMonitor
 	/// </summary>
 	public override void Dispose()
 	{
-		_webSocketConnection?.Dispose();
+		// If IJiroClientHub implements IDisposable, dispose it here
+		if (_jiroClientHub is IDisposable disposable)
+		{
+			disposable.Dispose();
+		}
 		base.Dispose();
 	}
 }

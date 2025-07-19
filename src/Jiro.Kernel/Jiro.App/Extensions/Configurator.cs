@@ -106,12 +106,12 @@ public static class Configurator
 	/// <returns>The service collection with configured HTTP clients for method chaining.</returns>
 	public static IServiceCollection AddHttpClients(this IServiceCollection services, IConfiguration configuration)
 	{
-		services.AddHttpClient(HttpClients.WEATHER_CLIENT, httpClient =>
+		services.AddHttpClient(HttpClients.WEATHER_CLIENT, static httpClient =>
 		{
 			httpClient.BaseAddress = new Uri("https://api.open-meteo.com/v1/");
 		});
 
-		services.AddHttpClient(HttpClients.GEOLOCATION_CLIENT, httpClient =>
+		services.AddHttpClient(HttpClients.GEOLOCATION_CLIENT, static httpClient =>
 		{
 			httpClient.BaseAddress = new Uri("https://nominatim.openstreetmap.org/");
 			httpClient.DefaultRequestHeaders.Add("User-Agent", "JiroBot");

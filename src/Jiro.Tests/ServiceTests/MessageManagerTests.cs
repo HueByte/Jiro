@@ -148,7 +148,7 @@ public class MessageManagerTests : IDisposable
 		// Assert
 		Assert.NotNull(result);
 		Assert.Equal(2, result.Count);
-		Assert.All(result, session => Assert.NotNull(session.Id));
+		Assert.All(result, static session => Assert.NotNull(session.Id));
 	}
 
 	[Fact]
@@ -217,9 +217,9 @@ public class MessageManagerTests : IDisposable
 		const string sessionId = "new-session";
 		const string instanceId = "test-instance";
 
-		_commandContextMock.Setup(x => x.InstanceId)
+		_commandContextMock.Setup(static x => x.InstanceId)
 			.Returns(instanceId);
-		_commandContextMock.Setup(x => x.SessionId)
+		_commandContextMock.Setup(static x => x.SessionId)
 			.Returns(sessionId);
 
 		// Act
@@ -259,16 +259,16 @@ public class MessageManagerTests : IDisposable
 			new() { Id = "msg2", Content = "Test response 1", SessionId = sessionId, InstanceId = instanceId, CreatedAt = DateTime.UtcNow }
 		};
 
-		_commandContextMock.Setup(x => x.SessionId).Returns(sessionId);
-		_commandContextMock.Setup(x => x.InstanceId).Returns(instanceId);
+		_commandContextMock.Setup(static x => x.SessionId).Returns(sessionId);
+		_commandContextMock.Setup(static x => x.InstanceId).Returns(instanceId);
 
 		// Act
 		await _messageManager.AddChatExchangeAsync(sessionId, chatMessages, modelMessages);
 
 		// Assert - Check that messages were added to database
-		var addedMessages = _dbContext.Messages.Where(m => m.SessionId == sessionId).ToList();
+		var addedMessages = _dbContext.Messages.Where(static m => m.SessionId == sessionId).ToList();
 		Assert.Equal(2, addedMessages.Count);
-		Assert.All(addedMessages, m => Assert.Equal(sessionId, m.SessionId));
+		Assert.All(addedMessages, static m => Assert.Equal(sessionId, m.SessionId));
 
 		// Also check that cache is updated
 		var cachedSession = await _messageManager.GetSessionAsync(sessionId, includeMessages: true);
@@ -395,7 +395,7 @@ public class MessageManagerTests : IDisposable
 		const string sessionId = "session-with-messages";
 		const string instanceId = "test-instance";
 
-		_commandContextMock.Setup(x => x.InstanceId).Returns(instanceId);
+		_commandContextMock.Setup(static x => x.InstanceId).Returns(instanceId);
 
 		// Create a session with messages
 		var session = new ChatSession

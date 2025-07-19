@@ -1,4 +1,4 @@
-using Jiro.Core.Services.System.Models;
+using Jiro.Shared.Websocket.Responses;
 
 namespace Jiro.Core.Services.System;
 

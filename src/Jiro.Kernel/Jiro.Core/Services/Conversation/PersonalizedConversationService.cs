@@ -52,7 +52,7 @@ public class PersonalizedConversationService : IPersonalizedConversationService
 			var sessionWithMessages = await _messageCacheService.GetOrCreateChatSessionAsync(sessionId, includeMessages: true);
 			var (conversationForChat, conversationHistory) = PrepareMessageHistory(sessionWithMessages, message);
 
-			var response = await _chatCoreService.ChatAsync(instanceId, conversationForChat.Select(x => x.Message).ToList(), ChatMessage.CreateDeveloperMessage(persona));
+			var response = await _chatCoreService.ChatAsync(instanceId, conversationForChat.Select(static x => x.Message).ToList(), ChatMessage.CreateSystemMessage(persona));
 			var assistantMessages = response.Content;
 			var assistantResponse = assistantMessages.FirstOrDefault()?.Text;
 
@@ -81,7 +81,7 @@ public class PersonalizedConversationService : IPersonalizedConversationService
 				try
 				{
 					var allMessages = conversationHistory.Concat([jiroMessage]).ToList();
-					var optimizationResult = await _historyOptimizerService.OptimizeMessageHistory(tokenUsage.TotalTokenCount, allMessages.Select(x => x.Message).ToList(), persona);
+					var optimizationResult = await _historyOptimizerService.OptimizeMessageHistory(tokenUsage.TotalTokenCount, allMessages.Select(static x => x.Message).ToList(), persona);
 					_messageCacheService.ClearOldMessages(sessionId, optimizationResult.RemovedMessages - 1);
 					await _personaService.AddSummaryAsync(optimizationResult.MessagesSummary);
 				}
@@ -163,7 +163,7 @@ public class PersonalizedConversationService : IPersonalizedConversationService
 		try
 		{
 			// Load existing messages from session (already loaded from cache with messages)
-			var existingMessages = session.Messages?.OrderBy(m => m.CreatedAt).ToList() ?? new List<ChatMessageWithMetadata>();
+			var existingMessages = session.Messages?.OrderBy(static m => m.CreatedAt).ToList() ?? new List<ChatMessageWithMetadata>();
 
 			var conversationHistory = new List<ChatMessageWithMetadata>(existingMessages);
 

@@ -1,6 +1,8 @@
 using System.Text.RegularExpressions;
 
 using Jiro.Core.Services.System.Models;
+using Jiro.Shared.Websocket.Requests;
+using Jiro.Shared.Websocket.Responses;
 
 using Microsoft.Extensions.Logging;
 

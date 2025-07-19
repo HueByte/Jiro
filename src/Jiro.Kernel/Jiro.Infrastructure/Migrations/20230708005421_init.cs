@@ -12,21 +12,21 @@ namespace Jiro.Infrastructure.Migrations
 		{
 			migrationBuilder.CreateTable(
 				name: "AspNetRoles",
-				columns: table => new
+				columns: static table => new
 				{
 					Id = table.Column<string>(type: "TEXT", nullable: false),
 					Name = table.Column<string>(type: "TEXT", maxLength: 256, nullable: true),
 					NormalizedName = table.Column<string>(type: "TEXT", maxLength: 256, nullable: true),
 					ConcurrencyStamp = table.Column<string>(type: "TEXT", nullable: true)
 				},
-				constraints: table =>
+				constraints: static table =>
 				{
-					table.PrimaryKey("PK_AspNetRoles", x => x.Id);
+					table.PrimaryKey("PK_AspNetRoles", static x => x.Id);
 				});
 
 			migrationBuilder.CreateTable(
 				name: "AspNetUsers",
-				columns: table => new
+				columns: static table => new
 				{
 					Id = table.Column<string>(type: "TEXT", nullable: false),
 					AccountCreatedDate = table.Column<DateTime>(type: "TEXT", nullable: false),
@@ -45,14 +45,14 @@ namespace Jiro.Infrastructure.Migrations
 					LockoutEnabled = table.Column<bool>(type: "INTEGER", nullable: false),
 					AccessFailedCount = table.Column<int>(type: "INTEGER", nullable: false)
 				},
-				constraints: table =>
+				constraints: static table =>
 				{
-					table.PrimaryKey("PK_AspNetUsers", x => x.Id);
+					table.PrimaryKey("PK_AspNetUsers", static x => x.Id);
 				});
 
 			migrationBuilder.CreateTable(
 				name: "AspNetRoleClaims",
-				columns: table => new
+				columns: static table => new
 				{
 					Id = table.Column<int>(type: "INTEGER", nullable: false)
 						.Annotation("Sqlite:Autoincrement", true),
@@ -60,12 +60,12 @@ namespace Jiro.Infrastructure.Migrations
 					ClaimType = table.Column<string>(type: "TEXT", nullable: true),
 					ClaimValue = table.Column<string>(type: "TEXT", nullable: true)
 				},
-				constraints: table =>
+				constraints: static table =>
 				{
-					table.PrimaryKey("PK_AspNetRoleClaims", x => x.Id);
+					table.PrimaryKey("PK_AspNetRoleClaims", static x => x.Id);
 					table.ForeignKey(
 						name: "FK_AspNetRoleClaims_AspNetRoles_RoleId",
-						column: x => x.RoleId,
+						column: static x => x.RoleId,
 						principalTable: "AspNetRoles",
 						principalColumn: "Id",
 						onDelete: ReferentialAction.Cascade);
@@ -73,7 +73,7 @@ namespace Jiro.Infrastructure.Migrations
 
 			migrationBuilder.CreateTable(
 				name: "AspNetUserClaims",
-				columns: table => new
+				columns: static table => new
 				{
 					Id = table.Column<int>(type: "INTEGER", nullable: false)
 						.Annotation("Sqlite:Autoincrement", true),
@@ -81,12 +81,12 @@ namespace Jiro.Infrastructure.Migrations
 					ClaimType = table.Column<string>(type: "TEXT", nullable: true),
 					ClaimValue = table.Column<string>(type: "TEXT", nullable: true)
 				},
-				constraints: table =>
+				constraints: static table =>
 				{
-					table.PrimaryKey("PK_AspNetUserClaims", x => x.Id);
+					table.PrimaryKey("PK_AspNetUserClaims", static x => x.Id);
 					table.ForeignKey(
 						name: "FK_AspNetUserClaims_AspNetUsers_UserId",
-						column: x => x.UserId,
+						column: static x => x.UserId,
 						principalTable: "AspNetUsers",
 						principalColumn: "Id",
 						onDelete: ReferentialAction.Cascade);
@@ -94,19 +94,19 @@ namespace Jiro.Infrastructure.Migrations
 
 			migrationBuilder.CreateTable(
 				name: "AspNetUserLogins",
-				columns: table => new
+				columns: static table => new
 				{
 					LoginProvider = table.Column<string>(type: "TEXT", nullable: false),
 					ProviderKey = table.Column<string>(type: "TEXT", nullable: false),
 					ProviderDisplayName = table.Column<string>(type: "TEXT", nullable: true),
 					UserId = table.Column<string>(type: "TEXT", nullable: false)
 				},
-				constraints: table =>
+				constraints: static table =>
 				{
-					table.PrimaryKey("PK_AspNetUserLogins", x => new { x.LoginProvider, x.ProviderKey });
+					table.PrimaryKey("PK_AspNetUserLogins", static x => new { x.LoginProvider, x.ProviderKey });
 					table.ForeignKey(
 						name: "FK_AspNetUserLogins_AspNetUsers_UserId",
-						column: x => x.UserId,
+						column: static x => x.UserId,
 						principalTable: "AspNetUsers",
 						principalColumn: "Id",
 						onDelete: ReferentialAction.Cascade);
@@ -114,23 +114,23 @@ namespace Jiro.Infrastructure.Migrations
 
 			migrationBuilder.CreateTable(
 				name: "AspNetUserRoles",
-				columns: table => new
+				columns: static table => new
 				{
 					UserId = table.Column<string>(type: "TEXT", nullable: false),
 					RoleId = table.Column<string>(type: "TEXT", nullable: false)
 				},
-				constraints: table =>
+				constraints: static table =>
 				{
-					table.PrimaryKey("PK_AspNetUserRoles", x => new { x.UserId, x.RoleId });
+					table.PrimaryKey("PK_AspNetUserRoles", static x => new { x.UserId, x.RoleId });
 					table.ForeignKey(
 						name: "FK_AspNetUserRoles_AspNetRoles_RoleId",
-						column: x => x.RoleId,
+						column: static x => x.RoleId,
 						principalTable: "AspNetRoles",
 						principalColumn: "Id",
 						onDelete: ReferentialAction.Cascade);
 					table.ForeignKey(
 						name: "FK_AspNetUserRoles_AspNetUsers_UserId",
-						column: x => x.UserId,
+						column: static x => x.UserId,
 						principalTable: "AspNetUsers",
 						principalColumn: "Id",
 						onDelete: ReferentialAction.Cascade);
@@ -138,19 +138,19 @@ namespace Jiro.Infrastructure.Migrations
 
 			migrationBuilder.CreateTable(
 				name: "AspNetUserTokens",
-				columns: table => new
+				columns: static table => new
 				{
 					UserId = table.Column<string>(type: "TEXT", nullable: false),
 					LoginProvider = table.Column<string>(type: "TEXT", nullable: false),
 					Name = table.Column<string>(type: "TEXT", nullable: false),
 					Value = table.Column<string>(type: "TEXT", nullable: true)
 				},
-				constraints: table =>
+				constraints: static table =>
 				{
-					table.PrimaryKey("PK_AspNetUserTokens", x => new { x.UserId, x.LoginProvider, x.Name });
+					table.PrimaryKey("PK_AspNetUserTokens", static x => new { x.UserId, x.LoginProvider, x.Name });
 					table.ForeignKey(
 						name: "FK_AspNetUserTokens_AspNetUsers_UserId",
-						column: x => x.UserId,
+						column: static x => x.UserId,
 						principalTable: "AspNetUsers",
 						principalColumn: "Id",
 						onDelete: ReferentialAction.Cascade);
@@ -158,7 +158,7 @@ namespace Jiro.Infrastructure.Migrations
 
 			migrationBuilder.CreateTable(
 				name: "RefreshToken",
-				columns: table => new
+				columns: static table => new
 				{
 					Id = table.Column<int>(type: "INTEGER", nullable: false)
 						.Annotation("Sqlite:Autoincrement", true),
@@ -171,12 +171,12 @@ namespace Jiro.Infrastructure.Migrations
 					ReasonRevoked = table.Column<string>(type: "TEXT", nullable: true),
 					AppUserId = table.Column<string>(type: "TEXT", nullable: true)
 				},
-				constraints: table =>
+				constraints: static table =>
 				{
-					table.PrimaryKey("PK_RefreshToken", x => x.Id);
+					table.PrimaryKey("PK_RefreshToken", static x => x.Id);
 					table.ForeignKey(
 						name: "FK_RefreshToken_AspNetUsers_AppUserId",
-						column: x => x.AppUserId,
+						column: static x => x.AppUserId,
 						principalTable: "AspNetUsers",
 						principalColumn: "Id");
 				});

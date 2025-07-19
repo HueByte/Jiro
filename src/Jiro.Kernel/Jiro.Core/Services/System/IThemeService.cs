@@ -1,4 +1,5 @@
 using Jiro.Core.Services.System.Models;
+using Jiro.Shared.Websocket.Responses;
 
 namespace Jiro.Core.Services.System;
 
@@ -7,9 +8,9 @@ namespace Jiro.Core.Services.System;
 /// </summary>
 public interface IThemeService
 {
-    /// <summary>
-    /// Retrieves available custom themes
-    /// </summary>
-    /// <returns>Theme response containing available themes</returns>
-    Task<ThemeResponse> GetCustomThemesAsync();
+	/// <summary>
+	/// Retrieves available custom themes
+	/// </summary>
+	/// <returns>Theme response containing available themes</returns>
+	Task<ThemesResponse> GetCustomThemesAsync();
 }

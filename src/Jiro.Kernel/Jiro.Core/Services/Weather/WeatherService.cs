@@ -47,7 +47,7 @@ public class WeatherService : IWeatherService
 		};
 
 		// Build the query string
-		string queryString = string.Join("&", queryParams.Select(kvp => $"{kvp.Key}={kvp.Value}"));
+		string queryString = string.Join("&", queryParams.Select(static kvp => $"{kvp.Key}={kvp.Value}"));
 
 		var response = await _weatherClient.GetAsync($"forecast?{queryString}");
 

@@ -36,7 +36,7 @@ public class HelpService : IHelpService
 	public void CreateHelpMessage()
 	{
 		var commands = _commandsContainer.Commands;
-		var modules = _commandsContainer.CommandModules.Select(e => e.Value);
+		var modules = _commandsContainer.CommandModules.Select(static e => e.Value);
 
 		StringBuilder messageBuilder = new();
 
@@ -52,7 +52,7 @@ public class HelpService : IHelpService
 				string? description = null;
 				string? syntax = null;
 
-				var parameters = command.Value.Parameters.Select(e => e?.ParamType.Name);
+				var parameters = command.Value.Parameters.Select(static e => e?.ParamType.Name);
 				string parametersString = parameters.Any() ? $"<span style=\"color: DeepPink;\">[ {string.Join(", ", parameters)} ]</span>" : string.Empty;
 
 				header = $"- {command.Key} {parametersString}<br />";
@@ -78,8 +78,8 @@ public class HelpService : IHelpService
 
 					// TODO: Add proper parameter metadata for ML
 					Parameters = command.Value.Parameters
-						.Where(p => p != null && p.ParamType != null)
-						.ToDictionary(p => p?.ToString() ?? string.Empty, p => p!.ParamType),
+						.Where(static p => p != null && p.ParamType != null)
+						.ToDictionary(static p => p?.ToString() ?? string.Empty, static p => p!.ParamType),
 
 					// TODO: Implement proper keywords to commands
 					Keywords = [string.Empty]

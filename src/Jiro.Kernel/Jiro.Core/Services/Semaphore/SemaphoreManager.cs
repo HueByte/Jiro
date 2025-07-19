@@ -29,6 +29,6 @@ public class SemaphoreManager : ISemaphoreManager
 	/// <returns>A <see cref="SemaphoreSlim"/> instance associated with the specified instance ID.</returns>
 	public SemaphoreSlim GetOrCreateInstanceSemaphore(string instanceId)
 	{
-		return _personaSemaphore.GetOrAdd(instanceId, _ => new SemaphoreSlim(1, 1));
+		return _personaSemaphore.GetOrAdd(instanceId, static _ => new SemaphoreSlim(1, 1));
 	}
 }

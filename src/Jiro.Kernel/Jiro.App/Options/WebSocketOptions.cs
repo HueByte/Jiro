@@ -8,7 +8,7 @@ public class WebSocketOptions
 	/// <summary>
 	/// The URL of the SignalR hub
 	/// </summary>
-	public string HubUrl { get; set; } = "https://localhost:5001/commandHub";
+	public string HubUrl { get; set; } = "https://localhost:5001/instanceHub";
 
 	/// <summary>
 	/// Delay between reconnection attempts in milliseconds

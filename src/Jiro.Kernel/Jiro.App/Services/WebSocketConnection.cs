@@ -1,10 +1,13 @@
 using System.Text.Json;
 
-using Jiro.App.Models;
 using Jiro.App.Options;
+using Jiro.Core.Services.CommandHandler;
 using Jiro.Core.Services.CommandSystem;
 using Jiro.Core.Services.MessageCache;
 using Jiro.Core.Services.System;
+using Jiro.Shared.Websocket;
+using Jiro.Shared.Websocket.Requests;
+using Jiro.Shared.Websocket.Responses;
 
 using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.Extensions.Configuration;
@@ -12,20 +15,24 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
+using static Jiro.Shared.Websocket.Endpoints;
+
 namespace Jiro.App.Services;
 
 /// <summary>
 /// SignalR implementation of the WebSocket connection interface
 /// </summary>
-public class WebSocketConnection : IWebSocketConnection
+public class WebSocketConnection : IJiroClientHub, IDisposable
 {
 	private readonly ILogger<WebSocketConnection> _logger;
 	private readonly WebSocketOptions _options;
 	private readonly IServiceScopeFactory _scopeFactory;
+	private readonly ICommandHandlerService _commandHandler;
 	private HubConnection? _connection;
 	private readonly SemaphoreSlim _connectionSemaphore = new(1, 1);
 	private bool _disposed = false;
-	private Func<CommandMessage, Task>? _commandHandler;
+
+	#region Connection Lifecycle Events
 
 	/// <summary>
 	/// Event fired when connection is closed
@@ -42,6 +49,61 @@ public class WebSocketConnection : IWebSocketConnection
 	/// </summary>
 	public event Func<string?, Task>? Reconnected;
 
+	#endregion
+
+	#region Command Events
+
+	/// <summary>
+	/// Event fired when a command is received from the server
+	/// </summary>
+	public event Func<CommandMessage, Task>? CommandReceived;
+
+	/// <summary>
+	/// Event fired when a keepalive acknowledgment is received
+	/// </summary>
+	public event Func<Task>? KeepaliveAckReceived;
+
+	#endregion
+
+	#region Request Events
+
+	/// <summary>
+	/// Event fired when a logs request is received from the server
+	/// </summary>
+	public event Func<GetLogsRequest, Task>? LogsRequested;
+
+	/// <summary>
+	/// Event fired when a session request is received from the server
+	/// </summary>
+	public event Func<GetSessionRequest, Task>? SessionRequested;
+
+	/// <summary>
+	/// Event fired when a sessions request is received from the server
+	/// </summary>
+	public event Func<GetSessionsRequest, Task>? SessionsRequested;
+
+	/// <summary>
+	/// Event fired when a config request is received from the server
+	/// </summary>
+	public event Func<GetConfigRequest, Task>? ConfigRequested;
+
+	/// <summary>
+	/// Event fired when a config update request is received from the server
+	/// </summary>
+	public event Func<UpdateConfigRequest, Task>? ConfigUpdateRequested;
+
+	/// <summary>
+	/// Event fired when a custom themes request is received from the server
+	/// </summary>
+	public event Func<GetCustomThemesRequest, Task>? CustomThemesRequested;
+
+	/// <summary>
+	/// Event fired when a commands metadata request is received from the server
+	/// </summary>
+	public event Func<GetCommandsMetadataRequest, Task>? CommandsMetadataRequested;
+
+	#endregion
+
 	/// <summary>
 	/// Gets the current connection state
 	/// </summary>
@@ -52,15 +114,31 @@ public class WebSocketConnection : IWebSocketConnection
 	/// </summary>
 	/// <param name="logger">The logger</param>
 	/// <param name="options">The WebSocket configuration options</param>
-	/// <param name="scopeFactory">The service scope factory for creating scoped services</param>
+	/// <param name="scopeFactory">Service scope factory for creating scoped services</param>
+	/// <param name="commandHandler">Command handler service</param>
 	public WebSocketConnection(
 		ILogger<WebSocketConnection> logger,
 		IOptions<WebSocketOptions> options,
-		IServiceScopeFactory scopeFactory)
+		IServiceScopeFactory scopeFactory,
+		ICommandHandlerService commandHandler)
 	{
 		_logger = logger ?? throw new ArgumentNullException(nameof(logger));
 		_options = options?.Value ?? throw new ArgumentNullException(nameof(options));
 		_scopeFactory = scopeFactory ?? throw new ArgumentNullException(nameof(scopeFactory));
+		_commandHandler = commandHandler ?? throw new ArgumentNullException(nameof(commandHandler));
+
+		// Auto-start the connection
+		_ = Task.Run(async () =>
+		{
+			try
+			{
+				await StartAsync();
+			}
+			catch (Exception ex)
+			{
+				_logger.LogError(ex, "Failed to auto-start WebSocket connection");
+			}
+		});
 	}
 
 	/// <summary>
@@ -119,6 +197,7 @@ public class WebSocketConnection : IWebSocketConnection
 
 			// Set up event handlers
 			SetupEventHandlers();
+			SetupEvents();
 
 			// Connect
 			await _connection.StartAsync(cancellationToken);
@@ -159,78 +238,17 @@ public class WebSocketConnection : IWebSocketConnection
 		}
 	}
 
-	/// <summary>
-	/// Registers a handler for incoming commands
-	/// </summary>
-	/// <param name="handler">Command handler function</param>
-	public void OnCommand(Func<CommandMessage, Task> handler)
-	{
-		_commandHandler = handler;
-	}
-
+	#region Event Handlers
 	/// <summary>
 	/// Sets up SignalR event handlers
 	/// </summary>
 	private void SetupEventHandlers()
 	{
+
 		if (_connection == null) return;
 
-		// TODO: Figure out some nicer system for resolving dependency injection in SignalR handlers
-		// Handle command reception - expecting JSON string that contains CommandMessage
-		_connection.On<string>("ReceiveCommand", async (commandJson) =>
-		{
-			try
-			{
-				_logger.LogDebug("Received command from hub: {Command}", commandJson);
-
-				// Deserialize the command message
-				var commandMessage = JsonSerializer.Deserialize<CommandMessage>(commandJson, new JsonSerializerOptions
-				{
-					PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-				});
-
-				if (commandMessage != null && _commandHandler != null)
-				{
-					await _commandHandler.Invoke(commandMessage);
-				}
-				else
-				{
-					_logger.LogWarning("Failed to deserialize command message or no handler registered");
-				}
-			}
-			catch (Exception ex)
-			{
-				_logger.LogError(ex, "Error processing received command: {Command}", commandJson);
-			}
-		});
-
-		// Handle keepalive acknowledgment from server
-		_connection.On("KeepaliveAck", async () =>
-		{
-			try
-			{
-				_logger.LogDebug("Received keepalive acknowledgment from server");
-
-				// Generate a unique requestId for the keepalive response
-				var requestId = Guid.NewGuid().ToString();
-
-				// Send acknowledgment back to server via SignalR
-				var response = new KeepaliveResponse
-				{
-					RequestId = requestId,
-					Timestamp = DateTime.UtcNow,
-					Status = "acknowledged"
-				};
-				await _connection.InvokeAsync("KeepaliveResponse", response);
-			}
-			catch (Exception ex)
-			{
-				_logger.LogError(ex, "Error handling keepalive acknowledgment");
-			}
-		});
-
 		// Handle GetLogs command from server
-		_connection.On<GetLogsParameters>("GetLogs", async (parameters) =>
+		LogsRequested += async (parameters) =>
 		{
 			try
 			{
@@ -262,7 +280,7 @@ public class WebSocketConnection : IWebSocketConnection
 						}).ToList()
 					};
 
-					await _connection.InvokeAsync("LogsResponse", response);
+					await SendLogsResponseAsync(response, CancellationToken.None);
 				}
 				catch (Exception ex)
 				{
@@ -273,21 +291,22 @@ public class WebSocketConnection : IWebSocketConnection
 						CommandName = "GetLogs",
 						ErrorMessage = $"Error retrieving logs: {ex.Message}"
 					};
-					await _connection.InvokeAsync("ErrorResponse", errorResponse);
+					await SendErrorResponseAsync(errorResponse, CancellationToken.None);
 				}
 			}
 			catch (Exception ex)
 			{
 				_logger.LogError(ex, "Error handling GetLogs command from server");
 			}
-		});
+		};
 
 		// Handle GetSessions command from server
-		_connection.On<GetSessionsParameters>("GetSessions", async (parameters) =>
+		SessionsRequested += async (parameters) =>
 		{
 			try
 			{
 				var requestId = parameters.RequestId;
+				var instanceId = parameters.InstanceId;
 
 				_logger.LogInformation("Received GetSessions command from server with RequestId: {RequestId}", requestId);
 
@@ -297,7 +316,6 @@ public class WebSocketConnection : IWebSocketConnection
 
 				try
 				{
-					var instanceId = configuration.GetValue<string>("INSTANCE_ID") ?? Environment.MachineName;
 					var sessions = await messageManager.GetChatSessionsAsync(instanceId);
 
 					var response = new SessionsResponse
@@ -314,7 +332,7 @@ public class WebSocketConnection : IWebSocketConnection
 						}).ToList()
 					};
 
-					await _connection.InvokeAsync("SessionsResponse", response);
+					await SendSessionsResponseAsync(response, CancellationToken.None);
 				}
 				catch (Exception ex)
 				{
@@ -325,7 +343,8 @@ public class WebSocketConnection : IWebSocketConnection
 						CommandName = "GetSessions",
 						ErrorMessage = $"Error retrieving sessions: {ex.Message}"
 					};
-					await _connection.InvokeAsync("ErrorResponse", errorResponse);
+
+					await SendErrorResponseAsync(errorResponse, CancellationToken.None);
 				}
 			}
 			catch (Exception ex)
@@ -337,12 +356,13 @@ public class WebSocketConnection : IWebSocketConnection
 					CommandName = "GetSessions",
 					ErrorMessage = $"Error handling GetSessions command: {ex.Message}"
 				};
-				await _connection.InvokeAsync("ErrorResponse", errorResponse);
+
+				await SendErrorResponseAsync(errorResponse, CancellationToken.None);
 			}
-		});
+		};
 
 		// Handle GetConfig command from server
-		_connection.On<GetConfigParameters>("GetConfig", async (parameters) =>
+		ConfigRequested += async (parameters) =>
 		{
 			try
 			{
@@ -358,7 +378,7 @@ public class WebSocketConnection : IWebSocketConnection
 					var configResponse = await configService.GetConfigAsync();
 					configResponse.RequestId = requestId;
 
-					await _connection.InvokeAsync("ConfigResponse", configResponse);
+					await SendConfigResponseAsync(configResponse, CancellationToken.None);
 				}
 				catch (Exception ex)
 				{
@@ -369,17 +389,17 @@ public class WebSocketConnection : IWebSocketConnection
 						CommandName = "GetConfig",
 						ErrorMessage = $"Error retrieving configuration: {ex.Message}"
 					};
-					await _connection.InvokeAsync("ErrorResponse", errorResponse);
+					await SendErrorResponseAsync(errorResponse, CancellationToken.None);
 				}
 			}
 			catch (Exception ex)
 			{
 				_logger.LogError(ex, "Error handling GetConfig command from server");
 			}
-		});
+		};
 
 		// Handle UpdateConfig command from server
-		_connection.On<UpdateConfigParameters>("UpdateConfig", async (parameters) =>
+		ConfigUpdateRequested += async (parameters) =>
 		{
 			try
 			{
@@ -396,7 +416,7 @@ public class WebSocketConnection : IWebSocketConnection
 					var updateResponse = await configService.UpdateConfigAsync(configJson);
 					updateResponse.RequestId = requestId;
 
-					await _connection.InvokeAsync("ConfigUpdateResponse", updateResponse);
+					await SendConfigUpdateResponseAsync(updateResponse, CancellationToken.None);
 				}
 				catch (Exception ex)
 				{
@@ -407,17 +427,17 @@ public class WebSocketConnection : IWebSocketConnection
 						CommandName = "UpdateConfig",
 						ErrorMessage = $"Error updating configuration: {ex.Message}"
 					};
-					await _connection.InvokeAsync("ErrorResponse", errorResponse);
+					await SendErrorResponseAsync(errorResponse, CancellationToken.None);
 				}
 			}
 			catch (Exception ex)
 			{
 				_logger.LogError(ex, "Error handling UpdateConfig command from server");
 			}
-		});
+		};
 
 		// Handle GetCustomThemes command from server
-		_connection.On<GetCustomThemesParameters>("GetCustomThemes", async (parameters) =>
+		CustomThemesRequested += async (parameters) =>
 		{
 			try
 			{
@@ -430,10 +450,9 @@ public class WebSocketConnection : IWebSocketConnection
 
 				try
 				{
-					var themeResponse = await themeService.GetCustomThemesAsync();
-					themeResponse.RequestId = requestId;
+					var themesResponse = await themeService.GetCustomThemesAsync();
 
-					await _connection.InvokeAsync("ThemesResponse", themeResponse);
+					await SendThemesResponseAsync(themesResponse, CancellationToken.None);
 				}
 				catch (Exception ex)
 				{
@@ -444,17 +463,17 @@ public class WebSocketConnection : IWebSocketConnection
 						CommandName = "GetCustomThemes",
 						ErrorMessage = $"Error retrieving custom themes: {ex.Message}"
 					};
-					await _connection.InvokeAsync("ErrorResponse", errorResponse);
+					await SendErrorResponseAsync(errorResponse, CancellationToken.None);
 				}
 			}
 			catch (Exception ex)
 			{
 				_logger.LogError(ex, "Error handling GetCustomThemes command from server");
 			}
-		});
+		};
 
 		// Handle GetCommandsMetadata command from server
-		_connection.On<GetCommandsMetadataParameters>("GetCommandsMetadata", async (parameters) =>
+		CommandsMetadataRequested += async (parameters) =>
 		{
 			try
 			{
@@ -470,7 +489,7 @@ public class WebSocketConnection : IWebSocketConnection
 					var coreCommandMeta = helpService.CommandMeta;
 
 					// Convert Core CommandMetadata to App CommandMetadata
-					var appCommandMeta = coreCommandMeta.Select(c => new App.Models.CommandMetadata
+					List<Jiro.Shared.Websocket.Requests.CommandMetadata> appCommandMeta = coreCommandMeta.Select(c => new Jiro.Shared.Websocket.Requests.CommandMetadata
 					{
 						CommandName = c.CommandName,
 						CommandDescription = c.CommandDescription,
@@ -487,7 +506,7 @@ public class WebSocketConnection : IWebSocketConnection
 					};
 
 					// Send response back to server via SignalR
-					await _connection.InvokeAsync("CommandsMetadataResponse", response);
+					await SendCommandsMetadataResponseAsync(response, CancellationToken.None);
 				}
 				catch (Exception ex)
 				{
@@ -498,14 +517,15 @@ public class WebSocketConnection : IWebSocketConnection
 						CommandName = "GetCommandsMetadata",
 						ErrorMessage = $"Error retrieving commands metadata: {ex.Message}"
 					};
-					await _connection.InvokeAsync("ErrorResponse", errorResponse);
+
+					await SendErrorResponseAsync(errorResponse, CancellationToken.None);
 				}
 			}
 			catch (Exception ex)
 			{
 				_logger.LogError(ex, "Error handling GetCommandsMetadata command from server");
 			}
-		});
+		};
 
 		// Handle connection closed
 		_connection.Closed += async (exception) =>
@@ -546,7 +566,191 @@ public class WebSocketConnection : IWebSocketConnection
 				await Reconnected.Invoke(connectionId);
 			}
 		};
+
+		KeepaliveAckReceived += async () =>
+		{
+			_logger.LogDebug("Keepalive acknowledgment received from server");
+
+			if (KeepaliveAckReceived != null)
+			{
+				await KeepaliveAckReceived.Invoke();
+			}
+		};
+
+		SessionRequested += async (req) =>
+		{
+			try
+			{
+				_logger.LogInformation("Received GetSession command from server");
+
+				await using var scope = _scopeFactory.CreateAsyncScope();
+				var messageManager = scope.ServiceProvider.GetRequiredService<IMessageManager>();
+
+				var session = await messageManager.GetSessionAsync(req.InstanceId, includeMessages: true);
+				if (session is null)
+				{
+					_logger.LogError("Session not found for instance {InstanceId}", req.InstanceId);
+					throw new Exception("Session not found.");
+				}
+
+				var sessionResponse = new SessionResponse
+				{
+					InstanceId = req.InstanceId,
+					CreatedAt = session.CreatedAt,
+					SessionId = session.SessionId,
+					LastUpdatedAt = session.LastUpdatedAt,
+					SessionName = string.Empty, // TODO: Implement session name
+					RequestId = req.RequestId,
+					TotalMessages = session.Messages.Count,
+					Messages = session.Messages.Select(m => new ChatMessage
+					{
+						MessageId = m.MessageId,
+						Content = m.Message.Content.ToString() ?? string.Empty,
+						CreatedAt = m.CreatedAt,
+						Type = m.Type.ToString(),
+						IsUser = m.IsUser
+					}).ToList()
+				};
+
+				await SendSessionResponseAsync(sessionResponse, CancellationToken.None);
+			}
+			catch (Exception ex)
+			{
+				_logger.LogError(ex, "Error handling GetSession command from server");
+			}
+		};
 	}
+
+	#endregion
+	#region Response Methods
+
+	/// <summary>
+	/// Sends a logs response to the server
+	/// </summary>
+	/// <param name="response">The logs response</param>
+	/// <param name="cancellationToken">Cancellation token</param>
+	/// <returns>Task representing the operation</returns>
+	public async Task SendLogsResponseAsync(LogsResponse response, CancellationToken cancellationToken = default)
+	{
+		if (_connection?.State == HubConnectionState.Connected)
+		{
+			await _connection.InvokeAsync(ServerHandled.LogsResponse, response, cancellationToken);
+		}
+	}
+
+	/// <summary>
+	/// Sends a session response to the server
+	/// </summary>
+	/// <param name="response">The session response</param>
+	/// <param name="cancellationToken">Cancellation token</param>
+	/// <returns>Task representing the operation</returns>
+	public async Task SendSessionResponseAsync(SessionResponse response, CancellationToken cancellationToken = default)
+	{
+		if (_connection?.State == HubConnectionState.Connected)
+		{
+			await _connection.InvokeAsync(ServerHandled.SessionResponse, response, cancellationToken);
+		}
+	}
+
+	/// <summary>
+	/// Sends a sessions response to the server
+	/// </summary>
+	/// <param name="response">The sessions response</param>
+	/// <param name="cancellationToken">Cancellation token</param>
+	/// <returns>Task representing the operation</returns>
+	public async Task SendSessionsResponseAsync(SessionsResponse response, CancellationToken cancellationToken = default)
+	{
+		if (_connection?.State == HubConnectionState.Connected)
+		{
+			await _connection.InvokeAsync(ServerHandled.SessionsResponse, response, cancellationToken);
+		}
+	}
+
+	/// <summary>
+	/// Sends a configuration response to the server
+	/// </summary>
+	/// <param name="response">The configuration response</param>
+	/// <param name="cancellationToken">Cancellation token</param>
+	/// <returns>Task representing the operation</returns>
+	public async Task SendConfigResponseAsync(ConfigResponse response, CancellationToken cancellationToken = default)
+	{
+		if (_connection?.State == HubConnectionState.Connected)
+		{
+			await _connection.InvokeAsync(ServerHandled.ConfigResponse, response, cancellationToken);
+		}
+	}
+
+	/// <summary>
+	/// Sends a config update response to the server
+	/// </summary>
+	/// <param name="response">The config update response</param>
+	/// <param name="cancellationToken">Cancellation token</param>
+	/// <returns>Task representing the operation</returns>
+	public async Task SendConfigUpdateResponseAsync(ConfigUpdateResponse response, CancellationToken cancellationToken = default)
+	{
+		if (_connection?.State == HubConnectionState.Connected)
+		{
+			await _connection.InvokeAsync(ServerHandled.ConfigUpdateResponse, response, cancellationToken);
+		}
+	}
+
+	/// <summary>
+	/// Sends a themes response to the server
+	/// </summary>
+	/// <param name="response">The themes response</param>
+	/// <param name="cancellationToken">Cancellation token</param>
+	/// <returns>Task representing the operation</returns>
+	public async Task SendThemesResponseAsync(ThemesResponse response, CancellationToken cancellationToken = default)
+	{
+		if (_connection?.State == HubConnectionState.Connected)
+		{
+			await _connection.InvokeAsync(ServerHandled.ThemesResponse, response, cancellationToken);
+		}
+	}
+
+	/// <summary>
+	/// Sends a commands metadata response to the server
+	/// </summary>
+	/// <param name="response">The commands metadata response</param>
+	/// <param name="cancellationToken">Cancellation token</param>
+	/// <returns>Task representing the operation</returns>
+	public async Task SendCommandsMetadataResponseAsync(CommandsMetadataResponse response, CancellationToken cancellationToken = default)
+	{
+		if (_connection?.State == HubConnectionState.Connected)
+		{
+			await _connection.InvokeAsync(ServerHandled.CommandsMetadataResponse, response, cancellationToken);
+		}
+	}
+
+	/// <summary>
+	/// Sends a keepalive response to the server
+	/// </summary>
+	/// <param name="response">The keepalive response</param>
+	/// <param name="cancellationToken">Cancellation token</param>
+	/// <returns>Task representing the operation</returns>
+	public async Task SendKeepaliveResponseAsync(KeepaliveResponse response, CancellationToken cancellationToken = default)
+	{
+		if (_connection?.State == HubConnectionState.Connected)
+		{
+			await _connection.InvokeAsync(ServerHandled.KeepaliveResponse, response, cancellationToken);
+		}
+	}
+
+	/// <summary>
+	/// Sends an error response to the server
+	/// </summary>
+	/// <param name="response">The error response</param>
+	/// <param name="cancellationToken">Cancellation token</param>
+	/// <returns>Task representing the operation</returns>
+	public async Task SendErrorResponseAsync(ErrorResponse response, CancellationToken cancellationToken = default)
+	{
+		if (_connection?.State == HubConnectionState.Connected)
+		{
+			await _connection.InvokeAsync(ServerHandled.ErrorResponse, response, cancellationToken);
+		}
+	}
+
+	#endregion
 
 	/// <summary>
 	/// Disposes the current connection
@@ -596,5 +800,42 @@ public class WebSocketConnection : IWebSocketConnection
 				_disposed = true;
 			}
 		}
+	}
+
+	/// <inheritdoc/>
+	public void SetupEvents()
+	{
+		if (_connection == null) return;
+
+		// List of required event handlers and their names for better diagnostics
+		var requiredHandlers = new (Delegate? handler, string name)[]
+		{
+			(CommandReceived, nameof(CommandReceived)),
+			(KeepaliveAckReceived, nameof(KeepaliveAckReceived)),
+			(LogsRequested, nameof(LogsRequested)),
+			(SessionRequested, nameof(SessionRequested)),
+			(SessionsRequested, nameof(SessionsRequested)),
+			(ConfigRequested, nameof(ConfigRequested)),
+			(ConfigUpdateRequested, nameof(ConfigUpdateRequested)),
+			(CustomThemesRequested, nameof(CustomThemesRequested)),
+			(CommandsMetadataRequested, nameof(CommandsMetadataRequested))
+		};
+
+		var missingHandlers = requiredHandlers.Where(h => h.handler is null).Select(h => h.name).ToList();
+		if (missingHandlers.Count > 0)
+		{
+			_logger.LogWarning($"The following event handlers are not set up: {string.Join(", ", missingHandlers)}. Ensure all events are subscribed before calling SetupEvents.");
+			return;
+		}
+
+		_connection.On(Endpoints.ClientHandled.ReceiveCommand, CommandReceived!);
+		_connection.On(Endpoints.ClientHandled.KeepaliveAck, KeepaliveAckReceived!);
+		_connection.On(Endpoints.ClientHandled.GetLogs, LogsRequested!);
+		_connection.On(Endpoints.ClientHandled.GetSession, SessionRequested!);
+		_connection.On(Endpoints.ClientHandled.GetSessions, SessionsRequested!);
+		_connection.On(Endpoints.ClientHandled.GetConfig, ConfigRequested!);
+		_connection.On(Endpoints.ClientHandled.UpdateConfig, ConfigUpdateRequested!);
+		_connection.On(Endpoints.ClientHandled.GetCustomThemes, CustomThemesRequested!);
+		_connection.On(Endpoints.ClientHandled.GetCommandsMetadata, CommandsMetadataRequested!);
 	}
 }

@@ -56,11 +56,11 @@ public class ServiceIntegrationTests
 		};
 
 		// Setup geolocation service
-		_geolocationServiceMock.Setup(x => x.GetGeolocationAsync(cityName))
+		_geolocationServiceMock.Setup(static x => x.GetGeolocationAsync(cityName))
 			.ReturnsAsync(geoResponse);
 
 		// Setup weather service to use geolocation
-		_weatherServiceMock.Setup(x => x.GetWeatherStringAsync(cityName))
+		_weatherServiceMock.Setup(static x => x.GetWeatherStringAsync(cityName))
 			.ReturnsAsync(expectedWeatherInfo);
 
 		// Act
@@ -74,8 +74,8 @@ public class ServiceIntegrationTests
 		Assert.Equal(expectedWeatherInfo, weatherResult);
 
 		// Verify the workflow called geolocation first, then weather
-		_geolocationServiceMock.Verify(x => x.GetGeolocationAsync(cityName), Times.Once);
-		_weatherServiceMock.Verify(x => x.GetWeatherStringAsync(cityName), Times.Once);
+		_geolocationServiceMock.Verify(static x => x.GetGeolocationAsync(cityName), Times.Once);
+		_weatherServiceMock.Verify(static x => x.GetWeatherStringAsync(cityName), Times.Once);
 	}
 
 	[Fact]
@@ -96,7 +96,7 @@ public class ServiceIntegrationTests
 		};
 
 		// Setup message manager
-		_messageManagerMock.Setup(x => x.AddChatExchangeAsync(
+		_messageManagerMock.Setup(static x => x.AddChatExchangeAsync(
 				sessionId,
 				It.IsAny<List<Core.Services.Conversation.Models.ChatMessageWithMetadata>>(),
 				It.IsAny<List<Core.Models.Message>>()))
@@ -106,7 +106,7 @@ public class ServiceIntegrationTests
 		await _messageManagerMock.Object.AddChatExchangeAsync(sessionId, chatMessages, modelMessages);
 
 		// Assert
-		_messageManagerMock.Verify(x => x.AddChatExchangeAsync(
+		_messageManagerMock.Verify(static x => x.AddChatExchangeAsync(
 			sessionId,
 			It.IsAny<List<Core.Services.Conversation.Models.ChatMessageWithMetadata>>(),
 			It.IsAny<List<Core.Models.Message>>()), Times.Once);
@@ -214,7 +214,7 @@ public class ServiceIntegrationTests
 		// Arrange
 		const string personaMessage = "You are Jiro, a helpful AI assistant";
 
-		_messageManagerMock.Setup(x => x.GetPersonaCoreMessageAsync())
+		_messageManagerMock.Setup(static x => x.GetPersonaCoreMessageAsync())
 			.ReturnsAsync(personaMessage);
 
 		// Act
@@ -222,7 +222,7 @@ public class ServiceIntegrationTests
 
 		// Assert
 		Assert.Equal(personaMessage, result);
-		_messageManagerMock.Verify(x => x.GetPersonaCoreMessageAsync(), Times.Once);
+		_messageManagerMock.Verify(static x => x.GetPersonaCoreMessageAsync(), Times.Once);
 	}
 
 	[Theory]
@@ -273,7 +273,7 @@ public class ServiceIntegrationTests
 			}
 		};
 
-		_weatherServiceMock.Setup(x => x.GetWeatherAsync(cityName))
+		_weatherServiceMock.Setup(static x => x.GetWeatherAsync(cityName))
 			.ReturnsAsync(weatherResponse);
 
 		// Act

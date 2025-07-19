@@ -88,7 +88,7 @@ hubUrl = $"{hubUrl}{separator}api_key={Uri.EscapeDataString(_options.ApiKey)}";
   "API_KEY": "your-api-key-here",
   "JIRO_API": "https://localhost:18092",
   "WebSocket": {
-    "HubUrl": "https://localhost:5001/commandHub",
+    "HubUrl": "https://localhost:5001/instanceHub",
     "ReconnectionDelayMs": 5000,
     "MaxReconnectionAttempts": 5,
     "HandshakeTimeoutMs": 15000,

@@ -12,32 +12,32 @@ namespace Jiro.Infrastructure.Migrations
 		{
 			migrationBuilder.CreateTable(
 				name: "ChatSessions",
-				columns: table => new
+				columns: static table => new
 				{
 					Id = table.Column<string>(type: "TEXT", nullable: false),
 					SessionId = table.Column<string>(type: "TEXT", nullable: false),
 					UserId = table.Column<string>(type: "TEXT", nullable: false)
 				},
-				constraints: table =>
+				constraints: static table =>
 				{
-					table.PrimaryKey("PK_ChatSessions", x => x.Id);
+					table.PrimaryKey("PK_ChatSessions", static x => x.Id);
 				});
 
 			migrationBuilder.CreateTable(
 				name: "Messages",
-				columns: table => new
+				columns: static table => new
 				{
 					Id = table.Column<string>(type: "TEXT", nullable: false),
 					Role = table.Column<string>(type: "TEXT", nullable: false),
 					Content = table.Column<string>(type: "TEXT", nullable: false),
 					ChatSessionId = table.Column<string>(type: "TEXT", nullable: false)
 				},
-				constraints: table =>
+				constraints: static table =>
 				{
-					table.PrimaryKey("PK_Messages", x => x.Id);
+					table.PrimaryKey("PK_Messages", static x => x.Id);
 					table.ForeignKey(
 						name: "FK_Messages_ChatSessions_ChatSessionId",
-						column: x => x.ChatSessionId,
+						column: static x => x.ChatSessionId,
 						principalTable: "ChatSessions",
 						principalColumn: "Id",
 						onDelete: ReferentialAction.Cascade);

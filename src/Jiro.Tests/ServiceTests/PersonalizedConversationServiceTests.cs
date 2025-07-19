@@ -114,11 +114,11 @@ public class PersonalizedConversationServiceTests
 		const string personaContent = "You are Jiro";
 
 		_personaServiceMock
-			.Setup(x => x.GetPersonaAsync(string.Empty))
+			.Setup(static x => x.GetPersonaAsync(string.Empty))
 			.ReturnsAsync(personaContent);
 
 		_chatCoreServiceMock
-			.Setup(x => x.ExchangeMessageAsync(inputMessage, It.IsAny<ChatMessage>(), 1200))
+			.Setup(static x => x.ExchangeMessageAsync(inputMessage, It.IsAny<ChatMessage>(), 1200))
 			.ReturnsAsync(expectedResponse);
 
 		// Act
@@ -126,7 +126,7 @@ public class PersonalizedConversationServiceTests
 
 		// Assert
 		Assert.Equal(expectedResponse, result);
-		_personaServiceMock.Verify(x => x.GetPersonaAsync(string.Empty), Times.Once);
+		_personaServiceMock.Verify(static x => x.GetPersonaAsync(string.Empty), Times.Once);
 	}
 
 	// Note: ChatAsync method testing is complex due to OpenAI Chat types and complex dependencies.

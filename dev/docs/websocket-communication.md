@@ -233,7 +233,7 @@ flowchart TD
 ```json
 {
   "WebSocket": {
-    "HubUrl": "https://localhost:5001/commandHub",
+    "HubUrl": "https://localhost:5001/instanceHub",
     "ReconnectionDelayMs": 5000,
     "MaxReconnectionAttempts": 5,
     "HandshakeTimeoutMs": 15000,

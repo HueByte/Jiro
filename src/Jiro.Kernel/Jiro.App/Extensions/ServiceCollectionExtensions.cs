@@ -1,5 +1,6 @@
 using Jiro.App.Options;
 using Jiro.App.Services;
+using Jiro.Shared.Websocket;
 
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -43,8 +44,8 @@ public static class ServiceCollectionExtensions
 		// Register gRPC service for sending command results
 		services.AddScoped<IJiroGrpcService, JiroGrpcService>();
 
-		// Register WebSocket connection implementation for receiving commands
-		services.AddSingleton<IWebSocketConnection, WebSocketConnection>();
+		// Register IJiroClientHub implementation for WebSocket communication
+		services.AddSingleton<IJiroClientHub, WebSocketConnection>();
 
 		// Register as hosted service to start/stop with the application
 		services.AddHostedService<JiroWebSocketService>();
