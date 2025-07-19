@@ -451,6 +451,7 @@ public class WebSocketConnection : IJiroClientHub, IDisposable
 				try
 				{
 					var themesResponse = await themeService.GetCustomThemesAsync();
+					themesResponse.RequestId = requestId;
 
 					await SendThemesResponseAsync(themesResponse, CancellationToken.None);
 				}
@@ -812,13 +813,13 @@ public class WebSocketConnection : IJiroClientHub, IDisposable
 		{
 			(CommandReceived, nameof(CommandReceived)),
 			(KeepaliveAckReceived, nameof(KeepaliveAckReceived)),
-			(LogsRequested, nameof(LogsRequested)),
-			(SessionRequested, nameof(SessionRequested)),
+			(LogsRequested, nameof(LogsRequested)), // TODO: stream the response, body often too large
+			(SessionRequested, nameof(SessionRequested)), // TODO: fix the request parameters, support streaming
 			(SessionsRequested, nameof(SessionsRequested)),
 			(ConfigRequested, nameof(ConfigRequested)),
 			(ConfigUpdateRequested, nameof(ConfigUpdateRequested)),
 			(CustomThemesRequested, nameof(CustomThemesRequested)),
-			(CommandsMetadataRequested, nameof(CommandsMetadataRequested))
+			(CommandsMetadataRequested, nameof(CommandsMetadataRequested)) // TODO: Fix the parameters dictionary
 		};
 
 		var missingHandlers = requiredHandlers.Where(h => h.handler is null).Select(h => h.name).ToList();

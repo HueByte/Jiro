@@ -25,16 +25,18 @@ public class LogsProviderService : ILogsProviderService
 	/// <inheritdoc/>
 	public async Task<LogsResponse> GetLogsAsync(string? level = null, int limit = 100)
 	{
+		var logsDirectory = Path.Combine(AppContext.BaseDirectory, "logs");
+		var logPattern = "*.log";
+
 		try
 		{
 			_logger.LogInformation("Getting logs with level: {Level}, limit: {Limit}", level ?? "all", limit);
 
 			var logs = new List<LogEntry>();
-			var logsDirectory = Path.Combine(AppContext.BaseDirectory, "Logs");
 
 			if (Directory.Exists(logsDirectory))
 			{
-				var logFiles = Directory.GetFiles(logsDirectory, "*.txt")
+				var logFiles = Directory.GetFiles(logsDirectory, logPattern)
 					.OrderByDescending(f => File.GetLastWriteTime(f))
 					.Take(5);
 
@@ -79,6 +81,7 @@ public class LogsProviderService : ILogsProviderService
 				.Take(limit)
 				.ToList();
 
+			// TODO: Ensure the size is manageable for WebSocket responses
 			return new LogsResponse
 			{
 				TotalLogs = result.Count,
