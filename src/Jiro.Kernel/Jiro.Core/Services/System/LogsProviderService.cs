@@ -1,6 +1,6 @@
-using System.Text.RegularExpressions;
 using System.Globalization;
 using System.Runtime.CompilerServices;
+using System.Text.RegularExpressions;
 
 using Jiro.Core.Services.System.Models;
 
@@ -23,7 +23,7 @@ public class LogsProviderService : ILogsProviderService
 	}
 
 	/// <inheritdoc/>
-	public async Task<LogsResponse> GetLogsAsync(string? level = null, int limit = 100, int offset = 0, 
+	public async Task<LogsResponse> GetLogsAsync(string? level = null, int limit = 100, int offset = 0,
 		DateTime? fromDate = null, DateTime? toDate = null, string? searchTerm = null)
 	{
 		var logsDirectory = Path.Combine(AppContext.BaseDirectory, "logs");
@@ -31,7 +31,7 @@ public class LogsProviderService : ILogsProviderService
 
 		try
 		{
-			_logger.LogInformation("Getting logs with level: {Level}, limit: {Limit}, offset: {Offset}, searchTerm: {SearchTerm}", 
+			_logger.LogInformation("Getting logs with level: {Level}, limit: {Limit}, offset: {Offset}, searchTerm: {SearchTerm}",
 				level ?? "all", limit, offset, searchTerm ?? "none");
 
 			// For better performance with large log files, we'll process files in reverse order
@@ -51,7 +51,7 @@ public class LogsProviderService : ILogsProviderService
 					{
 						// For large files, we might want to read in chunks or use streaming
 						var lines = await File.ReadAllLinesAsync(logFile);
-						
+
 						// Process lines in reverse order (newest first) for better performance
 						for (int i = lines.Length - 1; i >= 0; i--)
 						{
@@ -140,10 +140,10 @@ public class LogsProviderService : ILogsProviderService
 				var responseType = response.GetType();
 				var hasMoreProperty = responseType.GetProperty("HasMore");
 				var offsetProperty = responseType.GetProperty("Offset");
-				
+
 				if (hasMoreProperty != null && hasMoreProperty.CanWrite)
 					hasMoreProperty.SetValue(response, totalCount > offset + results.Count);
-				
+
 				if (offsetProperty != null && offsetProperty.CanWrite)
 					offsetProperty.SetValue(response, offset);
 			}
@@ -162,7 +162,7 @@ public class LogsProviderService : ILogsProviderService
 	}
 
 	/// <inheritdoc/>
-	public async Task<int> GetLogCountAsync(string? level = null, DateTime? fromDate = null, 
+	public async Task<int> GetLogCountAsync(string? level = null, DateTime? fromDate = null,
 		DateTime? toDate = null, string? searchTerm = null)
 	{
 		var logsDirectory = Path.Combine(AppContext.BaseDirectory, "logs");
@@ -174,13 +174,13 @@ public class LogsProviderService : ILogsProviderService
 			if (Directory.Exists(logsDirectory))
 			{
 				var logFiles = Directory.GetFiles(logsDirectory, logPattern);
-				
+
 				foreach (var logFile in logFiles)
 				{
 					try
 					{
 						var lines = await File.ReadAllLinesAsync(logFile);
-						
+
 						foreach (var line in lines)
 						{
 							if (string.IsNullOrWhiteSpace(line)) continue;
@@ -193,7 +193,7 @@ public class LogsProviderService : ILogsProviderService
 							};
 
 							var parsedTimestamp = TryParseTimestamp(logEntry.Timestamp);
-							
+
 							if (PassesFilters(logEntry, parsedTimestamp, level, fromDate, toDate, searchTerm))
 								count++;
 						}
@@ -226,7 +226,7 @@ public class LogsProviderService : ILogsProviderService
 			if (Directory.Exists(logsDirectory))
 			{
 				var logFiles = Directory.GetFiles(logsDirectory, logPattern);
-				
+
 				foreach (var logFile in logFiles)
 				{
 					try
@@ -258,7 +258,7 @@ public class LogsProviderService : ILogsProviderService
 	}
 
 	/// <inheritdoc/>
-	public async IAsyncEnumerable<LogEntry> StreamLogsAsync(string? level = null, 
+	public async IAsyncEnumerable<LogEntry> StreamLogsAsync(string? level = null,
 		[EnumeratorCancellation] CancellationToken cancellationToken = default)
 	{
 		// Future implementation for real-time log streaming
@@ -289,7 +289,7 @@ public class LogsProviderService : ILogsProviderService
 				_logger.LogWarning(ex, "Failed to read log file for streaming: {LogFile}", logFile);
 				continue;
 			}
-			
+
 			foreach (var line in lines.TakeLast(100)) // Last 100 entries for initial stream
 			{
 				if (cancellationToken.IsCancellationRequested)
@@ -306,7 +306,7 @@ public class LogsProviderService : ILogsProviderService
 				};
 
 				// Filter by level if specified
-				if (!string.IsNullOrEmpty(level) && 
+				if (!string.IsNullOrEmpty(level) &&
 					!logEntry.Level.Equals(level, StringComparison.OrdinalIgnoreCase))
 					continue;
 
@@ -367,7 +367,7 @@ public class LogsProviderService : ILogsProviderService
 
 		foreach (var format in formats)
 		{
-			if (DateTime.TryParseExact(timestamp, format, CultureInfo.InvariantCulture, 
+			if (DateTime.TryParseExact(timestamp, format, CultureInfo.InvariantCulture,
 				DateTimeStyles.None, out var result))
 			{
 				return result;
@@ -381,11 +381,11 @@ public class LogsProviderService : ILogsProviderService
 		return DateTime.UtcNow;
 	}
 
-	private static bool PassesFilters(LogEntry logEntry, DateTime parsedTimestamp, 
+	private static bool PassesFilters(LogEntry logEntry, DateTime parsedTimestamp,
 		string? level, DateTime? fromDate, DateTime? toDate, string? searchTerm)
 	{
 		// Level filter
-		if (!string.IsNullOrEmpty(level) && 
+		if (!string.IsNullOrEmpty(level) &&
 			!logEntry.Level.Equals(level, StringComparison.OrdinalIgnoreCase))
 			return false;
 
@@ -397,7 +397,7 @@ public class LogsProviderService : ILogsProviderService
 			return false;
 
 		// Search term filter
-		if (!string.IsNullOrEmpty(searchTerm) && 
+		if (!string.IsNullOrEmpty(searchTerm) &&
 			!logEntry.Message.Contains(searchTerm, StringComparison.OrdinalIgnoreCase))
 			return false;
 

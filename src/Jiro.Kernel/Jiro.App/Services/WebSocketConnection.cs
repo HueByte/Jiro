@@ -265,7 +265,7 @@ public class WebSocketConnection : IJiroClientHub, IDisposable
 				var requestId = parameters.RequestId;
 				var level = parameters.Level;
 				var limit = parameters.Limit ?? 100;
-				
+
 				// Extract new pagination parameters if they exist
 				var offset = 0;
 				DateTime? fromDate = null;
@@ -277,18 +277,18 @@ public class WebSocketConnection : IJiroClientHub, IDisposable
 				{
 					if (requestDict.TryGetValue("Offset", out var offsetValue) && offsetValue is int offsetInt)
 						offset = offsetInt;
-					
+
 					if (requestDict.TryGetValue("FromDate", out var fromDateValue) && fromDateValue is DateTime fromDateTime)
 						fromDate = fromDateTime;
-					
+
 					if (requestDict.TryGetValue("ToDate", out var toDateValue) && toDateValue is DateTime toDateTime)
 						toDate = toDateTime;
-					
+
 					if (requestDict.TryGetValue("SearchTerm", out var searchTermValue) && searchTermValue is string searchString)
 						searchTerm = searchString;
 				}
 
-				_logger.LogInformation("Received GetLogs command from server - Level: {Level}, Limit: {Limit}, Offset: {Offset}, SearchTerm: {SearchTerm}, RequestId: {RequestId}", 
+				_logger.LogInformation("Received GetLogs command from server - Level: {Level}, Limit: {Limit}, Offset: {Offset}, SearchTerm: {SearchTerm}, RequestId: {RequestId}",
 					level, limit, offset, searchTerm ?? "none", requestId);
 
 				await using var scope = _scopeFactory.CreateAsyncScope();
@@ -319,10 +319,10 @@ public class WebSocketConnection : IJiroClientHub, IDisposable
 						var responseType = response.GetType();
 						var hasMoreProperty = responseType.GetProperty("HasMore");
 						var offsetProperty = responseType.GetProperty("Offset");
-						
+
 						if (hasMoreProperty != null && hasMoreProperty.CanWrite)
 							hasMoreProperty.SetValue(response, logsResponse.HasMore);
-						
+
 						if (offsetProperty != null && offsetProperty.CanWrite)
 							offsetProperty.SetValue(response, logsResponse.Offset);
 					}

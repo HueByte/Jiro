@@ -1,5 +1,6 @@
-using Jiro.Core.Services.System.Models;
 using System.Runtime.CompilerServices;
+
+using Jiro.Core.Services.System.Models;
 
 namespace Jiro.Core.Services.System;
 
@@ -18,7 +19,7 @@ public interface ILogsProviderService
 	/// <param name="toDate">End date filter (optional)</param>
 	/// <param name="searchTerm">Search term to filter messages (optional)</param>
 	/// <returns>Log response containing filtered logs with pagination info</returns>
-	Task<LogsResponse> GetLogsAsync(string? level = null, int limit = 100, int offset = 0, 
+	Task<LogsResponse> GetLogsAsync(string? level = null, int limit = 100, int offset = 0,
 		DateTime? fromDate = null, DateTime? toDate = null, string? searchTerm = null);
 
 	/// <summary>
@@ -29,7 +30,7 @@ public interface ILogsProviderService
 	/// <param name="toDate">End date filter (optional)</param>
 	/// <param name="searchTerm">Search term to filter messages (optional)</param>
 	/// <returns>Total count of matching log entries</returns>
-	Task<int> GetLogCountAsync(string? level = null, DateTime? fromDate = null, 
+	Task<int> GetLogCountAsync(string? level = null, DateTime? fromDate = null,
 		DateTime? toDate = null, string? searchTerm = null);
 
 	/// <summary>
