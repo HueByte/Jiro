@@ -1,10 +1,23 @@
 namespace Jiro.Core.Services.System.Models;
 
+/// <summary>
+/// Represents a comprehensive color scheme configuration for theming the application interface.
+/// </summary>
 public class ColorScheme
 {
-	// Base colors
+	/// <summary>
+	/// Gets or sets the transparent color value.
+	/// </summary>
 	public string Transparent { get; set; }
+
+	/// <summary>
+	/// Gets or sets the white color value.
+	/// </summary>
 	public string White { get; set; }
+
+	/// <summary>
+	/// Gets or sets the black color value.
+	/// </summary>
 	public string Black { get; set; }
 
 	// Background colors

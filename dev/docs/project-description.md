@@ -591,4 +591,4 @@ For detailed setup instructions, refer to the main project README.
 
 ---
 
-**Jiro** represents a modern approach to AI assistant development, combining cutting-edge technologies with robust engineering practices to deliver a scalable, intelligent, and extensible platform for AI-powered assistance.
+**Jiro** represents a modern approach to AI assistant development as part of an engineering thesis project. It combines cutting-edge technologies with robust engineering practices to deliver a scalable, intelligent, and extensible platform for AI-powered assistance, demonstrating the practical application of clean architecture patterns and modern software development methodologies.

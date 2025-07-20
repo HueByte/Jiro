@@ -52,9 +52,9 @@ Jiro follows a layered architecture with clear separation of concerns:
 - **Jiro.Infrastructure** - Data access and external services
 - **Jiro.App** - Application configuration and startup
 
-## 🤝 Contributing
+## 🎓 Engineering Thesis Project
 
-We welcome contributions! Please see our documentation for guidelines on how to contribute to the Jiro project.
+This project is developed as part of an engineering thesis demonstrating modern AI assistant development with clean architecture principles.
 
 ---
 

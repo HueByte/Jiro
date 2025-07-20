@@ -652,13 +652,13 @@ public class WebSocketConnection : IJiroClientHub, IDisposable
 					CreatedAt = session.CreatedAt,
 					SessionId = session.SessionId,
 					LastUpdatedAt = session.LastUpdatedAt,
-					SessionName = string.Empty, // TODO: Implement session name
+					SessionName = session.Name,
 					RequestId = req.RequestId,
 					TotalMessages = session.Messages.Count,
 					Messages = session.Messages.Select(m => new ChatMessage
 					{
 						MessageId = m.MessageId,
-						Content = m.Message.Content.ToString() ?? string.Empty,
+						Content = m.Message.Content.FirstOrDefault()?.Text ?? string.Empty,
 						CreatedAt = m.CreatedAt,
 						Type = m.Type.ToString(),
 						IsUser = m.IsUser

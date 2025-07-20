@@ -142,7 +142,7 @@ public class HelloCommand : BaseCommand
 }
 ```
 
-📚 **Learn More**: Check out our [Plugin Development Guide](https://github.com/HueByte/Jiro.Libs) and [NuGet Package](https://www.nuget.org/packages/Jiro.Commands/)
+📚 **Learn More**: This project demonstrates plugin architecture patterns and extensible command system design
 
 ## 🏗️ Architecture Overview
 
@@ -299,26 +299,9 @@ cd dev
 docfx docfx.json --serve
 ```
 
-## 🤝 Contributing
+## 🎓 Engineering Thesis Project
 
-We love contributions! Here's how you can help make Jiro even better:
-
-1. 🍴 **Fork the repository**
-2. 🌿 **Create a feature branch** (`git checkout -b feature/amazing-feature`)
-3. ✨ **Make your changes**
-4. ✅ **Add tests** (if applicable)
-5. 📝 **Commit your changes** (`git commit -m 'Add amazing feature'`)
-6. 📤 **Push to the branch** (`git push origin feature/amazing-feature`)
-7. 🎉 **Open a Pull Request**
-
-### Areas We'd Love Help With
-
-- 🔌 New plugin ideas and implementations
-- 🌍 Internationalization and localization
-- 📱 Mobile app development
-- 🎨 UI/UX improvements
-- 📚 Documentation and tutorials
-- 🐛 Bug fixes and performance improvements
+This project is developed as part of an engineering thesis focused on building a modern AI assistant platform. The project demonstrates the integration of AI technologies with clean architecture patterns and modern software engineering practices.
 
 ## 🛠️ Configuration Reference
 
@@ -350,12 +333,11 @@ We love contributions! Here's how you can help make Jiro even better:
 
 ## 💖 Support the Project
 
-If Jiro has helped you or you think it's awesome, consider:
+If you find this engineering thesis project interesting:
 
-- ⭐ **Starring this repository**
-- 🐛 **Reporting bugs** and suggesting features
-- 💬 **Sharing it** with friends and colleagues
-- 🔌 **Creating plugins** for the community
+- ⭐ **Star this repository** to show your support
+- 🐛 **Report issues** if you find any bugs
+- 💬 **Share feedback** on the implementation approach
 
 ## 📄 License
 
@@ -365,7 +347,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 - 🤖 **OpenAI** for the powerful GPT models
 - 🚀 **Microsoft** for the amazing .NET ecosystem
-- 🌟 **All contributors** who help make Jiro better
 - ❤️ **The open-source community** for inspiration and support
 
 ---

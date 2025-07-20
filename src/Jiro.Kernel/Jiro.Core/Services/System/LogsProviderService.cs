@@ -305,8 +305,9 @@ public class LogsProviderService : ILogsProviderService
 					Message = line
 				};
 
-				// Filter by level if specified
-				if (!string.IsNullOrEmpty(level) &&
+				// Filter by level if specified - skip filtering if level is "all"
+				if (!string.IsNullOrEmpty(level) && 
+					!level.Equals("all", StringComparison.OrdinalIgnoreCase) &&
 					!logEntry.Level.Equals(level, StringComparison.OrdinalIgnoreCase))
 					continue;
 
@@ -347,6 +348,7 @@ public class LogsProviderService : ILogsProviderService
 				return level.ToUpperInvariant();
 			}
 		}
+
 		return "INFO";
 	}
 
@@ -384,8 +386,9 @@ public class LogsProviderService : ILogsProviderService
 	private static bool PassesFilters(LogEntry logEntry, DateTime parsedTimestamp,
 		string? level, DateTime? fromDate, DateTime? toDate, string? searchTerm)
 	{
-		// Level filter
-		if (!string.IsNullOrEmpty(level) &&
+		// Level filter - skip filtering if level is null, empty, or "all"
+		if (!string.IsNullOrEmpty(level) && 
+			!level.Equals("all", StringComparison.OrdinalIgnoreCase) &&
 			!logEntry.Level.Equals(level, StringComparison.OrdinalIgnoreCase))
 			return false;
 
