@@ -2,7 +2,6 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Text.Json;
 
-using Jiro.Core.Services.System.Models;
 using Jiro.Shared.Websocket.Responses;
 
 using Microsoft.Extensions.Configuration;
@@ -47,22 +46,6 @@ public class ConfigProviderService : IConfigProviderService
 						static kvp => (object)(kvp.Value ?? string.Empty)
 					)
 				},
-				// {
-				// 	Chat = _configuration.GetSection("Chat").Get<object>(),
-				// 	Logging = new LoggingConfig
-				// 	{
-				// 		LogLevel = _configuration.GetValue<string>("Logging:LogLevel:Default"),
-				// 		EnableConsoleLogging = true,
-				// 		EnableFileLogging = true
-				// 	},
-				// 	Features = new FeaturesConfig
-				// 	{
-				// 		ChatEnabled = _configuration.GetValue<bool>("Chat:Enabled"),
-				// 		WeatherEnabled = true,
-				// 		GrpcEnabled = _configuration.GetSection("Grpc").Exists(),
-				// 		WebSocketEnabled = _configuration.GetSection("WebSocket").Exists()
-				// 	}
-				// },
 				SystemInfo = new Shared.Websocket.Requests.SystemInfo
 				{
 					OperatingSystem = Environment.OSVersion.Platform.ToString(),
@@ -84,11 +67,10 @@ public class ConfigProviderService : IConfigProviderService
 	}
 
 	/// <inheritdoc/>
-	public Task<ConfigUpdateResponse> UpdateConfigAsync(string configJson)
+	public async Task<ConfigUpdateResponse> UpdateConfigAsync(string configJson)
 	{
 		try
 		{
-			// TODO: Implement actual configuration update logic
 			_logger.LogInformation("Received configuration update request");
 
 			if (string.IsNullOrEmpty(configJson))
@@ -96,23 +78,246 @@ public class ConfigProviderService : IConfigProviderService
 				throw new ArgumentException("Configuration data is required", nameof(configJson));
 			}
 
-			// Try to parse the configuration
+			// Parse the configuration data
 			var configData = JsonSerializer.Deserialize<Dictionary<string, object>>(configJson);
-
-			var response = new ConfigUpdateResponse
+			if (configData == null)
 			{
-				Success = true,
-				Message = "Configuration update received (read-only mode)",
-				ReceivedKeys = configData?.Keys.ToArray() ?? Array.Empty<string>(),
-				Note = "This is a read-only implementation for security. Configuration changes require application restart."
-			};
+				throw new ArgumentException("Invalid configuration JSON format", nameof(configJson));
+			}
 
-			return Task.FromResult(response);
+			// Define paths to configuration files
+			var appSettingsPath = Path.Combine(AppContext.BaseDirectory, "appsettings.json");
+			var appSettingsExamplePath = Path.Combine(AppContext.BaseDirectory, "appsettings.example.json");
+
+			// Backup current configuration
+			var backupPath = $"{appSettingsPath}.backup.{DateTime.UtcNow:yyyyMMddHHmmss}";
+			if (File.Exists(appSettingsPath))
+			{
+				File.Copy(appSettingsPath, backupPath);
+				_logger.LogInformation("Created backup of current configuration at: {BackupPath}", backupPath);
+			}
+
+			try
+			{
+				// Load current configuration
+				var currentConfig = await LoadConfigurationFromFileAsync(appSettingsPath);
+
+				// Update only the changed values
+				var updatedConfig = UpdateConfigurationValues(currentConfig, configData);
+				var updatedKeys = GetChangedKeys(currentConfig, updatedConfig);
+
+				// Validate the updated configuration
+				if (!ValidateConfiguration(updatedConfig))
+				{
+					_logger.LogWarning("Configuration validation failed. Restoring from example configuration.");
+
+					// Copy from example configuration if validation fails
+					if (File.Exists(appSettingsExamplePath))
+					{
+						updatedConfig = await LoadConfigurationFromFileAsync(appSettingsExamplePath);
+						_logger.LogInformation("Restored configuration from example file");
+					}
+					else
+					{
+						throw new InvalidOperationException("Example configuration file not found and validation failed");
+					}
+				}
+
+				// Save the updated configuration
+				await SaveConfigurationToFileAsync(appSettingsPath, updatedConfig);
+				_logger.LogInformation("Configuration updated successfully. Changed keys: {UpdatedKeys}", string.Join(", ", updatedKeys));
+
+				var response = new ConfigUpdateResponse
+				{
+					Success = true,
+					Message = $"Configuration updated successfully. {updatedKeys.Length} value(s) changed.",
+					ReceivedKeys = configData.Keys.ToArray(),
+					Note = updatedKeys.Length == 0 ? "No changes were made to the configuration." :
+						   $"Updated: {string.Join(", ", updatedKeys)}. Application restart may be required for some changes to take effect."
+				};
+
+				return response;
+			}
+			catch (Exception)
+			{
+				// Restore backup if something went wrong
+				if (File.Exists(backupPath))
+				{
+					File.Copy(backupPath, appSettingsPath, overwrite: true);
+					_logger.LogInformation("Restored configuration from backup due to update failure");
+				}
+				throw;
+			}
 		}
 		catch (Exception ex)
 		{
 			_logger.LogError(ex, "Error updating configuration");
-			throw;
+
+			var errorResponse = new ConfigUpdateResponse
+			{
+				Success = false,
+				Message = $"Configuration update failed: {ex.Message}",
+				ReceivedKeys = Array.Empty<string>(),
+				Note = "The configuration was not modified due to an error."
+			};
+
+			return errorResponse;
 		}
+	}
+
+	private async Task<Dictionary<string, object>> LoadConfigurationFromFileAsync(string filePath)
+	{
+		if (!File.Exists(filePath))
+		{
+			return new Dictionary<string, object>();
+		}
+
+		var configText = await File.ReadAllTextAsync(filePath);
+		var config = JsonSerializer.Deserialize<Dictionary<string, object>>(configText);
+		return config ?? new Dictionary<string, object>();
+	}
+
+	private Dictionary<string, object> UpdateConfigurationValues(Dictionary<string, object> currentConfig, Dictionary<string, object> updates)
+	{
+		var updatedConfig = new Dictionary<string, object>(currentConfig);
+
+		foreach (var kvp in updates)
+		{
+			// Use dot notation for nested properties (e.g., "Gpt.AuthToken")
+			SetNestedValue(updatedConfig, kvp.Key, kvp.Value);
+		}
+
+		return updatedConfig;
+	}
+
+	private void SetNestedValue(Dictionary<string, object> config, string path, object value)
+	{
+		var keys = path.Split('.');
+		var current = config;
+
+		for (int i = 0; i < keys.Length - 1; i++)
+		{
+			var key = keys[i];
+			if (!current.ContainsKey(key))
+			{
+				current[key] = new Dictionary<string, object>();
+			}
+
+			if (current[key] is JsonElement jsonElement)
+			{
+				current[key] = JsonSerializer.Deserialize<Dictionary<string, object>>(jsonElement.GetRawText())
+					?? new Dictionary<string, object>();
+			}
+
+			if (current[key] is Dictionary<string, object> dict)
+			{
+				current = dict;
+			}
+			else
+			{
+				// If the intermediate value is not a dictionary, create a new one
+				current[key] = new Dictionary<string, object>();
+				current = (Dictionary<string, object>)current[key];
+			}
+		}
+
+		current[keys[^1]] = value;
+	}
+
+	private string[] GetChangedKeys(Dictionary<string, object> original, Dictionary<string, object> updated)
+	{
+		var changedKeys = new List<string>();
+		CompareConfigurations(original, updated, "", changedKeys);
+		return changedKeys.ToArray();
+	}
+
+	private void CompareConfigurations(Dictionary<string, object> original, Dictionary<string, object> updated, string prefix, List<string> changedKeys)
+	{
+		foreach (var kvp in updated)
+		{
+			var fullKey = string.IsNullOrEmpty(prefix) ? kvp.Key : $"{prefix}.{kvp.Key}";
+
+			if (!original.ContainsKey(kvp.Key))
+			{
+				changedKeys.Add(fullKey);
+				continue;
+			}
+
+			var originalValue = original[kvp.Key];
+			var updatedValue = kvp.Value;
+
+			if (originalValue is Dictionary<string, object> originalDict &&
+				updatedValue is Dictionary<string, object> updatedDict)
+			{
+				CompareConfigurations(originalDict, updatedDict, fullKey, changedKeys);
+			}
+			else if (!Equals(originalValue, updatedValue))
+			{
+				changedKeys.Add(fullKey);
+			}
+		}
+	}
+
+	private bool ValidateConfiguration(Dictionary<string, object> config)
+	{
+		try
+		{
+			// Basic validation - ensure required sections exist
+			var requiredSections = new[] { "Serilog", "WebSocket", "Grpc" };
+
+			foreach (var section in requiredSections)
+			{
+				if (!config.ContainsKey(section))
+				{
+					_logger.LogWarning("Required configuration section missing: {Section}", section);
+					return false;
+				}
+			}
+
+			// Validate specific configuration values
+			if (config.TryGetValue("WebSocket", out var webSocketSection) &&
+				webSocketSection is Dictionary<string, object> wsConfig)
+			{
+				if (!wsConfig.ContainsKey("HubUrl") ||
+					string.IsNullOrWhiteSpace(wsConfig["HubUrl"]?.ToString()))
+				{
+					_logger.LogWarning("WebSocket.HubUrl is missing or empty");
+					return false;
+				}
+			}
+
+			if (config.TryGetValue("Grpc", out var grpcSection) &&
+				grpcSection is Dictionary<string, object> grpcConfig)
+			{
+				if (!grpcConfig.ContainsKey("ServerUrl") ||
+					string.IsNullOrWhiteSpace(grpcConfig["ServerUrl"]?.ToString()))
+				{
+					_logger.LogWarning("Grpc.ServerUrl is missing or empty");
+					return false;
+				}
+			}
+
+			// Try to serialize back to JSON to ensure it's valid
+			JsonSerializer.Serialize(config);
+
+			return true;
+		}
+		catch (Exception ex)
+		{
+			_logger.LogError(ex, "Configuration validation failed");
+			return false;
+		}
+	}
+
+	private async Task SaveConfigurationToFileAsync(string filePath, Dictionary<string, object> config)
+	{
+		var options = new JsonSerializerOptions
+		{
+			WriteIndented = true,
+			PropertyNamingPolicy = null
+		};
+
+		var configJson = JsonSerializer.Serialize(config, options);
+		await File.WriteAllTextAsync(filePath, configJson);
 	}
 }

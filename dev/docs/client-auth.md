@@ -85,8 +85,8 @@ hubUrl = $"{hubUrl}{separator}api_key={Uri.EscapeDataString(_options.ApiKey)}";
   },
   "Modules": {},
   "RequiredModules": {},
-  "API_KEY": "your-api-key-here",
-  "JIRO_API": "https://localhost:18092",
+  "ApiKey": "your-api-key-here",
+  "JiroApi": "https://localhost:18092",
   "WebSocket": {
     "HubUrl": "https://localhost:5001/instanceHub",
     "ReconnectionDelayMs": 5000,
@@ -208,7 +208,7 @@ sequenceDiagram
 
    ```json
    {
-     "API_KEY": "$(JIRO_API_KEY)"
+     "ApiKey": "$(JIRO_API_KEY)"
    }
    ```
 

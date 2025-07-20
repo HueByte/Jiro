@@ -53,8 +53,8 @@ host.ConfigureAppConfiguration(options =>
 
 host.ConfigureServices(services =>
 {
-	string? apiKey = configManager.GetValue<string>("API_KEY");
-	string? apiUrl = configManager.GetValue<string>("JIRO_API");
+	string? apiKey = configManager.GetValue<string>("ApiKey");
+	string? apiUrl = configManager.GetValue<string>("JiroApi");
 
 	// In test mode, use dummy values if not provided
 	if (isTestMode)

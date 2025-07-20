@@ -5,6 +5,9 @@ publish/
 ##
 ## Get latest from https://github.com/github/gitignore/blob/master/VisualStudio.gitignore
 
+claude*
+.claude/
+
 # DocFX generated files
 generated/
 dev/_site/

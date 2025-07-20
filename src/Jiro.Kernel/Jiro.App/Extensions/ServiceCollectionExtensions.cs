@@ -29,7 +29,7 @@ public static class ServiceCollectionExtensions
 			// If ApiKey is not set in WebSocket section, use the global API_KEY
 			if (string.IsNullOrEmpty(webSocketOptions.ApiKey))
 			{
-				webSocketOptions.ApiKey = configuration.GetValue<string>("API_KEY");
+				webSocketOptions.ApiKey = configuration.GetValue<string>("ApiKey");
 			}
 
 			// Ensure ApiKey is provided

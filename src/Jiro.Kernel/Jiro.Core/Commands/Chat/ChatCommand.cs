@@ -1,4 +1,3 @@
-using Jiro.Core.Commands.ComplexCommandResults;
 using Jiro.Core.Services.CommandContext;
 using Jiro.Core.Services.Conversation;
 using Jiro.Core.Services.MessageCache;

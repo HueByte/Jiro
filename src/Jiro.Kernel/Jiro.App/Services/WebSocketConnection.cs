@@ -102,6 +102,16 @@ public class WebSocketConnection : IJiroClientHub, IDisposable
 	/// </summary>
 	public event Func<GetCommandsMetadataRequest, Task>? CommandsMetadataRequested;
 
+	/// <summary>
+	/// Event fired when a log files request is received from the server
+	/// </summary>
+	public event Func<Task>? LogFilesRequested;
+
+	/// <summary>
+	/// Event fired when a log count request is received from the server
+	/// </summary>
+	public event Func<Task>? LogCountRequested;
+
 	#endregion
 
 	/// <summary>
@@ -255,15 +265,38 @@ public class WebSocketConnection : IJiroClientHub, IDisposable
 				var requestId = parameters.RequestId;
 				var level = parameters.Level;
 				var limit = parameters.Limit ?? 100;
+				
+				// Extract new pagination parameters if they exist
+				var offset = 0;
+				DateTime? fromDate = null;
+				DateTime? toDate = null;
+				string? searchTerm = null;
 
-				_logger.LogInformation("Received GetLogs command from server - Level: {Level}, Limit: {Limit}, RequestId: {RequestId}", level, limit, requestId);
+				// Check if the request has additional properties (future compatibility)
+				if (parameters is IDictionary<string, object> requestDict)
+				{
+					if (requestDict.TryGetValue("Offset", out var offsetValue) && offsetValue is int offsetInt)
+						offset = offsetInt;
+					
+					if (requestDict.TryGetValue("FromDate", out var fromDateValue) && fromDateValue is DateTime fromDateTime)
+						fromDate = fromDateTime;
+					
+					if (requestDict.TryGetValue("ToDate", out var toDateValue) && toDateValue is DateTime toDateTime)
+						toDate = toDateTime;
+					
+					if (requestDict.TryGetValue("SearchTerm", out var searchTermValue) && searchTermValue is string searchString)
+						searchTerm = searchString;
+				}
+
+				_logger.LogInformation("Received GetLogs command from server - Level: {Level}, Limit: {Limit}, Offset: {Offset}, SearchTerm: {SearchTerm}, RequestId: {RequestId}", 
+					level, limit, offset, searchTerm ?? "none", requestId);
 
 				await using var scope = _scopeFactory.CreateAsyncScope();
 				var logsService = scope.ServiceProvider.GetRequiredService<ILogsProviderService>();
 
 				try
 				{
-					var logsResponse = await logsService.GetLogsAsync(level, limit);
+					var logsResponse = await logsService.GetLogsAsync(level, limit, offset, fromDate, toDate, searchTerm);
 
 					var response = new LogsResponse
 					{
@@ -279,6 +312,25 @@ public class WebSocketConnection : IJiroClientHub, IDisposable
 							Message = log.Message
 						}).ToList()
 					};
+
+					// Add pagination info if the response model supports it
+					try
+					{
+						var responseType = response.GetType();
+						var hasMoreProperty = responseType.GetProperty("HasMore");
+						var offsetProperty = responseType.GetProperty("Offset");
+						
+						if (hasMoreProperty != null && hasMoreProperty.CanWrite)
+							hasMoreProperty.SetValue(response, logsResponse.HasMore);
+						
+						if (offsetProperty != null && offsetProperty.CanWrite)
+							offsetProperty.SetValue(response, logsResponse.Offset);
+					}
+					catch (Exception)
+					{
+						// Ignore reflection errors for backward compatibility
+						_logger.LogDebug("Response model doesn't support pagination properties, continuing with basic response");
+					}
 
 					await SendLogsResponseAsync(response, CancellationToken.None);
 				}
@@ -813,7 +865,7 @@ public class WebSocketConnection : IJiroClientHub, IDisposable
 		{
 			(CommandReceived, nameof(CommandReceived)),
 			(KeepaliveAckReceived, nameof(KeepaliveAckReceived)),
-			(LogsRequested, nameof(LogsRequested)), // TODO: stream the response, body often too large
+			(LogsRequested, nameof(LogsRequested)), // Now supports pagination to handle large responses
 			(SessionRequested, nameof(SessionRequested)), // TODO: fix the request parameters, support streaming
 			(SessionsRequested, nameof(SessionsRequested)),
 			(ConfigRequested, nameof(ConfigRequested)),

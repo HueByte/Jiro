@@ -9,10 +9,6 @@ namespace Jiro.App.Options;
 /// </summary>
 public class GrpcOptions
 {
-	/// <summary>
-	/// The URL of the gRPC server
-	/// </summary>
-	public string ServerUrl { get; set; } = "https://localhost:5001";
 
 	/// <summary>
 	/// Timeout for gRPC calls in milliseconds
