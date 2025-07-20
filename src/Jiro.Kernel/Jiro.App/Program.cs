@@ -81,6 +81,7 @@ host.ConfigureServices(services =>
 
 			return Task.CompletedTask;
 		})
+		.AddInterceptor<Jiro.App.Services.GrpcExceptionInterceptor>()
 		.ConfigureChannel(options =>
 		{
 			options.HttpHandler = new SocketsHttpHandler

@@ -8,12 +8,4 @@ public class HttpClients
 
 	public const string GEOLOCATION_CLIENT = "GeoLocationClient";
 
-	[Obsolete]
-	public const string TOKENIZER = "Tokenizer";
-
-	[Obsolete]
-	public const string CHAT_GPT_CLIENT = "ChatGPTClient";
-
-	[Obsolete]
-	public const string GPT_CLIENT = "GPTClient";
 }

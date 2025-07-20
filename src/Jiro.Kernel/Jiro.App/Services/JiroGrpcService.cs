@@ -46,7 +46,7 @@ internal class JiroGrpcService : IJiroGrpcService
 		}
 		catch (Exception ex)
 		{
-			_logger.LogError(ex, "Failed to send command result [{syncId}]", commandSyncId);
+			_logger.LogWarning("Failed to send command result [{syncId}]: {Message}", commandSyncId, ex.Message);
 			throw;
 		}
 	}
@@ -70,7 +70,7 @@ internal class JiroGrpcService : IJiroGrpcService
 		}
 		catch (Exception ex)
 		{
-			_logger.LogError(ex, "Failed to send command error [{syncId}]", commandSyncId);
+			_logger.LogWarning("Failed to send command error [{syncId}]: {Message}", commandSyncId, ex.Message);
 			throw;
 		}
 	}
@@ -102,8 +102,8 @@ internal class JiroGrpcService : IJiroGrpcService
 				retryCount++;
 
 				var delay = TimeSpan.FromMilliseconds(1000 * Math.Pow(2, retryCount - 1)); // Exponential backoff
-				_logger.LogWarning(ex, "Failed to send message, retrying in {delay}ms (attempt {attempt}/{max})",
-					delay.TotalMilliseconds, retryCount, _options.MaxRetries);
+				_logger.LogWarning("Failed to send message, retrying in {delay}ms (attempt {attempt}/{max}): {Message}",
+					delay.TotalMilliseconds, retryCount, _options.MaxRetries, ex.Message);
 
 				await Task.Delay(delay);
 			}
@@ -174,7 +174,7 @@ internal class JiroGrpcService : IJiroGrpcService
 		}
 		catch (Exception ex)
 		{
-			_logger.LogError(ex, "Error while creating message.");
+			_logger.LogError(ex, "Error while creating message for command: {CommandName}", commandResult.CommandName);
 			response.IsSuccess = false;
 			response.DataType = JiroCloud.Api.Proto.DataType.Text;
 			response.TextResult = new()

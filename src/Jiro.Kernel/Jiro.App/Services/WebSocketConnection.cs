@@ -28,6 +28,7 @@ public class WebSocketConnection : IJiroClientHub, IDisposable
 	private readonly WebSocketOptions _options;
 	private readonly IServiceScopeFactory _scopeFactory;
 	private readonly ICommandHandlerService _commandHandler;
+	private readonly WebSocketExceptionHandler _exceptionHandler;
 	private HubConnection? _connection;
 	private readonly SemaphoreSlim _connectionSemaphore = new(1, 1);
 	private bool _disposed = false;
@@ -102,15 +103,6 @@ public class WebSocketConnection : IJiroClientHub, IDisposable
 	/// </summary>
 	public event Func<GetCommandsMetadataRequest, Task>? CommandsMetadataRequested;
 
-	/// <summary>
-	/// Event fired when a log files request is received from the server
-	/// </summary>
-	public event Func<Task>? LogFilesRequested;
-
-	/// <summary>
-	/// Event fired when a log count request is received from the server
-	/// </summary>
-	public event Func<Task>? LogCountRequested;
 
 	#endregion
 
@@ -130,12 +122,14 @@ public class WebSocketConnection : IJiroClientHub, IDisposable
 		ILogger<WebSocketConnection> logger,
 		IOptions<WebSocketOptions> options,
 		IServiceScopeFactory scopeFactory,
-		ICommandHandlerService commandHandler)
+		ICommandHandlerService commandHandler,
+		WebSocketExceptionHandler exceptionHandler)
 	{
 		_logger = logger ?? throw new ArgumentNullException(nameof(logger));
 		_options = options?.Value ?? throw new ArgumentNullException(nameof(options));
 		_scopeFactory = scopeFactory ?? throw new ArgumentNullException(nameof(scopeFactory));
 		_commandHandler = commandHandler ?? throw new ArgumentNullException(nameof(commandHandler));
+		_exceptionHandler = exceptionHandler ?? throw new ArgumentNullException(nameof(exceptionHandler));
 
 		// Auto-start the connection
 		_ = Task.Run(async () =>
@@ -146,7 +140,7 @@ public class WebSocketConnection : IJiroClientHub, IDisposable
 			}
 			catch (Exception ex)
 			{
-				_logger.LogError(ex, "Failed to auto-start WebSocket connection");
+				_exceptionHandler.HandleConnectionException(ex, "Auto-start");
 			}
 		});
 	}
@@ -216,7 +210,7 @@ public class WebSocketConnection : IJiroClientHub, IDisposable
 		}
 		catch (Exception ex)
 		{
-			_logger.LogError(ex, "Failed to connect to hub");
+			_exceptionHandler.HandleConnectionException(ex, "Connect");
 			throw;
 		}
 		finally
@@ -336,19 +330,13 @@ public class WebSocketConnection : IJiroClientHub, IDisposable
 				}
 				catch (Exception ex)
 				{
-					_logger.LogError(ex, "Error retrieving logs");
-					var errorResponse = new ErrorResponse
-					{
-						RequestId = requestId,
-						CommandName = "GetLogs",
-						ErrorMessage = $"Error retrieving logs: {ex.Message}"
-					};
+					var errorResponse = _exceptionHandler.HandleException(ex, requestId, "GetLogs", $"Level: {level}, Limit: {limit}");
 					await SendErrorResponseAsync(errorResponse, CancellationToken.None);
 				}
 			}
 			catch (Exception ex)
 			{
-				_logger.LogError(ex, "Error handling GetLogs command from server");
+				_exceptionHandler.HandleEventException(ex, "GetLogs");
 			}
 		};
 
@@ -388,25 +376,18 @@ public class WebSocketConnection : IJiroClientHub, IDisposable
 				}
 				catch (Exception ex)
 				{
-					_logger.LogError(ex, "Error retrieving sessions");
-					var errorResponse = new ErrorResponse
-					{
-						RequestId = requestId,
-						CommandName = "GetSessions",
-						ErrorMessage = $"Error retrieving sessions: {ex.Message}"
-					};
-
+					var errorResponse = _exceptionHandler.HandleException(ex, requestId, "GetSessions", $"InstanceId: {instanceId}");
 					await SendErrorResponseAsync(errorResponse, CancellationToken.None);
 				}
 			}
 			catch (Exception ex)
 			{
-				_logger.LogError(ex, "Error handling GetSessions command from server");
+				_exceptionHandler.HandleEventException(ex, "GetSessions");
 				var errorResponse = new ErrorResponse
 				{
-					RequestId = "", // requestId might not be available in this catch block
+					RequestId = "",
 					CommandName = "GetSessions",
-					ErrorMessage = $"Error handling GetSessions command: {ex.Message}"
+					ErrorMessage = "Error handling GetSessions command"
 				};
 
 				await SendErrorResponseAsync(errorResponse, CancellationToken.None);
@@ -623,11 +604,6 @@ public class WebSocketConnection : IJiroClientHub, IDisposable
 		KeepaliveAckReceived += async () =>
 		{
 			_logger.LogDebug("Keepalive acknowledgment received from server");
-
-			if (KeepaliveAckReceived != null)
-			{
-				await KeepaliveAckReceived.Invoke();
-			}
 		};
 
 		SessionRequested += async (req) =>
