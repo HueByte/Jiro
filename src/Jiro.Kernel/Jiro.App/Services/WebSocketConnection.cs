@@ -251,6 +251,11 @@ public class WebSocketConnection : IJiroClientHub, IDisposable
 
 		if (_connection == null) return;
 
+		CommandReceived += async (command) =>
+		{
+			_logger.LogInformation("Received command from server: {CommandName}", command.Command);
+		};
+
 		// Handle GetLogs command from server
 		LogsRequested += async (parameters) =>
 		{
@@ -615,7 +620,7 @@ public class WebSocketConnection : IJiroClientHub, IDisposable
 				await using var scope = _scopeFactory.CreateAsyncScope();
 				var messageManager = scope.ServiceProvider.GetRequiredService<IMessageManager>();
 
-				var session = await messageManager.GetSessionAsync(req.InstanceId, includeMessages: true);
+				var session = await messageManager.GetSessionAsync(req.SessionId, includeMessages: true);
 				if (session is null)
 				{
 					_logger.LogError("Session not found for instance {InstanceId}", req.InstanceId);
@@ -651,6 +656,40 @@ public class WebSocketConnection : IJiroClientHub, IDisposable
 	}
 
 	#endregion
+
+	#region Helper Methods
+
+	/// <summary>
+	/// Executes a WebSocket send operation with logging of the result
+	/// </summary>
+	/// <param name="eventName">Name of the event being executed</param>
+	/// <param name="sendOperation">The send operation to execute</param>
+	/// <param name="cancellationToken">Cancellation token</param>
+	/// <returns>Task representing the operation</returns>
+	private async Task ExecuteWithLoggingAsync(string eventName, Func<Task> sendOperation, CancellationToken cancellationToken = default)
+	{
+		bool isSuccess = false;
+		try
+		{
+			if (_connection?.State != HubConnectionState.Connected)
+			{
+				_logger.LogWarning("Executed {EventName} IsSuccess: {IsSuccess} - Connection not established", eventName, false);
+				return;
+			}
+
+			await sendOperation();
+			isSuccess = true;
+			_logger.LogInformation("Executed {EventName} IsSuccess: {IsSuccess}", eventName, isSuccess);
+		}
+		catch (Exception ex)
+		{
+			_logger.LogError(ex, "Executed {EventName} IsSuccess: {IsSuccess} - Error: {ErrorMessage}", eventName, isSuccess, ex.Message);
+			throw;
+		}
+	}
+
+	#endregion
+
 	#region Response Methods
 
 	/// <summary>
@@ -661,10 +700,10 @@ public class WebSocketConnection : IJiroClientHub, IDisposable
 	/// <returns>Task representing the operation</returns>
 	public async Task SendLogsResponseAsync(LogsResponse response, CancellationToken cancellationToken = default)
 	{
-		if (_connection?.State == HubConnectionState.Connected)
+		await ExecuteWithLoggingAsync(nameof(SendLogsResponseAsync), async () =>
 		{
-			await _connection.InvokeAsync(ServerHandled.LogsResponse, response, cancellationToken);
-		}
+			await _connection!.InvokeAsync(ServerHandled.LogsResponse, response, cancellationToken);
+		}, cancellationToken);
 	}
 
 	/// <summary>
@@ -675,10 +714,10 @@ public class WebSocketConnection : IJiroClientHub, IDisposable
 	/// <returns>Task representing the operation</returns>
 	public async Task SendSessionResponseAsync(SessionResponse response, CancellationToken cancellationToken = default)
 	{
-		if (_connection?.State == HubConnectionState.Connected)
+		await ExecuteWithLoggingAsync(nameof(SendSessionResponseAsync), async () =>
 		{
-			await _connection.InvokeAsync(ServerHandled.SessionResponse, response, cancellationToken);
-		}
+			await _connection!.InvokeAsync(ServerHandled.SessionResponse, response, cancellationToken);
+		}, cancellationToken);
 	}
 
 	/// <summary>
@@ -689,10 +728,10 @@ public class WebSocketConnection : IJiroClientHub, IDisposable
 	/// <returns>Task representing the operation</returns>
 	public async Task SendSessionsResponseAsync(SessionsResponse response, CancellationToken cancellationToken = default)
 	{
-		if (_connection?.State == HubConnectionState.Connected)
+		await ExecuteWithLoggingAsync(nameof(SendSessionsResponseAsync), async () =>
 		{
-			await _connection.InvokeAsync(ServerHandled.SessionsResponse, response, cancellationToken);
-		}
+			await _connection!.InvokeAsync(ServerHandled.SessionsResponse, response, cancellationToken);
+		}, cancellationToken);
 	}
 
 	/// <summary>
@@ -703,10 +742,10 @@ public class WebSocketConnection : IJiroClientHub, IDisposable
 	/// <returns>Task representing the operation</returns>
 	public async Task SendConfigResponseAsync(ConfigResponse response, CancellationToken cancellationToken = default)
 	{
-		if (_connection?.State == HubConnectionState.Connected)
+		await ExecuteWithLoggingAsync(nameof(SendConfigResponseAsync), async () =>
 		{
-			await _connection.InvokeAsync(ServerHandled.ConfigResponse, response, cancellationToken);
-		}
+			await _connection!.InvokeAsync(ServerHandled.ConfigResponse, response, cancellationToken);
+		}, cancellationToken);
 	}
 
 	/// <summary>
@@ -717,10 +756,10 @@ public class WebSocketConnection : IJiroClientHub, IDisposable
 	/// <returns>Task representing the operation</returns>
 	public async Task SendConfigUpdateResponseAsync(ConfigUpdateResponse response, CancellationToken cancellationToken = default)
 	{
-		if (_connection?.State == HubConnectionState.Connected)
+		await ExecuteWithLoggingAsync(nameof(SendConfigUpdateResponseAsync), async () =>
 		{
-			await _connection.InvokeAsync(ServerHandled.ConfigUpdateResponse, response, cancellationToken);
-		}
+			await _connection!.InvokeAsync(ServerHandled.ConfigUpdateResponse, response, cancellationToken);
+		}, cancellationToken);
 	}
 
 	/// <summary>
@@ -731,10 +770,10 @@ public class WebSocketConnection : IJiroClientHub, IDisposable
 	/// <returns>Task representing the operation</returns>
 	public async Task SendThemesResponseAsync(ThemesResponse response, CancellationToken cancellationToken = default)
 	{
-		if (_connection?.State == HubConnectionState.Connected)
+		await ExecuteWithLoggingAsync(nameof(SendThemesResponseAsync), async () =>
 		{
-			await _connection.InvokeAsync(ServerHandled.ThemesResponse, response, cancellationToken);
-		}
+			await _connection!.InvokeAsync(ServerHandled.ThemesResponse, response, cancellationToken);
+		}, cancellationToken);
 	}
 
 	/// <summary>
@@ -745,10 +784,10 @@ public class WebSocketConnection : IJiroClientHub, IDisposable
 	/// <returns>Task representing the operation</returns>
 	public async Task SendCommandsMetadataResponseAsync(CommandsMetadataResponse response, CancellationToken cancellationToken = default)
 	{
-		if (_connection?.State == HubConnectionState.Connected)
+		await ExecuteWithLoggingAsync(nameof(SendCommandsMetadataResponseAsync), async () =>
 		{
-			await _connection.InvokeAsync(ServerHandled.CommandsMetadataResponse, response, cancellationToken);
-		}
+			await _connection!.InvokeAsync(ServerHandled.CommandsMetadataResponse, response, cancellationToken);
+		}, cancellationToken);
 	}
 
 	/// <summary>
@@ -759,10 +798,10 @@ public class WebSocketConnection : IJiroClientHub, IDisposable
 	/// <returns>Task representing the operation</returns>
 	public async Task SendKeepaliveResponseAsync(KeepaliveResponse response, CancellationToken cancellationToken = default)
 	{
-		if (_connection?.State == HubConnectionState.Connected)
+		await ExecuteWithLoggingAsync(nameof(SendKeepaliveResponseAsync), async () =>
 		{
-			await _connection.InvokeAsync(ServerHandled.KeepaliveResponse, response, cancellationToken);
-		}
+			await _connection!.InvokeAsync(ServerHandled.KeepaliveResponse, response, cancellationToken);
+		}, cancellationToken);
 	}
 
 	/// <summary>
@@ -773,10 +812,10 @@ public class WebSocketConnection : IJiroClientHub, IDisposable
 	/// <returns>Task representing the operation</returns>
 	public async Task SendErrorResponseAsync(ErrorResponse response, CancellationToken cancellationToken = default)
 	{
-		if (_connection?.State == HubConnectionState.Connected)
+		await ExecuteWithLoggingAsync(nameof(SendErrorResponseAsync), async () =>
 		{
-			await _connection.InvokeAsync(ServerHandled.ErrorResponse, response, cancellationToken);
-		}
+			await _connection!.InvokeAsync(ServerHandled.ErrorResponse, response, cancellationToken);
+		}, cancellationToken);
 	}
 
 	#endregion

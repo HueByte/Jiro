@@ -25,6 +25,7 @@ public class JiroWebSocketService : BackgroundService, ICommandQueueMonitor
 	private readonly ICommandHandlerService _commandHandler;
 	private readonly WebSocketOptions _options;
 	private readonly IJiroClientHub _jiroClientHub;
+	private readonly IJiroGrpcService _grpcService;
 
 	// Command queue monitoring
 	private readonly ConcurrentDictionary<string, DateTime> _activeCommands = new();
@@ -70,13 +71,15 @@ public class JiroWebSocketService : BackgroundService, ICommandQueueMonitor
 		ILogger<JiroWebSocketService> logger,
 		ICommandHandlerService commandHandler,
 		IOptions<WebSocketOptions> options,
-		IJiroClientHub jiroClientHub)
+		IJiroClientHub jiroClientHub,
+		IJiroGrpcService grpcService)
 	{
 		_scopeFactory = scopeFactory ?? throw new ArgumentNullException(nameof(scopeFactory));
 		_logger = logger ?? throw new ArgumentNullException(nameof(logger));
 		_commandHandler = commandHandler ?? throw new ArgumentNullException(nameof(commandHandler));
 		_options = options?.Value ?? throw new ArgumentNullException(nameof(options));
 		_jiroClientHub = jiroClientHub ?? throw new ArgumentNullException(nameof(jiroClientHub));
+		_grpcService = grpcService ?? throw new ArgumentNullException(nameof(grpcService));
 	}
 
 	/// <summary>
@@ -163,8 +166,19 @@ public class JiroWebSocketService : BackgroundService, ICommandQueueMonitor
 			// Execute command
 			var result = await _commandHandler.ExecuteCommandAsync(scope.ServiceProvider, commandMessage.Command);
 
-			// Note: IJiroClientHub interface doesn't have a method for sending command results
-			// You may need to extend the interface or handle results through a different mechanism
+			// Send result via gRPC to server
+			if (result.IsSuccess)
+			{
+				await _grpcService.SendCommandResultAsync(commandSyncId, result);
+				_logger.LogInformation("Command result sent via gRPC: {Command} [{SyncId}]", commandMessage.Command, commandSyncId);
+			}
+			else
+			{
+				var errorMessage = result.Result?.Message ?? "Command execution failed";
+				await _grpcService.SendCommandErrorAsync(commandSyncId, errorMessage);
+				_logger.LogWarning("Command error sent via gRPC: {Command} [{SyncId}] Error: {Error}", 
+					commandMessage.Command, commandSyncId, errorMessage);
+			}
 
 			Interlocked.Increment(ref _successfulCommands);
 			_logger.LogInformation("Command completed successfully: {Command} [{SyncId}] Result: {Result}",
@@ -176,6 +190,11 @@ public class JiroWebSocketService : BackgroundService, ICommandQueueMonitor
 
 			try
 			{
+				// Send error via gRPC to server
+				await _grpcService.SendCommandErrorAsync(commandSyncId, ex.Message);
+				_logger.LogInformation("Command error sent via gRPC: {Command} [{SyncId}]", commandMessage.Command, commandSyncId);
+
+				// Also send via WebSocket for local handling
 				var errorResponse = new SharedErrorResponse
 				{
 					ErrorMessage = $"[{commandSyncId}] {ex.Message}"
@@ -184,7 +203,7 @@ public class JiroWebSocketService : BackgroundService, ICommandQueueMonitor
 			}
 			catch (Exception sendEx)
 			{
-				_logger.LogError(sendEx, "Failed to send error response via IJiroClientHub for command [{SyncId}]", commandSyncId);
+				_logger.LogError(sendEx, "Failed to send error response via gRPC/WebSocket for command [{SyncId}]", commandSyncId);
 			}
 
 			Interlocked.Increment(ref _failedCommands);
