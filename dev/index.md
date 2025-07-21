@@ -14,9 +14,9 @@ _layout: landing
 
 Get started with Jiro in minutes:
 
-1. **[Documentation](docs/)** - Learn about Jiro's features and architecture
-2. **[API Reference](api/)** - Explore the complete API documentation
-3. **[User Guide](docs/user-guide.html)** - Step-by-step implementation guide
+1. **[Documentation](documentation/index.html)** - Learn about Jiro's features and architecture
+2. **[API Reference](api/index.html)** - Explore the complete API documentation
+3. **[User Guide](documentation/user-guide.html)** - Step-by-step implementation guide
 
 ## ✨ Key Features
 
@@ -29,7 +29,7 @@ Get started with Jiro in minutes:
 
 ## 📚 Documentation Sections
 
-### [📖 Documentation](docs/)
+### [📖 Documentation](documentation/index.html)
 
 - Project overview and architecture
 - Getting started guides
@@ -37,7 +37,7 @@ Get started with Jiro in minutes:
 - Workflow and pipelines
 - Changelog and version history
 
-### [🔧 API Reference](api/)
+### [🔧 API Reference](api/index.html)
 
 - Complete .NET API documentation
 - Class and interface references
@@ -58,4 +58,4 @@ This project is developed as part of an engineering thesis demonstrating modern 
 
 ---
 
-*Ready to dive in? Start with [Documentation](docs/) or explore the [API Reference](api/).*
+*Ready to dive in? Start with [Documentation](documentation/index.html) or explore the [API Reference](api/index.html).*

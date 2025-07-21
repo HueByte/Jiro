@@ -5,12 +5,12 @@
 ## 📋 Table of Contents
 
 - [Project Overview](#-project-overview)
-- [Architecture](#️-architecture)
+- [Architecture](#-architecture)
 - [Core Technologies](#-core-technologies)
-- [Core Services](#️-core-services)
+- [Core Services](#-core-services)
 - [Command System](#-command-system)
 - [Communication Protocols](#-communication-protocols)
-- [Infrastructure & Database](#️-infrastructure--database)
+- [Infrastructure & Database](#-infrastructure--database)
 - [Deployment & Docker](#-deployment--docker)
 - [AI & Machine Learning](#-ai--machine-learning)
 - [Testing Framework](#-testing-framework)
