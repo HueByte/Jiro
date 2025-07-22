@@ -1,9 +1,13 @@
 using Jiro.App.Options;
 using Jiro.App.Services;
+using Jiro.Core.Services.CommandHandler;
 using Jiro.Shared.Websocket;
 
+using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace Jiro.App.Extensions;
 
@@ -49,7 +53,53 @@ public static class ServiceCollectionExtensions
 		services.AddScoped<IJiroGrpcService, JiroGrpcService>();
 
 		// Register IJiroClientHub implementation for WebSocket communication
-		services.AddSingleton<IJiroClientHub, WebSocketConnection>();
+		services.AddSingleton<IJiroClient, WebSocketConnection>(services =>
+		{
+			var logger = services.GetRequiredService<ILogger<WebSocketConnection>>();
+			var options = services.GetRequiredService<IOptions<WebSocketOptions>>();
+			var scopeFactory = services.GetRequiredService<IServiceScopeFactory>();
+			var commandHandler = services.GetRequiredService<ICommandHandlerService>();
+			var exceptionHandler = services.GetRequiredService<WebSocketExceptionHandler>();
+
+			var webSocketOptions = options.Value;
+			if (string.IsNullOrEmpty(webSocketOptions.HubUrl))
+			{
+				throw new InvalidOperationException("WebSocket HubUrl is required. Please configure 'WebSocket:HubUrl' in your settings.");
+			}
+
+			// Build the hub URL with API key query parameter
+			string hubUrl = webSocketOptions.HubUrl;
+			var separator = hubUrl.Contains('?') ? "&" : "?";
+			hubUrl = $"{hubUrl}{separator}api_key={Uri.EscapeDataString(webSocketOptions.ApiKey ?? "")}";
+
+
+			var connection = new HubConnectionBuilder()
+				.AddJsonProtocol(options =>
+				{
+					options.PayloadSerializerOptions.PropertyNamingPolicy = null; // Use default property names
+					options.PayloadSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
+				})
+				.WithUrl(hubUrl, hubOptions =>
+				{
+					// Configure additional headers if provided
+					if (webSocketOptions.Headers?.Count > 0)
+					{
+						foreach (var header in webSocketOptions.Headers)
+						{
+							hubOptions.Headers.Add(header.Key, header.Value);
+						}
+					}
+				})
+				// Custom reconnection intervals: 0s, 2s, 10s, 30s, 60s, then always 60s
+				.WithAutomaticReconnect(new SocketRetryPolicy())
+				.ConfigureLogging(logging =>
+				{
+					logging.SetMinimumLevel(LogLevel.Information);
+				})
+				.Build();
+
+			return new WebSocketConnection(connection, logger, options, scopeFactory, commandHandler, exceptionHandler);
+		});
 
 		// Register as hosted service to start/stop with the application
 		services.AddHostedService<JiroWebSocketService>();
