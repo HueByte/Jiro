@@ -4,6 +4,7 @@ using System.Text.RegularExpressions;
 
 using Jiro.Core.Services.System.Models;
 
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
 namespace Jiro.Core.Services.System;
@@ -12,22 +13,37 @@ namespace Jiro.Core.Services.System;
 public class LogsProviderService : ILogsProviderService
 {
 	private readonly ILogger<LogsProviderService> _logger;
+	private readonly IConfiguration _configuration;
+
+	private static readonly Lazy<Regex> DefaultTimestampRegex = new(() => 
+		new Regex(@"\[(\d{2}:\d{2}:\d{2}) (VER|DBG|INF|WRN|ERR|FTL)\]", RegexOptions.IgnoreCase | RegexOptions.Compiled));
+	
+	private static readonly Lazy<Regex> DefaultLogLevelRegex = new(() => 
+		new Regex(@"\[\d{2}:\d{2}:\d{2} (VER|DBG|INF|WRN|ERR|FTL)\]", RegexOptions.IgnoreCase | RegexOptions.Compiled));
+	
+	private static readonly Lazy<Regex[]> DefaultFallbackTimestampRegexes = new(() => new[]
+	{
+		new Regex(@"(\d{4}-\d{2}-\d{2}[\sT]\d{2}:\d{2}:\d{2}(?:\.\d{1,7})?(?:Z|[+-]\d{2}:?\d{2})?)", RegexOptions.Compiled),
+		new Regex(@"(\d{2}/\d{2}/\d{4} \d{2}:\d{2}:\d{2})", RegexOptions.Compiled),
+		new Regex(@"(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})", RegexOptions.Compiled)
+	});
 
 	/// <summary>
 	/// Initializes a new instance of the <see cref="LogsProviderService"/> class.
 	/// </summary>
 	/// <param name="logger">Logger instance for logging.</param>
-	public LogsProviderService(ILogger<LogsProviderService> logger)
+	/// <param name="configuration">Configuration instance to read Serilog settings.</param>
+	public LogsProviderService(ILogger<LogsProviderService> logger, IConfiguration configuration)
 	{
 		_logger = logger ?? throw new ArgumentNullException(nameof(logger));
+		_configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
 	}
 
 	/// <inheritdoc/>
 	public async Task<LogsResponse> GetLogsAsync(string? level = null, int limit = 100, int offset = 0,
 		DateTime? fromDate = null, DateTime? toDate = null, string? searchTerm = null)
 	{
-		var logsDirectory = Path.Combine(AppContext.BaseDirectory, "logs");
-		var logPattern = "*.txt"; // Using .txt extension as seen in Logging folder
+		var (logsDirectory, logPatterns) = GetLogPathsFromSerilogConfig();
 
 		try
 		{
@@ -42,7 +58,8 @@ public class LogsProviderService : ILogsProviderService
 
 			if (Directory.Exists(logsDirectory))
 			{
-				var logFiles = Directory.GetFiles(logsDirectory, logPattern)
+				var logFiles = logPatterns
+					.SelectMany(pattern => Directory.GetFiles(logsDirectory, pattern))
 					.OrderByDescending(f => File.GetLastWriteTime(f));
 
 				foreach (var logFile in logFiles)
@@ -165,15 +182,15 @@ public class LogsProviderService : ILogsProviderService
 	public async Task<int> GetLogCountAsync(string? level = null, DateTime? fromDate = null,
 		DateTime? toDate = null, string? searchTerm = null)
 	{
-		var logsDirectory = Path.Combine(AppContext.BaseDirectory, "logs");
-		var logPattern = "*.txt";
+		var (logsDirectory, logPatterns) = GetLogPathsFromSerilogConfig();
 		var count = 0;
 
 		try
 		{
 			if (Directory.Exists(logsDirectory))
 			{
-				var logFiles = Directory.GetFiles(logsDirectory, logPattern);
+				var logFiles = logPatterns
+					.SelectMany(pattern => Directory.GetFiles(logsDirectory, pattern));
 
 				foreach (var logFile in logFiles)
 				{
@@ -217,15 +234,15 @@ public class LogsProviderService : ILogsProviderService
 	/// <inheritdoc/>
 	public async Task<IEnumerable<LogFileInfo>> GetLogFilesAsync()
 	{
-		var logsDirectory = Path.Combine(AppContext.BaseDirectory, "logs");
-		var logPattern = "*.txt";
+		var (logsDirectory, logPatterns) = GetLogPathsFromSerilogConfig();
 		var files = new List<LogFileInfo>();
 
 		try
 		{
 			if (Directory.Exists(logsDirectory))
 			{
-				var logFiles = Directory.GetFiles(logsDirectory, logPattern);
+				var logFiles = logPatterns
+					.SelectMany(pattern => Directory.GetFiles(logsDirectory, pattern));
 
 				foreach (var logFile in logFiles)
 				{
@@ -263,14 +280,14 @@ public class LogsProviderService : ILogsProviderService
 	{
 		// Future implementation for real-time log streaming
 		// This would watch log files for changes and yield new entries
-		var logsDirectory = Path.Combine(AppContext.BaseDirectory, "logs");
-		var logPattern = "*.txt";
+		var (logsDirectory, logPatterns) = GetLogPathsFromSerilogConfig();
 
 		if (!Directory.Exists(logsDirectory))
 			yield break;
 
 		// For now, just yield existing logs (placeholder for future streaming implementation)
-		var logFiles = Directory.GetFiles(logsDirectory, logPattern)
+		var logFiles = logPatterns
+			.SelectMany(pattern => Directory.GetFiles(logsDirectory, pattern))
 			.OrderByDescending(f => File.GetLastWriteTime(f))
 			.Take(1); // Only latest file for streaming
 
@@ -306,7 +323,7 @@ public class LogsProviderService : ILogsProviderService
 				};
 
 				// Filter by level if specified - skip filtering if level is "all"
-				if (!string.IsNullOrEmpty(level) && 
+				if (!string.IsNullOrEmpty(level) &&
 					!level.Equals("all", StringComparison.OrdinalIgnoreCase) &&
 					!logEntry.Level.Equals(level, StringComparison.OrdinalIgnoreCase))
 					continue;
@@ -316,40 +333,34 @@ public class LogsProviderService : ILogsProviderService
 		}
 	}
 
+
 	private static string ExtractTimestamp(string logLine)
 	{
-		// Enhanced regex to match multiple timestamp formats
-		var patterns = new[]
+		var match = DefaultTimestampRegex.Value.Match(logLine);
+		if (match.Success && match.Groups.Count > 1)
 		{
-			@"(\d{4}-\d{2}-\d{2}[\sT]\d{2}:\d{2}:\d{2}(?:\.\d{1,7})?(?:Z|[+-]\d{2}:?\d{2})?)", // ISO format
-			@"(\d{2}/\d{2}/\d{4} \d{2}:\d{2}:\d{2})", // US format
-			@"(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})", // Standard format
-		};
-
-		foreach (var pattern in patterns)
-		{
-			var match = Regex.Match(logLine, pattern);
-			if (match.Success)
-				return match.Value;
+			// Return time part only
+			return match.Groups[1].Value;
 		}
 
-		return DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss");
+		// Fallback to previous formats if needed
+		foreach (var regex in DefaultFallbackTimestampRegexes.Value)
+		{
+			var fallbackMatch = regex.Match(logLine);
+			if (fallbackMatch.Success)
+				return fallbackMatch.Value;
+		}
+		return DateTime.UtcNow.ToString("HH:mm:ss");
 	}
 
 	private static string ExtractLogLevel(string logLine)
 	{
-		var levels = new[] { "TRACE", "DEBUG", "INFO", "INFORMATION", "WARN", "WARNING", "ERROR", "FATAL", "CRITICAL" };
-		foreach (var level in levels)
+		var match = DefaultLogLevelRegex.Value.Match(logLine);
+		if (match.Success && match.Groups.Count > 1)
 		{
-			// Check for both [LEVEL] and |LEVEL| formats
-			if (logLine.Contains($"[{level}]", StringComparison.OrdinalIgnoreCase) ||
-				logLine.Contains($"|{level}|", StringComparison.OrdinalIgnoreCase))
-			{
-				return level.ToUpperInvariant();
-			}
+			return match.Groups[1].Value.ToUpperInvariant();
 		}
-
-		return "INFO";
+		return "INF";
 	}
 
 	private static DateTime TryParseTimestamp(string timestamp)
@@ -383,11 +394,62 @@ public class LogsProviderService : ILogsProviderService
 		return DateTime.UtcNow;
 	}
 
+	/// <summary>
+	/// Extracts log directory and file patterns from Serilog configuration.
+	/// </summary>
+	/// <returns>A tuple containing the logs directory path and array of log file patterns.</returns>
+	private (string LogsDirectory, string[] LogPatterns) GetLogPathsFromSerilogConfig()
+	{
+		var logPaths = new List<string>();
+		var serilogWriteTo = _configuration.GetSection("Serilog:WriteTo").GetChildren();
+		
+		foreach (var sink in serilogWriteTo)
+		{
+			var sinkName = sink.GetValue<string>("Name");
+			if (sinkName == "File")
+			{
+				var filePath = sink.GetValue<string>("Args:path");
+				if (!string.IsNullOrEmpty(filePath))
+				{
+					logPaths.Add(filePath);
+				}
+			}
+		}
+
+		// If no Serilog file sinks found, use defaults
+		if (logPaths.Count == 0)
+		{
+			return (Path.Combine(AppContext.BaseDirectory, "Logs"), new[] { "jiro-detailed_*.txt", "jiro-errors_*.txt" });
+		}
+
+		// Extract directory from first log path
+		var firstLogPath = logPaths[0];
+		var directory = Path.GetDirectoryName(firstLogPath);
+		var logsDirectory = string.IsNullOrEmpty(directory) 
+			? Path.Combine(AppContext.BaseDirectory, "Logs")
+			: Path.IsPathRooted(directory) ? directory : Path.Combine(AppContext.BaseDirectory, directory);
+
+		// Create patterns from file paths
+		var patterns = logPaths
+			.Select(path => Path.GetFileName(path))
+			.Where(fileName => !string.IsNullOrEmpty(fileName))
+			.Select(fileName => fileName!.Replace("_.", "_*."))  // Convert Serilog rolling patterns
+			.ToArray();
+
+		// If no valid patterns, use defaults
+		if (patterns.Length == 0)
+		{
+			patterns = new[] { "jiro-detailed_*.txt", "jiro-errors_*.txt" };
+		}
+
+		return (logsDirectory, patterns);
+	}
+
 	private static bool PassesFilters(LogEntry logEntry, DateTime parsedTimestamp,
 		string? level, DateTime? fromDate, DateTime? toDate, string? searchTerm)
 	{
 		// Level filter - skip filtering if level is null, empty, or "all"
-		if (!string.IsNullOrEmpty(level) && 
+		if (!string.IsNullOrEmpty(level) &&
 			!level.Equals("all", StringComparison.OrdinalIgnoreCase) &&
 			!logEntry.Level.Equals(level, StringComparison.OrdinalIgnoreCase))
 			return false;

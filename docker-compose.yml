@@ -11,10 +11,20 @@ services:
       - "${JIRO_HTTPS_PORT}:8443"
       - "${JIRO_ADDITIONAL_PORT}:18090"
     environment:
-      - ConnectionStrings__DefaultConnection=Server=${DB_SERVER};Database=${MYSQL_DATABASE};Uid=${MYSQL_USER};Pwd=${MYSQL_PASSWORD};
+      # Database connection
+      - ConnectionStrings__JiroContext=Server=${DB_SERVER};Database=${MYSQL_DATABASE};Uid=${MYSQL_USER};Pwd=${MYSQL_PASSWORD};
+      # Serilog configuration overrides (optional - uncomment to customize)
+      # - Serilog__WriteTo__1__Args__path=Data/Logs/jiro-detailed_.txt
+      # - Serilog__WriteTo__2__Args__path=Data/Logs/jiro-errors_.txt
+      # - Serilog__MinimumLevel__Default=Information
+      # OpenAI configuration (required for AI features)
+      # - Chat__AuthToken=${OPENAI_API_KEY}
+      # JWT configuration (required for authentication)
+      # - JWT__Secret=${JWT_SECRET}
+      # - JWT__Issuer=${JWT_ISSUER}
+      # - JWT__Audience=${JWT_AUDIENCE}
     volumes:
-      - jiro_shared:/home/app/jiro/Data/Shared
-      - jiro_logs:/home/app/jiro/Data/Logs
+      - jiro_data:/home/app/jiro/Data
     depends_on:
       mysql:
         condition: service_healthy
@@ -55,9 +65,7 @@ services:
       start_period: ${MYSQL_HEALTH_CHECK_START_PERIOD}
 
 volumes:
-  jiro_shared:
-    driver: local
-  jiro_logs:
+  jiro_data:
     driver: local
   mysql_data:
     driver: local

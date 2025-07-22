@@ -31,6 +31,9 @@ RUN dotnet publish Jiro.App/Jiro.App.csproj -c Release -o build \
 	/p:PublishTrimmed=false \
 	/p:UseAppHost=true
 
+# Ensure appsettings.example.json is available as fallback
+RUN cp Jiro.App/appsettings.example.json build/appsettings.json || true
+
 # Stage 2: Runtime image
 FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS runtime
 ARG MAIN_WORK_DIR=/home/app/jiro
@@ -49,14 +52,12 @@ RUN apt-get update && apt-get install -y \
 COPY --from=build ${MAIN_WORK_DIR}/build ${MAIN_WORK_DIR}/build
 
 # Set up directories
-ARG LOGS_PATH=${MAIN_WORK_DIR}/Data/Logs
-ARG SHARED_PATH=${MAIN_WORK_DIR}/Data/Shared
-ENV LOGS_PATH=${LOGS_PATH}
-ENV SHARED_PATH=${SHARED_PATH}
+ARG DATA_PATH=${MAIN_WORK_DIR}/Data
 ENV ASPNETCORE_ENVIRONMENT=Production
 ENV ASPNETCORE_URLS=http://+:8080;https://+:8443
 
-RUN mkdir -p ${LOGS_PATH} ${SHARED_PATH} && \
+# Create data directories and set permissions
+RUN mkdir -p ${DATA_PATH}/Logs ${DATA_PATH}/Save ${DATA_PATH}/Modules && \
 	chown -R jiro:jiro ${MAIN_WORK_DIR}
 
 WORKDIR ${MAIN_WORK_DIR}/build

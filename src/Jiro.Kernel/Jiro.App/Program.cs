@@ -24,12 +24,21 @@ bool isTestMode = args.Contains("--test-mode") || Environment.GetEnvironmentVari
 var host = Host.CreateDefaultBuilder(args);
 
 ConfigurationManager configManager = new();
+
+// Ensure appsettings.json exists, create from example if needed
+var appSettingsPath = Path.Combine(AppContext.BaseDirectory, "appsettings.json");
+var exampleSettingsPath = Path.Combine(AppContext.BaseDirectory, "appsettings.example.json");
+
+if (!File.Exists(appSettingsPath) && File.Exists(exampleSettingsPath))
+{
+	File.Copy(exampleSettingsPath, appSettingsPath);
+}
+
 configManager.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
 	.AddEnvironmentVariables();
 
 EnvironmentConfigurator environmentConfigurator = new EnvironmentConfigurator(configManager)
 	.PrepareDefaultFolders()
-	.PrepareConfigFiles()
 	.PrepareLogsFolder();
 
 Log.Logger = new LoggerConfiguration()

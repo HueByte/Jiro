@@ -20,19 +20,9 @@ public class SystemConfigResponse
 public class ConfigurationSection
 {
 	public object? Chat { get; set; }
-	public LoggingConfig Logging { get; set; } = new();
 	public FeaturesConfig Features { get; set; } = new();
 }
 
-/// <summary>
-/// Logging configuration
-/// </summary>
-public class LoggingConfig
-{
-	public string? LogLevel { get; set; }
-	public bool EnableConsoleLogging { get; set; }
-	public bool EnableFileLogging { get; set; }
-}
 
 /// <summary>
 /// Features configuration
