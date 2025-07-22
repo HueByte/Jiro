@@ -1,5 +1,6 @@
-using Microsoft.Extensions.Logging;
 using Jiro.Shared.Websocket.Responses;
+
+using Microsoft.Extensions.Logging;
 
 namespace Jiro.App.Services;
 

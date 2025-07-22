@@ -1,5 +1,6 @@
 using Grpc.Core;
 using Grpc.Core.Interceptors;
+
 using Microsoft.Extensions.Logging;
 
 namespace Jiro.App.Services;
@@ -42,10 +43,10 @@ public class GrpcExceptionInterceptor : Interceptor
 		try
 		{
 			var response = await responseTask;
-			
+
 			// Log successful gRPC calls at debug level
 			_logger.LogDebug("gRPC call successful - Method: {Method}", method.Name);
-			
+
 			return response;
 		}
 		catch (RpcException rpcEx)

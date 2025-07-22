@@ -44,7 +44,7 @@ public class EnvironmentConfigurator
 	{
 		// Extract log file paths from Serilog configuration
 		var serilogWriteTo = _config.GetSection("Serilog:WriteTo").GetChildren();
-		
+
 		foreach (var sink in serilogWriteTo)
 		{
 			var sinkName = sink.GetValue<string>("Name");
@@ -56,10 +56,10 @@ public class EnvironmentConfigurator
 					var directory = Path.GetDirectoryName(filePath);
 					if (!string.IsNullOrEmpty(directory))
 					{
-						var fullPath = Path.IsPathRooted(directory) 
-							? directory 
+						var fullPath = Path.IsPathRooted(directory)
+							? directory
 							: Path.Combine(AppContext.BaseDirectory, directory);
-							
+
 						if (!Directory.Exists(fullPath))
 						{
 							Directory.CreateDirectory(fullPath);

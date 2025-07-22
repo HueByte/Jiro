@@ -57,7 +57,7 @@ public partial class WebSocketConnection : JiroClientBase, IDisposable
 		_commandHandler = commandHandler ?? throw new ArgumentNullException(nameof(commandHandler));
 		_exceptionHandler = exceptionHandler ?? throw new ArgumentNullException(nameof(exceptionHandler));
 
-		_ = InitializeAsync(_options.HubUrl, _options.ApiKey, 
+		_ = InitializeAsync(_options.HubUrl, _options.ApiKey,
 			(ex, context) => _exceptionHandler.HandleConnectionException(ex, context));
 	}
 

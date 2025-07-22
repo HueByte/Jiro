@@ -23,7 +23,7 @@ public class LogsProviderServiceTests : IDisposable
 	public LogsProviderServiceTests()
 	{
 		_mockLogger = new Mock<ILogger<LogsProviderService>>();
-		
+
 		// Create a temporary directory for test logs
 		_testLogDirectory = Path.Combine(Path.GetTempPath(), "JiroTestLogs", Guid.NewGuid().ToString());
 		Directory.CreateDirectory(_testLogDirectory);
@@ -42,7 +42,7 @@ public class LogsProviderServiceTests : IDisposable
 		{
 			["Serilog:WriteTo:0:Name"] = "File",
 			["Serilog:WriteTo:0:Args:path"] = Path.Combine(_testLogDirectory, "jiro_.log"),
-			["Serilog:WriteTo:1:Name"] = "File", 
+			["Serilog:WriteTo:1:Name"] = "File",
 			["Serilog:WriteTo:1:Args:path"] = Path.Combine(_testLogDirectory, "jiro_errors_.log"),
 			["Serilog:WriteTo:2:Name"] = "Console"
 		};
@@ -58,7 +58,7 @@ public class LogsProviderServiceTests : IDisposable
 		var logEntries1 = new[]
 		{
 			"[10:00:00 DBG] [TestContext] Debug message 1",
-			"[10:01:00 INF] [TestContext] Info message 1", 
+			"[10:01:00 INF] [TestContext] Info message 1",
 			"10:02:00 WRN] [TestContext] Warning message 1", // Missing opening bracket
 			"[10:03:00 ERR] [TestContext] Error message 1",
 			"10:04:00 INF] [TestContext] Info message 2" // Missing opening bracket
@@ -249,7 +249,7 @@ public class LogsProviderServiceTests : IDisposable
 			Assert.NotNull(logEntry);
 			Assert.False(string.IsNullOrEmpty(logEntry.Message));
 			logCount++;
-			
+
 			// Limit to prevent infinite loop in case of issues
 			if (logCount > 100) break;
 		}
@@ -270,7 +270,7 @@ public class LogsProviderServiceTests : IDisposable
 			Assert.NotNull(logEntry);
 			Assert.Equal("ERR", logEntry.Level);
 			logCount++;
-			
+
 			// Limit to prevent infinite loop
 			if (logCount > 50) break;
 		}

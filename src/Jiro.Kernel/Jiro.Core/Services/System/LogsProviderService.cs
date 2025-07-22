@@ -60,25 +60,25 @@ public class LogsProviderService : ILogsProviderService
 			_logger.LogDebug("Using patterns: {Patterns}", string.Join(", ", logPatterns));
 
 			if (Directory.Exists(logsDirectory))
-				{
-					_logger.LogDebug("Directory exists, searching for files...");
+			{
+				_logger.LogDebug("Directory exists, searching for files...");
 
-					// Use EnumerateFiles for better memory efficiency
-					var logFiles = logPatterns
-						.SelectMany(pattern =>
-						{
-							var matchingFiles = Directory.EnumerateFiles(logsDirectory, pattern);
-							_logger.LogDebug("Pattern '{Pattern}' searching...", pattern);
-							return matchingFiles;
-						})
-						.OrderByDescending(File.GetLastWriteTime);
+				// Use EnumerateFiles for better memory efficiency
+				var logFiles = logPatterns
+					.SelectMany(pattern =>
+					{
+						var matchingFiles = Directory.EnumerateFiles(logsDirectory, pattern);
+						_logger.LogDebug("Pattern '{Pattern}' searching...", pattern);
+						return matchingFiles;
+					})
+					.OrderByDescending(File.GetLastWriteTime);
 
 				foreach (var logFile in logFiles)
 				{
 					try
 					{
 						// Use streaming approach with smart offset and limit handling
-						var result = await ProcessLogFileOptimizedAsync(logFile, results, totalProcessed, skipped, 
+						var result = await ProcessLogFileOptimizedAsync(logFile, results, totalProcessed, skipped,
 							level, fromDate, toDate, searchTerm, offset, limit);
 
 						totalProcessed = result.TotalProcessed;
@@ -494,8 +494,8 @@ public class LogsProviderService : ILogsProviderService
 	/// Optimized method to process a single log file with smart offset and limit handling.
 	/// Uses streaming approach with FileShare.ReadWrite for better concurrency.
 	/// </summary>
-	private async Task<LogProcessingResult> ProcessLogFileOptimizedAsync(string logFile, List<LogEntry> results, 
-		int currentTotalProcessed, int currentSkipped, string? level, DateTime? fromDate, DateTime? toDate, 
+	private async Task<LogProcessingResult> ProcessLogFileOptimizedAsync(string logFile, List<LogEntry> results,
+		int currentTotalProcessed, int currentSkipped, string? level, DateTime? fromDate, DateTime? toDate,
 		string? searchTerm, int offset, int limit)
 	{
 		using var fileStream = new FileStream(logFile, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
@@ -503,7 +503,7 @@ public class LogsProviderService : ILogsProviderService
 
 		var lines = new List<string>();
 		string? line;
-		
+
 		// Read all lines first (we still need to reverse for newest-first processing)
 		while ((line = await reader.ReadLineAsync()) != null)
 		{
