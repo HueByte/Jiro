@@ -18,10 +18,21 @@ using Serilog.Extensions.Logging;
 
 AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
 
+// Ensure working directory matches the application's base directory
+Directory.SetCurrentDirectory(AppContext.BaseDirectory);
+
 // Check for test mode
 bool isTestMode = args.Contains("--test-mode") || Environment.GetEnvironmentVariable("JIRO_TEST_MODE") == "true";
 
-var host = Host.CreateDefaultBuilder(args);
+var host = Host.CreateDefaultBuilder(args)
+	.UseContentRoot(AppContext.BaseDirectory)
+	.ConfigureHostConfiguration(config =>
+	{
+		config.SetBasePath(AppContext.BaseDirectory);
+		config.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
+		config.AddEnvironmentVariables();
+		config.AddCommandLine(args);
+	});
 
 ConfigurationManager configManager = new();
 
@@ -49,7 +60,7 @@ var logger = new SerilogLoggerProvider(Log.Logger)
 	.CreateLogger(nameof(Program));
 
 host.UseSerilog((context, services, configuration) => configuration
-		.ReadFrom.Configuration(configManager)
+		.ReadFrom.Configuration(context.Configuration)
 		.ReadFrom.Services(services));
 
 var modulePaths = configManager.GetSection("Modules").Get<string[]>();
@@ -104,9 +115,7 @@ host.ConfigureServices(services =>
 
 	pluginManager = new(services, configManager, logger);
 
-	string? connString = configManager.GetValue<string>("JIRO_DB_CONN");
-	if (string.IsNullOrEmpty(connString))
-		connString = configManager.GetConnectionString("JiroContext");
+	var connString = configManager.GetConnectionString("JiroContext");
 
 	services.AddJiroSQLiteContext(string.IsNullOrEmpty(connString) ? Path.Join(AppContext.BaseDirectory, "save", "jiro.db") : connString);
 	services.AddMemoryCache();

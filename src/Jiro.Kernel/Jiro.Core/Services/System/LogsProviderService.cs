@@ -15,12 +15,12 @@ public class LogsProviderService : ILogsProviderService
 	private readonly ILogger<LogsProviderService> _logger;
 	private readonly IConfiguration _configuration;
 
-	private static readonly Lazy<Regex> DefaultTimestampRegex = new(() => 
-		new Regex(@"\[(\d{2}:\d{2}:\d{2}) (VER|DBG|INF|WRN|ERR|FTL)\]", RegexOptions.IgnoreCase | RegexOptions.Compiled));
-	
-	private static readonly Lazy<Regex> DefaultLogLevelRegex = new(() => 
-		new Regex(@"\[\d{2}:\d{2}:\d{2} (VER|DBG|INF|WRN|ERR|FTL)\]", RegexOptions.IgnoreCase | RegexOptions.Compiled));
-	
+	private static readonly Lazy<Regex> DefaultTimestampRegex = new(() =>
+		new Regex(@"^\[?(?<timestamp>(?:\d{4}-\d{2}-\d{2} )?\d{2}:\d{2}:\d{2}(?:\.\d{3})?)\s+(?<level>[A-Z]+)\]", RegexOptions.IgnoreCase | RegexOptions.Compiled));
+
+	private static readonly Lazy<Regex> DefaultLogLevelRegex = new(() =>
+		new Regex(@"^\[?(?:\d{4}-\d{2}-\d{2} )?\d{2}:\d{2}:\d{2}(?:\.\d{3})?\s+(?<level>[A-Z]+)\]", RegexOptions.IgnoreCase | RegexOptions.Compiled));
+
 	private static readonly Lazy<Regex[]> DefaultFallbackTimestampRegexes = new(() => new[]
 	{
 		new Regex(@"(\d{4}-\d{2}-\d{2}[\sT]\d{2}:\d{2}:\d{2}(?:\.\d{1,7})?(?:Z|[+-]\d{2}:?\d{2})?)", RegexOptions.Compiled),
@@ -56,63 +56,36 @@ public class LogsProviderService : ILogsProviderService
 			var totalProcessed = 0;
 			var skipped = 0;
 
+			_logger.LogDebug("Checking logs directory: {LogsDirectory}", logsDirectory);
+			_logger.LogDebug("Using patterns: {Patterns}", string.Join(", ", logPatterns));
+
 			if (Directory.Exists(logsDirectory))
-			{
-				var logFiles = logPatterns
-					.SelectMany(pattern => Directory.GetFiles(logsDirectory, pattern))
-					.OrderByDescending(f => File.GetLastWriteTime(f));
+				{
+					_logger.LogDebug("Directory exists, searching for files...");
+
+					// Use EnumerateFiles for better memory efficiency
+					var logFiles = logPatterns
+						.SelectMany(pattern =>
+						{
+							var matchingFiles = Directory.EnumerateFiles(logsDirectory, pattern);
+							_logger.LogDebug("Pattern '{Pattern}' searching...", pattern);
+							return matchingFiles;
+						})
+						.OrderByDescending(File.GetLastWriteTime);
 
 				foreach (var logFile in logFiles)
 				{
 					try
 					{
-						// For large files, we might want to read in chunks or use streaming
-						var lines = await File.ReadAllLinesAsync(logFile);
+						// Use streaming approach with smart offset and limit handling
+						var result = await ProcessLogFileOptimizedAsync(logFile, results, totalProcessed, skipped, 
+							level, fromDate, toDate, searchTerm, offset, limit);
 
-						// Process lines in reverse order (newest first) for better performance
-						for (int i = lines.Length - 1; i >= 0; i--)
-						{
-							var line = lines[i];
-							if (string.IsNullOrWhiteSpace(line)) continue;
+						totalProcessed = result.TotalProcessed;
+						skipped = result.Skipped;
 
-							var logEntry = new LogEntry
-							{
-								File = Path.GetFileName(logFile),
-								Timestamp = ExtractTimestamp(line),
-								Level = ExtractLogLevel(line),
-								Message = line
-							};
-
-							// Parse timestamp for accurate filtering
-							var parsedTimestamp = TryParseTimestamp(logEntry.Timestamp);
-
-							// Apply filters
-							if (!PassesFilters(logEntry, parsedTimestamp, level, fromDate, toDate, searchTerm))
-								continue;
-
-							totalProcessed++;
-
-							// Skip entries if we're not at the requested offset yet
-							if (skipped < offset)
-							{
-								skipped++;
-								continue;
-							}
-
-							// Add to results if we haven't reached the limit
-							if (results.Count < limit)
-							{
-								results.Add(logEntry);
-							}
-							else if (totalProcessed > offset + limit)
-							{
-								// We have enough results and know there are more
-								break;
-							}
-						}
-
-						// If we have enough results and processed more than needed, we can stop
-						if (results.Count >= limit && totalProcessed > offset + limit)
+						// Early exit if we have enough results
+						if (results.Count >= limit || result.ShouldStop)
 							break;
 					}
 					catch (Exception ex)
@@ -120,6 +93,10 @@ public class LogsProviderService : ILogsProviderService
 						_logger.LogWarning(ex, "Failed to read log file: {LogFile}", logFile);
 					}
 				}
+			}
+			else
+			{
+				_logger.LogWarning("Logs directory does not exist: {LogsDirectory}", logsDirectory);
 			}
 
 			// Get total count for pagination info (only if needed)
@@ -190,15 +167,18 @@ public class LogsProviderService : ILogsProviderService
 			if (Directory.Exists(logsDirectory))
 			{
 				var logFiles = logPatterns
-					.SelectMany(pattern => Directory.GetFiles(logsDirectory, pattern));
+					.SelectMany(pattern => Directory.EnumerateFiles(logsDirectory, pattern));
 
 				foreach (var logFile in logFiles)
 				{
 					try
 					{
-						var lines = await File.ReadAllLinesAsync(logFile);
+						// Use streaming approach for counting to avoid loading entire file into memory
+						using var fileStream = new FileStream(logFile, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+						using var reader = new StreamReader(fileStream);
 
-						foreach (var line in lines)
+						string? line;
+						while ((line = await reader.ReadLineAsync()) != null)
 						{
 							if (string.IsNullOrWhiteSpace(line)) continue;
 
@@ -242,7 +222,7 @@ public class LogsProviderService : ILogsProviderService
 			if (Directory.Exists(logsDirectory))
 			{
 				var logFiles = logPatterns
-					.SelectMany(pattern => Directory.GetFiles(logsDirectory, pattern));
+					.SelectMany(pattern => Directory.EnumerateFiles(logsDirectory, pattern));
 
 				foreach (var logFile in logFiles)
 				{
@@ -287,7 +267,7 @@ public class LogsProviderService : ILogsProviderService
 
 		// For now, just yield existing logs (placeholder for future streaming implementation)
 		var logFiles = logPatterns
-			.SelectMany(pattern => Directory.GetFiles(logsDirectory, pattern))
+			.SelectMany(pattern => Directory.EnumerateFiles(logsDirectory, pattern))
 			.OrderByDescending(f => File.GetLastWriteTime(f))
 			.Take(1); // Only latest file for streaming
 
@@ -299,7 +279,16 @@ public class LogsProviderService : ILogsProviderService
 			string[] lines;
 			try
 			{
-				lines = await File.ReadAllLinesAsync(logFile, cancellationToken);
+				// Use streaming approach for better memory efficiency
+				using var fileStream = new FileStream(logFile, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+				using var reader = new StreamReader(fileStream);
+				var linesList = new List<string>();
+				string? line;
+				while ((line = await reader.ReadLineAsync()) != null)
+				{
+					linesList.Add(line);
+				}
+				lines = linesList.ToArray();
 			}
 			catch (Exception ex)
 			{
@@ -337,10 +326,10 @@ public class LogsProviderService : ILogsProviderService
 	private static string ExtractTimestamp(string logLine)
 	{
 		var match = DefaultTimestampRegex.Value.Match(logLine);
-		if (match.Success && match.Groups.Count > 1)
+		if (match.Success && match.Groups["timestamp"].Success)
 		{
-			// Return time part only
-			return match.Groups[1].Value;
+			// Return full timestamp
+			return match.Groups["timestamp"].Value;
 		}
 
 		// Fallback to previous formats if needed
@@ -356,9 +345,9 @@ public class LogsProviderService : ILogsProviderService
 	private static string ExtractLogLevel(string logLine)
 	{
 		var match = DefaultLogLevelRegex.Value.Match(logLine);
-		if (match.Success && match.Groups.Count > 1)
+		if (match.Success && match.Groups["level"].Success)
 		{
-			return match.Groups[1].Value.ToUpperInvariant();
+			return match.Groups["level"].Value.ToUpperInvariant();
 		}
 		return "INF";
 	}
@@ -368,6 +357,8 @@ public class LogsProviderService : ILogsProviderService
 		// Try various timestamp formats
 		var formats = new[]
 		{
+			"HH:mm:ss",                      // Time only (test format)
+			"HH:mm:ss.fff",                  // Time with milliseconds
 			"yyyy-MM-dd HH:mm:ss",
 			"yyyy-MM-ddTHH:mm:ss",
 			"yyyy-MM-dd HH:mm:ss.fff",
@@ -383,6 +374,12 @@ public class LogsProviderService : ILogsProviderService
 			if (DateTime.TryParseExact(timestamp, format, CultureInfo.InvariantCulture,
 				DateTimeStyles.None, out var result))
 			{
+				// If we only parsed time, add today's date
+				if (format.StartsWith("HH:"))
+				{
+					var today = DateTime.Today;
+					return new DateTime(today.Year, today.Month, today.Day, result.Hour, result.Minute, result.Second, result.Millisecond);
+				}
 				return result;
 			}
 		}
@@ -396,13 +393,14 @@ public class LogsProviderService : ILogsProviderService
 
 	/// <summary>
 	/// Extracts log directory and file patterns from Serilog configuration.
+	/// Uses AppContext.BaseDirectory for relative paths, absolute paths for Docker volumes.
 	/// </summary>
 	/// <returns>A tuple containing the logs directory path and array of log file patterns.</returns>
 	private (string LogsDirectory, string[] LogPatterns) GetLogPathsFromSerilogConfig()
 	{
 		var logPaths = new List<string>();
 		var serilogWriteTo = _configuration.GetSection("Serilog:WriteTo").GetChildren();
-		
+
 		foreach (var sink in serilogWriteTo)
 		{
 			var sinkName = sink.GetValue<string>("Name");
@@ -416,33 +414,158 @@ public class LogsProviderService : ILogsProviderService
 			}
 		}
 
-		// If no Serilog file sinks found, use defaults
+		// If no Serilog file sinks found, use defaults with AppContext.BaseDirectory
 		if (logPaths.Count == 0)
 		{
-			return (Path.Combine(AppContext.BaseDirectory, "Logs"), new[] { "jiro-detailed_*.txt", "jiro-errors_*.txt" });
+			return (Path.Combine(AppContext.BaseDirectory, "Logs"), new[] { "jiro-detailed_*.log", "jiro-errors_*.log", "jiro_*.log", "jiro_*.txt" });
 		}
 
-		// Extract directory from first log path
+		// Extract directory from first log path and resolve it correctly
 		var firstLogPath = logPaths[0];
 		var directory = Path.GetDirectoryName(firstLogPath);
-		var logsDirectory = string.IsNullOrEmpty(directory) 
-			? Path.Combine(AppContext.BaseDirectory, "Logs")
-			: Path.IsPathRooted(directory) ? directory : Path.Combine(AppContext.BaseDirectory, directory);
 
-		// Create patterns from file paths
+		string logsDirectory;
+		if (string.IsNullOrEmpty(directory))
+		{
+			// If no directory in path, use default Logs folder relative to app
+			logsDirectory = Path.Combine(AppContext.BaseDirectory, "logs");
+		}
+		else if (Path.IsPathRooted(directory))
+		{
+			// Absolute path - use as is (for example Docker volumes)
+			logsDirectory = directory;
+		}
+		else
+		{
+			// Relative path - combine with AppContext.BaseDirectory
+			logsDirectory = Path.Combine(AppContext.BaseDirectory, directory);
+		}
+
+		// Create patterns from file paths, handling Serilog rolling patterns correctly
 		var patterns = logPaths
 			.Select(path => Path.GetFileName(path))
 			.Where(fileName => !string.IsNullOrEmpty(fileName))
-			.Select(fileName => fileName!.Replace("_.", "_*."))  // Convert Serilog rolling patterns
+			.Select(fileName =>
+			{
+				// Convert Serilog rolling patterns and common date patterns:
+				// "jiro-detailed_.txt" -> "jiro-detailed_*.txt"
+				// "jiro_{Date}.log" -> "jiro_*.log"
+				// "{Date}" -> "*", "{Hour}" -> "*", etc.
+				return fileName!
+					.Replace("_.", "_*.")
+					.Replace("{Date}", "*")
+					.Replace("{Hour}", "*")
+					.Replace("{HalfHour}", "*")
+					.Replace("{date}", "*")  // lowercase variant
+					.Replace("{hour}", "*")  // lowercase variant
+					.Replace("_{", "_*")     // Handle patterns like jiro_{date}.log -> jiro_*.log
+					.Replace("}", "");       // Remove remaining braces
+			})
 			.ToArray();
 
-		// If no valid patterns, use defaults
+		// If no valid patterns, use defaults with both .log and .txt extensions for backward compatibility
 		if (patterns.Length == 0)
 		{
-			patterns = new[] { "jiro-detailed_*.txt", "jiro-errors_*.txt" };
+			patterns = new[] { "jiro-detailed_*.log", "jiro-errors_*.log", "jiro_*.log", "jiro_*.txt" };
 		}
 
+		_logger.LogDebug("AppContext.BaseDirectory: {BaseDirectory}", AppContext.BaseDirectory);
+		_logger.LogDebug("Environment.CurrentDirectory: {CurrentDirectory}", Environment.CurrentDirectory);
+		_logger.LogDebug("First log path from config: {FirstLogPath}", firstLogPath);
+		_logger.LogDebug("Extracted directory: {Directory}", directory);
+		_logger.LogDebug("Path.IsPathRooted(directory): {IsRooted}", Path.IsPathRooted(directory ?? ""));
+		_logger.LogDebug("Resolved logs directory: {LogsDirectory}, patterns: {Patterns}",
+			logsDirectory, string.Join(", ", patterns));
+
 		return (logsDirectory, patterns);
+	}
+
+	/// <summary>
+	/// Result container for log file processing
+	/// </summary>
+	private class LogProcessingResult
+	{
+		public int TotalProcessed { get; set; }
+		public int Skipped { get; set; }
+		public bool ShouldStop { get; set; }
+	}
+
+	/// <summary>
+	/// Optimized method to process a single log file with smart offset and limit handling.
+	/// Uses streaming approach with FileShare.ReadWrite for better concurrency.
+	/// </summary>
+	private async Task<LogProcessingResult> ProcessLogFileOptimizedAsync(string logFile, List<LogEntry> results, 
+		int currentTotalProcessed, int currentSkipped, string? level, DateTime? fromDate, DateTime? toDate, 
+		string? searchTerm, int offset, int limit)
+	{
+		using var fileStream = new FileStream(logFile, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+		using var reader = new StreamReader(fileStream);
+
+		var lines = new List<string>();
+		string? line;
+		
+		// Read all lines first (we still need to reverse for newest-first processing)
+		while ((line = await reader.ReadLineAsync()) != null)
+		{
+			lines.Add(line);
+		}
+
+		var totalProcessed = currentTotalProcessed;
+		var skipped = currentSkipped;
+
+		// Process lines in reverse order (newest first) for better performance
+		for (int i = lines.Count - 1; i >= 0; i--)
+		{
+			var currentLine = lines[i];
+			if (string.IsNullOrWhiteSpace(currentLine)) continue;
+
+			var logEntry = new LogEntry
+			{
+				File = Path.GetFileName(logFile),
+				Timestamp = ExtractTimestamp(currentLine),
+				Level = ExtractLogLevel(currentLine),
+				Message = currentLine
+			};
+
+			// Parse timestamp for accurate filtering
+			var parsedTimestamp = TryParseTimestamp(logEntry.Timestamp);
+
+			// Apply filters first to avoid unnecessary processing
+			if (!PassesFilters(logEntry, parsedTimestamp, level, fromDate, toDate, searchTerm))
+				continue;
+
+			totalProcessed++;
+
+			// Smart offset handling - skip entries if we're not at the requested offset yet
+			if (skipped < offset)
+			{
+				skipped++;
+				continue;
+			}
+
+			// Add to results if we haven't reached the limit
+			if (results.Count < limit)
+			{
+				results.Add(logEntry);
+			}
+			else
+			{
+				// We have enough results, exit early for maximum efficiency
+				return new LogProcessingResult
+				{
+					TotalProcessed = totalProcessed,
+					Skipped = skipped,
+					ShouldStop = true
+				};
+			}
+		}
+
+		return new LogProcessingResult
+		{
+			TotalProcessed = totalProcessed,
+			Skipped = skipped,
+			ShouldStop = false
+		};
 	}
 
 	private static bool PassesFilters(LogEntry logEntry, DateTime parsedTimestamp,
