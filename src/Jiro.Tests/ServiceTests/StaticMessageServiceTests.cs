@@ -72,10 +72,10 @@ public class StaticMessageServiceTests : IDisposable
 
 		// Act - First call
 		var result1 = await _staticMessageService.GetStaticMessageAsync(key);
-		
+
 		// Delete the file to ensure second call uses cache
 		File.Delete(filePath);
-		
+
 		// Act - Second call (should use cache)
 		var result2 = await _staticMessageService.GetStaticMessageAsync(key);
 
@@ -162,7 +162,7 @@ public class StaticMessageServiceTests : IDisposable
 
 		// Assert
 		Assert.Equal(content, result);
-		
+
 		// Verify the cache was accessed
 		Assert.True(_memoryCache.TryGetValue(CacheKeys.CorePersonaMessageKey, out var cachedValue));
 		Assert.Equal(content, cachedValue);
@@ -286,7 +286,7 @@ public class StaticMessageServiceTests : IDisposable
 		// Arrange
 		var key = "error-message";
 		var filePath = Path.Combine(_testMessagesDirectory, $"{key}.md");
-		
+
 		// Create a file that will cause read issues (this is tricky to simulate)
 		// Instead, we'll test with an empty key that causes path issues
 		var emptyKey = "";

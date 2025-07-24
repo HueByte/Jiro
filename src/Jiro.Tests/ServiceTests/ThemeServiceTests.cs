@@ -111,7 +111,7 @@ public class ThemeServiceTests : IDisposable
 	{
 		// Arrange
 		await CreateTestThemeFile("valid-theme.json", "Valid Theme", "A valid theme", CreateDarkColorScheme());
-		
+
 		// Create invalid theme file
 		var invalidThemePath = Path.Combine(_testThemesDirectory, "invalid-theme.json");
 		await File.WriteAllTextAsync(invalidThemePath, "{ invalid json content }");
@@ -135,7 +135,7 @@ public class ThemeServiceTests : IDisposable
 			description = "Theme without name",
 			colorScheme = CreateDarkColorScheme()
 		};
-		
+
 		var themeWithoutDescription = new
 		{
 			name = "Theme Without Description",
@@ -143,10 +143,10 @@ public class ThemeServiceTests : IDisposable
 		};
 
 		var jsonOptions = new JsonSerializerOptions { WriteIndented = true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
-		
+
 		var themeWithoutNamePath = Path.Combine(_testThemesDirectory, "no-name-theme.json");
 		await File.WriteAllTextAsync(themeWithoutNamePath, JsonSerializer.Serialize(themeWithoutName, jsonOptions));
-		
+
 		var themeWithoutDescPath = Path.Combine(_testThemesDirectory, "no-desc-theme.json");
 		await File.WriteAllTextAsync(themeWithoutDescPath, JsonSerializer.Serialize(themeWithoutDescription, jsonOptions));
 
@@ -225,11 +225,11 @@ public class ThemeServiceTests : IDisposable
 	{
 		// Arrange
 		await CreateTestThemeFile("valid-theme.json", "Valid Theme", "A valid theme", CreateDarkColorScheme());
-		
+
 		// Create non-JSON files
 		var txtFilePath = Path.Combine(_testThemesDirectory, "not-a-theme.txt");
 		await File.WriteAllTextAsync(txtFilePath, "This is not a JSON file");
-		
+
 		var xmlFilePath = Path.Combine(_testThemesDirectory, "not-a-theme.xml");
 		await File.WriteAllTextAsync(xmlFilePath, "<xml>This is not a JSON file</xml>");
 

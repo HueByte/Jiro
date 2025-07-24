@@ -108,7 +108,7 @@ public class ConfigProviderServiceTests : IDisposable
 		// The ConfigProviderService's UpdateConfigAsync method requires actual file system access
 		// and validation logic that is complex to mock. For unit testing purposes,
 		// we're testing that the method handles invalid input gracefully.
-		
+
 		// Arrange
 		var invalidJson = "{}"; // Empty JSON should fail validation
 
@@ -174,7 +174,7 @@ public class ConfigProviderServiceTests : IDisposable
 	{
 		// Note: Similar to the above test, this is more of an integration test.
 		// For unit testing, we focus on testing that the service handles the request properly.
-		
+
 		// Arrange
 		var configWithSomeValidData = JsonSerializer.Serialize(new Dictionary<string, object>
 		{

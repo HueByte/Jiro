@@ -24,10 +24,10 @@ public class VersionService : IVersionService
 	{
 		var assembly = Assembly.GetEntryAssembly() ?? Assembly.GetExecutingAssembly();
 		var version = assembly.GetName().Version;
-		
+
 		// Try to get informational version first (includes pre-release info like "0.1.1-beta")
 		var informationalVersion = assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion;
-		
+
 		return informationalVersion ?? version?.ToString() ?? "Unknown";
 	}
 }

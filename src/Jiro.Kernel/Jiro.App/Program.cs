@@ -124,7 +124,7 @@ host.ConfigureServices(services =>
 	// Get data paths from options and configure database
 	var dataPathsOptions = new DataPathsOptions();
 	configManager.GetSection(DataPathsOptions.DataPaths).Bind(dataPathsOptions);
-	
+
 	var connString = configManager.GetConnectionString("JiroContext");
 	var dbPath = string.IsNullOrEmpty(connString) ? dataPathsOptions.AbsoluteDatabasePath : connString;
 	services.AddJiroSQLiteContext(dbPath);

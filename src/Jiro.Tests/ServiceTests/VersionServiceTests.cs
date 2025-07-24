@@ -84,7 +84,7 @@ public class VersionServiceTests
 
 		// Assert
 		Assert.NotNull(version);
-		
+
 		// Version should either be "Unknown" or follow a version pattern
 		if (version != "Unknown")
 		{
@@ -98,7 +98,7 @@ public class VersionServiceTests
 	[InlineData("1.2.3-beta")]
 	[InlineData("2.0.0-alpha.1")]
 	[InlineData("Unknown")]
-	public void GetVersion_ShouldHandleValidVersionFormats(string expectedPattern)
+	public void GetVersion_ShouldHandleValidVersionFormats()
 	{
 		// Arrange
 		var versionService = new VersionService();

@@ -31,7 +31,7 @@ public class EnvironmentConfigurator
 		// Get data paths options from configuration
 		var dataPathsOptions = new DataPathsOptions();
 		_config.GetSection(DataPathsOptions.DataPaths).Bind(dataPathsOptions);
-		
+
 		// Create directories using options
 		if (!Directory.Exists(dataPathsOptions.AbsoluteLogsPath))
 			Directory.CreateDirectory(dataPathsOptions.AbsoluteLogsPath);

@@ -42,8 +42,8 @@ public class DataPathsOptions : IOption
 	/// <returns>An absolute path.</returns>
 	public static string ResolvePath(string path)
 	{
-		return Path.IsPathRooted(path) 
-			? path 
+		return Path.IsPathRooted(path)
+			? path
 			: Path.Combine(AppContext.BaseDirectory, path);
 	}
 

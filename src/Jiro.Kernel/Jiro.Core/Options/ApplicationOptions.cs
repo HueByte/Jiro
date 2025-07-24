@@ -42,8 +42,8 @@ public class ApplicationOptions : IOption
 	/// <returns>True if configuration is valid, false otherwise.</returns>
 	public bool IsValid()
 	{
-		return !string.IsNullOrWhiteSpace(ApiKey) && 
-		       !string.IsNullOrWhiteSpace(JiroApi);
+		return !string.IsNullOrWhiteSpace(ApiKey) &&
+			   !string.IsNullOrWhiteSpace(JiroApi);
 	}
 
 	/// <summary>
