@@ -95,6 +95,8 @@ public static class Configurator
 		services.AddOptions();
 		services.Configure<ChatOptions>(configuration.GetSection(ChatOptions.Chat));
 		services.Configure<LogOptions>(configuration.GetSection(LogOptions.Log));
+		services.Configure<DataPathsOptions>(configuration.GetSection(DataPathsOptions.DataPaths));
+		services.Configure<ApplicationOptions>(configuration);
 
 		return services;
 	}

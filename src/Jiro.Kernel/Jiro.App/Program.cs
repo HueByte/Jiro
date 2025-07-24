@@ -4,6 +4,7 @@ using Jiro.App.Extensions;
 using Jiro.Commands.Base;
 using Jiro.Commands.Models;
 using Jiro.Core.Commands.Chat;
+using Jiro.Core.Options;
 using Jiro.Core.Utils;
 using Jiro.Infrastructure;
 
@@ -31,6 +32,7 @@ var host = Host.CreateDefaultBuilder(args)
 		config.SetBasePath(AppContext.BaseDirectory);
 		config.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
 		config.AddEnvironmentVariables();
+		config.AddEnvironmentVariables("JIRO_");
 		config.AddCommandLine(args);
 	});
 
@@ -46,7 +48,8 @@ if (!File.Exists(appSettingsPath) && File.Exists(exampleSettingsPath))
 }
 
 configManager.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
-	.AddEnvironmentVariables();
+	.AddEnvironmentVariables()
+	.AddEnvironmentVariables("JIRO_");
 
 EnvironmentConfigurator environmentConfigurator = new EnvironmentConfigurator(configManager)
 	.PrepareDefaultFolders()
@@ -73,31 +76,34 @@ host.ConfigureAppConfiguration(options =>
 
 host.ConfigureServices(services =>
 {
-	string? apiKey = configManager.GetValue<string>("ApiKey");
-	string? apiUrl = configManager.GetValue<string>("JiroApi");
+	// Configure options first so they can be used by other services
+	services.AddOptions(configManager);
+
+	// Get application options to configure services
+	var appOptions = new ApplicationOptions();
+	configManager.Bind(appOptions);
 
 	// In test mode, use dummy values if not provided
 	if (isTestMode)
 	{
-		apiKey ??= "test-api-key";
-		apiUrl ??= "https://localhost:18092";
+		appOptions.ApiKey = string.IsNullOrWhiteSpace(appOptions.ApiKey) ? "test-api-key" : appOptions.ApiKey;
+		appOptions.JiroApi = string.IsNullOrWhiteSpace(appOptions.JiroApi) ? "https://localhost:18092" : appOptions.JiroApi;
 	}
 
-	// todo
-	// add link to guide
-	if (string.IsNullOrWhiteSpace(apiKey))
-		throw new Exception("Please provide API_KEY");
-
-	if (string.IsNullOrWhiteSpace(apiUrl))
-		throw new Exception("Couldn't connect to API");
+	// Validate configuration
+	if (!appOptions.IsValid())
+	{
+		var errors = string.Join(Environment.NewLine, appOptions.GetValidationErrors());
+		throw new Exception($"Configuration validation failed:{Environment.NewLine}{errors}");
+	}
 
 	services.AddGrpcClient<JiroHubProto.JiroHubProtoClient>("JiroClient", options =>
 		{
-			options.Address = new Uri(apiUrl);
+			options.Address = new Uri(appOptions.JiroApi);
 		})
 		.AddCallCredentials((context, metadata) =>
 		{
-			metadata.Add("X-Api-Key", apiKey);
+			metadata.Add("X-Api-Key", appOptions.ApiKey);
 
 			return Task.CompletedTask;
 		})
@@ -115,14 +121,17 @@ host.ConfigureServices(services =>
 
 	pluginManager = new(services, configManager, logger);
 
+	// Get data paths from options and configure database
+	var dataPathsOptions = new DataPathsOptions();
+	configManager.GetSection(DataPathsOptions.DataPaths).Bind(dataPathsOptions);
+	
 	var connString = configManager.GetConnectionString("JiroContext");
-
-	services.AddJiroSQLiteContext(string.IsNullOrEmpty(connString) ? Path.Join(AppContext.BaseDirectory, "save", "jiro.db") : connString);
+	var dbPath = string.IsNullOrEmpty(connString) ? dataPathsOptions.AbsoluteDatabasePath : connString;
+	services.AddJiroSQLiteContext(dbPath);
 	services.AddMemoryCache();
 	services.AddServices(configManager);
 	services.RegisterCommands(nameof(ChatCommand.Chat));
 	services.AddHttpClients(configManager);
-	services.AddOptions(configManager);
 
 	// Add the new communication services (WebSocket for receiving, gRPC for sending)
 	services.AddJiroCommunication(configManager);

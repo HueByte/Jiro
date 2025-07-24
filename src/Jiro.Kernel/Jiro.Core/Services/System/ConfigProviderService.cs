@@ -38,7 +38,7 @@ public class ConfigProviderService : IConfigProviderService
 				ApplicationName = "Jiro",
 				Version = Assembly.GetExecutingAssembly().GetName().Version?.ToString(),
 				Environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Production",
-				InstanceId = _configuration.GetValue<string>("INSTANCE_ID") ?? Environment.MachineName,
+				InstanceId = _configuration.GetValue<string>("InstanceId") ?? Environment.MachineName,
 				Configuration = new Shared.Websocket.Requests.ConfigurationSection
 				{
 					Values = GetJiroRelatedConfiguration()
@@ -271,6 +271,19 @@ public class ConfigProviderService : IConfigProviderService
 				}
 			}
 
+			// Validate core application settings (can be overridden by JIRO_ env vars)
+			if (!config.ContainsKey("ApiKey") || string.IsNullOrWhiteSpace(config["ApiKey"]?.ToString()))
+			{
+				_logger.LogWarning("ApiKey is missing or empty. Set it in configuration or use JIRO_ApiKey environment variable");
+				return false;
+			}
+
+			if (!config.ContainsKey("JiroApi") || string.IsNullOrWhiteSpace(config["JiroApi"]?.ToString()))
+			{
+				_logger.LogWarning("JiroApi is missing or empty. Set it in configuration or use JIRO_JiroApi environment variable");
+				return false;
+			}
+
 			// Validate specific configuration values
 			if (config.TryGetValue("WebSocket", out var webSocketSection) &&
 				webSocketSection is Dictionary<string, object> wsConfig)
@@ -286,11 +299,29 @@ public class ConfigProviderService : IConfigProviderService
 			if (config.TryGetValue("Grpc", out var grpcSection) &&
 				grpcSection is Dictionary<string, object> grpcConfig)
 			{
-				if (!grpcConfig.ContainsKey("ServerUrl") ||
+				// Note: Grpc.ServerUrl is optional as it may default to JiroApi
+				// Only validate if explicitly set
+				if (grpcConfig.ContainsKey("ServerUrl") &&
 					string.IsNullOrWhiteSpace(grpcConfig["ServerUrl"]?.ToString()))
 				{
-					_logger.LogWarning("Grpc.ServerUrl is missing or empty");
+					_logger.LogWarning("Grpc.ServerUrl is set but empty");
 					return false;
+				}
+			}
+
+			// Validate DataPaths if present (optional section with defaults)
+			if (config.TryGetValue("DataPaths", out var dataPathsSection) &&
+				dataPathsSection is Dictionary<string, object> dpConfig)
+			{
+				var pathKeys = new[] { "Logs", "Themes", "Plugins", "Database" };
+				foreach (var key in pathKeys)
+				{
+					if (dpConfig.ContainsKey(key) &&
+						string.IsNullOrWhiteSpace(dpConfig[key]?.ToString()))
+					{
+						_logger.LogWarning("DataPaths.{Key} is set but empty", key);
+						return false;
+					}
 				}
 			}
 
@@ -308,28 +339,23 @@ public class ConfigProviderService : IConfigProviderService
 
 	private Dictionary<string, object> GetJiroRelatedConfiguration()
 	{
-		// TODO: Implement prefix system so all Jiro-related configuration can be retrieved via a single method
-		// Define Jiro-related configuration prefixes and specific keys
-		var jiroRelatedPrefixes = new[]
-		{
-			"JIRO_",           // Jiro-specific environment variables
-			"ASPNETCORE_",     // ASP.NET Core environment variables
-			"DOTNET_"          // .NET runtime environment variables
-		};
-
+		// With JIRO_ prefix configuration, all JIRO_ prefixed env vars are automatically available
+		// as regular configuration keys (prefix is stripped by IConfiguration)
 		var jiroRelatedKeys = new[]
 		{
-			"Gpt",             // OpenAI/GPT configuration
+			"ApiKey",          // Core API key configuration
+			"JiroApi",         // Jiro API URL
+			"TokenizerUrl",    // Tokenizer service URL
+			"Whitelist",       // Whitelist configuration
+			"DataPaths",       // Data storage paths configuration
+			"Chat",            // Chat/AI configuration
+			"Gpt",             // Legacy OpenAI/GPT configuration
 			"JWT",             // JWT authentication
 			"Serilog",         // Logging configuration
 			"WebSocket",       // WebSocket configuration
 			"Grpc",            // gRPC configuration
 			"ConnectionStrings", // Database connections
 			"Modules",         // Plugin modules
-			"TokenizerUrl",    // Tokenizer service URL
-			"ApiKey",          // API key configuration
-			"JiroApi",         // Jiro API URL
-			"Chat",            // Chat configuration
 			"Log"              // Log configuration
 		};
 
@@ -343,15 +369,16 @@ public class ConfigProviderService : IConfigProviderService
 			if (string.IsNullOrEmpty(kvp.Key) || kvp.Value == null)
 				continue;
 
-			// Check if the key matches any Jiro-related prefix or key
+			// Check if the key matches any Jiro-related configuration section
 			bool isJiroRelated = jiroRelatedKeys.Any(key =>
 				kvp.Key.Equals(key, StringComparison.OrdinalIgnoreCase) ||
 				kvp.Key.StartsWith($"{key}:", StringComparison.OrdinalIgnoreCase));
 
-			// Also check environment variables with Jiro-related prefixes
+			// Include ASP.NET Core and .NET runtime environment info
 			if (!isJiroRelated)
 			{
-				isJiroRelated = jiroRelatedPrefixes.Any(prefix =>
+				var environmentPrefixes = new[] { "ASPNETCORE_", "DOTNET_" };
+				isJiroRelated = environmentPrefixes.Any(prefix =>
 					kvp.Key.StartsWith(prefix, StringComparison.OrdinalIgnoreCase));
 			}
 
@@ -360,6 +387,9 @@ public class ConfigProviderService : IConfigProviderService
 				filteredConfig[kvp.Key] = kvp.Value;
 			}
 		}
+
+		// Add a note about JIRO_ prefix support
+		filteredConfig["_ConfigurationNote"] = "Environment variables with JIRO_ prefix automatically override corresponding configuration values";
 
 		return filteredConfig;
 	}

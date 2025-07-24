@@ -1,11 +1,13 @@
 using System.Text.Json;
 
+using Jiro.Core.Options;
 using Jiro.Core.Services.System.Models;
 using Jiro.Shared.Websocket.Requests;
 using Jiro.Shared.Websocket.Responses;
 
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace Jiro.Core.Services.System;
 
@@ -14,16 +16,19 @@ public class ThemeService : IThemeService
 {
 	private readonly ILogger<ThemeService> _logger;
 	private readonly IHostEnvironment _hostEnvironment;
+	private readonly DataPathsOptions _dataPathsOptions;
 
 	/// <summary>
 	/// Initializes a new instance of the <see cref="ThemeService"/> class.
 	/// </summary>
 	/// <param name="logger">Logger instance for logging.</param>
 	/// <param name="hostEnvironment">Host environment to get content root path.</param>
-	public ThemeService(ILogger<ThemeService> logger, IHostEnvironment hostEnvironment)
+	/// <param name="dataPathsOptions">Data paths configuration options.</param>
+	public ThemeService(ILogger<ThemeService> logger, IHostEnvironment hostEnvironment, IOptions<DataPathsOptions> dataPathsOptions)
 	{
 		_logger = logger ?? throw new ArgumentNullException(nameof(logger));
 		_hostEnvironment = hostEnvironment ?? throw new ArgumentNullException(nameof(hostEnvironment));
+		_dataPathsOptions = dataPathsOptions?.Value ?? throw new ArgumentNullException(nameof(dataPathsOptions));
 	}
 
 	/// <inheritdoc/>
@@ -34,7 +39,8 @@ public class ThemeService : IThemeService
 			_logger.LogInformation("Getting custom themes from themes directory");
 
 			var themes = new List<Theme>();
-			var themesPath = Path.Combine(_hostEnvironment.ContentRootPath, "themes");
+			// Use the configured themes path from options (JIRO_ env vars automatically override)
+			var themesPath = _dataPathsOptions.AbsoluteThemesPath;
 
 			if (!Directory.Exists(themesPath))
 			{

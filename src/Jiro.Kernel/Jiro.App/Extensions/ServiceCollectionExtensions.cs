@@ -1,5 +1,6 @@
 using Jiro.App.Options;
 using Jiro.App.Services;
+using Jiro.Core.Options;
 using Jiro.Core.Services.CommandHandler;
 using Jiro.Shared.Websocket;
 
@@ -30,16 +31,18 @@ public static class ServiceCollectionExtensions
 		{
 			configuration.GetSection("WebSocket").Bind(webSocketOptions);
 
-			// If ApiKey is not set in WebSocket section, use the global API_KEY
+			// If ApiKey is not set in WebSocket section, use the global ApiKey from ApplicationOptions
 			if (string.IsNullOrEmpty(webSocketOptions.ApiKey))
 			{
-				webSocketOptions.ApiKey = configuration.GetValue<string>("ApiKey");
+				var appOptions = new ApplicationOptions();
+				configuration.Bind(appOptions);
+				webSocketOptions.ApiKey = appOptions.ApiKey;
 			}
 
 			// Ensure ApiKey is provided
 			if (string.IsNullOrEmpty(webSocketOptions.ApiKey))
 			{
-				throw new InvalidOperationException("WebSocket ApiKey is required. Please provide either 'WebSocket:ApiKey' or 'API_KEY' in configuration.");
+				throw new InvalidOperationException("WebSocket ApiKey is required. Please provide either 'WebSocket:ApiKey' or 'JIRO_ApiKey' environment variable in configuration.");
 			}
 		});
 

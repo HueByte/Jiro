@@ -1,3 +1,5 @@
+using Jiro.Core.Options;
+
 using Microsoft.Extensions.Configuration;
 
 namespace Jiro.App.Configurator;
@@ -19,11 +21,32 @@ public class EnvironmentConfigurator
 	}
 
 	/// <summary>
-	/// Creates default application folders (logs, save, modules) if they don't exist.
+	/// Creates default application folders if they don't exist.
+	/// Uses configurable paths from DataPaths section or falls back to defaults.
+	/// JIRO_ prefixed environment variables automatically override these configuration values.
 	/// </summary>
 	/// <returns>The current <see cref="EnvironmentConfigurator"/> instance for method chaining.</returns>
 	public EnvironmentConfigurator PrepareDefaultFolders()
 	{
+		// Get data paths options from configuration
+		var dataPathsOptions = new DataPathsOptions();
+		_config.GetSection(DataPathsOptions.DataPaths).Bind(dataPathsOptions);
+		
+		// Create directories using options
+		if (!Directory.Exists(dataPathsOptions.AbsoluteLogsPath))
+			Directory.CreateDirectory(dataPathsOptions.AbsoluteLogsPath);
+
+		if (!Directory.Exists(dataPathsOptions.AbsoluteThemesPath))
+			Directory.CreateDirectory(dataPathsOptions.AbsoluteThemesPath);
+
+		if (!Directory.Exists(dataPathsOptions.AbsolutePluginsPath))
+			Directory.CreateDirectory(dataPathsOptions.AbsolutePluginsPath);
+
+		var databaseDir = Path.GetDirectoryName(dataPathsOptions.AbsoluteDatabasePath);
+		if (!string.IsNullOrEmpty(databaseDir) && !Directory.Exists(databaseDir))
+			Directory.CreateDirectory(databaseDir);
+
+		// Legacy folders for backward compatibility
 		if (!Directory.Exists(Path.Join(AppContext.BaseDirectory, "logs")))
 			Directory.CreateDirectory(Path.Join(AppContext.BaseDirectory, "logs"));
 
