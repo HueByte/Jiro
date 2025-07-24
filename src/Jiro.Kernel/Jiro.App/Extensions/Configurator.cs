@@ -67,6 +67,7 @@ public static class Configurator
 		services.AddScoped<ILogsProviderService, LogsProviderService>();
 		services.AddScoped<IConfigProviderService, ConfigProviderService>();
 		services.AddScoped<IThemeService, ThemeService>();
+		services.AddSingleton<IVersionService, VersionService>();
 		services.AddScoped<ChatClient>((services) =>
 		{
 			var configManager = services.GetRequiredService<IConfiguration>();

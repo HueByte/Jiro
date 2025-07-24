@@ -4,6 +4,7 @@ using Jiro.Core.Services.System.Models;
 using Jiro.Shared.Websocket.Requests;
 using Jiro.Shared.Websocket.Responses;
 
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
 namespace Jiro.Core.Services.System;
@@ -12,49 +13,74 @@ namespace Jiro.Core.Services.System;
 public class ThemeService : IThemeService
 {
 	private readonly ILogger<ThemeService> _logger;
+	private readonly IHostEnvironment _hostEnvironment;
 
 	/// <summary>
 	/// Initializes a new instance of the <see cref="ThemeService"/> class.
 	/// </summary>
 	/// <param name="logger">Logger instance for logging.</param>
-	public ThemeService(ILogger<ThemeService> logger)
+	/// <param name="hostEnvironment">Host environment to get content root path.</param>
+	public ThemeService(ILogger<ThemeService> logger, IHostEnvironment hostEnvironment)
 	{
 		_logger = logger ?? throw new ArgumentNullException(nameof(logger));
+		_hostEnvironment = hostEnvironment ?? throw new ArgumentNullException(nameof(hostEnvironment));
 	}
 
 	/// <inheritdoc/>
-	public Task<ThemesResponse> GetCustomThemesAsync()
+	public async Task<ThemesResponse> GetCustomThemesAsync()
 	{
 		try
 		{
-			_logger.LogInformation("Getting custom themes");
+			_logger.LogInformation("Getting custom themes from themes directory");
 
-			// This is a placeholder implementation
-			// In a real system, you'd read theme files from a themes directory
-			var themes = new List<Theme>
+			var themes = new List<Theme>();
+			var themesPath = Path.Combine(_hostEnvironment.ContentRootPath, "themes");
+
+			if (!Directory.Exists(themesPath))
 			{
-				new Theme
+				_logger.LogWarning("Themes directory not found at: {ThemesPath}", themesPath);
+				return new ThemesResponse { Themes = themes };
+			}
+
+			var jsonFiles = Directory.GetFiles(themesPath, "*.json")
+				.Where(file => !Path.GetFileName(file).Equals("template.json", StringComparison.OrdinalIgnoreCase));
+
+			foreach (var filePath in jsonFiles)
+			{
+				try
 				{
-					Name = "Dark Mode",
-					Description = "A dark theme for low light environments",
-					JsonColorScheme = ColorSchemeToJson(new ColorScheme
+					var jsonContent = await File.ReadAllTextAsync(filePath);
+					var themeData = JsonSerializer.Deserialize<ThemeFile>(jsonContent, new JsonSerializerOptions
 					{
-						Transparent = "#00000000",
-						Primary = "#BB86FC",
-						Secondary = "#03DAC6",
-						Error = "#CF6679",
-						Background = "#121212",
-						Surface = "#1E1E1E"
-					})
+						PropertyNameCaseInsensitive = true
+					});
+
+					if (themeData?.ColorScheme != null)
+					{
+						var theme = new Theme
+						{
+							Name = themeData.Name ?? Path.GetFileNameWithoutExtension(filePath),
+							Description = themeData.Description ?? "Custom theme",
+							JsonColorScheme = JsonSerializer.Serialize(themeData.ColorScheme, new JsonSerializerOptions
+							{
+								WriteIndented = true,
+								PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+							})
+						};
+
+						themes.Add(theme);
+						_logger.LogDebug("Loaded theme: {ThemeName} from {FilePath}", theme.Name, filePath);
+					}
 				}
-			};
+				catch (Exception ex)
+				{
+					_logger.LogWarning(ex, "Failed to load theme from file: {FilePath}", filePath);
+				}
+			}
 
-			var response = new ThemesResponse
-			{
-				Themes = themes
-			};
+			_logger.LogInformation("Loaded {ThemeCount} custom themes", themes.Count);
 
-			return Task.FromResult(response);
+			return new ThemesResponse { Themes = themes };
 		}
 		catch (Exception ex)
 		{
@@ -71,4 +97,25 @@ public class ThemeService : IThemeService
 			WriteIndented = true
 		});
 	}
+}
+
+/// <summary>
+/// Represents the structure of a theme JSON file.
+/// </summary>
+internal class ThemeFile
+{
+	/// <summary>
+	/// Gets or sets the theme name.
+	/// </summary>
+	public string? Name { get; set; }
+
+	/// <summary>
+	/// Gets or sets the theme description.
+	/// </summary>
+	public string? Description { get; set; }
+
+	/// <summary>
+	/// Gets or sets the color scheme for the theme.
+	/// </summary>
+	public ColorScheme? ColorScheme { get; set; }
 }
