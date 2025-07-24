@@ -41,10 +41,7 @@ public class ConfigProviderService : IConfigProviderService
 				InstanceId = _configuration.GetValue<string>("INSTANCE_ID") ?? Environment.MachineName,
 				Configuration = new Shared.Websocket.Requests.ConfigurationSection
 				{
-					Values = _configuration.AsEnumerable().ToDictionary(
-						static kvp => kvp.Key,
-						static kvp => (object)(kvp.Value ?? string.Empty)
-					)
+					Values = GetJiroRelatedConfiguration()
 				},
 				SystemInfo = new Shared.Websocket.Requests.SystemInfo
 				{
@@ -307,6 +304,64 @@ public class ConfigProviderService : IConfigProviderService
 			_logger.LogError(ex, "Configuration validation failed");
 			return false;
 		}
+	}
+
+	private Dictionary<string, object> GetJiroRelatedConfiguration()
+	{
+		// TODO: Implement prefix system so all Jiro-related configuration can be retrieved via a single method
+		// Define Jiro-related configuration prefixes and specific keys
+		var jiroRelatedPrefixes = new[]
+		{
+			"JIRO_",           // Jiro-specific environment variables
+			"ASPNETCORE_",     // ASP.NET Core environment variables
+			"DOTNET_"          // .NET runtime environment variables
+		};
+
+		var jiroRelatedKeys = new[]
+		{
+			"Gpt",             // OpenAI/GPT configuration
+			"JWT",             // JWT authentication
+			"Serilog",         // Logging configuration
+			"WebSocket",       // WebSocket configuration
+			"Grpc",            // gRPC configuration
+			"ConnectionStrings", // Database connections
+			"Modules",         // Plugin modules
+			"TokenizerUrl",    // Tokenizer service URL
+			"ApiKey",          // API key configuration
+			"JiroApi",         // Jiro API URL
+			"Chat",            // Chat configuration
+			"Log"              // Log configuration
+		};
+
+		var filteredConfig = new Dictionary<string, object>();
+
+		// Get all configuration entries
+		var allConfig = _configuration.AsEnumerable();
+
+		foreach (var kvp in allConfig)
+		{
+			if (string.IsNullOrEmpty(kvp.Key) || kvp.Value == null)
+				continue;
+
+			// Check if the key matches any Jiro-related prefix or key
+			bool isJiroRelated = jiroRelatedKeys.Any(key =>
+				kvp.Key.Equals(key, StringComparison.OrdinalIgnoreCase) ||
+				kvp.Key.StartsWith($"{key}:", StringComparison.OrdinalIgnoreCase));
+
+			// Also check environment variables with Jiro-related prefixes
+			if (!isJiroRelated)
+			{
+				isJiroRelated = jiroRelatedPrefixes.Any(prefix =>
+					kvp.Key.StartsWith(prefix, StringComparison.OrdinalIgnoreCase));
+			}
+
+			if (isJiroRelated)
+			{
+				filteredConfig[kvp.Key] = kvp.Value;
+			}
+		}
+
+		return filteredConfig;
 	}
 
 	private async Task SaveConfigurationToFileAsync(string filePath, Dictionary<string, object> config)
