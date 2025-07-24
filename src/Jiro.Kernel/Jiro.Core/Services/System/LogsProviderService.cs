@@ -276,36 +276,267 @@ public class LogsProviderService : ILogsProviderService
 			if (cancellationToken.IsCancellationRequested)
 				yield break;
 
-			string[] lines;
-			try
+			// Use async enumerable helper method to handle file operations safely
+			await foreach (var logEntry in StreamLogFileAsync(logFile, level, cancellationToken))
 			{
-				// Use streaming approach for better memory efficiency
-				using var fileStream = new FileStream(logFile, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
-				using var reader = new StreamReader(fileStream);
-				var linesList = new List<string>();
-				string? line;
-				while ((line = await reader.ReadLineAsync()) != null)
-				{
-					linesList.Add(line);
-				}
-				lines = linesList.ToArray();
+				yield return logEntry;
 			}
-			catch (Exception ex)
+		}
+	}
+
+	/// <inheritdoc/>
+	public async IAsyncEnumerable<LogEntry> StreamLimitedLogsAsync(string? level = null, int limit = 100, int offset = 0,
+		DateTime? fromDate = null, DateTime? toDate = null, string? searchTerm = null,
+		[EnumeratorCancellation] CancellationToken cancellationToken = default)
+	{
+		_logger.LogInformation("Starting limited logs stream with level: {Level}, limit: {Limit}, offset: {Offset}, searchTerm: {SearchTerm}",
+			level ?? "all", limit, offset, searchTerm ?? "none");
+
+		var (logsDirectory, logPatterns) = GetLogPathsFromSerilogConfig();
+
+		if (!Directory.Exists(logsDirectory))
+		{
+			_logger.LogWarning("Logs directory does not exist: {LogsDirectory}", logsDirectory);
+			yield break;
+		}
+
+		var streamedCount = 0;
+		var skippedCount = 0;
+
+		// Process files in reverse chronological order (newest first)
+		var logFiles = logPatterns
+			.SelectMany(pattern =>
 			{
-				_logger.LogWarning(ex, "Failed to read log file for streaming: {LogFile}", logFile);
+				try
+				{
+					return Directory.EnumerateFiles(logsDirectory, pattern);
+				}
+				catch (Exception ex)
+				{
+					_logger.LogWarning(ex, "Failed to enumerate files with pattern {Pattern} in {Directory}", pattern, logsDirectory);
+					return Enumerable.Empty<string>();
+				}
+			})
+			.OrderByDescending(f =>
+			{
+				try
+				{
+					return File.GetLastWriteTime(f);
+				}
+				catch (Exception ex)
+				{
+					_logger.LogWarning(ex, "Failed to get last write time for file {File}", f);
+					return DateTime.MinValue;
+				}
+			});
+
+		foreach (var logFile in logFiles)
+		{
+			if (cancellationToken.IsCancellationRequested || streamedCount >= limit)
+				yield break;
+
+			var fileResult = new StreamLimitResult { StreamedCount = streamedCount, SkippedCount = skippedCount };
+
+			await foreach (var logEntry in StreamLogFileWithLimitsAsync(logFile, level, fromDate, toDate, searchTerm,
+				fileResult, limit, offset, cancellationToken))
+			{
+				if (cancellationToken.IsCancellationRequested || fileResult.StreamedCount >= limit)
+					yield break;
+
+				yield return logEntry;
+			}
+
+			streamedCount = fileResult.StreamedCount;
+			skippedCount = fileResult.SkippedCount;
+		}
+
+		_logger.LogInformation("Completed limited logs stream with {StreamedCount} entries", streamedCount);
+	}
+
+	/// <summary>
+	/// Helper class to track streaming state without using ref parameters
+	/// </summary>
+	private class StreamLimitResult
+	{
+		public int StreamedCount { get; set; }
+		public int SkippedCount { get; set; }
+	}
+
+	/// <summary>
+	/// Streams log entries from a single file with limits and filtering
+	/// </summary>
+	private async IAsyncEnumerable<LogEntry> StreamLogFileWithLimitsAsync(string logFile, string? level,
+		DateTime? fromDate, DateTime? toDate, string? searchTerm,
+		StreamLimitResult result, int limit, int offset,
+		[EnumeratorCancellation] CancellationToken cancellationToken = default)
+	{
+		if (!File.Exists(logFile))
+		{
+			_logger.LogWarning("Log file does not exist: {LogFile}", logFile);
+			yield break;
+		}
+
+		IAsyncEnumerable<LogEntry>? entries = null;
+
+		try
+		{
+			entries = StreamLogFileWithLimitsInternalAsync(logFile, level, fromDate, toDate, searchTerm, result, limit, offset, cancellationToken);
+		}
+		catch (Exception ex)
+		{
+			_logger.LogWarning(ex, "Error opening log file for streaming: {LogFile}", logFile);
+			yield break;
+		}
+
+		await foreach (var entry in entries.WithCancellation(cancellationToken))
+		{
+			yield return entry;
+		}
+	}
+
+	/// <summary>
+	/// Internal method to handle the actual file streaming without try-catch around yield
+	/// </summary>
+	private async IAsyncEnumerable<LogEntry> StreamLogFileWithLimitsInternalAsync(string logFile, string? level,
+		DateTime? fromDate, DateTime? toDate, string? searchTerm,
+		StreamLimitResult result, int limit, int offset,
+		[EnumeratorCancellation] CancellationToken cancellationToken = default)
+	{
+		await using var fileStream = new FileStream(logFile, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+		using var reader = new StreamReader(fileStream);
+
+		var fileName = Path.GetFileName(logFile);
+
+		// Use streaming approach instead of loading all lines into memory
+		var lines = new List<string>();
+		string? line;
+
+		// Read lines in chunks to avoid memory issues with very large files
+		while ((line = await reader.ReadLineAsync().ConfigureAwait(false)) != null)
+		{
+			if (cancellationToken.IsCancellationRequested)
+				yield break;
+
+			lines.Add(line);
+
+			// Process in batches to prevent excessive memory usage
+			if (lines.Count >= 1000)
+			{
+				await foreach (var entry in ProcessLinesBatch(lines, fileName, level, fromDate, toDate, searchTerm, result, limit, offset, cancellationToken))
+				{
+					if (cancellationToken.IsCancellationRequested || result.StreamedCount >= limit)
+						yield break;
+					yield return entry;
+				}
+				lines.Clear();
+			}
+		}
+
+		// Process remaining lines
+		if (lines.Count > 0 && result.StreamedCount < limit)
+		{
+			await foreach (var entry in ProcessLinesBatch(lines, fileName, level, fromDate, toDate, searchTerm, result, limit, offset, cancellationToken))
+			{
+				if (cancellationToken.IsCancellationRequested || result.StreamedCount >= limit)
+					yield break;
+				yield return entry;
+			}
+		}
+	}
+
+	/// <summary>
+	/// Processes a batch of lines for streaming
+	/// </summary>
+	private async IAsyncEnumerable<LogEntry> ProcessLinesBatch(List<string> lines, string fileName,
+		string? level, DateTime? fromDate, DateTime? toDate, string? searchTerm,
+		StreamLimitResult result, int limit, int offset,
+		[EnumeratorCancellation] CancellationToken cancellationToken = default)
+	{
+		// Process lines in reverse order (newest first)
+		for (int i = lines.Count - 1; i >= 0; i--)
+		{
+			if (cancellationToken.IsCancellationRequested || result.StreamedCount >= limit)
+				yield break;
+
+			var currentLine = lines[i];
+			if (string.IsNullOrWhiteSpace(currentLine))
+				continue;
+
+			var logEntry = new LogEntry
+			{
+				File = fileName,
+				Timestamp = ExtractTimestamp(currentLine),
+				Level = ExtractLogLevel(currentLine),
+				Message = currentLine
+			};
+
+			// Parse timestamp for filtering
+			var parsedTimestamp = TryParseTimestamp(logEntry.Timestamp);
+
+			// Apply filters
+			if (!PassesFilters(logEntry, parsedTimestamp, level, fromDate, toDate, searchTerm))
+				continue;
+
+			// Handle offset - skip entries until we reach the desired offset
+			if (result.SkippedCount < offset)
+			{
+				result.SkippedCount++;
 				continue;
 			}
 
-			foreach (var line in lines.TakeLast(100)) // Last 100 entries for initial stream
+			// Stream the entry and increment counter
+			result.StreamedCount++;
+			yield return logEntry;
+
+			// Add a small delay every 10 entries to prevent overwhelming the client
+			if (result.StreamedCount % 10 == 0)
+			{
+				await Task.Delay(1, cancellationToken).ConfigureAwait(false);
+			}
+		}
+	}
+
+	/// <summary>
+	/// Streams log entries from a single file
+	/// </summary>
+	private async IAsyncEnumerable<LogEntry> StreamLogFileAsync(string logFile, string? level, [EnumeratorCancellation] CancellationToken cancellationToken = default)
+	{
+		FileStream? fileStream = null;
+		StreamReader? reader = null;
+
+		// Check if file can be opened first
+		try
+		{
+			fileStream = new FileStream(logFile, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+			reader = new StreamReader(fileStream);
+		}
+		catch (Exception ex)
+		{
+			_logger.LogWarning(ex, "Failed to open log file for streaming: {LogFile}", logFile);
+			fileStream?.Dispose();
+			reader?.Dispose();
+			yield break;
+		}
+
+		try
+		{
+			var fileName = Path.GetFileName(logFile);
+			string? line;
+			var lineCount = 0;
+
+			while ((line = await reader.ReadLineAsync()) != null)
 			{
 				if (cancellationToken.IsCancellationRequested)
 					yield break;
 
-				if (string.IsNullOrWhiteSpace(line)) continue;
+				if (string.IsNullOrWhiteSpace(line))
+					continue;
+
+				lineCount++;
 
 				var logEntry = new LogEntry
 				{
-					File = Path.GetFileName(logFile),
+					File = fileName,
 					Timestamp = ExtractTimestamp(line),
 					Level = ExtractLogLevel(line),
 					Message = line
@@ -314,14 +545,24 @@ public class LogsProviderService : ILogsProviderService
 				// Filter by level if specified - skip filtering if level is "all"
 				if (!string.IsNullOrEmpty(level) &&
 					!level.Equals("all", StringComparison.OrdinalIgnoreCase) &&
-					!logEntry.Level.Equals(level, StringComparison.OrdinalIgnoreCase))
+					!IsLogLevelMatch(logEntry.Level, level))
 					continue;
 
 				yield return logEntry;
+
+				// Add a small delay every 10 entries to prevent overwhelming the client
+				if (lineCount % 10 == 0)
+				{
+					await Task.Delay(1, cancellationToken);
+				}
 			}
 		}
+		finally
+		{
+			reader?.Dispose();
+			fileStream?.Dispose();
+		}
 	}
-
 
 	private static string ExtractTimestamp(string logLine)
 	{
@@ -574,7 +815,7 @@ public class LogsProviderService : ILogsProviderService
 		// Level filter - skip filtering if level is null, empty, or "all"
 		if (!string.IsNullOrEmpty(level) &&
 			!level.Equals("all", StringComparison.OrdinalIgnoreCase) &&
-			!logEntry.Level.Equals(level, StringComparison.OrdinalIgnoreCase))
+			!IsLogLevelMatch(logEntry.Level, level))
 			return false;
 
 		// Date range filter
@@ -591,16 +832,95 @@ public class LogsProviderService : ILogsProviderService
 
 		return true;
 	}
+
+	/// <summary>
+	/// Matches log levels supporting both abbreviated (INF, DBG, WRN, ERR) and full names (Information, Debug, Warning, Error)
+	/// </summary>
+	private static bool IsLogLevelMatch(string extractedLevel, string requestedLevel)
+	{
+		// Direct match (case-insensitive)
+		if (extractedLevel.Equals(requestedLevel, StringComparison.OrdinalIgnoreCase))
+			return true;
+
+		// Map full level names to abbreviations
+		var levelMapping = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+		{
+			{ "Information", "INF" },
+			{ "Debug", "DBG" },
+			{ "Warning", "WRN" },
+			{ "Error", "ERR" },
+			{ "Fatal", "FTL" },
+			{ "Verbose", "VRB" },
+			{ "Trace", "TRC" }
+		};
+
+		// Check if requested level maps to extracted level
+		return levelMapping.TryGetValue(requestedLevel, out var mappedLevel) &&
+			   extractedLevel.Equals(mappedLevel, StringComparison.OrdinalIgnoreCase);
+	}
 }
 
 /// <summary>
-/// Information about a log file
+/// Represents metadata information about a log file in the system.
+/// Used for log file discovery, management, and providing file details to clients.
 /// </summary>
 public class LogFileInfo
 {
+	/// <summary>
+	/// Gets or sets the name of the log file including extension.
+	/// </summary>
+	/// <value>
+	/// The file name only (e.g., "app-20241123.log"), without the full path.
+	/// </value>
+	/// <example>
+	/// "app-20241123.log", "errors.log", "debug-20241123.txt"
+	/// </example>
 	public string FileName { get; set; } = string.Empty;
+
+	/// <summary>
+	/// Gets or sets the full absolute path to the log file.
+	/// </summary>
+	/// <value>
+	/// The complete file system path including directory and filename.
+	/// </value>
+	/// <example>
+	/// "/app/logs/app-20241123.log", "C:\Logs\errors.log"
+	/// </example>
 	public string FilePath { get; set; } = string.Empty;
+
+	/// <summary>
+	/// Gets or sets the size of the log file in bytes.
+	/// </summary>
+	/// <value>
+	/// The file size as reported by the file system. Returns 0 if the file cannot be accessed.
+	/// </value>
+	/// <remarks>
+	/// This value represents the current size at the time of metadata collection.
+	/// For active log files, this size may change as new entries are written.
+	/// </remarks>
 	public long SizeBytes { get; set; }
+
+	/// <summary>
+	/// Gets or sets the date and time when the log file was last modified.
+	/// </summary>
+	/// <value>
+	/// The last write time as reported by the file system, typically in UTC.
+	/// </value>
+	/// <remarks>
+	/// For active log files, this timestamp updates each time new log entries are written.
+	/// Useful for determining which files contain the most recent log data.
+	/// </remarks>
 	public DateTime LastModified { get; set; }
+
+	/// <summary>
+	/// Gets or sets the date and time when the log file was created.
+	/// </summary>
+	/// <value>
+	/// The creation time as reported by the file system, typically in UTC.
+	/// </value>
+	/// <remarks>
+	/// For log files created through log rotation, this represents when the specific
+	/// file was first created, not when logging started for the application.
+	/// </remarks>
 	public DateTime Created { get; set; }
 }

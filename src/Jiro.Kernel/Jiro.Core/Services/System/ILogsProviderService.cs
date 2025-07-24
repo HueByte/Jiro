@@ -46,4 +46,19 @@ public interface ILogsProviderService
 	/// <param name="cancellationToken">Cancellation token</param>
 	/// <returns>Async enumerable of log entries</returns>
 	IAsyncEnumerable<LogEntry> StreamLogsAsync(string? level = null, CancellationToken cancellationToken = default);
+
+	/// <summary>
+	/// Streams a limited number of logs and then stops
+	/// </summary>
+	/// <param name="level">Log level filter (optional)</param>
+	/// <param name="limit">Maximum number of logs to stream before stopping</param>
+	/// <param name="offset">Number of logs to skip before streaming</param>
+	/// <param name="fromDate">Start date filter (optional)</param>
+	/// <param name="toDate">End date filter (optional)</param>
+	/// <param name="searchTerm">Search term to filter messages (optional)</param>
+	/// <param name="cancellationToken">Cancellation token</param>
+	/// <returns>Async enumerable of log entries that stops after the limit is reached</returns>
+	IAsyncEnumerable<LogEntry> StreamLimitedLogsAsync(string? level = null, int limit = 100, int offset = 0,
+		DateTime? fromDate = null, DateTime? toDate = null, string? searchTerm = null,
+		CancellationToken cancellationToken = default);
 }

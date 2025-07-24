@@ -98,7 +98,11 @@ public class JiroWebSocketService : BackgroundService, ICommandQueueMonitor
 		_jiroClient.Reconnecting += OnConnectionReconnecting;
 		_jiroClient.Reconnected += OnConnectionReconnected;
 
-		// Optionally, register other event handlers for requests if needed
+		// Start the WebSocket connection
+		if (_jiroClient is WebSocketConnection wsConnection)
+		{
+			await wsConnection.StartAsync(cancellationToken);
+		}
 
 		_logger.LogInformation("Jiro WebSocket Service started successfully (IJiroClientHub)");
 		await base.StartAsync(cancellationToken);
@@ -119,7 +123,11 @@ public class JiroWebSocketService : BackgroundService, ICommandQueueMonitor
 		_jiroClient.Reconnecting -= OnConnectionReconnecting;
 		_jiroClient.Reconnected -= OnConnectionReconnected;
 
-		// No explicit StopAsync for IJiroClientHub assumed; if needed, add here
+		// Stop the WebSocket connection
+		if (_jiroClient is WebSocketConnection wsConnection)
+		{
+			await wsConnection.StopAsync(cancellationToken);
+		}
 
 		_logger.LogInformation("Jiro WebSocket Service stopped successfully (IJiroClientHub)");
 		await base.StopAsync(cancellationToken);

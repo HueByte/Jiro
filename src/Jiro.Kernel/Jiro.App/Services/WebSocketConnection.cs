@@ -1,3 +1,4 @@
+using System.Runtime.CompilerServices;
 using System.Text.Json;
 
 using Jiro.App.Options;
@@ -5,6 +6,7 @@ using Jiro.Core.Services.CommandHandler;
 using Jiro.Core.Services.CommandSystem;
 using Jiro.Core.Services.MessageCache;
 using Jiro.Core.Services.System;
+using Jiro.Shared.Extensions;
 using Jiro.Shared.Websocket;
 using Jiro.Shared.Websocket.Requests;
 using Jiro.Shared.Websocket.Responses;
@@ -57,10 +59,27 @@ public partial class WebSocketConnection : JiroClientBase, IDisposable
 		_commandHandler = commandHandler ?? throw new ArgumentNullException(nameof(commandHandler));
 		_exceptionHandler = exceptionHandler ?? throw new ArgumentNullException(nameof(exceptionHandler));
 
-		_ = InitializeAsync(_options.HubUrl, _options.ApiKey,
-			(ex, context) => _exceptionHandler.HandleConnectionException(ex, context));
+		// Don't start connection in constructor - wait for explicit initialization
+		_webSocketLogger.LogWarning("🔥 CONSTRUCTOR: WebSocketConnection created, NOT starting connection yet");
 	}
 
+
+	/// <summary>
+	/// Starts the WebSocket connection
+	/// </summary>
+	/// <param name="cancellationToken">Cancellation token</param>
+	/// <returns>Task representing the async operation</returns>
+	public async Task StartAsync(CancellationToken cancellationToken = default)
+	{
+		_webSocketLogger.LogWarning("🔥 StartAsync: Setting up handlers BEFORE connecting");
+		SetupHandlers();
+		_webSocketLogger.LogWarning("🔥 StartAsync: Handlers setup complete, now initializing connection");
+
+		await InitializeAsync(_options.HubUrl, _options.ApiKey,
+			(ex, context) => _exceptionHandler.HandleConnectionException(ex, context), cancellationToken);
+
+		_webSocketLogger.LogWarning("🔥 StartAsync: Connection initialized successfully");
+	}
 
 	/// <summary>
 	/// Stops the WebSocket connection
@@ -92,6 +111,12 @@ public partial class WebSocketConnection : JiroClientBase, IDisposable
 	protected override void SetupHandlers()
 	{
 		_webSocketLogger.LogDebug("Setting up custom event handlers");
+
+		// Setup stream handlers - now handled by base class with proper streaming to server
+		_webSocketLogger.LogWarning("🔥 CLIENT: Setting up stream handlers");
+		SessionMessagesStreamRequested += HandleSessionMessagesStreamAsync;
+		LogsStreamRequested += HandleLogsStreamAsync;
+		_webSocketLogger.LogWarning("🔥 CLIENT: Stream handlers setup complete");
 
 		// Handle GetLogs command from server
 		LogsRequested += async (parameters) =>
@@ -387,9 +412,10 @@ public partial class WebSocketConnection : JiroClientBase, IDisposable
 			}
 		};
 
-		KeepaliveAckReceived += async () =>
+		KeepaliveAckReceived += () =>
 		{
 			_webSocketLogger.LogDebug("Keepalive acknowledgment received from server");
+			return Task.CompletedTask;
 		};
 
 		SessionRequested += async (req) =>
@@ -445,6 +471,211 @@ public partial class WebSocketConnection : JiroClientBase, IDisposable
 				};
 			}
 		};
+	}
+
+	#endregion
+
+	#region Stream Methods
+
+	/// <summary>
+	/// Handles session messages stream request by sending data to server
+	/// </summary>
+	/// <param name="request">The session request</param>
+	private Task HandleSessionMessagesStreamAsync(GetSingleSessionRequest request)
+	{
+		try
+		{
+			_webSocketLogger.LogInformation("Starting HandleSessionMessagesStreamAsync for SessionId: {SessionId}, RequestId: {RequestId}",
+				request.SessionId, request.RequestId);
+
+			// Create the stream for session messages
+
+			// Send the stream to the SignalR hub (fire and forget)
+			_logger?.LogInformation("Sending session messages stream for RequestId: {RequestId}", request.RequestId);
+			_ = Task.Run(async () =>
+			{
+				try
+				{
+					var stream = GetSessionMessagesStreamAsync(request);
+
+					// await ReceiveSessionMessagesStreamAsync(request.RequestId, stream);
+					await _hubConnection.InvokeAsync(Events.ReceiveSessionMessagesStream, request.RequestId, stream);
+					_webSocketLogger.LogInformation("Successfully sent session messages stream for RequestId: {RequestId}", request.RequestId);
+				}
+				catch (Exception ex)
+				{
+					_webSocketLogger.LogError(ex, "Failed to send session messages stream for RequestId: {RequestId}", request.RequestId);
+				}
+			});
+
+			_webSocketLogger.LogInformation("Completed HandleSessionMessagesStreamAsync for RequestId: {RequestId}", request.RequestId);
+			return Task.CompletedTask;
+		}
+		catch (Exception ex)
+		{
+			_webSocketLogger.LogError(ex, "Error in HandleSessionMessagesStreamAsync for RequestId: {RequestId}", request.RequestId);
+			throw;
+		}
+	}
+
+	/// <summary>
+	/// Gets session messages as a stream
+	/// </summary>
+	/// <param name="request">The session request</param>
+	/// <returns>An async enumerable of chat messages</returns>
+	private async IAsyncEnumerable<ChatMessage> GetSessionMessagesStreamAsync(GetSingleSessionRequest request, [EnumeratorCancellation] CancellationToken cancellationToken = default)
+	{
+		_webSocketLogger.LogInformation("Starting SessionMessagesStream for SessionId: {SessionId}, InstanceId: {InstanceId}, RequestId: {RequestId}",
+			request.SessionId, request.InstanceId, request.RequestId);
+
+		IServiceScope? scope = null;
+		var messageCount = 0;
+		try
+		{
+			scope = _scopeFactory.CreateScope();
+			var messageManager = scope.ServiceProvider.GetRequiredService<IMessageManager>();
+
+			var session = await messageManager.GetSessionAsync(request.SessionId, includeMessages: true);
+			if (session?.Messages != null)
+			{
+				foreach (var message in session.Messages)
+				{
+					if (cancellationToken.IsCancellationRequested)
+					{
+						_webSocketLogger.LogInformation("SessionMessagesStream cancelled after {MessageCount} messages for RequestId: {RequestId}",
+							messageCount, request.RequestId);
+						yield break;
+					}
+
+					yield return new ChatMessage
+					{
+						MessageId = message.MessageId,
+						Content = message.Message.Content.FirstOrDefault()?.Text ?? string.Empty,
+						CreatedAt = message.CreatedAt,
+						Type = message.Type.ToString(),
+						IsUser = message.IsUser
+					};
+
+					messageCount++;
+
+					// Add a small delay every 5 messages to allow for smooth streaming
+					if (messageCount % 5 == 0)
+					{
+						await Task.Delay(1, cancellationToken);
+					}
+				}
+			}
+
+			_webSocketLogger.LogInformation("Completed SessionMessagesStream with {MessageCount} messages for RequestId: {RequestId}",
+				messageCount, request.RequestId);
+		}
+		finally
+		{
+			scope?.Dispose();
+		}
+	}
+
+	/// <summary>
+	/// Handles logs stream request by sending data to server
+	/// </summary>
+	/// <param name="request">The logs request</param>
+	private Task HandleLogsStreamAsync(GetLogsRequest request)
+	{
+		try
+		{
+			_webSocketLogger.LogWarning("🔥 CLIENT: HandleLogsStreamAsync CALLED! Level: {Level}, RequestId: {RequestId}",
+				request.Level ?? "all", request.RequestId);
+
+
+			// Send the stream to the SignalR hub (fire and forget)
+			_logger?.LogInformation("Sending logs stream for RequestId: {RequestId}", request.RequestId);
+			_ = Task.Run(async () =>
+			{
+				try
+				{
+
+					// Create the stream using StreamLimitedLogsAsync for better performance
+					var stream = GetLogsStreamForSignalRAsync(request);
+
+					// await ReceiveLogsStreamAsync(request.RequestId, stream);
+					await _hubConnection.InvokeAsync(Events.ReceiveLogsStream, request.RequestId, stream);
+					_webSocketLogger.LogInformation("Successfully sent logs stream for RequestId: {RequestId}", request.RequestId);
+				}
+				catch (Exception ex)
+				{
+					_webSocketLogger.LogError(ex, "Failed to send logs stream for RequestId: {RequestId}", request.RequestId);
+				}
+			});
+
+			_webSocketLogger.LogInformation("Completed HandleLogsStreamAsync for RequestId: {RequestId}", request.RequestId);
+			return Task.CompletedTask;
+		}
+		catch (Exception ex)
+		{
+			_webSocketLogger.LogError(ex, "Error in HandleLogsStreamAsync for RequestId: {RequestId}", request.RequestId);
+			throw;
+		}
+	}
+
+	/// <summary>
+	/// Gets logs stream optimized for SignalR using StreamLimitedLogsAsync
+	/// </summary>
+	/// <param name="request">The logs request</param>
+	/// <returns>An async enumerable of log entries</returns>
+	private async IAsyncEnumerable<LogEntry> GetLogsStreamForSignalRAsync(GetLogsRequest request, [EnumeratorCancellation] CancellationToken cancellationToken = default)
+	{
+		_webSocketLogger.LogInformation("Starting GetLogsStreamForSignalRAsync for Level: {Level}, Limit: {Limit}, Offset: {Offset}, RequestId: {RequestId}",
+			request.Level ?? "all", request.Limit ?? 100, request.Offset ?? 0, request.RequestId);
+
+		IServiceScope? scope = null;
+		var entryCount = 0;
+		try
+		{
+			scope = _scopeFactory.CreateScope();
+			var logsService = scope.ServiceProvider.GetRequiredService<ILogsProviderService>();
+
+			// Use StreamLimitedLogsAsync for better performance and automatic stopping
+			await foreach (var log in logsService.StreamLimitedLogsAsync(
+				level: request.Level,
+				limit: request.Limit ?? 100,
+				offset: request.Offset ?? 0,
+				fromDate: null,
+				toDate: null,
+				searchTerm: null,
+				cancellationToken: cancellationToken))
+			{
+				if (cancellationToken.IsCancellationRequested)
+				{
+					_webSocketLogger.LogInformation("GetLogsStreamForSignalRAsync cancelled after {EntryCount} entries for RequestId: {RequestId}",
+						entryCount, request.RequestId);
+					yield break;
+				}
+
+				yield return new LogEntry
+				{
+					File = log.File,
+					Timestamp = log.Timestamp,
+					Level = log.Level,
+					Message = log.Message
+				};
+
+				entryCount++;
+
+				// Log progress every 50 entries
+				if (entryCount % 50 == 0)
+				{
+					_webSocketLogger.LogDebug("Streamed {EntryCount} log entries for RequestId: {RequestId}",
+						entryCount, request.RequestId);
+				}
+			}
+
+			_webSocketLogger.LogInformation("Completed GetLogsStreamForSignalRAsync with {EntryCount} entries for RequestId: {RequestId}",
+				entryCount, request.RequestId);
+		}
+		finally
+		{
+			scope?.Dispose();
+		}
 	}
 
 	#endregion
