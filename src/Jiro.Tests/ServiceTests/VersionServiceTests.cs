@@ -106,11 +106,11 @@ public class VersionServiceTests
 		// Version should be one of the expected formats
 		Assert.NotNull(version);
 		Assert.NotEmpty(version);
-		
+
 		// Version should be either "Unknown" or a valid version format
-		Assert.True(version == "Unknown" || System.Text.RegularExpressions.Regex.IsMatch(version, @"^\d+\.\d+\.\d+"), 
+		Assert.True(version == "Unknown" || System.Text.RegularExpressions.Regex.IsMatch(version, @"^\d+\.\d+\.\d+"),
 			$"Version '{version}' should be either 'Unknown' or follow semantic versioning format");
-		
+
 		// This test verifies that the service can handle different version formats
 		// The actual version depends on the assembly configuration
 	}
