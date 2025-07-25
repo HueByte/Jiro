@@ -26,6 +26,10 @@ public class LogsProviderService : ILogsProviderService
 	private static readonly Lazy<Regex> LogEntryStartRegex = new(() =>
 		new Regex(@"^\[?(?:\d{4}-\d{2}-\d{2} )?\d{2}:\d{2}:\d{2}(?:\.\d{3})?\s+[A-Z]+\]", RegexOptions.IgnoreCase | RegexOptions.Compiled));
 
+	// Regex to extract the message content without the log pattern
+	private static readonly Lazy<Regex> MessageExtractRegex = new(() =>
+		new Regex(@"^\[?(?:\d{4}-\d{2}-\d{2} )?\d{2}:\d{2}:\d{2}(?:\.\d{3})?\s+[A-Z]+\]\s*(?<message>.*)", RegexOptions.IgnoreCase | RegexOptions.Compiled | RegexOptions.Singleline));
+
 	// Maximum number of lines to combine for a single log entry
 	private const int MaxLinesPerLogEntry = 100;
 
@@ -577,6 +581,20 @@ public class LogsProviderService : ILogsProviderService
 		return "INF";
 	}
 
+	/// <summary>
+	/// Extracts the actual message content from a log line, removing the timestamp and log level prefix
+	/// </summary>
+	private static string ExtractMessageContent(string logLine)
+	{
+		var match = MessageExtractRegex.Value.Match(logLine);
+		if (match.Success && match.Groups["message"].Success)
+		{
+			return match.Groups["message"].Value;
+		}
+		// If no pattern match, return the line as-is (for continuation lines or malformed entries)
+		return logLine;
+	}
+
 	private static DateTime TryParseTimestamp(string timestamp)
 	{
 		// Try various timestamp formats
@@ -865,7 +883,7 @@ public class LogsProviderService : ILogsProviderService
 
 				// Start new entry
 				currentEntry.Clear();
-				currentEntry.AppendLine(line);
+				currentEntry.AppendLine(ExtractMessageContent(line));
 				currentTimestamp = ExtractTimestamp(line);
 				currentLevel = ExtractLogLevel(line);
 				linesInCurrentEntry = 1;
@@ -926,7 +944,7 @@ public class LogsProviderService : ILogsProviderService
 
 				// Start new entry
 				currentEntry.Clear();
-				currentEntry.AppendLine(line);
+				currentEntry.AppendLine(ExtractMessageContent(line));
 				currentTimestamp = ExtractTimestamp(line);
 				currentLevel = ExtractLogLevel(line);
 				linesInCurrentEntry = 1;
