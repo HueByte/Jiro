@@ -31,8 +31,8 @@ RUN dotnet publish Jiro.App/Jiro.App.csproj -c Release -o build \
 	/p:PublishTrimmed=false \
 	/p:UseAppHost=true
 
-# Ensure appsettings.example.json is available as fallback
-RUN cp Jiro.App/appsettings.example.json build/appsettings.json || true
+# Ensure appsettings.json exists, use example as fallback only if missing
+RUN test -f build/appsettings.json || cp Jiro.App/appsettings.example.json build/appsettings.json
 
 # Stage 2: Runtime image
 FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS runtime

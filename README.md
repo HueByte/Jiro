@@ -299,6 +299,65 @@ cd dev
 docfx docfx.json --serve
 ```
 
+## 🐳 Docker Development
+
+Jiro Kernel supports Docker Compose for easy development and deployment with automatic environment variable management.
+
+### Quick Start with Docker
+
+```bash
+# 1. Copy and configure environment variables
+cp .env.example .env
+# Edit .env with your API keys and configuration
+
+# 2. Start with Docker Compose (includes MySQL + Jiro Kernel)
+docker-compose up -d
+
+# 3. View logs
+docker-compose logs -f jiro-kernel
+
+# 4. Stop services
+docker-compose down
+```
+
+### Environment Configuration
+
+The Docker setup uses `.env` files for clean configuration management:
+
+```bash
+# Required Database Configuration
+MYSQL_ROOT_PASSWORD=your-root-password
+MYSQL_DATABASE=jiro
+MYSQL_USER=jiro
+MYSQL_PASSWORD=your-secure-password
+DB_SERVER=mysql
+
+# Required Application Configuration (uncomment in .env)
+JIRO_ApiKey=your-api-key-here
+JIRO_JiroApi=https://your-jiro-api-url
+
+# Required for AI features (uncomment in .env)
+OPENAI_API_KEY=sk-your-openai-api-key
+
+# Required for authentication (uncomment in .env)
+JWT_SECRET=your-jwt-secret-minimum-32-characters
+JWT_ISSUER=Jiro
+JWT_AUDIENCE=JiroUsers
+
+# Port Configuration
+JIRO_HTTP_PORT=8080
+JIRO_HTTPS_PORT=8443
+JIRO_ADDITIONAL_PORT=18090
+MYSQL_PORT=3306
+```
+
+### Production Deployment
+
+- Use `docker-compose.yml` with proper `.env` configuration
+- Environment variables override `.env` values for secrets management
+- Persistent volumes for data and logs included
+- Health checks and proper networking configured
+
 ## 🎓 Engineering Thesis Project
 
 This project is developed as part of an engineering thesis focused on building a modern AI assistant platform. The project demonstrates the integration of AI technologies with clean architecture patterns and modern software engineering practices.
