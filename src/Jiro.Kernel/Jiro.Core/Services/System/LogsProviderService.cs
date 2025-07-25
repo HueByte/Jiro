@@ -1,5 +1,6 @@
 using System.Globalization;
 using System.Runtime.CompilerServices;
+using System.Text;
 using System.Text.RegularExpressions;
 
 using Jiro.Core.Services.System.Models;
@@ -20,6 +21,13 @@ public class LogsProviderService : ILogsProviderService
 
 	private static readonly Lazy<Regex> DefaultLogLevelRegex = new(() =>
 		new Regex(@"^\[?(?:\d{4}-\d{2}-\d{2} )?\d{2}:\d{2}:\d{2}(?:\.\d{3})?\s+(?<level>[A-Z]+)\]", RegexOptions.IgnoreCase | RegexOptions.Compiled));
+
+	// Regex to detect the start of a new log entry
+	private static readonly Lazy<Regex> LogEntryStartRegex = new(() =>
+		new Regex(@"^\[?(?:\d{4}-\d{2}-\d{2} )?\d{2}:\d{2}:\d{2}(?:\.\d{3})?\s+[A-Z]+\]", RegexOptions.IgnoreCase | RegexOptions.Compiled));
+
+	// Maximum number of lines to combine for a single log entry
+	private const int MaxLinesPerLogEntry = 100;
 
 	private static readonly Lazy<Regex[]> DefaultFallbackTimestampRegexes = new(() => new[]
 	{
@@ -177,18 +185,9 @@ public class LogsProviderService : ILogsProviderService
 						using var fileStream = new FileStream(logFile, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
 						using var reader = new StreamReader(fileStream);
 
-						string? line;
-						while ((line = await reader.ReadLineAsync()) != null)
+						var logEntries = await ParseLogEntriesAsync(reader);
+						foreach (var logEntry in logEntries)
 						{
-							if (string.IsNullOrWhiteSpace(line)) continue;
-
-							var logEntry = new LogEntry
-							{
-								Timestamp = ExtractTimestamp(line),
-								Level = ExtractLogLevel(line),
-								Message = line
-							};
-
 							var parsedTimestamp = TryParseTimestamp(logEntry.Timestamp);
 
 							if (PassesFilters(logEntry, parsedTimestamp, level, fromDate, toDate, searchTerm))
@@ -452,23 +451,16 @@ public class LogsProviderService : ILogsProviderService
 		StreamLimitResult result, int limit, int offset,
 		[EnumeratorCancellation] CancellationToken cancellationToken = default)
 	{
-		// Process lines in reverse order (newest first)
-		for (int i = lines.Count - 1; i >= 0; i--)
+		// Parse log entries from lines (handles multi-line logs)
+		var logEntries = ParseLogEntriesFromLines(lines, fileName);
+
+		// Process entries in reverse order (newest first)
+		for (int i = logEntries.Count - 1; i >= 0; i--)
 		{
 			if (cancellationToken.IsCancellationRequested || result.StreamedCount >= limit)
 				yield break;
 
-			var currentLine = lines[i];
-			if (string.IsNullOrWhiteSpace(currentLine))
-				continue;
-
-			var logEntry = new LogEntry
-			{
-				File = fileName,
-				Timestamp = ExtractTimestamp(currentLine),
-				Level = ExtractLogLevel(currentLine),
-				Message = currentLine
-			};
+			var logEntry = logEntries[i];
 
 			// Parse timestamp for filtering
 			var parsedTimestamp = TryParseTimestamp(logEntry.Timestamp);
@@ -521,26 +513,18 @@ public class LogsProviderService : ILogsProviderService
 		try
 		{
 			var fileName = Path.GetFileName(logFile);
-			string? line;
 			var lineCount = 0;
 
-			while ((line = await reader.ReadLineAsync()) != null)
+			// Parse log entries (handles multi-line logs)
+			var logEntries = await ParseLogEntriesAsync(reader);
+
+			foreach (var logEntry in logEntries)
 			{
 				if (cancellationToken.IsCancellationRequested)
 					yield break;
 
-				if (string.IsNullOrWhiteSpace(line))
-					continue;
-
 				lineCount++;
-
-				var logEntry = new LogEntry
-				{
-					File = fileName,
-					Timestamp = ExtractTimestamp(line),
-					Level = ExtractLogLevel(line),
-					Message = line
-				};
+				logEntry.File = fileName;
 
 				// Filter by level if specified - skip filtering if level is "all"
 				if (!string.IsNullOrEmpty(level) &&
@@ -742,31 +726,23 @@ public class LogsProviderService : ILogsProviderService
 		using var fileStream = new FileStream(logFile, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
 		using var reader = new StreamReader(fileStream);
 
-		var lines = new List<string>();
-		string? line;
+		// Parse log entries (handles multi-line logs)
+		var logEntries = (await ParseLogEntriesAsync(reader)).ToList();
+		var fileName = Path.GetFileName(logFile);
 
-		// Read all lines first (we still need to reverse for newest-first processing)
-		while ((line = await reader.ReadLineAsync()) != null)
+		// Add file name to each entry
+		foreach (var entry in logEntries)
 		{
-			lines.Add(line);
+			entry.File = fileName;
 		}
 
 		var totalProcessed = currentTotalProcessed;
 		var skipped = currentSkipped;
 
-		// Process lines in reverse order (newest first) for better performance
-		for (int i = lines.Count - 1; i >= 0; i--)
+		// Process entries in reverse order (newest first) for better performance
+		for (int i = logEntries.Count - 1; i >= 0; i--)
 		{
-			var currentLine = lines[i];
-			if (string.IsNullOrWhiteSpace(currentLine)) continue;
-
-			var logEntry = new LogEntry
-			{
-				File = Path.GetFileName(logFile),
-				Timestamp = ExtractTimestamp(currentLine),
-				Level = ExtractLogLevel(currentLine),
-				Message = currentLine
-			};
+			var logEntry = logEntries[i];
 
 			// Parse timestamp for accurate filtering
 			var parsedTimestamp = TryParseTimestamp(logEntry.Timestamp);
@@ -857,6 +833,129 @@ public class LogsProviderService : ILogsProviderService
 		// Check if requested level maps to extracted level
 		return levelMapping.TryGetValue(requestedLevel, out var mappedLevel) &&
 			   extractedLevel.Equals(mappedLevel, StringComparison.OrdinalIgnoreCase);
+	}
+
+	/// <summary>
+	/// Parses log entries from a stream reader, handling multi-line logs properly
+	/// </summary>
+	private async Task<IEnumerable<LogEntry>> ParseLogEntriesAsync(StreamReader reader)
+	{
+		var entries = new List<LogEntry>();
+		var currentEntry = new StringBuilder();
+		string? currentTimestamp = null;
+		string? currentLevel = null;
+		string? line;
+		int linesInCurrentEntry = 0;
+
+		while ((line = await reader.ReadLineAsync()) != null)
+		{
+			// Check if this line starts a new log entry
+			if (LogEntryStartRegex.Value.IsMatch(line))
+			{
+				// Save the previous entry if exists
+				if (currentEntry.Length > 0 && currentTimestamp != null)
+				{
+					entries.Add(new LogEntry
+					{
+						Timestamp = currentTimestamp,
+						Level = currentLevel ?? "INF",
+						Message = currentEntry.ToString().TrimEnd()
+					});
+				}
+
+				// Start new entry
+				currentEntry.Clear();
+				currentEntry.AppendLine(line);
+				currentTimestamp = ExtractTimestamp(line);
+				currentLevel = ExtractLogLevel(line);
+				linesInCurrentEntry = 1;
+			}
+			else if (currentEntry.Length > 0)
+			{
+				// This is a continuation of the current log entry
+				if (linesInCurrentEntry < MaxLinesPerLogEntry)
+				{
+					currentEntry.AppendLine(line);
+					linesInCurrentEntry++;
+				}
+			}
+			// If we don't have a current entry and this line doesn't start a new one, skip it
+		}
+
+		// Don't forget the last entry
+		if (currentEntry.Length > 0 && currentTimestamp != null)
+		{
+			entries.Add(new LogEntry
+			{
+				Timestamp = currentTimestamp,
+				Level = currentLevel ?? "INF",
+				Message = currentEntry.ToString().TrimEnd()
+			});
+		}
+
+		return entries;
+	}
+
+	/// <summary>
+	/// Parses log entries from a list of lines, handling multi-line logs properly
+	/// </summary>
+	private List<LogEntry> ParseLogEntriesFromLines(List<string> lines, string fileName)
+	{
+		var entries = new List<LogEntry>();
+		var currentEntry = new StringBuilder();
+		string? currentTimestamp = null;
+		string? currentLevel = null;
+		int linesInCurrentEntry = 0;
+
+		foreach (var line in lines)
+		{
+			// Check if this line starts a new log entry
+			if (LogEntryStartRegex.Value.IsMatch(line))
+			{
+				// Save the previous entry if exists
+				if (currentEntry.Length > 0 && currentTimestamp != null)
+				{
+					entries.Add(new LogEntry
+					{
+						File = fileName,
+						Timestamp = currentTimestamp,
+						Level = currentLevel ?? "INF",
+						Message = currentEntry.ToString().TrimEnd()
+					});
+				}
+
+				// Start new entry
+				currentEntry.Clear();
+				currentEntry.AppendLine(line);
+				currentTimestamp = ExtractTimestamp(line);
+				currentLevel = ExtractLogLevel(line);
+				linesInCurrentEntry = 1;
+			}
+			else if (currentEntry.Length > 0)
+			{
+				// This is a continuation of the current log entry
+				if (linesInCurrentEntry < MaxLinesPerLogEntry)
+				{
+					currentEntry.AppendLine(line);
+					linesInCurrentEntry++;
+				}
+			}
+			// If we don't have a current entry and this line doesn't start a new one, skip it
+		}
+
+		// Don't forget the last entry
+		if (currentEntry.Length > 0 && currentTimestamp != null)
+		{
+			entries.Add(new LogEntry
+			{
+				File = fileName,
+				Timestamp = currentTimestamp,
+				Level = currentLevel ?? "INF",
+				Message = currentEntry.ToString().TrimEnd()
+			});
+		}
+
+		return entries;
 	}
 }
 
