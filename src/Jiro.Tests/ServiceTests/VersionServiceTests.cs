@@ -93,11 +93,7 @@ public class VersionServiceTests
 		}
 	}
 
-	[Theory]
-	[InlineData("1.0.0")]
-	[InlineData("1.2.3-beta")]
-	[InlineData("2.0.0-alpha.1")]
-	[InlineData("Unknown")]
+	[Fact]
 	public void GetVersion_ShouldHandleValidVersionFormats()
 	{
 		// Arrange
@@ -107,7 +103,14 @@ public class VersionServiceTests
 		var version = versionService.GetVersion();
 
 		// Assert
+		// Version should be one of the expected formats
 		Assert.NotNull(version);
+		Assert.NotEmpty(version);
+		
+		// Version should be either "Unknown" or a valid version format
+		Assert.True(version == "Unknown" || System.Text.RegularExpressions.Regex.IsMatch(version, @"^\d+\.\d+\.\d+"), 
+			$"Version '{version}' should be either 'Unknown' or follow semantic versioning format");
+		
 		// This test verifies that the service can handle different version formats
 		// The actual version depends on the assembly configuration
 	}
