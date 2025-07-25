@@ -362,7 +362,7 @@ JIRO_DataPaths__Messages=Data/Messages
 
 Jiro uses an organized Data folder structure for all application data:
 
-```
+```sh
 Data/
 ├── Database/     # SQLite database files
 ├── Logs/         # Application logs (managed by Serilog)
@@ -372,6 +372,7 @@ Data/
 ```
 
 **Docker Volumes**: Each Data subfolder has its own persistent volume:
+
 - `jiro_database` → `/home/app/jiro/Data/Database`
 - `jiro_logs` → `/home/app/jiro/Data/Logs`
 - `jiro_plugins` → `/home/app/jiro/Data/Plugins`
