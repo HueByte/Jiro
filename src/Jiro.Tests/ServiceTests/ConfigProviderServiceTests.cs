@@ -192,10 +192,10 @@ public class ConfigProviderServiceTests : IDisposable
 	}
 
 	[Fact]
-	public void GetJiroRelatedConfiguration_ShouldFilterCorrectKeys()
+	public async Task GetJiroRelatedConfiguration_ShouldFilterCorrectKeys()
 	{
 		// Act
-		var result = _configProviderService.GetConfigAsync().Result;
+		var result = await _configProviderService.GetConfigAsync();
 
 		// Assert
 		var configValues = result.Configuration.Values;

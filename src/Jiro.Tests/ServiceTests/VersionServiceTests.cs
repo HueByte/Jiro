@@ -116,7 +116,7 @@ public class VersionServiceTests
 	}
 
 	[Fact]
-	public void VersionService_ShouldBeThreadSafe()
+	public async Task VersionService_ShouldBeThreadSafe()
 	{
 		// Arrange
 		var versionService = new VersionService();
@@ -128,7 +128,7 @@ public class VersionServiceTests
 			tasks.Add(Task.Run(() => versionService.GetVersion()));
 		}
 
-		Task.WaitAll(tasks.ToArray());
+		await Task.WhenAll(tasks);
 
 		// Assert
 		var versions = tasks.Select(t => t.Result).ToList();
