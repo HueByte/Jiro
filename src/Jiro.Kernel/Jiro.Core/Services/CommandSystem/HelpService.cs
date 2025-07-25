@@ -79,11 +79,14 @@ public class HelpService : IHelpService
 					// TODO: Add proper parameter metadata for ML
 					Parameters = command.Value.Parameters
 						.Where(static p => p != null && p.ParamType != null)
-						.ToDictionary(static p => p?.ToString() ?? string.Empty, static p => p!.ParamType),
+						.Select(static (p, index) => new { Key = $"{p?.ToString() ?? string.Empty}_{index}", Value = p!.ParamType })
+						.ToDictionary(static x => x.Key, static x => x.Value),
 
 					// TODO: Implement proper keywords to commands
 					Keywords = [string.Empty]
 				};
+
+				CommandMeta.Add(meta);
 			}
 
 			messageBuilder.AppendLine();
