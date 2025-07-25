@@ -18,6 +18,7 @@ services:
       - JIRO_DataPaths__Themes=${JIRO_THEMES_PATH:-Data/Themes}
       - JIRO_DataPaths__Plugins=${JIRO_PLUGINS_PATH:-Data/Plugins}
       - JIRO_DataPaths__Database=${JIRO_DATABASE_PATH:-Data/Database/jiro.db}
+      - JIRO_DataPaths__Messages=${JIRO_MESSAGES_PATH:-Data/Messages}
       # Application configuration
       - JIRO_ApiKey=${JIRO_API_KEY}
       - JIRO_JiroApi=${JIRO_JIRO_API:-https://localhost:18092}
@@ -37,6 +38,7 @@ services:
       - jiro_themes:/home/app/jiro/Data/Themes
       - jiro_plugins:/home/app/jiro/Data/Plugins
       - jiro_database:/home/app/jiro/Data/Database
+      - jiro_messages:/home/app/jiro/Data/Messages
     depends_on:
       mysql:
         condition: service_healthy
@@ -86,6 +88,8 @@ volumes:
   jiro_plugins:
     driver: local
   jiro_database:
+    driver: local
+  jiro_messages:
     driver: local
   mysql_data:
     driver: local

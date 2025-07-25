@@ -36,7 +36,7 @@ public class ConfigProviderService : IConfigProviderService
 			var config = new ConfigResponse
 			{
 				ApplicationName = "Jiro",
-				Version = Assembly.GetExecutingAssembly().GetName().Version?.ToString(),
+				Version = Assembly.GetEntryAssembly()?.GetName().Version?.ToString() ?? "Unknown",
 				Environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Production",
 				InstanceId = _configuration.GetValue<string>("InstanceId") ?? Environment.MachineName,
 				Configuration = new Shared.Websocket.Requests.ConfigurationSection

@@ -57,7 +57,7 @@ ENV ASPNETCORE_ENVIRONMENT=Production
 ENV ASPNETCORE_URLS=http://+:8080;https://+:8443
 
 # Create data directories and set permissions
-RUN mkdir -p ${DATA_PATH}/Logs ${DATA_PATH}/Save ${DATA_PATH}/Modules && \
+RUN mkdir -p ${DATA_PATH}/Logs ${DATA_PATH}/Database ${DATA_PATH}/Plugins ${DATA_PATH}/Themes ${DATA_PATH}/Messages && \
 	chown -R jiro:jiro ${MAIN_WORK_DIR}
 
 WORKDIR ${MAIN_WORK_DIR}/build

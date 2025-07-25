@@ -349,14 +349,44 @@ JIRO_HTTP_PORT=8080
 JIRO_HTTPS_PORT=8443
 JIRO_ADDITIONAL_PORT=18090
 MYSQL_PORT=3306
+
+# Data Paths Configuration (optional - customize as needed)
+JIRO_DataPaths__Logs=Data/Logs
+JIRO_DataPaths__Database=Data/Database/jiro.db
+JIRO_DataPaths__Plugins=Data/Plugins
+JIRO_DataPaths__Themes=Data/Themes
+JIRO_DataPaths__Messages=Data/Messages
 ```
+
+### Data Organization
+
+Jiro uses an organized Data folder structure for all application data:
+
+```
+Data/
+├── Database/     # SQLite database files
+├── Logs/         # Application logs (managed by Serilog)
+├── Plugins/      # Plugin assemblies and configurations
+├── Themes/       # Custom UI themes and styling
+└── Messages/     # Markdown files for chat messages
+```
+
+**Docker Volumes**: Each Data subfolder has its own persistent volume:
+- `jiro_database` → `/home/app/jiro/Data/Database`
+- `jiro_logs` → `/home/app/jiro/Data/Logs`
+- `jiro_plugins` → `/home/app/jiro/Data/Plugins`
+- `jiro_themes` → `/home/app/jiro/Data/Themes`
+- `jiro_messages` → `/home/app/jiro/Data/Messages`
+
+**Path Customization**: All paths are configurable via environment variables using the `JIRO_DataPaths__` prefix.
 
 ### Production Deployment
 
 - Use `docker-compose.yml` with proper `.env` configuration
 - Environment variables override `.env` values for secrets management
-- Persistent volumes for data and logs included
+- Persistent volumes for all data directories included
 - Health checks and proper networking configured
+- Organized data structure with separate volumes for each data type
 
 ## 🎓 Engineering Thesis Project
 
@@ -372,6 +402,16 @@ This project is developed as part of an engineering thesis focused on building a
 | `TokenizerUrl` | Tokenizer API endpoint | `http://localhost:8000` |
 | `Gpt:AuthToken` | OpenAI API key | *Required for chat features* |
 | `JWT:Secret` | JWT signing key | *Change in production!* |
+
+### Data Paths Settings
+
+| Setting | Description | Default |
+|---------|-------------|---------|
+| `DataPaths:Database` | SQLite database file path | `Data/Database/jiro.db` |
+| `DataPaths:Logs` | Application logs directory | `Data/Logs` |
+| `DataPaths:Plugins` | Plugin assemblies directory | `Data/Plugins` |
+| `DataPaths:Themes` | UI themes directory | `Data/Themes` |
+| `DataPaths:Messages` | Markdown messages directory | `Data/Messages` |
 
 ### Web Client Settings  
 

@@ -62,7 +62,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<None Include="Messages\**\*">
+		<None Include="Data\**\*">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
 		<None Include="themes\**\*">
