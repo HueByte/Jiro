@@ -457,4 +457,124 @@ public class MessageManager : IMessageManager
 
 		return 0;
 	}
+
+	/// <summary>
+	/// Removes a chat session and all its messages from both the database and cache.
+	/// </summary>
+	/// <param name="sessionId">The unique identifier of the session to remove.</param>
+	/// <returns>A task that represents the asynchronous operation. Returns true if the session was found and removed, false otherwise.</returns>
+	public async Task<bool> RemoveSessionAsync(string sessionId)
+	{
+		try
+		{
+			var instanceId = _commandContext.InstanceId ?? throw new InvalidOperationException("Command context or current instance is not set.");
+
+			// Remove session from database
+			var dbSession = await _chatSessionRepository.GetAsync(sessionId);
+			if (dbSession == null)
+			{
+				_logger.LogWarning("Session {SessionId} not found in database", sessionId);
+				return false;
+			}
+
+			// Remove all messages associated with this session
+			var messages = await _messageRepository.AsQueryable()
+				.Where(m => m.SessionId == sessionId)
+				.ToListAsync();
+
+			if (messages.Any())
+			{
+				await _messageRepository.RemoveRangeAsync(messages);
+				_logger.LogInformation("Removed {MessageCount} messages for session {SessionId}", messages.Count, sessionId);
+			}
+
+			// Remove the session
+			await _chatSessionRepository.RemoveAsync(dbSession);
+			await _chatSessionRepository.SaveChangesAsync();
+
+			// Remove from cache
+			string cacheKey = $"{Constants.CacheKeys.SessionKey}::{sessionId}";
+			_memoryCache.Remove(cacheKey);
+
+			// Invalidate sessions list cache for this instance
+			string sessionsListCacheKey = $"{Constants.CacheKeys.SessionsKey}::{instanceId}";
+			_memoryCache.Remove(sessionsListCacheKey);
+
+			_logger.LogInformation("Successfully removed session {SessionId} from database and cache", sessionId);
+			return true;
+		}
+		catch (Exception ex)
+		{
+			_logger.LogError(ex, "Error removing session {SessionId}", sessionId);
+			throw;
+		}
+	}
+
+	/// <summary>
+	/// Updates a chat session's metadata (name and description) in both the database and cache.
+	/// </summary>
+	/// <param name="sessionId">The unique identifier of the session to update.</param>
+	/// <param name="name">The new name for the session. If null, the name will not be updated.</param>
+	/// <param name="description">The new description for the session. If null, the description will not be updated.</param>
+	/// <returns>A task that represents the asynchronous operation. Returns true if the session was found and updated, false otherwise.</returns>
+	public async Task<bool> UpdateSessionAsync(string sessionId, string? name = null, string? description = null)
+	{
+		try
+		{
+			var instanceId = _commandContext.InstanceId ?? throw new InvalidOperationException("Command context or current instance is not set.");
+
+			// Update session in database
+			var dbSession = await _chatSessionRepository.GetAsync(sessionId);
+			if (dbSession == null)
+			{
+				_logger.LogWarning("Session {SessionId} not found in database", sessionId);
+				return false;
+			}
+
+			bool wasUpdated = false;
+			if (name != null && dbSession.Name != name)
+			{
+				dbSession.Name = name;
+				wasUpdated = true;
+			}
+
+			if (description != null && dbSession.Description != description)
+			{
+				dbSession.Description = description;
+				wasUpdated = true;
+			}
+
+			if (wasUpdated)
+			{
+				dbSession.LastUpdatedAt = DateTime.UtcNow;
+				await _chatSessionRepository.UpdateAsync(dbSession);
+				await _chatSessionRepository.SaveChangesAsync();
+
+				// Update cached session if it exists
+				string cacheKey = $"{Constants.CacheKeys.SessionKey}::{sessionId}";
+				if (_memoryCache.TryGetValue(cacheKey, out Session? cachedSession) && cachedSession != null)
+				{
+					cachedSession.LastUpdatedAt = dbSession.LastUpdatedAt;
+					_memoryCache.Set(cacheKey, cachedSession, TimeSpan.FromDays(MEMORY_CACHE_EXPIRATION));
+				}
+
+				// Invalidate sessions list cache to reflect updated metadata
+				string sessionsListCacheKey = $"{Constants.CacheKeys.SessionsKey}::{instanceId}";
+				_memoryCache.Remove(sessionsListCacheKey);
+
+				_logger.LogInformation("Successfully updated session {SessionId} metadata", sessionId);
+			}
+			else
+			{
+				_logger.LogInformation("No updates needed for session {SessionId} - values unchanged", sessionId);
+			}
+
+			return true;
+		}
+		catch (Exception ex)
+		{
+			_logger.LogError(ex, "Error updating session {SessionId}", sessionId);
+			throw;
+		}
+	}
 }

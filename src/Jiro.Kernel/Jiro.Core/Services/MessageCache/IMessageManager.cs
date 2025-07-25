@@ -86,4 +86,20 @@ public interface IMessageManager
 	/// <param name="sessionId">The session identifier.</param>
 	/// <returns>The number of messages in the session.</returns>
 	int GetChatMessageCount(string sessionId);
+
+	/// <summary>
+	/// Removes a chat session and all its messages from both the database and cache.
+	/// </summary>
+	/// <param name="sessionId">The unique identifier of the session to remove.</param>
+	/// <returns>A task that represents the asynchronous operation. Returns true if the session was found and removed, false otherwise.</returns>
+	Task<bool> RemoveSessionAsync(string sessionId);
+
+	/// <summary>
+	/// Updates a chat session's metadata (name and description) in both the database and cache.
+	/// </summary>
+	/// <param name="sessionId">The unique identifier of the session to update.</param>
+	/// <param name="name">The new name for the session. If null, the name will not be updated.</param>
+	/// <param name="description">The new description for the session. If null, the description will not be updated.</param>
+	/// <returns>A task that represents the asynchronous operation. Returns true if the session was found and updated, false otherwise.</returns>
+	Task<bool> UpdateSessionAsync(string sessionId, string? name = null, string? description = null);
 }
