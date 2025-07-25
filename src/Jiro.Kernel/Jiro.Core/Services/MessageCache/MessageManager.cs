@@ -477,18 +477,7 @@ public class MessageManager : IMessageManager
 				return false;
 			}
 
-			// Remove all messages associated with this session
-			var messages = await _messageRepository.AsQueryable()
-				.Where(m => m.SessionId == sessionId)
-				.ToListAsync();
-
-			if (messages.Any())
-			{
-				await _messageRepository.RemoveRangeAsync(messages);
-				_logger.LogInformation("Removed {MessageCount} messages for session {SessionId}", messages.Count, sessionId);
-			}
-
-			// Remove the session
+			// Remove the session (messages will be cascade deleted automatically)
 			await _chatSessionRepository.RemoveAsync(dbSession);
 			await _chatSessionRepository.SaveChangesAsync();
 
