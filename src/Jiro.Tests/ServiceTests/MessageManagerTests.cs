@@ -1,6 +1,7 @@
 using Jiro.Core.IRepositories;
 using Jiro.Core.Models;
 using Jiro.Core.Services.CommandContext;
+using Jiro.Core.Services.Context;
 using Jiro.Core.Services.Conversation.Models;
 using Jiro.Core.Services.MessageCache;
 using Jiro.Core.Services.StaticMessage;
@@ -25,8 +26,9 @@ public class MessageManagerTests : IDisposable
 	private readonly IMessageRepository _messageRepository;
 	private readonly IChatSessionRepository _chatSessionRepository;
 	private readonly IConfiguration _configuration;
-	private readonly Mock<ICommandContext> _commandContextMock;
+	private readonly Mock<IInstanceContext> _instanceContextMock;
 	private readonly Mock<IStaticMessageService> _staticMessageServiceMock;
+	private readonly Mock<IInstanceMetadataAccessor> _instanceMetadataAccessorMock;
 	private readonly IMessageManager _messageManager;
 	private readonly JiroContext _dbContext;
 
@@ -52,8 +54,15 @@ public class MessageManagerTests : IDisposable
 			.AddInMemoryCollection(configData)
 			.Build();
 
-		_commandContextMock = new Mock<ICommandContext>();
+		_instanceContextMock = new Mock<IInstanceContext>();
 		_staticMessageServiceMock = new Mock<IStaticMessageService>();
+		_instanceMetadataAccessorMock = new Mock<IInstanceMetadataAccessor>();
+
+		// Setup default return value for instance metadata accessor
+		_instanceMetadataAccessorMock.Setup(x => x.GetInstanceIdAsync(It.IsAny<string>()))
+			.ReturnsAsync("test-instance");
+		_instanceMetadataAccessorMock.Setup(x => x.GetCurrentInstanceId())
+			.Returns("test-instance");
 
 		// Setup static message service mock to use the same memory cache for testing
 		_staticMessageServiceMock.Setup(x => x.ClearStaticMessageCache())
@@ -80,8 +89,9 @@ public class MessageManagerTests : IDisposable
 			_messageRepository,
 			_chatSessionRepository,
 			_configuration,
-			_commandContextMock.Object,
-			_staticMessageServiceMock.Object);
+			_staticMessageServiceMock.Object,
+			_instanceContextMock.Object,
+			_instanceMetadataAccessorMock.Object);
 	}
 
 	public void Dispose()
@@ -109,8 +119,9 @@ public class MessageManagerTests : IDisposable
 			_messageRepository,
 			_chatSessionRepository,
 			configuration,
+			_staticMessageServiceMock.Object,
 			null!,
-			_staticMessageServiceMock.Object));
+			_instanceMetadataAccessorMock.Object));
 	}
 
 	[Fact]
@@ -217,10 +228,10 @@ public class MessageManagerTests : IDisposable
 		const string sessionId = "new-session";
 		const string instanceId = "test-instance";
 
-		_commandContextMock.Setup(static x => x.InstanceId)
+		_instanceContextMock.Setup(static x => x.InstanceId)
 			.Returns(instanceId);
-		_commandContextMock.Setup(static x => x.SessionId)
-			.Returns(sessionId);
+		_instanceMetadataAccessorMock.Setup(x => x.GetInstanceIdAsync(It.IsAny<string>()))
+			.ReturnsAsync(instanceId);
 
 		// Act
 		var result = await _messageManager.GetOrCreateChatSessionAsync(sessionId);
@@ -259,8 +270,9 @@ public class MessageManagerTests : IDisposable
 			new() { Id = "msg2", Content = "Test response 1", SessionId = sessionId, InstanceId = instanceId, CreatedAt = DateTime.UtcNow }
 		};
 
-		_commandContextMock.Setup(static x => x.SessionId).Returns(sessionId);
-		_commandContextMock.Setup(static x => x.InstanceId).Returns(instanceId);
+		_instanceContextMock.Setup(static x => x.InstanceId).Returns(instanceId);
+		_instanceMetadataAccessorMock.Setup(x => x.GetInstanceIdAsync(It.IsAny<string>()))
+			.ReturnsAsync(instanceId);
 
 		// Act
 		await _messageManager.AddChatExchangeAsync(sessionId, chatMessages, modelMessages);
@@ -395,7 +407,9 @@ public class MessageManagerTests : IDisposable
 		const string sessionId = "session-with-messages";
 		const string instanceId = "test-instance";
 
-		_commandContextMock.Setup(static x => x.InstanceId).Returns(instanceId);
+		_instanceContextMock.Setup(static x => x.InstanceId).Returns(instanceId);
+		_instanceMetadataAccessorMock.Setup(x => x.GetInstanceIdAsync(It.IsAny<string>()))
+			.ReturnsAsync(instanceId);
 
 		// Create a session with messages
 		var session = new ChatSession

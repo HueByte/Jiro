@@ -6,6 +6,7 @@ using Jiro.Core.Options;
 using Jiro.Core.Services.CommandContext;
 using Jiro.Core.Services.CommandHandler;
 using Jiro.Core.Services.CommandSystem;
+using Jiro.Core.Services.Context;
 using Jiro.Core.Services.Conversation;
 using Jiro.Core.Services.Geolocation;
 using Jiro.Core.Services.MessageCache;
@@ -54,6 +55,8 @@ public static class Configurator
 		});
 
 		services.AddScoped<IWeatherService, WeatherService>();
+		services.AddScoped<IInstanceContext, InstanceContext>();
+		services.AddScoped<IInstanceMetadataAccessor, InstanceMetadataAccessor>();
 		services.AddScoped<ICommandContext, CommandContext>();
 		services.AddScoped<IGeolocationService, GeolocationService>();
 		services.AddScoped<IConversationCoreService, ConversationCoreService>();
@@ -120,7 +123,11 @@ public static class Configurator
 			httpClient.DefaultRequestHeaders.Add("User-Agent", "JiroBot");
 		});
 
-		services.AddHttpClient(HttpClients.JIRO);
+		services.AddHttpClient(HttpClients.JIRO, (serviceProvider, httpClient) =>
+		{
+			var appOptions = serviceProvider.GetRequiredService<IOptions<ApplicationOptions>>().Value;
+			httpClient.BaseAddress = new Uri(appOptions.JiroApi);
+		});
 
 
 

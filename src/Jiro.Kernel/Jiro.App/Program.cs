@@ -100,6 +100,7 @@ host.ConfigureServices(services =>
 			return Task.CompletedTask;
 		})
 		.AddInterceptor<Jiro.App.Services.GrpcExceptionInterceptor>()
+		.AddInterceptor<Jiro.App.Interceptors.InstanceContextInterceptor>()
 		.ConfigureChannel(options =>
 		{
 			options.HttpHandler = new SocketsHttpHandler
@@ -168,6 +169,32 @@ if (isTestMode)
 // Log loaded modules
 var commandContainer = app.Services.GetRequiredService<CommandsContext>();
 foreach (var module in commandContainer.CommandModules.Keys) Log.Information("Module {Module} loaded", module);
+
+// Initialize instance ID from API
+using (var scope = app.Services.CreateScope())
+{
+	try
+	{
+		var instanceMetadataAccessor = scope.ServiceProvider.GetRequiredService<Jiro.Core.Services.Context.IInstanceMetadataAccessor>();
+		var appOptions = scope.ServiceProvider.GetRequiredService<Microsoft.Extensions.Options.IOptions<Jiro.Core.Options.ApplicationOptions>>().Value;
+		
+		Log.Information("Initializing instance ID from Jiro API...");
+		var instanceId = await instanceMetadataAccessor.InitializeInstanceIdAsync(appOptions.ApiKey);
+		
+		if (!string.IsNullOrWhiteSpace(instanceId))
+		{
+			Log.Information("✅ Instance ID initialized successfully: {InstanceId}", instanceId);
+		}
+		else
+		{
+			Log.Warning("⚠️ Failed to initialize instance ID from API - will fall back to context-based resolution");
+		}
+	}
+	catch (Exception ex)
+	{
+		Log.Error(ex, "❌ Error during instance ID initialization - will fall back to context-based resolution");
+	}
+}
 
 var appConf = new AppConfigurator(app)
 	  .Migrate();

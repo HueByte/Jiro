@@ -13,8 +13,9 @@ public interface IMessageManager
 	/// </summary>
 	/// <param name="sessionId">The unique identifier of the session.</param>
 	/// <param name="includeMessages">Whether to include messages in the result.</param>
+	/// <param name="instanceId">The unique identifier of the instance. If null, will be fetched from database.</param>
 	/// <returns>A task that represents the asynchronous operation. The task result contains the session or null if not found.</returns>
-	Task<Session?> GetSessionAsync(string sessionId, bool includeMessages = false);
+	Task<Session?> GetSessionAsync(string sessionId, bool includeMessages = false, string? instanceId = null);
 
 	/// <summary>
 	/// Retrieves an existing chat session or creates a new one if it doesn't exist.

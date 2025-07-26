@@ -1,5 +1,6 @@
 using Jiro.Core.Services.CommandContext;
 using Jiro.Core.Services.CommandSystem;
+using Jiro.Core.Services.Context;
 using Jiro.Core.Services.MessageCache;
 using Jiro.Core.Services.System;
 
@@ -22,6 +23,7 @@ public class SystemCommand : ICommandBase
 	private readonly ILogsProviderService _logsProviderService;
 	private readonly IConfigProviderService _configProviderService;
 	private readonly IThemeService _themeService;
+	private readonly IInstanceMetadataAccessor _instanceMetadataAccessor;
 
 	/// <summary>
 	/// Initializes a new instance of the SystemCommand class
@@ -34,7 +36,8 @@ public class SystemCommand : ICommandBase
 		IConfiguration configuration,
 		ILogsProviderService logsProviderService,
 		IConfigProviderService configProviderService,
-		IThemeService themeService)
+		IThemeService themeService,
+		IInstanceMetadataAccessor instanceMetadataAccessor)
 	{
 		_logger = logger ?? throw new ArgumentNullException(nameof(logger));
 		_commandContext = commandContext ?? throw new ArgumentNullException(nameof(commandContext));
@@ -44,6 +47,7 @@ public class SystemCommand : ICommandBase
 		_logsProviderService = logsProviderService ?? throw new ArgumentNullException(nameof(logsProviderService));
 		_configProviderService = configProviderService ?? throw new ArgumentNullException(nameof(configProviderService));
 		_themeService = themeService ?? throw new ArgumentNullException(nameof(themeService));
+		_instanceMetadataAccessor = instanceMetadataAccessor ?? throw new ArgumentNullException(nameof(instanceMetadataAccessor));
 	}
 
 	/// <summary>
@@ -75,19 +79,18 @@ public class SystemCommand : ICommandBase
 	{
 		try
 		{
-			if (string.IsNullOrEmpty(_commandContext.InstanceId))
+			var instanceId = await _instanceMetadataAccessor.GetInstanceIdAsync("") ?? _instanceMetadataAccessor.GetCurrentInstanceId();
+			if (string.IsNullOrEmpty(instanceId))
 			{
 				return TextResult.Create("Instance ID not available");
 			}
 
-			_logger.LogInformation("Getting sessions for instance: {InstanceId}", _commandContext.InstanceId);
+			_logger.LogInformation("Getting sessions for instance: {InstanceId}", instanceId);
 
-
-
-			var sessions = await _messageManager.GetChatSessionsAsync(_commandContext.InstanceId);
+			var sessions = await _messageManager.GetChatSessionsAsync(instanceId);
 			var response = new
 			{
-				_commandContext.InstanceId,
+				InstanceId = instanceId,
 				TotalSessions = sessions.Count,
 				CurrentSessionId = _commandContext.SessionId,
 				Sessions = sessions

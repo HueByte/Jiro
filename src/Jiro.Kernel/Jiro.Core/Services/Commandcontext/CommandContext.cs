@@ -1,9 +1,10 @@
+using Jiro.Core.Services.Context;
+
 namespace Jiro.Core.Services.CommandContext;
 
-public class CommandContext : ICommandContext
+public class CommandContext : InstanceContext, ICommandContext
 {
-	public string InstanceId { get; private set; } = string.Empty;
-	public string SessionId { get; private set; } = string.Empty;
+	// InstanceId and SessionId are inherited from InstanceContext
 	public Dictionary<string, object> Data { get; } = [];
 
 	public void SetData(IEnumerable<KeyValuePair<string, object>> data)

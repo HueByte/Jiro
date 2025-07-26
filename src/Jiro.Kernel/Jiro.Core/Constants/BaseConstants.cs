@@ -17,6 +17,11 @@ public class Environment
 public class CacheKeys
 {
 	/// <summary>
+	/// The cache key for storing the instance ID of the Jiro agent.
+	/// </summary>
+	public const string InstanceKey = $"{AgentMetadata.CachePrefix}::Instance";
+
+	/// <summary>
 	/// The cache key for storing the core persona message.
 	/// </summary>
 	public const string CorePersonaMessageKey = $"{AgentMetadata.CachePrefix}::Persona";

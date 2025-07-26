@@ -1,5 +1,6 @@
 using System.Runtime.CompilerServices;
 using System.Text.Json;
+using System.Threading.Channels;
 
 using Jiro.App.Options;
 using Jiro.Core.Services.CommandHandler;
@@ -7,6 +8,7 @@ using Jiro.Core.Services.CommandSystem;
 using Jiro.Core.Services.MessageCache;
 using Jiro.Core.Services.System;
 using Jiro.Shared.Extensions;
+using Jiro.Shared.Utilities;
 using Jiro.Shared.Websocket;
 using Jiro.Shared.Websocket.Requests;
 using Jiro.Shared.Websocket.Responses;
@@ -71,9 +73,7 @@ public partial class WebSocketConnection : JiroClientBase, IDisposable
 	/// <returns>Task representing the async operation</returns>
 	public async Task StartAsync(CancellationToken cancellationToken = default)
 	{
-		_webSocketLogger.LogWarning("🔥 StartAsync: Setting up handlers BEFORE connecting");
-		SetupHandlers();
-		_webSocketLogger.LogWarning("🔥 StartAsync: Handlers setup complete, now initializing connection");
+		_webSocketLogger.LogWarning("🔥 StartAsync: Initializing connection (handlers will be setup by base class)");
 
 		await InitializeAsync(_options.HubUrl, _options.ApiKey,
 			(ex, context) => _exceptionHandler.HandleConnectionException(ex, context), cancellationToken);
@@ -117,6 +117,29 @@ public partial class WebSocketConnection : JiroClientBase, IDisposable
 		SessionMessagesStreamRequested += HandleSessionMessagesStreamAsync;
 		LogsStreamRequested += HandleLogsStreamAsync;
 		_webSocketLogger.LogWarning("🔥 CLIENT: Stream handlers setup complete");
+
+		// Setup new v1.3.0 event handlers
+		RemoveSessionRequested += HandleRemoveSessionAsync;
+		UpdateSessionRequested += HandleUpdateSessionAsync;
+		MachineInfoRequested += HandleMachineInfoAsync;
+
+		Reconnected += (input) =>
+		{
+			_logger?.LogInformation("WebSocket connection re-established");
+			return Task.CompletedTask;
+		};
+
+		Reconnecting += (input) =>
+		{
+			_logger?.LogWarning("WebSocket connection is reconnecting");
+			return Task.CompletedTask;
+		};
+
+		Closed += async (input) =>
+		{
+			_logger?.LogWarning("WebSocket connection closed: {Message}", input);
+			await DisposeConnectionAsync();
+		};
 
 		// Handle GetLogs command from server
 		LogsRequested += async (parameters) =>
@@ -412,12 +435,6 @@ public partial class WebSocketConnection : JiroClientBase, IDisposable
 			}
 		};
 
-		KeepaliveAckReceived += () =>
-		{
-			_webSocketLogger.LogDebug("Keepalive acknowledgment received from server");
-			return Task.CompletedTask;
-		};
-
 		SessionRequested += async (req) =>
 		{
 			try
@@ -473,6 +490,177 @@ public partial class WebSocketConnection : JiroClientBase, IDisposable
 		};
 	}
 
+	#region New v1.3.0 Event Handlers
+
+	/// <summary>
+	/// Handles remove session request from server
+	/// </summary>
+	/// <param name="request">The remove session request</param>
+	/// <returns>Action result indicating success or failure</returns>
+	private async Task<ActionResult> HandleRemoveSessionAsync(RemoveSessionRequest request)
+	{
+		try
+		{
+			_webSocketLogger.LogInformation("Received RemoveSession command from server for SessionId: {SessionId}", request.SessionId);
+
+			await using var scope = _scopeFactory.CreateAsyncScope();
+			var messageManager = scope.ServiceProvider.GetRequiredService<IMessageManager>();
+
+			var success = await messageManager.RemoveSessionAsync(request.SessionId);
+			if (!success)
+			{
+				return new ActionResult
+				{
+					IsSuccess = false,
+					Message = "Session not found",
+					Errors = new[] { $"Session with ID {request.SessionId} does not exist" }
+				};
+			}
+
+			return new ActionResult
+			{
+				IsSuccess = true,
+				Message = $"Session {request.SessionId} removed successfully"
+			};
+		}
+		catch (Exception ex)
+		{
+			_webSocketLogger.LogError(ex, "Error handling RemoveSession command for SessionId: {SessionId}", request.SessionId);
+			return new ActionResult
+			{
+				IsSuccess = false,
+				Message = "Failed to remove session",
+				Errors = new[] { ex.Message }
+			};
+		}
+	}
+
+	/// <summary>
+	/// Handles update session request from server
+	/// </summary>
+	/// <param name="request">The update session request</param>
+	/// <returns>Action result indicating success or failure</returns>
+	private async Task<ActionResult> HandleUpdateSessionAsync(UpdateSessionRequest request)
+	{
+		try
+		{
+			_webSocketLogger.LogInformation("Received UpdateSession command from server for SessionId: {SessionId}, Name: {Name}",
+				request.SessionId, request.Name ?? "unchanged");
+
+			await using var scope = _scopeFactory.CreateAsyncScope();
+			var messageManager = scope.ServiceProvider.GetRequiredService<IMessageManager>();
+
+			var success = await messageManager.UpdateSessionAsync(request.SessionId, request.Name, request.Description);
+			if (!success)
+			{
+				return new ActionResult
+				{
+					IsSuccess = false,
+					Message = "Session not found",
+					Errors = new[] { $"Session with ID {request.SessionId} does not exist" }
+				};
+			}
+
+			return new ActionResult
+			{
+				IsSuccess = true,
+				Message = $"Session {request.SessionId} updated successfully"
+			};
+		}
+		catch (Exception ex)
+		{
+			_webSocketLogger.LogError(ex, "Error handling UpdateSession command for SessionId: {SessionId}", request.SessionId);
+			return new ActionResult
+			{
+				IsSuccess = false,
+				Message = "Failed to update session",
+				Errors = new[] { ex.Message }
+			};
+		}
+	}
+
+	/// <summary>
+	/// Handles machine info request from server
+	/// </summary>
+	/// <param name="request">The machine info request</param>
+	/// <returns>Machine information response</returns>
+	private async Task<MachineInfoResponse> HandleMachineInfoAsync(MachineInfoRequest request)
+	{
+		try
+		{
+			_webSocketLogger.LogInformation("Received MachineInfo command from server with RequestId: {RequestId}", request.RequestId);
+
+			await using var scope = _scopeFactory.CreateAsyncScope();
+			var configuration = scope.ServiceProvider.GetRequiredService<IConfiguration>();
+
+			// Get real-time performance data using PerformanceAnalyzer
+			var performanceAnalyzer = PerformanceAnalyzerFactory.Create();
+
+			var metadata = new Dictionary<string, string>
+			{
+				["OS"] = Environment.OSVersion.ToString(),
+				["Platform"] = Environment.OSVersion.Platform.ToString(),
+				["ProcessorCount"] = Environment.ProcessorCount.ToString(),
+				["RuntimeVersion"] = Environment.Version.ToString(),
+				["WorkingSet"] = Environment.WorkingSet.ToString(),
+				["UserName"] = Environment.UserName,
+				["UserDomainName"] = Environment.UserDomainName,
+				["Is64BitOS"] = Environment.Is64BitOperatingSystem.ToString(),
+				["Is64BitProcess"] = Environment.Is64BitProcess.ToString()
+			};
+
+			// Add real-time performance metrics
+			try
+			{
+				var cpuUsage = await performanceAnalyzer.GetCpuUsageAsync();
+				var availableMemoryMB = await performanceAnalyzer.GetAvailableMemoryMBAsync();
+				var usedMemoryMB = await performanceAnalyzer.GetApplicationMemoryUsedMBAsync();
+				var memoryUsagePercentage = await performanceAnalyzer.GetApplicationMemoryUsagePercentageAsync();
+
+				metadata.Add("CpuUsagePercent", cpuUsage.ToString("F2"));
+				metadata.Add("AvailableMemoryMB", availableMemoryMB.ToString("F2"));
+				metadata.Add("UsedMemoryMB", usedMemoryMB.ToString("F2"));
+				metadata.Add("MemoryUsagePercent", memoryUsagePercentage.ToString("F2"));
+				metadata.Add("TotalMemoryMB", (availableMemoryMB + usedMemoryMB).ToString("F2"));
+			}
+			catch (Exception perfEx)
+			{
+				_webSocketLogger.LogWarning(perfEx, "Failed to get performance metrics for machine info");
+				metadata.Add("PerformanceMetricsError", perfEx.Message);
+			}
+
+			var machineInfo = new MachineInfoResponse
+			{
+				RequestId = request.RequestId,
+				MachineId = Environment.MachineName,
+				Name = Environment.MachineName,
+				Description = $"Jiro instance running on {Environment.OSVersion}",
+				Status = "Active",
+				Metadata = metadata
+			};
+
+			return machineInfo;
+		}
+		catch (Exception ex)
+		{
+			_webSocketLogger.LogError(ex, "Error handling MachineInfo command from server");
+			return new MachineInfoResponse
+			{
+				RequestId = request.RequestId,
+				MachineId = "Error",
+				Name = "Error",
+				Description = "Failed to retrieve machine information",
+				Status = "Error",
+				Metadata = new Dictionary<string, string>
+				{
+					["Error"] = ex.Message
+				}
+			};
+		}
+	}
+
+	#endregion
+
 	#endregion
 
 	#region Stream Methods
@@ -481,25 +669,44 @@ public partial class WebSocketConnection : JiroClientBase, IDisposable
 	/// Handles session messages stream request by sending data to server
 	/// </summary>
 	/// <param name="request">The session request</param>
-	private Task HandleSessionMessagesStreamAsync(GetSingleSessionRequest request)
+	private Task<ActionResult> HandleSessionMessagesStreamAsync(GetSingleSessionRequest request)
 	{
 		try
 		{
 			_webSocketLogger.LogInformation("Starting HandleSessionMessagesStreamAsync for SessionId: {SessionId}, RequestId: {RequestId}",
 				request.SessionId, request.RequestId);
 
-			// Create the stream for session messages
+			// Create channel first (SignalR best practice)
+			var channel = Channel.CreateUnbounded<ChatMessage>();
+			var writer = channel.Writer;
+			var reader = channel.Reader;
 
-			// Send the stream to the SignalR hub (fire and forget)
-			_logger?.LogInformation("Sending session messages stream for RequestId: {RequestId}", request.RequestId);
+			// Start background task to populate channel
 			_ = Task.Run(async () =>
 			{
 				try
 				{
-					var stream = GetSessionMessagesStreamAsync(request);
+					await foreach (var message in GetSessionMessagesStreamAsync(request))
+					{
+						await writer.WriteAsync(message);
+					}
+				}
+				catch (Exception ex)
+				{
+					_webSocketLogger.LogError(ex, "Error populating session messages channel for RequestId: {RequestId}", request.RequestId);
+				}
+				finally
+				{
+					writer.Complete();
+				}
+			});
 
-					// await ReceiveSessionMessagesStreamAsync(request.RequestId, stream);
-					await _hubConnection.InvokeAsync(Events.ReceiveSessionMessagesStream, request.RequestId, stream);
+			// Send stream to SignalR hub (fire and forget)
+			_ = Task.Run(async () =>
+			{
+				try
+				{
+					await ReceiveSessionMessagesStreamAsync(request.RequestId, reader);
 					_webSocketLogger.LogInformation("Successfully sent session messages stream for RequestId: {RequestId}", request.RequestId);
 				}
 				catch (Exception ex)
@@ -509,12 +716,12 @@ public partial class WebSocketConnection : JiroClientBase, IDisposable
 			});
 
 			_webSocketLogger.LogInformation("Completed HandleSessionMessagesStreamAsync for RequestId: {RequestId}", request.RequestId);
-			return Task.CompletedTask;
+			return Task.FromResult(new ActionResult { IsSuccess = true, Message = "Session messages stream initiated successfully" });
 		}
 		catch (Exception ex)
 		{
 			_webSocketLogger.LogError(ex, "Error in HandleSessionMessagesStreamAsync for RequestId: {RequestId}", request.RequestId);
-			throw;
+			return Task.FromResult(new ActionResult { IsSuccess = false, Message = "Failed to initiate session messages stream", Errors = new[] { ex.Message } });
 		}
 	}
 
@@ -579,26 +786,44 @@ public partial class WebSocketConnection : JiroClientBase, IDisposable
 	/// Handles logs stream request by sending data to server
 	/// </summary>
 	/// <param name="request">The logs request</param>
-	private Task HandleLogsStreamAsync(GetLogsRequest request)
+	private Task<ActionResult> HandleLogsStreamAsync(GetLogsRequest request)
 	{
 		try
 		{
 			_webSocketLogger.LogWarning("🔥 CLIENT: HandleLogsStreamAsync CALLED! Level: {Level}, RequestId: {RequestId}",
 				request.Level ?? "all", request.RequestId);
 
+			// Create channel first (SignalR best practice)
+			var channel = Channel.CreateUnbounded<LogEntry>();
+			var writer = channel.Writer;
+			var reader = channel.Reader;
 
-			// Send the stream to the SignalR hub (fire and forget)
-			_logger?.LogInformation("Sending logs stream for RequestId: {RequestId}", request.RequestId);
+			// Start background task to populate channel
 			_ = Task.Run(async () =>
 			{
 				try
 				{
+					await foreach (var logEntry in GetLogsStreamForSignalRAsync(request))
+					{
+						await writer.WriteAsync(logEntry);
+					}
+				}
+				catch (Exception ex)
+				{
+					_webSocketLogger.LogError(ex, "Error populating logs channel for RequestId: {RequestId}", request.RequestId);
+				}
+				finally
+				{
+					writer.Complete();
+				}
+			});
 
-					// Create the stream using StreamLimitedLogsAsync for better performance
-					var stream = GetLogsStreamForSignalRAsync(request);
-
-					// await ReceiveLogsStreamAsync(request.RequestId, stream);
-					await _hubConnection.InvokeAsync(Events.ReceiveLogsStream, request.RequestId, stream);
+			// Send stream to SignalR hub (fire and forget)
+			_ = Task.Run(async () =>
+			{
+				try
+				{
+					await ReceiveLogsStreamAsync(request.RequestId, reader);
 					_webSocketLogger.LogInformation("Successfully sent logs stream for RequestId: {RequestId}", request.RequestId);
 				}
 				catch (Exception ex)
@@ -608,12 +833,12 @@ public partial class WebSocketConnection : JiroClientBase, IDisposable
 			});
 
 			_webSocketLogger.LogInformation("Completed HandleLogsStreamAsync for RequestId: {RequestId}", request.RequestId);
-			return Task.CompletedTask;
+			return Task.FromResult(new ActionResult { IsSuccess = true, Message = "Logs stream initiated successfully" });
 		}
 		catch (Exception ex)
 		{
 			_webSocketLogger.LogError(ex, "Error in HandleLogsStreamAsync for RequestId: {RequestId}", request.RequestId);
-			throw;
+			return Task.FromResult(new ActionResult { IsSuccess = false, Message = "Failed to initiate logs stream", Errors = new[] { ex.Message } });
 		}
 	}
 

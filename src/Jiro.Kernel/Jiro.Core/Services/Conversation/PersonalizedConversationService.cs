@@ -1,6 +1,7 @@
 using Jiro.Core.IRepositories;
 using Jiro.Core.Models;
 using Jiro.Core.Services.CommandContext;
+using Jiro.Core.Services.Context;
 using Jiro.Core.Services.Conversation.Models;
 using Jiro.Core.Services.MessageCache;
 using Jiro.Core.Services.Persona;
@@ -21,12 +22,13 @@ public class PersonalizedConversationService : IPersonalizedConversationService
 	private readonly ICommandContext _commandContext;
 	private readonly IChatSessionRepository _chatSessionRepository;
 	private readonly IMessageRepository _messageRepository;
+	private readonly IInstanceMetadataAccessor _instanceMetadataAccessor;
 	private const float PRICING_OUTPUT = 0.600f;
 	private const float PRICING_INPUT = 0.150f;
 	private const float PRICING_INPUT_CACHED = 0.075f;
 	private const float ONE_MILLION = 1_000_000;
 
-	public PersonalizedConversationService(ILogger<PersonalizedConversationService> logger, IConversationCoreService chatCoreService, IPersonaService personaService, IMessageManager messageCacheService, IHistoryOptimizerService historyOptimizerService, ICommandContext commandContext, IChatSessionRepository chatSessionRepository, IMessageRepository messageRepository)
+	public PersonalizedConversationService(ILogger<PersonalizedConversationService> logger, IConversationCoreService chatCoreService, IPersonaService personaService, IMessageManager messageCacheService, IHistoryOptimizerService historyOptimizerService, ICommandContext commandContext, IChatSessionRepository chatSessionRepository, IMessageRepository messageRepository, IInstanceMetadataAccessor instanceMetadataAccessor)
 	{
 		_logger = logger ?? throw new ArgumentNullException(nameof(logger), "Logger cannot be null.");
 		_chatCoreService = chatCoreService ?? throw new ArgumentNullException(nameof(chatCoreService), "Chat core service cannot be null.");
@@ -36,6 +38,7 @@ public class PersonalizedConversationService : IPersonalizedConversationService
 		_commandContext = commandContext ?? throw new ArgumentNullException(nameof(commandContext), "Command context cannot be null.");
 		_chatSessionRepository = chatSessionRepository ?? throw new ArgumentNullException(nameof(chatSessionRepository), "Chat session repository cannot be null.");
 		_messageRepository = messageRepository ?? throw new ArgumentNullException(nameof(messageRepository), "Message repository cannot be null.");
+		_instanceMetadataAccessor = instanceMetadataAccessor ?? throw new ArgumentNullException(nameof(instanceMetadataAccessor), "Instance metadata accessor cannot be null.");
 	}
 
 	public async Task<string> ChatAsync(string instanceId, string sessionId, string message)
@@ -73,7 +76,7 @@ public class PersonalizedConversationService : IPersonalizedConversationService
 				Type = MessageType.Text
 			};
 			// Save messages to database using MessageManager
-			await SaveMessagesToSessionAsync(sessionWithMessages.SessionId, conversationHistory.Last(), jiroMessage);
+			await SaveMessagesToSessionAsync(sessionWithMessages.SessionId, instanceId, conversationHistory.Last(), jiroMessage);
 
 			// Handle history optimization
 			if (_historyOptimizerService.ShouldOptimizeMessageHistory(tokenUsage))
@@ -109,14 +112,14 @@ public class PersonalizedConversationService : IPersonalizedConversationService
 	/// <summary>
 	/// Saves user and assistant messages to the session using MessageManager.
 	/// </summary>
-	private async Task SaveMessagesToSessionAsync(string sessionId, ChatMessageWithMetadata userMessage, ChatMessageWithMetadata assistantMessage)
+	private async Task SaveMessagesToSessionAsync(string sessionId, string instanceId, ChatMessageWithMetadata userMessage, ChatMessageWithMetadata assistantMessage)
 	{
 		try
 		{
 			var userMessageModel = new Message
 			{
 				Id = Guid.NewGuid().ToString(),
-				InstanceId = _commandContext.InstanceId ?? throw new InvalidOperationException("InstanceId is required"),
+				InstanceId = instanceId,
 				Content = userMessage.Message.Content.FirstOrDefault()?.Text ?? string.Empty,
 				IsUser = true,
 				CreatedAt = userMessage.CreatedAt,
@@ -127,7 +130,7 @@ public class PersonalizedConversationService : IPersonalizedConversationService
 			var assistantMessageModel = new Message
 			{
 				Id = Guid.NewGuid().ToString(),
-				InstanceId = _commandContext.InstanceId ?? throw new InvalidOperationException("InstanceId is required"),
+				InstanceId = instanceId,
 				Content = assistantMessage.Message.Content.FirstOrDefault()?.Text ?? string.Empty,
 				IsUser = false,
 				CreatedAt = assistantMessage.CreatedAt,

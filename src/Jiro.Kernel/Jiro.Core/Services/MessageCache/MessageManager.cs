@@ -1,6 +1,6 @@
 using Jiro.Core.IRepositories;
 using Jiro.Core.Models;
-using Jiro.Core.Services.CommandContext;
+using Jiro.Core.Services.Context;
 using Jiro.Core.Services.Conversation.Models;
 using Jiro.Core.Services.StaticMessage;
 
@@ -22,9 +22,10 @@ public class MessageManager : IMessageManager
 	private readonly IMemoryCache _memoryCache;
 	private readonly IMessageRepository _messageRepository;
 	private readonly IChatSessionRepository _chatSessionRepository;
-	private readonly ICommandContext _commandContext;
 	private readonly IConfiguration _configuration;
 	private readonly IStaticMessageService _staticMessageService;
+	private readonly IInstanceContext _instanceContext;
+	private readonly IInstanceMetadataAccessor _instanceMetadataAccessor;
 	private const int MEMORY_CACHE_EXPIRATION = 5;
 
 	/// <summary>
@@ -35,17 +36,19 @@ public class MessageManager : IMessageManager
 	/// <param name="messageRepository">The message repository.</param>
 	/// <param name="chatSessionRepository">The chat session repository.</param>
 	/// <param name="configuration">The configuration instance.</param>
-	/// <param name="commandContext">The command context.</param>
 	/// <param name="staticMessageService">The static message service.</param>
-	public MessageManager(ILogger<MessageManager> logger, IMemoryCache memoryCache, IMessageRepository messageRepository, IChatSessionRepository chatSessionRepository, IConfiguration configuration, ICommandContext commandContext, IStaticMessageService staticMessageService)
+	/// <param name="instanceContext">The instance context service.</param>
+	/// <param name="instanceMetadataAccessor">The instance metadata accessor service.</param>
+	public MessageManager(ILogger<MessageManager> logger, IMemoryCache memoryCache, IMessageRepository messageRepository, IChatSessionRepository chatSessionRepository, IConfiguration configuration, IStaticMessageService staticMessageService, IInstanceContext instanceContext, IInstanceMetadataAccessor instanceMetadataAccessor)
 	{
 		_logger = logger;
 		_memoryCache = memoryCache;
 		_messageRepository = messageRepository;
 		_chatSessionRepository = chatSessionRepository;
 		_configuration = configuration;
-		_commandContext = commandContext ?? throw new ArgumentNullException(nameof(commandContext), "Command context cannot be null.");
 		_staticMessageService = staticMessageService ?? throw new ArgumentNullException(nameof(staticMessageService), "Static message service cannot be null.");
+		_instanceContext = instanceContext ?? throw new ArgumentNullException(nameof(instanceContext), "Instance context cannot be null.");
+		_instanceMetadataAccessor = instanceMetadataAccessor ?? throw new ArgumentNullException(nameof(instanceMetadataAccessor), "Instance metadata accessor cannot be null.");
 	}
 
 	/// <summary>
@@ -53,12 +56,14 @@ public class MessageManager : IMessageManager
 	/// </summary>
 	/// <param name="sessionId">The session identifier.</param>
 	/// <param name="includeMessages">Whether to include messages in the result. Defaults to false for performance.</param>
+	/// <param name="instanceId">The unique identifier of the instance. If null, will be fetched from database.</param>
 	/// <returns>The session or null if not found.</returns>
-	public async Task<Session?> GetSessionAsync(string sessionId, bool includeMessages = false)
+	public async Task<Session?> GetSessionAsync(string sessionId, bool includeMessages = false, string? instanceId = null)
 	{
 		_logger.LogInformation("GetSessionAsync called with sessionId: '{SessionId}' (IncludeMessages: {IncludeMessages})", sessionId, includeMessages);
 
 		string cacheKey = $"{Constants.CacheKeys.SessionKey}::{sessionId}";
+		string? resolvedInstanceId = instanceId;
 
 		// Try to get session from cache first
 		if (_memoryCache.TryGetValue(cacheKey, out Session? cachedSession) && cachedSession != null)
@@ -74,18 +79,27 @@ public class MessageManager : IMessageManager
 			if (!cachedSession.Messages.Any() && includeMessages)
 			{
 				_logger.LogInformation("Cached session has no messages, fetching with messages for sessionId: '{SessionId}'", sessionId);
-				return await FetchSessionFromDatabase(sessionId, true, cacheKey);
+				// If instanceId is not provided, get it from the accessor
+				resolvedInstanceId ??= await _instanceMetadataAccessor.GetInstanceIdAsync("");
+				if (resolvedInstanceId is null) return null;
+
+				return await FetchSessionFromDatabase(sessionId, resolvedInstanceId, true, cacheKey);
 			}
 		}
 
 		// Session not in cache, fetch from database
-		return await FetchSessionFromDatabase(sessionId, includeMessages, cacheKey);
+		// If instanceId is not provided, get it from the accessor
+		resolvedInstanceId ??= await _instanceMetadataAccessor.GetInstanceIdAsync("");
+		if (resolvedInstanceId is null) return null;
+
+		return await FetchSessionFromDatabase(sessionId, resolvedInstanceId, includeMessages, cacheKey);
 	}
+
 
 	/// <summary>
 	/// Fetches session from database and caches it.
 	/// </summary>
-	private async Task<Session?> FetchSessionFromDatabase(string sessionId, bool includeMessages, string cacheKey)
+	private async Task<Session?> FetchSessionFromDatabase(string sessionId, string instanceId, bool includeMessages, string cacheKey)
 	{
 		var query = _chatSessionRepository.AsQueryable().Where(x => x.Id == sessionId);
 
@@ -96,8 +110,9 @@ public class MessageManager : IMessageManager
 				.Include(x => x.Messages)
 				.Select(x => new Session
 				{
-					InstanceId = _commandContext.InstanceId,
+					InstanceId = instanceId,
 					SessionId = x.Id,
+					Name = x.Name,
 					CreatedAt = x.CreatedAt,
 					LastUpdatedAt = x.LastUpdatedAt,
 					Messages = x.Messages != null ? x.Messages.OrderBy(m => m.CreatedAt).Select(m => new ChatMessageWithMetadata()
@@ -118,8 +133,9 @@ public class MessageManager : IMessageManager
 			session = await query
 				.Select(x => new Session
 				{
-					InstanceId = _commandContext.InstanceId,
+					InstanceId = instanceId,
 					SessionId = x.Id,
+					Name = x.Name,
 					CreatedAt = x.CreatedAt,
 					LastUpdatedAt = x.LastUpdatedAt,
 					Messages = new List<ChatMessageWithMetadata>()
@@ -221,7 +237,10 @@ public class MessageManager : IMessageManager
 				if (!cachedSession.Messages.Any() && includeMessages)
 				{
 					_logger.LogInformation("Cached session has no messages, fetching with messages for sessionId: '{SessionId}'", sessionId);
-					var sessionWithMessages = await FetchSessionFromDatabase(sessionId, true, cacheKey);
+
+					var instanceId = await _instanceMetadataAccessor.GetInstanceIdAsync("");
+					if (instanceId is null) return cachedSession;
+					var sessionWithMessages = await FetchSessionFromDatabase(sessionId, instanceId, true, cacheKey);
 					return sessionWithMessages ?? cachedSession; // Fallback to cached if fetch fails
 				}
 			}
@@ -242,9 +261,11 @@ public class MessageManager : IMessageManager
 					session = await query.FirstOrDefaultAsync();
 				}
 
+				string resolvedInstanceId;
 				if (session is null)
 				{
-					_logger.LogInformation("No chat session found for instance {InstanceId} and session {SessionId}. Creating new session.", _commandContext.InstanceId, sessionId);
+					resolvedInstanceId = await _instanceMetadataAccessor.GetInstanceIdAsync("") ?? throw new InvalidOperationException($"Instance ID could not be determined.");
+					_logger.LogInformation("No chat session found for instance {InstanceId} and session {SessionId}. Creating new session.", resolvedInstanceId, sessionId);
 					session = new ChatSession
 					{
 						Id = sessionId,
@@ -257,10 +278,13 @@ public class MessageManager : IMessageManager
 					await _chatSessionRepository.AddAsync(session);
 					await _chatSessionRepository.SaveChangesAsync();
 				}
-
+				else
+				{
+					resolvedInstanceId = await _instanceMetadataAccessor.GetInstanceIdAsync("") ?? throw new InvalidOperationException($"Instance ID could not be determined.");
+				}
 				return new Session
 				{
-					InstanceId = _commandContext.InstanceId,
+					InstanceId = resolvedInstanceId,
 					SessionId = session.Id,
 					CreatedAt = session.CreatedAt,
 					LastUpdatedAt = session.LastUpdatedAt,
@@ -280,7 +304,7 @@ public class MessageManager : IMessageManager
 		}
 		catch (Exception ex)
 		{
-			_logger.LogError(ex, "Error fetching or caching chat messages for instance {InstanceId}", _commandContext.InstanceId);
+			_logger.LogError(ex, "Error fetching or caching chat messages for instance {InstanceId}", _instanceMetadataAccessor.GetCurrentInstanceId());
 			throw;
 		}
 	}
@@ -296,7 +320,7 @@ public class MessageManager : IMessageManager
 	{
 		try
 		{
-			var instanceId = _commandContext.InstanceId ?? throw new InvalidOperationException("Command context or current instance is not set.");
+			var instanceId = await _instanceMetadataAccessor.GetInstanceIdAsync("") ?? throw new InvalidOperationException($"Instance ID could not be determined.");
 
 			// Ensure all message IDs are unique by checking against database and regenerating any conflicts upfront
 			var existingMessageIds = await _messageRepository.AsQueryable()
@@ -467,7 +491,7 @@ public class MessageManager : IMessageManager
 	{
 		try
 		{
-			var instanceId = _commandContext.InstanceId ?? throw new InvalidOperationException("Command context or current instance is not set.");
+			var instanceId = await _instanceMetadataAccessor.GetInstanceIdAsync("") ?? throw new InvalidOperationException($"Instance ID could not be determined.");
 
 			// Remove session from database
 			var dbSession = await _chatSessionRepository.GetAsync(sessionId);
@@ -510,7 +534,7 @@ public class MessageManager : IMessageManager
 	{
 		try
 		{
-			var instanceId = _commandContext.InstanceId ?? throw new InvalidOperationException("Command context or current instance is not set.");
+			var instanceId = await _instanceMetadataAccessor.GetInstanceIdAsync("") ?? throw new InvalidOperationException($"Instance ID could not be determined.");
 
 			// Update session in database
 			var dbSession = await _chatSessionRepository.GetAsync(sessionId);
@@ -521,7 +545,7 @@ public class MessageManager : IMessageManager
 			}
 
 			bool wasUpdated = false;
-			if (name != null && dbSession.Name != name)
+			if (name is not null && dbSession.Name != name)
 			{
 				dbSession.Name = name;
 				wasUpdated = true;
@@ -539,13 +563,9 @@ public class MessageManager : IMessageManager
 				await _chatSessionRepository.UpdateAsync(dbSession);
 				await _chatSessionRepository.SaveChangesAsync();
 
-				// Update cached session if it exists
+				// Invalidate individual session cache to force refresh from database
 				string cacheKey = $"{Constants.CacheKeys.SessionKey}::{sessionId}";
-				if (_memoryCache.TryGetValue(cacheKey, out Session? cachedSession) && cachedSession != null)
-				{
-					cachedSession.LastUpdatedAt = dbSession.LastUpdatedAt;
-					_memoryCache.Set(cacheKey, cachedSession, TimeSpan.FromDays(MEMORY_CACHE_EXPIRATION));
-				}
+				_memoryCache.Remove(cacheKey);
 
 				// Invalidate sessions list cache to reflect updated metadata
 				string sessionsListCacheKey = $"{Constants.CacheKeys.SessionsKey}::{instanceId}";

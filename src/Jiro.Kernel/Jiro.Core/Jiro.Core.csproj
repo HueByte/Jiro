@@ -9,7 +9,7 @@
 
   <ItemGroup>
     <PackageReference Include="Jiro.Commands" Version="3.0.4" />
-    <PackageReference Include="Jiro.Shared" Version="1.2.2" />
+    <PackageReference Include="Jiro.Shared" Version="1.3.0" />
     <PackageReference Include="JWT" Version="11.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.7" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Abstractions" Version="2.3.0" />

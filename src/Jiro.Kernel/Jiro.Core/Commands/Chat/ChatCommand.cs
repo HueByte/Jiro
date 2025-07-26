@@ -1,4 +1,5 @@
 using Jiro.Core.Services.CommandContext;
+using Jiro.Core.Services.Context;
 using Jiro.Core.Services.Conversation;
 using Jiro.Core.Services.MessageCache;
 
@@ -10,12 +11,14 @@ public class ChatCommand : ICommandBase
 	private readonly IPersonalizedConversationService _chatService;
 	private readonly ICommandContext _commandContext;
 	private readonly IMessageManager _messageManager;
+	private readonly IInstanceMetadataAccessor _instanceMetadataAccessor;
 
-	public ChatCommand(IPersonalizedConversationService chatService, ICommandContext commandContext, IMessageManager messageManager)
+	public ChatCommand(IPersonalizedConversationService chatService, ICommandContext commandContext, IMessageManager messageManager, IInstanceMetadataAccessor instanceMetadataAccessor)
 	{
 		_messageManager = messageManager ?? throw new ArgumentNullException(nameof(messageManager), "Chat storage service cannot be null.");
 		_chatService = chatService ?? throw new ArgumentNullException(nameof(chatService), "Chat service cannot be null.");
 		_commandContext = commandContext ?? throw new ArgumentNullException(nameof(commandContext), "Command context cannot be null.");
+		_instanceMetadataAccessor = instanceMetadataAccessor ?? throw new ArgumentNullException(nameof(instanceMetadataAccessor), "Instance metadata accessor cannot be null.");
 	}
 
 	[Command("chat")]
@@ -25,7 +28,8 @@ public class ChatCommand : ICommandBase
 		if (string.IsNullOrEmpty(sessionId))
 			throw new JiroException("Session not found");
 
-		var result = await _chatService.ChatAsync(_commandContext.InstanceId ?? "", sessionId, prompt);
+		var instanceId = await _instanceMetadataAccessor.GetInstanceIdAsync("") ?? _instanceMetadataAccessor.GetCurrentInstanceId() ?? "";
+		var result = await _chatService.ChatAsync(instanceId, sessionId, prompt);
 
 		return TextResult.Create(result);
 	}

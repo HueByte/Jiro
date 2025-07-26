@@ -1,5 +1,6 @@
 using Jiro.Core.IRepositories;
 using Jiro.Core.Services.CommandContext;
+using Jiro.Core.Services.Context;
 using Jiro.Core.Services.Conversation;
 using Jiro.Core.Services.MessageCache;
 using Jiro.Core.Services.Persona;
@@ -22,6 +23,7 @@ public class PersonalizedConversationServiceTests
 	private readonly Mock<ICommandContext> _commandContextMock;
 	private readonly Mock<IChatSessionRepository> _chatSessionRepositoryMock;
 	private readonly Mock<IMessageRepository> _messageRepositoryMock;
+	private readonly Mock<IInstanceMetadataAccessor> _instanceMetadataAccessorMock;
 	private readonly PersonalizedConversationService _personalizedConversationService;
 
 	public PersonalizedConversationServiceTests()
@@ -34,6 +36,7 @@ public class PersonalizedConversationServiceTests
 		_commandContextMock = new Mock<ICommandContext>();
 		_chatSessionRepositoryMock = new Mock<IChatSessionRepository>();
 		_messageRepositoryMock = new Mock<IMessageRepository>();
+		_instanceMetadataAccessorMock = new Mock<IInstanceMetadataAccessor>();
 
 		_personalizedConversationService = new PersonalizedConversationService(
 			_loggerMock.Object,
@@ -43,7 +46,8 @@ public class PersonalizedConversationServiceTests
 			_historyOptimizerServiceMock.Object,
 			_commandContextMock.Object,
 			_chatSessionRepositoryMock.Object,
-			_messageRepositoryMock.Object
+			_messageRepositoryMock.Object,
+			_instanceMetadataAccessorMock.Object
 		);
 	}
 
@@ -59,7 +63,8 @@ public class PersonalizedConversationServiceTests
 			_historyOptimizerServiceMock.Object,
 			_commandContextMock.Object,
 			_chatSessionRepositoryMock.Object,
-			_messageRepositoryMock.Object
+			_messageRepositoryMock.Object,
+			_instanceMetadataAccessorMock.Object
 		);
 
 		// Assert
@@ -78,7 +83,8 @@ public class PersonalizedConversationServiceTests
 			_historyOptimizerServiceMock.Object,
 			_commandContextMock.Object,
 			_chatSessionRepositoryMock.Object,
-			_messageRepositoryMock.Object
+			_messageRepositoryMock.Object,
+			_instanceMetadataAccessorMock.Object
 		));
 	}
 
@@ -94,7 +100,8 @@ public class PersonalizedConversationServiceTests
 			_historyOptimizerServiceMock.Object,
 			_commandContextMock.Object,
 			_chatSessionRepositoryMock.Object,
-			_messageRepositoryMock.Object
+			_messageRepositoryMock.Object,
+			_instanceMetadataAccessorMock.Object
 		));
 	}
 
