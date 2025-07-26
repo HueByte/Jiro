@@ -141,7 +141,7 @@ public static class Configurator
 			{
 				throw new InvalidOperationException("Grpc:ServerUrl is required in configuration");
 			}
-			
+
 			var handler = new SocketsHttpHandler
 			{
 				PooledConnectionIdleTimeout = Timeout.InfiniteTimeSpan,
@@ -149,15 +149,15 @@ public static class Configurator
 				KeepAlivePingTimeout = TimeSpan.FromSeconds(30),
 				EnableMultipleHttp2Connections = true
 			};
-			
+
 			// For localhost development, skip TLS certificate validation
 			var uri = new Uri(grpcServerUrl);
 			if (uri.Host == "localhost" || uri.Host == "127.0.0.1")
 			{
-				handler.SslOptions.RemoteCertificateValidationCallback = 
+				handler.SslOptions.RemoteCertificateValidationCallback =
 					(sender, certificate, chain, sslPolicyErrors) => true;
 			}
-			
+
 			return handler;
 		});
 

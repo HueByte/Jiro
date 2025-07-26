@@ -147,7 +147,7 @@ public class InstanceMetadataAccessor : IInstanceMetadataAccessor
 		// If not cached, fetch from API and cache it
 		_logger.LogInformation("Instance ID not found in cache, fetching from API");
 		var metadata = await FetchInstanceMetadataFromApiAsync(_applicationOptions.ApiKey);
-		
+
 		if (metadata?.Data != null && !string.IsNullOrWhiteSpace(metadata.Data.Id))
 		{
 			var instanceId = metadata.Data.Id;

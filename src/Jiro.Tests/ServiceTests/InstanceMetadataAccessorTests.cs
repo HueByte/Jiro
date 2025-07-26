@@ -1,3 +1,6 @@
+using System.Net;
+using System.Text;
+
 using Jiro.Core.Constants;
 using Jiro.Core.Options;
 using Jiro.Core.Services.Context;
@@ -8,9 +11,6 @@ using Microsoft.Extensions.Options;
 
 using Moq;
 using Moq.Protected;
-
-using System.Net;
-using System.Text;
 
 namespace Jiro.Tests.ServiceTests;
 

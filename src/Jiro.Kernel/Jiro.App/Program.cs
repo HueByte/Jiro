@@ -115,7 +115,7 @@ host.ConfigureServices(services =>
 				KeepAlivePingTimeout = TimeSpan.FromSeconds(30),
 				EnableMultipleHttp2Connections = true
 			};
-			
+
 			// For localhost development, skip TLS certificate validation
 			var grpcServerUrl = configManager.GetSection("Grpc:ServerUrl").Value;
 			if (!string.IsNullOrEmpty(grpcServerUrl))
@@ -123,11 +123,11 @@ host.ConfigureServices(services =>
 				var uri = new Uri(grpcServerUrl);
 				if (uri.Host == "localhost" || uri.Host == "127.0.0.1")
 				{
-					socketsHandler.SslOptions.RemoteCertificateValidationCallback = 
+					socketsHandler.SslOptions.RemoteCertificateValidationCallback =
 						(sender, certificate, chain, sslPolicyErrors) => true;
 				}
 			}
-			
+
 			options.HttpHandler = socketsHandler;
 		});
 
@@ -194,10 +194,10 @@ using (var scope = app.Services.CreateScope())
 {
 	var instanceMetadataAccessor = scope.ServiceProvider.GetRequiredService<Jiro.Core.Services.Context.IInstanceMetadataAccessor>();
 	var appOptions = scope.ServiceProvider.GetRequiredService<Microsoft.Extensions.Options.IOptions<Jiro.Core.Options.ApplicationOptions>>().Value;
-	
+
 	Log.Information("Initializing instance ID from Jiro API...");
 	var instanceId = await instanceMetadataAccessor.InitializeInstanceIdAsync(appOptions.ApiKey);
-	
+
 	if (!string.IsNullOrWhiteSpace(instanceId))
 	{
 		Log.Information("✅ Instance ID initialized successfully: {InstanceId}", instanceId);
