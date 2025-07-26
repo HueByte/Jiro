@@ -48,9 +48,10 @@ public static class ServiceCollectionExtensions
 
 		services.Configure<GrpcOptions>(configuration.GetSection("Grpc"));
 
-		// Register exception handlers
+		// Register exception handlers and interceptors
 		services.AddSingleton<WebSocketExceptionHandler>();
 		services.AddSingleton<GrpcExceptionInterceptor>();
+		services.AddSingleton<Jiro.App.Interceptors.InstanceContextInterceptor>();
 
 		// Register gRPC service for sending command results
 		services.AddScoped<IJiroGrpcService, JiroGrpcService>();

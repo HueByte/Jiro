@@ -74,7 +74,7 @@ public class ConfigProviderServiceTests : IDisposable
 		Assert.Equal("test-instance", result.InstanceId);
 		Assert.NotNull(result.Configuration);
 		Assert.NotNull(result.SystemInfo);
-		Assert.True(result.Uptime >= TimeSpan.Zero);
+		Assert.True(result.UptimeSeconds >= 0);
 
 		// Verify configuration contains expected keys
 		var configValues = result.Configuration.Values;

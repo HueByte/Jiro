@@ -158,7 +158,7 @@ public class InstanceMetadataAccessorTests : IDisposable
 	{
 		// Arrange
 		const string expectedInstanceId = "api-instance-id";
-		const string apiResponse = """{"id": "api-instance-id"}""";
+		const string apiResponse = """{"data": {"id": "api-instance-id", "name": "Test Instance", "description": "Test Description", "createdAt": "2024-01-01T00:00:00Z", "lastOnline": "2024-01-01T00:00:00Z", "apiKey": "test-api-key", "userId": "test-user"}}""";
 
 		var httpMessageHandlerMock = new Mock<HttpMessageHandler>();
 		var httpResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
@@ -292,7 +292,7 @@ public class InstanceMetadataAccessorTests : IDisposable
 		// Arrange
 		const string apiKey = "valid-api-key";
 		const string expectedInstanceId = "api-instance-id";
-		const string apiResponse = """{"id": "api-instance-id"}""";
+		const string apiResponse = """{"data": {"id": "api-instance-id", "name": "Test Instance", "description": "Test Description", "createdAt": "2024-01-01T00:00:00Z", "lastOnline": "2024-01-01T00:00:00Z", "apiKey": "valid-api-key", "userId": "test-user"}}""";
 
 		var httpMessageHandlerMock = new Mock<HttpMessageHandler>();
 		var httpResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
@@ -383,7 +383,7 @@ public class InstanceMetadataAccessorTests : IDisposable
 		// Arrange
 		const string apiKey = "valid-api-key";
 		const string expectedInstanceId = "initialized-instance-id";
-		const string apiResponse = """{"id": "initialized-instance-id"}""";
+		const string apiResponse = """{"data": {"id": "initialized-instance-id", "name": "Test Instance", "description": "Test Description", "createdAt": "2024-01-01T00:00:00Z", "lastOnline": "2024-01-01T00:00:00Z", "apiKey": "valid-api-key", "userId": "test-user"}}""";
 
 		var httpMessageHandlerMock = new Mock<HttpMessageHandler>();
 		var httpResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)

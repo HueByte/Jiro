@@ -125,8 +125,40 @@ public static class Configurator
 
 		services.AddHttpClient(HttpClients.JIRO, (serviceProvider, httpClient) =>
 		{
-			var appOptions = serviceProvider.GetRequiredService<IOptions<ApplicationOptions>>().Value;
-			httpClient.BaseAddress = new Uri(appOptions.JiroApi);
+			var grpcServerUrl = serviceProvider.GetRequiredService<IConfiguration>().GetSection("Grpc:ServerUrl").Value;
+			if (string.IsNullOrEmpty(grpcServerUrl))
+			{
+				throw new InvalidOperationException("Grpc:ServerUrl is required in configuration");
+			}
+			httpClient.BaseAddress = new Uri(grpcServerUrl);
+			httpClient.DefaultRequestVersion = new Version(2, 0);
+			httpClient.DefaultVersionPolicy = HttpVersionPolicy.RequestVersionOrHigher;
+		})
+		.ConfigurePrimaryHttpMessageHandler((serviceProvider) =>
+		{
+			var grpcServerUrl = serviceProvider.GetRequiredService<IConfiguration>().GetSection("Grpc:ServerUrl").Value;
+			if (string.IsNullOrEmpty(grpcServerUrl))
+			{
+				throw new InvalidOperationException("Grpc:ServerUrl is required in configuration");
+			}
+			
+			var handler = new SocketsHttpHandler
+			{
+				PooledConnectionIdleTimeout = Timeout.InfiniteTimeSpan,
+				KeepAlivePingDelay = TimeSpan.FromSeconds(60),
+				KeepAlivePingTimeout = TimeSpan.FromSeconds(30),
+				EnableMultipleHttp2Connections = true
+			};
+			
+			// For localhost development, skip TLS certificate validation
+			var uri = new Uri(grpcServerUrl);
+			if (uri.Host == "localhost" || uri.Host == "127.0.0.1")
+			{
+				handler.SslOptions.RemoteCertificateValidationCallback = 
+					(sender, certificate, chain, sslPolicyErrors) => true;
+			}
+			
+			return handler;
 		});
 
 

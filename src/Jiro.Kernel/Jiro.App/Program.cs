@@ -91,7 +91,12 @@ host.ConfigureServices(services =>
 
 	services.AddGrpcClient<JiroHubProto.JiroHubProtoClient>("JiroClient", options =>
 		{
-			options.Address = new Uri(appOptions.JiroApi);
+			var grpcServerUrl = configManager.GetSection("Grpc:ServerUrl").Value;
+			if (string.IsNullOrEmpty(grpcServerUrl))
+			{
+				throw new InvalidOperationException("Grpc:ServerUrl is required in configuration");
+			}
+			options.Address = new Uri(grpcServerUrl);
 		})
 		.AddCallCredentials((context, metadata) =>
 		{
@@ -103,13 +108,27 @@ host.ConfigureServices(services =>
 		.AddInterceptor<Jiro.App.Interceptors.InstanceContextInterceptor>()
 		.ConfigureChannel(options =>
 		{
-			options.HttpHandler = new SocketsHttpHandler
+			var socketsHandler = new SocketsHttpHandler
 			{
 				PooledConnectionIdleTimeout = Timeout.InfiniteTimeSpan,
 				KeepAlivePingDelay = TimeSpan.FromSeconds(60),
 				KeepAlivePingTimeout = TimeSpan.FromSeconds(30),
 				EnableMultipleHttp2Connections = true
 			};
+			
+			// For localhost development, skip TLS certificate validation
+			var grpcServerUrl = configManager.GetSection("Grpc:ServerUrl").Value;
+			if (!string.IsNullOrEmpty(grpcServerUrl))
+			{
+				var uri = new Uri(grpcServerUrl);
+				if (uri.Host == "localhost" || uri.Host == "127.0.0.1")
+				{
+					socketsHandler.SslOptions.RemoteCertificateValidationCallback = 
+						(sender, certificate, chain, sslPolicyErrors) => true;
+				}
+			}
+			
+			options.HttpHandler = socketsHandler;
 		});
 
 	pluginManager = new(services, configManager, logger);
@@ -173,26 +192,20 @@ foreach (var module in commandContainer.CommandModules.Keys) Log.Information("Mo
 // Initialize instance ID from API
 using (var scope = app.Services.CreateScope())
 {
-	try
+	var instanceMetadataAccessor = scope.ServiceProvider.GetRequiredService<Jiro.Core.Services.Context.IInstanceMetadataAccessor>();
+	var appOptions = scope.ServiceProvider.GetRequiredService<Microsoft.Extensions.Options.IOptions<Jiro.Core.Options.ApplicationOptions>>().Value;
+	
+	Log.Information("Initializing instance ID from Jiro API...");
+	var instanceId = await instanceMetadataAccessor.InitializeInstanceIdAsync(appOptions.ApiKey);
+	
+	if (!string.IsNullOrWhiteSpace(instanceId))
 	{
-		var instanceMetadataAccessor = scope.ServiceProvider.GetRequiredService<Jiro.Core.Services.Context.IInstanceMetadataAccessor>();
-		var appOptions = scope.ServiceProvider.GetRequiredService<Microsoft.Extensions.Options.IOptions<Jiro.Core.Options.ApplicationOptions>>().Value;
-		
-		Log.Information("Initializing instance ID from Jiro API...");
-		var instanceId = await instanceMetadataAccessor.InitializeInstanceIdAsync(appOptions.ApiKey);
-		
-		if (!string.IsNullOrWhiteSpace(instanceId))
-		{
-			Log.Information("✅ Instance ID initialized successfully: {InstanceId}", instanceId);
-		}
-		else
-		{
-			Log.Warning("⚠️ Failed to initialize instance ID from API - will fall back to context-based resolution");
-		}
+		Log.Information("✅ Instance ID initialized successfully: {InstanceId}", instanceId);
 	}
-	catch (Exception ex)
+	else
 	{
-		Log.Error(ex, "❌ Error during instance ID initialization - will fall back to context-based resolution");
+		Log.Fatal("❌ Failed to initialize instance ID from API - application cannot start without valid instance metadata");
+		Environment.Exit(1);
 	}
 }
 

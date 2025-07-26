@@ -7,7 +7,6 @@ using Jiro.Core.Services.CommandHandler;
 using Jiro.Core.Services.CommandSystem;
 using Jiro.Core.Services.MessageCache;
 using Jiro.Core.Services.System;
-using Jiro.Shared.Extensions;
 using Jiro.Shared.Utilities;
 using Jiro.Shared.Websocket;
 using Jiro.Shared.Websocket.Requests;
@@ -24,7 +23,7 @@ namespace Jiro.App.Services;
 /// <summary>
 /// SignalR implementation of the WebSocket connection interface
 /// </summary>
-public partial class WebSocketConnection : JiroClientBase, IDisposable
+public class WebSocketConnection : JiroClientBase, IDisposable
 {
 	private readonly ILogger<WebSocketConnection> _webSocketLogger;
 	private readonly WebSocketOptions _options;
@@ -304,7 +303,7 @@ public partial class WebSocketConnection : JiroClientBase, IDisposable
 					Version = "Error",
 					Environment = "Error",
 					InstanceId = "Error",
-					Configuration = new Shared.Websocket.Requests.ConfigurationSection { Values = new Dictionary<string, object>() },
+					Configuration = new Shared.Websocket.Requests.ConfigurationSection { Values = new Dictionary<string, string>() },
 					SystemInfo = new Shared.Websocket.Requests.SystemInfo
 					{
 						OperatingSystem = "Error",
@@ -313,7 +312,7 @@ public partial class WebSocketConnection : JiroClientBase, IDisposable
 						ProcessorCount = 0,
 						TotalMemory = 0
 					},
-					Uptime = TimeSpan.Zero
+					UptimeSeconds = 0
 				};
 			}
 		};
@@ -349,7 +348,7 @@ public partial class WebSocketConnection : JiroClientBase, IDisposable
 					Version = "Error",
 					Environment = "Error",
 					InstanceId = "Error",
-					Configuration = new Shared.Websocket.Requests.ConfigurationSection { Values = new Dictionary<string, object>() },
+					Configuration = new Shared.Websocket.Requests.ConfigurationSection { Values = new Dictionary<string, string>() },
 					SystemInfo = new Shared.Websocket.Requests.SystemInfo
 					{
 						OperatingSystem = "Error",
@@ -358,7 +357,7 @@ public partial class WebSocketConnection : JiroClientBase, IDisposable
 						ProcessorCount = 0,
 						TotalMemory = 0
 					},
-					Uptime = TimeSpan.Zero
+					UptimeSeconds = 0
 				};
 			}
 		};
@@ -411,7 +410,7 @@ public partial class WebSocketConnection : JiroClientBase, IDisposable
 					CommandName = c.CommandName,
 					CommandDescription = c.CommandDescription,
 					CommandSyntax = c.CommandSyntax,
-					Parameters = c.Parameters,
+					Parameters = c.Parameters.Select(static p => new KeyValuePair<string, string>(p.Key, p.Value.ToString())).ToDictionary(),
 					ModuleName = c.ModuleName,
 					Keywords = c.Keywords
 				}).ToList();
@@ -421,6 +420,8 @@ public partial class WebSocketConnection : JiroClientBase, IDisposable
 					RequestId = requestId,
 					Commands = appCommandMeta
 				};
+
+				_logger?.LogInformation("Returning {CommandCount} command metadata items", appCommandMeta.Count);
 
 				return response;
 			}

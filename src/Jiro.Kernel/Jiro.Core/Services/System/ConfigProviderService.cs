@@ -51,7 +51,7 @@ public class ConfigProviderService : IConfigProviderService
 					ProcessorCount = Environment.ProcessorCount,
 					TotalMemory = GC.GetTotalMemory(false),
 				},
-				Uptime = DateTime.UtcNow - Process.GetCurrentProcess().StartTime.ToUniversalTime()
+				UptimeSeconds = (DateTime.UtcNow - Process.GetCurrentProcess().StartTime.ToUniversalTime()).TotalSeconds
 			};
 
 			return Task.FromResult(config);
@@ -121,7 +121,8 @@ public class ConfigProviderService : IConfigProviderService
 				}
 
 				// Save the updated configuration
-				await SaveConfigurationToFileAsync(appSettingsPath, updatedConfig);
+				var stringConfig = updatedConfig.ToDictionary(kvp => kvp.Key, kvp => kvp.Value?.ToString() ?? string.Empty);
+				await SaveConfigurationToFileAsync(appSettingsPath, stringConfig);
 				_logger.LogInformation("Configuration updated successfully. Changed keys: {UpdatedKeys}", string.Join(", ", updatedKeys));
 
 				var response = new ConfigUpdateResponse
@@ -337,7 +338,7 @@ public class ConfigProviderService : IConfigProviderService
 		}
 	}
 
-	private Dictionary<string, object> GetJiroRelatedConfiguration()
+	private Dictionary<string, string> GetJiroRelatedConfiguration()
 	{
 		// With JIRO_ prefix configuration, all JIRO_ prefixed env vars are automatically available
 		// as regular configuration keys (prefix is stripped by IConfiguration)
@@ -359,7 +360,7 @@ public class ConfigProviderService : IConfigProviderService
 			"Log"              // Log configuration
 		};
 
-		var filteredConfig = new Dictionary<string, object>();
+		var filteredConfig = new Dictionary<string, string>();
 
 		// Get all configuration entries
 		var allConfig = _configuration.AsEnumerable();
@@ -384,7 +385,7 @@ public class ConfigProviderService : IConfigProviderService
 
 			if (isJiroRelated)
 			{
-				filteredConfig[kvp.Key] = kvp.Value;
+				filteredConfig[kvp.Key] = kvp.Value ?? string.Empty;
 			}
 		}
 
@@ -394,7 +395,7 @@ public class ConfigProviderService : IConfigProviderService
 		return filteredConfig;
 	}
 
-	private async Task SaveConfigurationToFileAsync(string filePath, Dictionary<string, object> config)
+	private async Task SaveConfigurationToFileAsync(string filePath, Dictionary<string, string> config)
 	{
 		var options = new JsonSerializerOptions
 		{
