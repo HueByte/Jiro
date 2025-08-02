@@ -1,3 +1,4 @@
+using Jiro.Core.Constants;
 using Jiro.Core.IRepositories;
 using Jiro.Core.Models;
 using Jiro.Core.Services.CommandContext;
@@ -340,7 +341,7 @@ public class MessageManagerTests : IDisposable
 				Messages = messages
 			};
 
-			_memoryCache.Set($"{sessionId}_with_messages", session);
+			_memoryCache.Set($"{CacheKeys.SessionKey}::{sessionId}", session);
 		}
 
 		// Act
