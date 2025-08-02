@@ -62,7 +62,9 @@ public static class Configurator
 		services.AddScoped<IConversationCoreService, ConversationCoreService>();
 		services.AddScoped<IHistoryOptimizerService, HistoryOptimizerService>();
 		services.AddScoped<IStaticMessageService, StaticMessageService>();
-		services.AddScoped<IMessageManager, MessageManager>();
+		services.AddScoped<ISessionManager, SessionManager>();
+		services.AddScoped<IMessageCacheService, MessageCacheService>();
+		services.AddScoped<IMessageManager, CompositeMessageManager>();
 		services.AddScoped<IPersonaService, PersonaService>();
 		services.AddScoped<IPersonalizedConversationService, PersonalizedConversationService>();
 

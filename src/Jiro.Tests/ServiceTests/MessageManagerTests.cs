@@ -22,7 +22,8 @@ namespace Jiro.Tests.ServiceTests;
 
 public class MessageManagerTests : IDisposable
 {
-	private readonly Mock<ILogger<MessageManager>> _loggerMock;
+	private readonly Mock<ILogger<SessionManager>> _sessionLoggerMock;
+	private readonly Mock<ILogger<MessageCacheService>> _cacheLoggerMock;
 	private readonly IMemoryCache _memoryCache;
 	private readonly IMessageRepository _messageRepository;
 	private readonly IChatSessionRepository _chatSessionRepository;
@@ -35,7 +36,8 @@ public class MessageManagerTests : IDisposable
 
 	public MessageManagerTests()
 	{
-		_loggerMock = new Mock<ILogger<MessageManager>>();
+		_sessionLoggerMock = new Mock<ILogger<SessionManager>>();
+		_cacheLoggerMock = new Mock<ILogger<MessageCacheService>>();
 		_memoryCache = new MemoryCache(new MemoryCacheOptions());
 
 		// Setup in-memory database
@@ -84,15 +86,23 @@ public class MessageManagerTests : IDisposable
 				_memoryCache.Set(key, message, cacheEntryOptions);
 			});
 
-		_messageManager = new MessageManager(
-			_loggerMock.Object,
+		// Create separated services
+		var sessionManager = new SessionManager(
+			_sessionLoggerMock.Object,
+			_memoryCache,
+			_chatSessionRepository,
+			_instanceMetadataAccessorMock.Object);
+
+		var messageCacheService = new MessageCacheService(
+			_cacheLoggerMock.Object,
 			_memoryCache,
 			_messageRepository,
 			_chatSessionRepository,
-			_configuration,
 			_staticMessageServiceMock.Object,
-			_instanceContextMock.Object,
 			_instanceMetadataAccessorMock.Object);
+
+		// Create composite manager
+		_messageManager = new CompositeMessageManager(sessionManager, messageCacheService);
 	}
 
 	public void Dispose()
@@ -102,27 +112,18 @@ public class MessageManagerTests : IDisposable
 	}
 
 	[Fact]
-	public void Constructor_WithNullCommandContext_ShouldThrowArgumentNullException()
+	public void Constructor_WithNullSessionManager_ShouldThrowArgumentNullException()
 	{
-		// Arrange
-		var configData = new Dictionary<string, string?>
-		{
-			["JIRO_MESSAGE_FETCH_COUNT"] = "40"
-		};
-		var configuration = new ConfigurationBuilder()
-			.AddInMemoryCollection(configData)
-			.Build();
-
-		// Act & Assert
-		Assert.Throws<ArgumentNullException>(() => new MessageManager(
-			_loggerMock.Object,
-			_memoryCache,
-			_messageRepository,
-			_chatSessionRepository,
-			configuration,
-			_staticMessageServiceMock.Object,
+		// Arrange & Act & Assert
+		Assert.Throws<ArgumentNullException>(() => new CompositeMessageManager(
 			null!,
-			_instanceMetadataAccessorMock.Object));
+			new MessageCacheService(
+				_cacheLoggerMock.Object,
+				_memoryCache,
+				_messageRepository,
+				_chatSessionRepository,
+				_staticMessageServiceMock.Object,
+				_instanceMetadataAccessorMock.Object)));
 	}
 
 	[Fact]

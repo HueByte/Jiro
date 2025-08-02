@@ -4,7 +4,8 @@ using Jiro.Core.Services.Conversation.Models;
 namespace Jiro.Core.Services.MessageCache;
 
 /// <summary>
-/// Defines the contract for managing chat messages, sessions, and message caching operations.
+/// Composite interface that combines session management and message caching operations.
+/// This interface bridges the separated services for backward compatibility while consumers migrate.
 /// </summary>
 public interface IMessageManager
 {
@@ -43,14 +44,12 @@ public interface IMessageManager
 
 	/// <summary>
 	/// Clears all cached data for a specific session.
-	/// Useful when the session needs to be completely refreshed from the database.
 	/// </summary>
 	/// <param name="sessionId">The unique identifier of the session.</param>
 	void InvalidateSessionCache(string sessionId);
 
 	/// <summary>
 	/// Clears all cached sessions for a specific instance.
-	/// Useful when a complete cache refresh is needed.
 	/// </summary>
 	/// <param name="instanceId">The unique identifier of the instance.</param>
 	void InvalidateInstanceSessionsCache(string instanceId);
@@ -69,12 +68,12 @@ public interface IMessageManager
 	Task<List<ChatSession>> GetChatSessionsAsync(string instanceId);
 
 	/// <summary>
-	/// Clears all message cache entries. Legacy method for compatibility.
+	/// Clears all message cache entries. Legacy method.
 	/// </summary>
 	void ClearMessageCache();
 
 	/// <summary>
-	/// Modifies a message in the cache with the specified key and expiration. Legacy method for compatibility.
+	/// Modifies a message in the cache with the specified key and expiration. Legacy method.
 	/// </summary>
 	/// <param name="key">The cache key.</param>
 	/// <param name="message">The message content.</param>
@@ -82,7 +81,7 @@ public interface IMessageManager
 	void ModifyMessage(string key, string message, int minutes);
 
 	/// <summary>
-	/// Gets the count of messages in a specific session from cache. Legacy method for compatibility.
+	/// Gets the count of messages in a specific session from cache.
 	/// </summary>
 	/// <param name="sessionId">The session identifier.</param>
 	/// <returns>The number of messages in the session.</returns>
