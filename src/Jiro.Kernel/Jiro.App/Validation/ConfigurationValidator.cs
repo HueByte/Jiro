@@ -36,8 +36,6 @@ public static class ConfigurationValidator
 		// Validate database connection
 		errors.AddRange(ValidateDatabaseConnection(configuration, isTestMode));
 
-		// Validate JWT settings (if authentication is needed)
-		errors.AddRange(ValidateJWTOptions(configuration, isTestMode));
 
 		// Validate Chat settings (if chat is enabled)
 		errors.AddRange(ValidateChatOptions(configuration, isTestMode));
@@ -193,39 +191,6 @@ public static class ConfigurationValidator
 		return errors;
 	}
 
-	/// <summary>
-	/// Validates JWT configuration options.
-	/// </summary>
-	private static List<string> ValidateJWTOptions(IConfiguration configuration, bool isTestMode)
-	{
-		var errors = new List<string>();
-		var jwtOptions = new JWTOptions();
-		configuration.GetSection(JWTOptions.JWT).Bind(jwtOptions);
-
-		if (!isTestMode)
-		{
-			if (string.IsNullOrWhiteSpace(jwtOptions.Secret))
-			{
-				errors.Add("❌ JWT:Secret is required for authentication. Set it in appsettings.json or use JIRO_JWT__Secret environment variable.");
-			}
-			else if (jwtOptions.Secret.Length < 32)
-			{
-				errors.Add("❌ JWT:Secret must be at least 32 characters long for security. Current length: " + jwtOptions.Secret.Length);
-			}
-
-			if (string.IsNullOrWhiteSpace(jwtOptions.Issuer))
-			{
-				errors.Add("❌ JWT:Issuer is required for authentication. Set it in appsettings.json or use JIRO_JWT__Issuer environment variable.");
-			}
-
-			if (string.IsNullOrWhiteSpace(jwtOptions.Audience))
-			{
-				errors.Add("❌ JWT:Audience is required for authentication. Set it in appsettings.json or use JIRO_JWT__Audience environment variable.");
-			}
-		}
-
-		return errors;
-	}
 
 	/// <summary>
 	/// Validates Chat configuration options when chat is enabled.

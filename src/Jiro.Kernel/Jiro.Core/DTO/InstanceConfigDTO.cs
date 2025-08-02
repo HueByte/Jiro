@@ -34,11 +34,6 @@ public class InstanceConfigDTO
 		get; set;
 	}
 
-	[JsonPropertyName("JWT")]
-	public JWT? JWT
-	{
-		get; set;
-	}
 
 	[JsonPropertyName("Gpt")]
 	public Gpt? Gpt
@@ -122,38 +117,6 @@ public class Gpt
 	}
 }
 
-public class JWT
-{
-	[JsonPropertyName("Issuer")]
-	public string? Issuer
-	{
-		get; set;
-	}
-
-	[JsonPropertyName("Audience")]
-	public string? Audience
-	{
-		get; set;
-	}
-
-	[JsonPropertyName("Secret")]
-	public string? Secret
-	{
-		get; set;
-	}
-
-	[JsonPropertyName("AccessTokenExpireTime")]
-	public int? AccessTokenExpireTime
-	{
-		get; set;
-	}
-
-	[JsonPropertyName("RefreshTokenExpireTime")]
-	public int? RefreshTokenExpireTime
-	{
-		get; set;
-	}
-}
 
 public class Log
 {

@@ -357,7 +357,6 @@ public class ConfigProviderService : IConfigProviderService
 			"DataPaths",       // Data storage paths configuration
 			"Chat",            // Chat/AI configuration
 			"Gpt",             // Legacy OpenAI/GPT configuration
-			"JWT",             // JWT authentication
 			"Serilog",         // Logging configuration
 			"JiroCloud",       // JiroCloud configuration (WebSocket and gRPC)
 			"ConnectionStrings", // Database connections

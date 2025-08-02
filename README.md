@@ -161,9 +161,6 @@ If you prefer manual configuration:
    # Required for AI features
    OPENAI_API_KEY=sk-your-openai-api-key
    
-   # Required for authentication
-   JWT_SECRET=your-jwt-secret-minimum-32-characters
-   
    # Database configuration
    MYSQL_ROOT_PASSWORD=your-root-password
    MYSQL_PASSWORD=your-mysql-password
@@ -176,9 +173,6 @@ If you prefer manual configuration:
      "Gpt": {
        "AuthToken": "your-openai-api-key-here"
      },
-     "JWT": {
-       "Secret": "your-jwt-secret-minimum-32-characters"
-     }
    }
    ```
 
@@ -406,10 +400,6 @@ JIRO_JiroApi=https://localhost:5001
 # AI Features (configure manually)
 OPENAI_API_KEY=your-openai-api-key-here
 
-# Authentication (auto-generated)
-JWT_SECRET=secure-generated-32-char-secret
-JWT_ISSUER=Jiro
-JWT_AUDIENCE=JiroUsers
 
 # Port Configuration
 JIRO_HTTP_PORT=8080
@@ -419,7 +409,6 @@ MYSQL_PORT=3306
 
 # Data Paths Configuration (optional)
 JIRO_DataPaths__Logs=Data/Logs
-JIRO_DataPaths__Database=Data/Database/jiro.db
 JIRO_DataPaths__Plugins=Data/Plugins
 JIRO_DataPaths__Themes=Data/Themes
 JIRO_DataPaths__Messages=Data/Messages
@@ -480,13 +469,11 @@ This project is developed as part of an engineering thesis focused on building a
 | `urls` | Hosting URLs | `http://localhost:18090;https://localhost:18091` | ❌ |
 | `TokenizerUrl` | Tokenizer API endpoint | `http://localhost:8000` | ❌ |
 | `Gpt:AuthToken` | OpenAI API key | *Required for chat features* | ❌ |
-| `JWT:Secret` | JWT signing key | *Must be 32+ characters* | ✅ |
 
 ### Data Paths Settings
 
 | Setting | Description | Default | Auto-Generated |
 |---------|-------------|---------|----------------|
-| `DataPaths:Database` | SQLite database file path | `Data/Database/jiro.db` | ❌ |
 | `DataPaths:Logs` | Application logs directory | `Data/Logs` | ❌ |
 | `DataPaths:Plugins` | Plugin assemblies directory | `Data/Plugins` | ❌ |
 | `DataPaths:Themes` | UI themes directory | `Data/Themes` | ❌ |
@@ -497,7 +484,6 @@ This project is developed as part of an engineering thesis focused on building a
 | Variable | Description | Auto-Generated |
 |----------|-------------|----------------|
 | `OPENAI_API_KEY` | OpenAI API key for AI features | ❌ (prompted in `-Default` mode) |
-| `JWT_SECRET` | JWT signing secret (32+ chars) | ✅ |
 | `MYSQL_ROOT_PASSWORD` | MySQL root password | ✅ |
 | `MYSQL_PASSWORD` | MySQL user password | ✅ |
 | `JIRO_ApiKey` | Jiro API authentication key | ✅ |

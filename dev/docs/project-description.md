@@ -320,7 +320,6 @@ Jiro utilizes **ASP.NET Core Identity** for user management combined with custom
 - **AspNetUsers**: User accounts with extended properties (`AccountCreatedDate`)
 - **AspNetRoles**: System roles and permissions
 - **AspNetUserRoles**: Many-to-many user-role relationships
-- **RefreshTokens**: JWT refresh token management with IP tracking
 
 ##### **Conversation System**  
 

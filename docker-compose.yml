@@ -17,7 +17,6 @@ services:
       - JIRO_DataPaths__Logs=${JIRO_LOGS_PATH:-Data/Logs}
       - JIRO_DataPaths__Themes=${JIRO_THEMES_PATH:-Data/Themes}
       - JIRO_DataPaths__Plugins=${JIRO_PLUGINS_PATH:-Data/Plugins}
-      - JIRO_DataPaths__Database=${JIRO_DATABASE_PATH:-Data/Database/jiro.db}
       - JIRO_DataPaths__Messages=${JIRO_MESSAGES_PATH:-Data/Messages}
       # Application configuration
       - JIRO_ApiKey=${JIRO_API_KEY}

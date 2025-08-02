@@ -53,7 +53,6 @@ public class ConfigProviderServiceTests : IDisposable
 			["JiroCloud:Grpc:ServerUrl"] = "https://test.grpc.url",
 			["ConnectionStrings:JiroContext"] = "test-connection-string",
 			["Chat:Enabled"] = "true",
-			["JWT:Secret"] = "test-jwt-secret-key-32-characters"
 		};
 
 		return new ConfigurationBuilder()
@@ -206,7 +205,6 @@ public class ConfigProviderServiceTests : IDisposable
 		Assert.True(configValues.ContainsKey("DataPaths:Logs"));
 		Assert.True(configValues.ContainsKey("Serilog:MinimumLevel:Default"));
 		Assert.True(configValues.ContainsKey("JiroCloud:WebSocket:HubUrl"));
-		Assert.True(configValues.ContainsKey("JWT:Secret"));
 
 		// Should include configuration note
 		Assert.True(configValues.ContainsKey("_ConfigurationNote"));
@@ -272,10 +270,6 @@ public class ConfigProviderServiceTests : IDisposable
 			{
 				["Enabled"] = true
 			},
-			["JWT"] = new Dictionary<string, object>
-			{
-				["Secret"] = "test-jwt-secret-key-32-characters"
-			}
 		};
 
 		var jsonOptions = new JsonSerializerOptions { WriteIndented = true };
