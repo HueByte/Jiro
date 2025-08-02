@@ -1,4 +1,5 @@
 using Jiro.Core.Options;
+
 using Microsoft.Extensions.Configuration;
 
 namespace Jiro.App.Validation;
@@ -59,21 +60,21 @@ public static class ConfigurationValidator
 
 			// Set default gRPC server URL if missing (use old path for backward compatibility)
 			if (string.IsNullOrWhiteSpace(configuration.GetSection("JiroCloud:Grpc:ServerUrl").Value) &&
-			    string.IsNullOrWhiteSpace(configuration.GetSection("Grpc:ServerUrl").Value))
+				string.IsNullOrWhiteSpace(configuration.GetSection("Grpc:ServerUrl").Value))
 			{
 				configManager["JiroCloud:Grpc:ServerUrl"] = "https://localhost:5001";
 			}
 
 			// Set default WebSocket API key if missing (use old path for backward compatibility)
 			if (string.IsNullOrWhiteSpace(configuration.GetSection("JiroCloud:ApiKey").Value) &&
-			    string.IsNullOrWhiteSpace(configuration.GetSection("WebSocket:ApiKey").Value))
+				string.IsNullOrWhiteSpace(configuration.GetSection("WebSocket:ApiKey").Value))
 			{
 				configManager["JiroCloud:ApiKey"] = "test-jirocloud-api-key";
 			}
 
 			// Set default WebSocket Hub URL if missing (use old path for backward compatibility)
 			if (string.IsNullOrWhiteSpace(configuration.GetSection("JiroCloud:WebSocket:HubUrl").Value) &&
-			    string.IsNullOrWhiteSpace(configuration.GetSection("WebSocket:HubUrl").Value))
+				string.IsNullOrWhiteSpace(configuration.GetSection("WebSocket:HubUrl").Value))
 			{
 				configManager["JiroCloud:WebSocket:HubUrl"] = "https://localhost:5001/instanceHub";
 			}
@@ -106,8 +107,8 @@ public static class ConfigurationValidator
 			}
 		}
 
-		if (!string.IsNullOrWhiteSpace(appOptions.TokenizerUrl) && 
-		    !Uri.TryCreate(appOptions.TokenizerUrl, UriKind.Absolute, out var tokenizerUri))
+		if (!string.IsNullOrWhiteSpace(appOptions.TokenizerUrl) &&
+			!Uri.TryCreate(appOptions.TokenizerUrl, UriKind.Absolute, out var tokenizerUri))
 		{
 			errors.Add("❌ TokenizerUrl must be a valid URL if provided. Current value: " + appOptions.TokenizerUrl);
 		}
@@ -127,8 +128,8 @@ public static class ConfigurationValidator
 		if (!isTestMode)
 		{
 			// Validate JiroCloud API key
-			if (string.IsNullOrWhiteSpace(jiroCloudOptions.ApiKey) || 
-			    jiroCloudOptions.ApiKey == "your-jirocloud-api-key-here")
+			if (string.IsNullOrWhiteSpace(jiroCloudOptions.ApiKey) ||
+				jiroCloudOptions.ApiKey == "your-jirocloud-api-key-here")
 			{
 				errors.Add("❌ JiroCloud:ApiKey is required. Set it in appsettings.json or use JIRO_JiroCloud__ApiKey environment variable.");
 			}
