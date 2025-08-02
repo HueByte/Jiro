@@ -2,7 +2,7 @@ using Jiro.Core.Options;
 
 using Microsoft.Extensions.Configuration;
 
-namespace Jiro.App.Configurator;
+namespace Jiro.App.Setup;
 
 /// <summary>
 /// Provides configuration functionality for environment setup, including folder creation and configuration file management.
@@ -45,12 +45,6 @@ public class EnvironmentConfigurator
 		if (!Directory.Exists(dataPathsOptions.AbsoluteMessagesPath))
 			Directory.CreateDirectory(dataPathsOptions.AbsoluteMessagesPath);
 
-		// Legacy folders for backward compatibility
-		if (!Directory.Exists(Path.Join(AppContext.BaseDirectory, "logs")))
-			Directory.CreateDirectory(Path.Join(AppContext.BaseDirectory, "logs"));
-
-		if (!Directory.Exists(Path.Join(AppContext.BaseDirectory, "save")))
-			Directory.CreateDirectory(Path.Join(AppContext.BaseDirectory, "save"));
 
 		if (!Directory.Exists(Path.Join(AppContext.BaseDirectory, "modules")))
 			Directory.CreateDirectory(Path.Join(AppContext.BaseDirectory, "modules"));

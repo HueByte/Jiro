@@ -233,8 +233,8 @@ EOF
 # Create appsettings.json from example
 echo -e "${CYAN}Creating appsettings.json...${NC}"
 
-APPSETTINGS_EXAMPLE="$PROJECT_ROOT/src/Jiro.Kernel/Jiro.App/appsettings.example.json"
-APPSETTINGS="$PROJECT_ROOT/src/Jiro.Kernel/Jiro.App/appsettings.json"
+APPSETTINGS_EXAMPLE="$PROJECT_ROOT/src/Jiro.Kernel/Jiro.App/Configuration/appsettings.example.json"
+APPSETTINGS="$PROJECT_ROOT/src/Jiro.Kernel/Jiro.App/Configuration/appsettings.json"
 
 if [ -f "$APPSETTINGS_EXAMPLE" ]; then
     # Copy and update appsettings.json using jq if available, otherwise use sed

@@ -72,7 +72,6 @@ Jiro: "🌐 Pinging google.com... Response time: 23ms ✅"
 
 - [.NET 9 SDK](https://dotnet.microsoft.com/download)
 - [Node.js](https://nodejs.org/) (for the web interface)
-- [Python 3.8+](https://python.org/) (for tokenizer service)
 - OpenAI API Key (optional, for AI chat features)
 
 ### 🏃‍♂️ Get Running in 2 Minutes (Automated Setup)
@@ -113,15 +112,7 @@ Jiro: "🌐 Pinging google.com... Response time: 23ms ✅"
    dotnet run
    ```
 
-5. **Start the tokenizer** (in a new terminal)
-
-   ```bash
-   cd src/Jiro.TokenApi
-   pip install -r requirements.txt
-   python main.py
-   ```
-
-6. **Open your browser** and navigate to `https://localhost:5001` 🎉
+5. **Open your browser** and navigate to `https://localhost:5001` 🎉
 
 ### 🔧 Manual Setup (Alternative)
 
@@ -467,7 +458,6 @@ This project is developed as part of an engineering thesis focused on building a
 | Setting | Description | Default | Auto-Generated |
 |---------|-------------|---------|----------------|
 | `urls` | Hosting URLs | `http://localhost:18090;https://localhost:18091` | ❌ |
-| `TokenizerUrl` | Tokenizer API endpoint | `http://localhost:8000` | ❌ |
 | `Gpt:AuthToken` | OpenAI API key | *Required for chat features* | ❌ |
 
 ### Data Paths Settings

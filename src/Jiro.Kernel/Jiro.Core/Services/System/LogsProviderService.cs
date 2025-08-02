@@ -130,7 +130,6 @@ public class LogsProviderService : ILogsProviderService
 				totalCount = await GetLogCountAsync(level, fromDate, toDate, searchTerm);
 			}
 
-			// Create response with backward compatibility
 			var response = new LogsResponse
 			{
 				TotalLogs = totalCount,
@@ -139,24 +138,6 @@ public class LogsProviderService : ILogsProviderService
 				Logs = results,
 				RequestId = string.Empty, // Will be set by caller
 			};
-
-			// Try to set pagination properties if they exist (for newer versions of Jiro.Shared)
-			try
-			{
-				var responseType = response.GetType();
-				var hasMoreProperty = responseType.GetProperty("HasMore");
-				var offsetProperty = responseType.GetProperty("Offset");
-
-				if (hasMoreProperty != null && hasMoreProperty.CanWrite)
-					hasMoreProperty.SetValue(response, totalCount > offset + results.Count);
-
-				if (offsetProperty != null && offsetProperty.CanWrite)
-					offsetProperty.SetValue(response, offset);
-			}
-			catch (Exception)
-			{
-				// Ignore reflection errors for backward compatibility
-			}
 
 			return response;
 		}
@@ -706,7 +687,7 @@ public class LogsProviderService : ILogsProviderService
 			})
 			.ToArray();
 
-		// If no valid patterns, use defaults with both .log and .txt extensions for backward compatibility
+		// If no valid patterns, use defaults
 		if (patterns.Length == 0)
 		{
 			patterns = new[] { "jiro-detailed_*.log", "jiro-errors_*.log", "jiro_*.log", "jiro_*.txt" };

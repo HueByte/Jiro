@@ -472,12 +472,6 @@ public class MessageManager : IMessageManager
 			return session.Messages.Count;
 		}
 
-		// Also check the old cache key format for backward compatibility
-		string legacyCacheKey = $"{sessionId}_with_messages";
-		if (_memoryCache.TryGetValue(legacyCacheKey, out Session? legacySession) && legacySession != null)
-		{
-			return legacySession.Messages.Count;
-		}
 
 		return 0;
 	}

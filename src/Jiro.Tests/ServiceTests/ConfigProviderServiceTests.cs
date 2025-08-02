@@ -40,7 +40,6 @@ public class ConfigProviderServiceTests : IDisposable
 		{
 			["ApiKey"] = "test-api-key",
 			["JiroApi"] = "https://test.jiro.api",
-			["TokenizerUrl"] = "http://localhost:8000",
 			["Whitelist"] = "true",
 			["InstanceId"] = "test-instance",
 			["DataPaths:Logs"] = "Data/Logs",
@@ -234,7 +233,6 @@ public class ConfigProviderServiceTests : IDisposable
 		{
 			["ApiKey"] = "test-key",
 			["JiroApi"] = "https://test.api",
-			["TokenizerUrl"] = "http://localhost:8000",
 			["InstanceId"] = "test-instance",
 			["DataPaths"] = new Dictionary<string, object>
 			{

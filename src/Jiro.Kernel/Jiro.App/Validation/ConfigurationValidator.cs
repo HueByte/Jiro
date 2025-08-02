@@ -36,7 +36,6 @@ public static class ConfigurationValidator
 		// Validate database connection
 		errors.AddRange(ValidateDatabaseConnection(configuration, isTestMode));
 
-
 		// Validate Chat settings (if chat is enabled)
 		errors.AddRange(ValidateChatOptions(configuration, isTestMode));
 
@@ -56,23 +55,20 @@ public static class ConfigurationValidator
 				configManager["ConnectionStrings:JiroContext"] = "Data Source=:memory:";
 			}
 
-			// Set default gRPC server URL if missing (use old path for backward compatibility)
-			if (string.IsNullOrWhiteSpace(configuration.GetSection("JiroCloud:Grpc:ServerUrl").Value) &&
-				string.IsNullOrWhiteSpace(configuration.GetSection("Grpc:ServerUrl").Value))
+			// Set default gRPC server URL if missing
+			if (string.IsNullOrWhiteSpace(configuration.GetSection("JiroCloud:Grpc:ServerUrl").Value))
 			{
 				configManager["JiroCloud:Grpc:ServerUrl"] = "https://localhost:5001";
 			}
 
-			// Set default WebSocket API key if missing (use old path for backward compatibility)
-			if (string.IsNullOrWhiteSpace(configuration.GetSection("JiroCloud:ApiKey").Value) &&
-				string.IsNullOrWhiteSpace(configuration.GetSection("WebSocket:ApiKey").Value))
+			// Set default WebSocket API key if missing
+			if (string.IsNullOrWhiteSpace(configuration.GetSection("JiroCloud:ApiKey").Value))
 			{
 				configManager["JiroCloud:ApiKey"] = "test-jirocloud-api-key";
 			}
 
-			// Set default WebSocket Hub URL if missing (use old path for backward compatibility)
-			if (string.IsNullOrWhiteSpace(configuration.GetSection("JiroCloud:WebSocket:HubUrl").Value) &&
-				string.IsNullOrWhiteSpace(configuration.GetSection("WebSocket:HubUrl").Value))
+			// Set default WebSocket Hub URL if missing
+			if (string.IsNullOrWhiteSpace(configuration.GetSection("JiroCloud:WebSocket:HubUrl").Value))
 			{
 				configManager["JiroCloud:WebSocket:HubUrl"] = "https://localhost:5001/instanceHub";
 			}
@@ -105,11 +101,6 @@ public static class ConfigurationValidator
 			}
 		}
 
-		if (!string.IsNullOrWhiteSpace(appOptions.TokenizerUrl) &&
-			!Uri.TryCreate(appOptions.TokenizerUrl, UriKind.Absolute, out var tokenizerUri))
-		{
-			errors.Add("❌ TokenizerUrl must be a valid URL if provided. Current value: " + appOptions.TokenizerUrl);
-		}
 
 		return errors;
 	}
@@ -251,7 +242,7 @@ public static class ConfigurationValidator
 
 			Console.WriteLine();
 			Console.WriteLine("💡 Tips:");
-			Console.WriteLine("  • Copy appsettings.example.json to appsettings.json and configure your values");
+			Console.WriteLine("  • Copy Configuration/appsettings.example.json to Configuration/appsettings.json and configure your values");
 			Console.WriteLine("  • Use environment variables with JIRO_ prefix (e.g., JIRO_ApiKey=your-key)");
 			Console.WriteLine("  • Use double underscores for nested settings (e.g., JIRO_JiroCloud__ApiKey=your-key)");
 			Console.WriteLine("  • Run the setup script: ./scripts/setup-project.ps1 (Windows) or ./scripts/setup-project.sh (Linux/macOS)");

@@ -2,7 +2,7 @@ using Jiro.Core.Services.CommandHandler;
 
 using Microsoft.Extensions.Logging;
 
-namespace Jiro.App.Configurator;
+namespace Jiro.App.Setup;
 
 /// <summary>
 /// Provides configuration for application events, particularly for logging events from command handlers.

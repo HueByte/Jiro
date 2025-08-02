@@ -83,8 +83,8 @@ public class ConfigProviderService : IConfigProviderService
 			}
 
 			// Define paths to configuration files
-			var appSettingsPath = Path.Combine(AppContext.BaseDirectory, "appsettings.json");
-			var appSettingsExamplePath = Path.Combine(AppContext.BaseDirectory, "appsettings.example.json");
+			var appSettingsPath = Path.Combine(AppContext.BaseDirectory, "Configuration", "appsettings.json");
+			var appSettingsExamplePath = Path.Combine(AppContext.BaseDirectory, "Configuration", "appsettings.example.json");
 
 			// Backup current configuration
 			var backupPath = $"{appSettingsPath}.backup.{DateTime.UtcNow:yyyyMMddHHmmss}";
@@ -352,7 +352,6 @@ public class ConfigProviderService : IConfigProviderService
 		{
 			"ApiKey",          // Core API key configuration
 			"JiroApi",         // Jiro API URL
-			"TokenizerUrl",    // Tokenizer service URL
 			"Whitelist",       // Whitelist configuration
 			"DataPaths",       // Data storage paths configuration
 			"Chat",            // Chat/AI configuration

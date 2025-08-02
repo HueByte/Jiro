@@ -1,4 +1,4 @@
-using Jiro.App.Configurator;
+using Jiro.App.Setup;
 using Jiro.Core;
 using Jiro.Core.Constants;
 using Jiro.Core.IRepositories;
@@ -125,10 +125,10 @@ public static class Configurator
 
 		services.AddHttpClient(HttpClients.JIRO, (serviceProvider, httpClient) =>
 		{
-			var grpcServerUrl = serviceProvider.GetRequiredService<IConfiguration>().GetSection("Grpc:ServerUrl").Value;
+			var grpcServerUrl = serviceProvider.GetRequiredService<IConfiguration>().GetSection("JiroCloud:Grpc:ServerUrl").Value;
 			if (string.IsNullOrEmpty(grpcServerUrl))
 			{
-				throw new InvalidOperationException("Grpc:ServerUrl is required in configuration");
+				throw new InvalidOperationException("JiroCloud:Grpc:ServerUrl is required in configuration");
 			}
 			httpClient.BaseAddress = new Uri(grpcServerUrl);
 			httpClient.DefaultRequestVersion = new Version(2, 0);
@@ -136,10 +136,10 @@ public static class Configurator
 		})
 		.ConfigurePrimaryHttpMessageHandler((serviceProvider) =>
 		{
-			var grpcServerUrl = serviceProvider.GetRequiredService<IConfiguration>().GetSection("Grpc:ServerUrl").Value;
+			var grpcServerUrl = serviceProvider.GetRequiredService<IConfiguration>().GetSection("JiroCloud:Grpc:ServerUrl").Value;
 			if (string.IsNullOrEmpty(grpcServerUrl))
 			{
-				throw new InvalidOperationException("Grpc:ServerUrl is required in configuration");
+				throw new InvalidOperationException("JiroCloud:Grpc:ServerUrl is required in configuration");
 			}
 
 			var handler = new SocketsHttpHandler

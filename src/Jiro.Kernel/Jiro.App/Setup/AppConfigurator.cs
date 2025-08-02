@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
-namespace Jiro.App.Configurator;
+namespace Jiro.App.Setup;
 
 /// <summary>
 /// Provides configuration functionality for the Jiro application, including event configuration and database migration.

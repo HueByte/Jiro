@@ -1,5 +1,5 @@
 using Jiro.App;
-using Jiro.App.Configurator;
+using Jiro.App.Setup;
 using Jiro.App.Extensions;
 using Jiro.App.Validation;
 using Jiro.Commands.Base;
@@ -31,7 +31,7 @@ var host = Host.CreateDefaultBuilder(args)
 	.ConfigureHostConfiguration(config =>
 	{
 		config.SetBasePath(AppContext.BaseDirectory);
-		config.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
+		config.AddJsonFile("Configuration/appsettings.json", optional: false, reloadOnChange: true);
 		config.AddEnvironmentVariables();
 		config.AddEnvironmentVariables("JIRO_");
 		config.AddCommandLine(args);
@@ -40,7 +40,7 @@ var host = Host.CreateDefaultBuilder(args)
 ConfigurationManager configManager = new();
 
 
-configManager.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+configManager.AddJsonFile("Configuration/appsettings.json", optional: false, reloadOnChange: true)
 	.AddEnvironmentVariables()
 	.AddEnvironmentVariables("JIRO_");
 

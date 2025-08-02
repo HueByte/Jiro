@@ -24,11 +24,6 @@ public class ApplicationOptions : IOption
 	/// </summary>
 	public string JiroApi { get; set; } = "https://localhost:18092";
 
-	/// <summary>
-	/// Gets or sets the tokenizer service URL.
-	/// Can be overridden with JIRO_TokenizerUrl environment variable.
-	/// </summary>
-	public string TokenizerUrl { get; set; } = "http://localhost:8000";
 
 	/// <summary>
 	/// Gets or sets whether whitelist functionality is enabled.

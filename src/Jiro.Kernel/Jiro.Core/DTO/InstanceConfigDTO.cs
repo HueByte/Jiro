@@ -10,11 +10,6 @@ public class InstanceConfigDTO
 		get; set;
 	}
 
-	[JsonPropertyName("TokenizerUrl")]
-	public string? TokenizerUrl
-	{
-		get; set;
-	}
 
 	[JsonPropertyName("ConnectionStrings")]
 	public ConnectionStrings? ConnectionStrings

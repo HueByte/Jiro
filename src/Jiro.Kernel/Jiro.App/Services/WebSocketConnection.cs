@@ -209,7 +209,6 @@ public class WebSocketConnection : JiroClientBase, IDisposable
 				}
 				catch (Exception)
 				{
-					// Ignore reflection errors for backward compatibility
 					_webSocketLogger.LogDebug("Response model doesn't support pagination properties, continuing with basic response");
 				}
 

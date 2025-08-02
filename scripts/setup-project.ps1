@@ -173,8 +173,8 @@ Set-Content -Path $envPath -Value $envContent -Encoding UTF8
 # Create appsettings.json from example
 Write-Host "Creating appsettings.json..." -ForegroundColor Cyan
 
-$appSettingsExamplePath = Join-Path $PSScriptRoot ".." "src" "Jiro.Kernel" "Jiro.App" "appsettings.example.json"
-$appSettingsPath = Join-Path $PSScriptRoot ".." "src" "Jiro.Kernel" "Jiro.App" "appsettings.json"
+$appSettingsExamplePath = Join-Path $PSScriptRoot ".." "src" "Jiro.Kernel" "Jiro.App" "Configuration" "appsettings.example.json"
+$appSettingsPath = Join-Path $PSScriptRoot ".." "src" "Jiro.Kernel" "Jiro.App" "Configuration" "appsettings.json"
 
 if (Test-Path $appSettingsExamplePath) {
     $appSettings = Get-Content $appSettingsExamplePath -Raw | ConvertFrom-Json
