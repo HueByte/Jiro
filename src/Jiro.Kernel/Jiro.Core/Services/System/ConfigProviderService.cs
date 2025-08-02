@@ -261,7 +261,7 @@ public class ConfigProviderService : IConfigProviderService
 		try
 		{
 			// Basic validation - ensure required sections exist
-			var requiredSections = new[] { "Serilog", "WebSocket", "Grpc" };
+			var requiredSections = new[] { "Serilog", "JiroCloud" };
 
 			foreach (var section in requiredSections)
 			{
@@ -285,28 +285,34 @@ public class ConfigProviderService : IConfigProviderService
 				return false;
 			}
 
-			// Validate specific configuration values
-			if (config.TryGetValue("WebSocket", out var webSocketSection) &&
-				webSocketSection is Dictionary<string, object> wsConfig)
+			// Validate JiroCloud configuration values
+			if (config.TryGetValue("JiroCloud", out var jiroCloudSection) &&
+				jiroCloudSection is Dictionary<string, object> jcConfig)
 			{
-				if (!wsConfig.ContainsKey("HubUrl") ||
-					string.IsNullOrWhiteSpace(wsConfig["HubUrl"]?.ToString()))
+				// Validate WebSocket configuration
+				if (jcConfig.TryGetValue("WebSocket", out var webSocketSection) &&
+					webSocketSection is Dictionary<string, object> wsConfig)
 				{
-					_logger.LogWarning("WebSocket.HubUrl is missing or empty");
-					return false;
+					if (!wsConfig.ContainsKey("HubUrl") ||
+						string.IsNullOrWhiteSpace(wsConfig["HubUrl"]?.ToString()))
+					{
+						_logger.LogWarning("JiroCloud.WebSocket.HubUrl is missing or empty");
+						return false;
+					}
 				}
-			}
 
-			if (config.TryGetValue("Grpc", out var grpcSection) &&
-				grpcSection is Dictionary<string, object> grpcConfig)
-			{
-				// Note: Grpc.ServerUrl is optional as it may default to JiroApi
-				// Only validate if explicitly set
-				if (grpcConfig.ContainsKey("ServerUrl") &&
-					string.IsNullOrWhiteSpace(grpcConfig["ServerUrl"]?.ToString()))
+				// Validate gRPC configuration
+				if (jcConfig.TryGetValue("Grpc", out var grpcSection) &&
+					grpcSection is Dictionary<string, object> grpcConfig)
 				{
-					_logger.LogWarning("Grpc.ServerUrl is set but empty");
-					return false;
+					// Note: Grpc.ServerUrl is optional as it may default to JiroApi
+					// Only validate if explicitly set
+					if (grpcConfig.ContainsKey("ServerUrl") &&
+						string.IsNullOrWhiteSpace(grpcConfig["ServerUrl"]?.ToString()))
+					{
+						_logger.LogWarning("JiroCloud.Grpc.ServerUrl is set but empty");
+						return false;
+					}
 				}
 			}
 
@@ -314,7 +320,7 @@ public class ConfigProviderService : IConfigProviderService
 			if (config.TryGetValue("DataPaths", out var dataPathsSection) &&
 				dataPathsSection is Dictionary<string, object> dpConfig)
 			{
-				var pathKeys = new[] { "Logs", "Themes", "Plugins", "Database" };
+				var pathKeys = new[] { "Logs", "Themes", "Plugins", "Messages" };
 				foreach (var key in pathKeys)
 				{
 					if (dpConfig.ContainsKey(key) &&
@@ -353,8 +359,7 @@ public class ConfigProviderService : IConfigProviderService
 			"Gpt",             // Legacy OpenAI/GPT configuration
 			"JWT",             // JWT authentication
 			"Serilog",         // Logging configuration
-			"WebSocket",       // WebSocket configuration
-			"Grpc",            // gRPC configuration
+			"JiroCloud",       // JiroCloud configuration (WebSocket and gRPC)
 			"ConnectionStrings", // Database connections
 			"Modules",         // Plugin modules
 			"Log"              // Log configuration

@@ -42,9 +42,8 @@ public class EnvironmentConfigurator
 		if (!Directory.Exists(dataPathsOptions.AbsolutePluginsPath))
 			Directory.CreateDirectory(dataPathsOptions.AbsolutePluginsPath);
 
-		var databaseDir = Path.GetDirectoryName(dataPathsOptions.AbsoluteDatabasePath);
-		if (!string.IsNullOrEmpty(databaseDir) && !Directory.Exists(databaseDir))
-			Directory.CreateDirectory(databaseDir);
+		if (!Directory.Exists(dataPathsOptions.AbsoluteMessagesPath))
+			Directory.CreateDirectory(dataPathsOptions.AbsoluteMessagesPath);
 
 		// Legacy folders for backward compatibility
 		if (!Directory.Exists(Path.Join(AppContext.BaseDirectory, "logs")))

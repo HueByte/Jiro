@@ -46,11 +46,11 @@ public class ConfigProviderServiceTests : IDisposable
 			["DataPaths:Logs"] = "Data/Logs",
 			["DataPaths:Themes"] = "Data/Themes",
 			["DataPaths:Plugins"] = "Data/Plugins",
-			["DataPaths:Database"] = "Data/Database/jiro.db",
+			["DataPaths:Messages"] = "Data/Messages",
 			["Serilog:MinimumLevel:Default"] = "Information",
-			["WebSocket:HubUrl"] = "https://test.hub.url",
-			["WebSocket:ApiKey"] = "test-websocket-key",
-			["Grpc:ServerUrl"] = "https://test.grpc.url",
+			["JiroCloud:ApiKey"] = "test-jirocloud-api-key",
+			["JiroCloud:WebSocket:HubUrl"] = "https://test.hub.url",
+			["JiroCloud:Grpc:ServerUrl"] = "https://test.grpc.url",
 			["ConnectionStrings:JiroContext"] = "test-connection-string",
 			["Chat:Enabled"] = "true",
 			["JWT:Secret"] = "test-jwt-secret-key-32-characters"
@@ -82,7 +82,7 @@ public class ConfigProviderServiceTests : IDisposable
 		Assert.True(configValues.ContainsKey("JiroApi"));
 		Assert.True(configValues.ContainsKey("DataPaths:Logs"));
 		Assert.True(configValues.ContainsKey("Serilog:MinimumLevel:Default"));
-		Assert.True(configValues.ContainsKey("WebSocket:HubUrl"));
+		Assert.True(configValues.ContainsKey("JiroCloud:WebSocket:HubUrl"));
 		Assert.True(configValues.ContainsKey("_ConfigurationNote"));
 	}
 
@@ -205,7 +205,7 @@ public class ConfigProviderServiceTests : IDisposable
 		Assert.True(configValues.ContainsKey("JiroApi"));
 		Assert.True(configValues.ContainsKey("DataPaths:Logs"));
 		Assert.True(configValues.ContainsKey("Serilog:MinimumLevel:Default"));
-		Assert.True(configValues.ContainsKey("WebSocket:HubUrl"));
+		Assert.True(configValues.ContainsKey("JiroCloud:WebSocket:HubUrl"));
 		Assert.True(configValues.ContainsKey("JWT:Secret"));
 
 		// Should include configuration note
@@ -252,14 +252,17 @@ public class ConfigProviderServiceTests : IDisposable
 					["Default"] = "Information"
 				}
 			},
-			["WebSocket"] = new Dictionary<string, object>
+			["JiroCloud"] = new Dictionary<string, object>
 			{
-				["HubUrl"] = "https://test.hub",
-				["ApiKey"] = "test-websocket-key"
-			},
-			["Grpc"] = new Dictionary<string, object>
-			{
-				["ServerUrl"] = "https://test.grpc"
+				["ApiKey"] = "test-jirocloud-key",
+				["WebSocket"] = new Dictionary<string, object>
+				{
+					["HubUrl"] = "https://test.hub"
+				},
+				["Grpc"] = new Dictionary<string, object>
+				{
+					["ServerUrl"] = "https://test.grpc"
+				}
 			},
 			["ConnectionStrings"] = new Dictionary<string, object>
 			{

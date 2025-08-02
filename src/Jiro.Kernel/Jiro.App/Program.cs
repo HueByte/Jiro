@@ -1,6 +1,7 @@
 using Jiro.App;
 using Jiro.App.Configurator;
 using Jiro.App.Extensions;
+using Jiro.App.Validation;
 using Jiro.Commands.Base;
 using Jiro.Commands.Models;
 using Jiro.Core.Commands.Chat;
@@ -54,6 +55,17 @@ Log.Logger = new LoggerConfiguration()
 var logger = new SerilogLoggerProvider(Log.Logger)
 	.CreateLogger(nameof(Program));
 
+// Validate configuration before proceeding
+Log.Information("🔍 Validating configuration...");
+var validationErrors = ConfigurationValidator.ValidateSettings(configManager, isTestMode);
+ConfigurationValidator.PrintValidationResults(validationErrors, isTestMode);
+
+if (validationErrors.Count > 0)
+{
+	Log.Fatal("Configuration validation failed - application cannot start");
+	Environment.Exit(1);
+}
+
 host.UseSerilog((context, services, configuration) => configuration
 		.ReadFrom.Configuration(context.Configuration)
 		.ReadFrom.Services(services));
@@ -82,21 +94,14 @@ host.ConfigureServices(services =>
 		appOptions.JiroApi = string.IsNullOrWhiteSpace(appOptions.JiroApi) ? "https://localhost:18092" : appOptions.JiroApi;
 	}
 
-	// Validate configuration
-	if (!appOptions.IsValid())
-	{
-		var errors = string.Join(Environment.NewLine, appOptions.GetValidationErrors());
-		throw new Exception($"Configuration validation failed:{Environment.NewLine}{errors}");
-	}
-
 	services.AddGrpcClient<JiroHubProto.JiroHubProtoClient>("JiroClient", options =>
 		{
-			var grpcServerUrl = configManager.GetSection("Grpc:ServerUrl").Value;
-			if (string.IsNullOrEmpty(grpcServerUrl))
+			var grpcServerUrl = configManager.GetSection("JiroCloud:Grpc:ServerUrl").Value;
+			if (string.IsNullOrEmpty(grpcServerUrl) && !isTestMode)
 			{
-				throw new InvalidOperationException("Grpc:ServerUrl is required in configuration");
+				throw new InvalidOperationException("JiroCloud:Grpc:ServerUrl is required in configuration");
 			}
-			options.Address = new Uri(grpcServerUrl);
+			options.Address = new Uri(grpcServerUrl ?? "https://localhost:5001");
 		})
 		.AddCallCredentials((context, metadata) =>
 		{
@@ -117,7 +122,7 @@ host.ConfigureServices(services =>
 			};
 
 			// For localhost development, skip TLS certificate validation
-			var grpcServerUrl = configManager.GetSection("Grpc:ServerUrl").Value;
+			var grpcServerUrl = configManager.GetSection("JiroCloud:Grpc:ServerUrl").Value;
 			if (!string.IsNullOrEmpty(grpcServerUrl))
 			{
 				var uri = new Uri(grpcServerUrl);
@@ -133,13 +138,13 @@ host.ConfigureServices(services =>
 
 	pluginManager = new(services, configManager, logger);
 
-	// Get data paths from options and configure database
-	var dataPathsOptions = new DataPathsOptions();
-	configManager.GetSection(DataPathsOptions.DataPaths).Bind(dataPathsOptions);
-
+	// Configure database using connection string
 	var connString = configManager.GetConnectionString("JiroContext");
-	var dbPath = string.IsNullOrEmpty(connString) ? dataPathsOptions.AbsoluteDatabasePath : connString;
-	services.AddJiroSQLiteContext(dbPath);
+	if (string.IsNullOrEmpty(connString) && !isTestMode)
+	{
+		throw new InvalidOperationException("ConnectionStrings:JiroContext is required in configuration");
+	}
+	services.AddJiroSQLiteContext(connString);
 	services.AddMemoryCache();
 	services.AddServices(configManager);
 	services.RegisterCommands(nameof(ChatCommand.Chat));

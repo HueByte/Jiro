@@ -30,10 +30,10 @@ public class DataPathsOptions : IOption
 	public string Plugins { get; set; } = "Data/Plugins";
 
 	/// <summary>
-	/// Gets or sets the path for the SQLite database file.
-	/// Can be overridden with JIRO_DataPaths__Database environment variable.
+	/// Gets or sets the path for storing message files.
+	/// Can be overridden with JIRO_DataPaths__Messages environment variable.
 	/// </summary>
-	public string Database { get; set; } = "Data/Database/jiro.db";
+	public string Messages { get; set; } = "Data/Messages";
 
 	/// <summary>
 	/// Resolves a path to an absolute path based on the application base directory.
@@ -63,7 +63,7 @@ public class DataPathsOptions : IOption
 	public string AbsolutePluginsPath => ResolvePath(Plugins);
 
 	/// <summary>
-	/// Gets the absolute path for the database.
+	/// Gets the absolute path for messages.
 	/// </summary>
-	public string AbsoluteDatabasePath => ResolvePath(Database);
+	public string AbsoluteMessagesPath => ResolvePath(Messages);
 }

@@ -2,7 +2,7 @@ using System.Runtime.CompilerServices;
 using System.Text.Json;
 using System.Threading.Channels;
 
-using Jiro.App.Options;
+using Jiro.Core.Options;
 using Jiro.Core.Services.CommandHandler;
 using Jiro.Core.Services.CommandSystem;
 using Jiro.Core.Services.MessageCache;
@@ -26,7 +26,7 @@ namespace Jiro.App.Services;
 public class WebSocketConnection : JiroClientBase, IDisposable
 {
 	private readonly ILogger<WebSocketConnection> _webSocketLogger;
-	private readonly WebSocketOptions _options;
+	private readonly JiroCloudOptions _jiroCloudOptions;
 	private readonly IServiceScopeFactory _scopeFactory;
 	private readonly ICommandHandlerService _commandHandler;
 	private readonly WebSocketExceptionHandler _exceptionHandler;
@@ -42,20 +42,20 @@ public class WebSocketConnection : JiroClientBase, IDisposable
 	/// </summary>
 	/// <param name="connection">The SignalR HubConnection</param>
 	/// <param name="logger">The logger</param>
-	/// <param name="options">The WebSocket configuration options</param>
+	/// <param name="jiroCloudOptions">The JiroCloud configuration options</param>
 	/// <param name="scopeFactory">Service scope factory for creating scoped services</param>
 	/// <param name="commandHandler">Command handler service</param>
 	/// <param name="exceptionHandler">Exception handler for WebSocket errors</param>
 	public WebSocketConnection(
 		HubConnection connection,
 		ILogger<WebSocketConnection> logger,
-		IOptions<WebSocketOptions> options,
+		IOptions<JiroCloudOptions> jiroCloudOptions,
 		IServiceScopeFactory scopeFactory,
 		ICommandHandlerService commandHandler,
 		WebSocketExceptionHandler exceptionHandler) : base(connection, logger as ILogger<JiroClientBase>)
 	{
 		_webSocketLogger = logger ?? throw new ArgumentNullException(nameof(logger));
-		_options = options?.Value ?? throw new ArgumentNullException(nameof(options));
+		_jiroCloudOptions = jiroCloudOptions?.Value ?? throw new ArgumentNullException(nameof(jiroCloudOptions));
 		_scopeFactory = scopeFactory ?? throw new ArgumentNullException(nameof(scopeFactory));
 		_commandHandler = commandHandler ?? throw new ArgumentNullException(nameof(commandHandler));
 		_exceptionHandler = exceptionHandler ?? throw new ArgumentNullException(nameof(exceptionHandler));
@@ -74,7 +74,7 @@ public class WebSocketConnection : JiroClientBase, IDisposable
 	{
 		_webSocketLogger.LogWarning("🔥 StartAsync: Initializing connection (handlers will be setup by base class)");
 
-		await InitializeAsync(_options.HubUrl, _options.ApiKey,
+		await InitializeAsync(_jiroCloudOptions.WebSocket.HubUrl, _jiroCloudOptions.ApiKey,
 			(ex, context) => _exceptionHandler.HandleConnectionException(ex, context), cancellationToken);
 
 		_webSocketLogger.LogWarning("🔥 StartAsync: Connection initialized successfully");

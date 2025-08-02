@@ -4,8 +4,8 @@ using Google.Protobuf;
 
 using Grpc.Net.ClientFactory;
 
-using Jiro.App.Options;
 using Jiro.Commands.Models;
+using Jiro.Core.Options;
 
 using JiroCloud.Api.Proto;
 
@@ -23,16 +23,16 @@ internal class JiroGrpcService : IJiroGrpcService
 {
 	private readonly JiroHubProtoClient _client;
 	private readonly ILogger<JiroGrpcService> _logger;
-	private readonly GrpcOptions _options;
+	private readonly JiroCloudOptions _jiroCloudOptions;
 
 	public JiroGrpcService(
 		GrpcClientFactory clientFactory,
 		ILogger<JiroGrpcService> logger,
-		IOptions<GrpcOptions> options)
+		IOptions<JiroCloudOptions> jiroCloudOptions)
 	{
 		_client = clientFactory.CreateClient<JiroHubProtoClient>("JiroClient");
 		_logger = logger;
-		_options = options.Value;
+		_jiroCloudOptions = jiroCloudOptions.Value;
 	}
 
 	public async Task SendCommandResultAsync(string commandSyncId, CommandResponse commandResult)
@@ -80,11 +80,11 @@ internal class JiroGrpcService : IJiroGrpcService
 		var retryCount = 0;
 		Exception? lastException = null;
 
-		while (retryCount <= _options.MaxRetries)
+		while (retryCount <= _jiroCloudOptions.Grpc.MaxRetries)
 		{
 			try
 			{
-				using var cancellationTokenSource = new CancellationTokenSource(_options.TimeoutMs);
+				using var cancellationTokenSource = new CancellationTokenSource(_jiroCloudOptions.Grpc.TimeoutMs);
 
 				var response = await _client.SendCommandResultAsync(message,
 					cancellationToken: cancellationTokenSource.Token);
@@ -96,20 +96,20 @@ internal class JiroGrpcService : IJiroGrpcService
 
 				throw new InvalidOperationException($"Server returned unsuccessful response: {response.Message}");
 			}
-			catch (Exception ex) when (retryCount < _options.MaxRetries)
+			catch (Exception ex) when (retryCount < _jiroCloudOptions.Grpc.MaxRetries)
 			{
 				lastException = ex;
 				retryCount++;
 
 				var delay = TimeSpan.FromMilliseconds(1000 * Math.Pow(2, retryCount - 1)); // Exponential backoff
 				_logger.LogWarning("Failed to send message, retrying in {delay}ms (attempt {attempt}/{max}): {Message}",
-					delay.TotalMilliseconds, retryCount, _options.MaxRetries, ex.Message);
+					delay.TotalMilliseconds, retryCount, _jiroCloudOptions.Grpc.MaxRetries, ex.Message);
 
 				await Task.Delay(delay);
 			}
 		}
 
-		throw new InvalidOperationException($"Failed to send message after {_options.MaxRetries} retries", lastException);
+		throw new InvalidOperationException($"Failed to send message after {_jiroCloudOptions.Grpc.MaxRetries} retries", lastException);
 	}
 
 	/// <summary>

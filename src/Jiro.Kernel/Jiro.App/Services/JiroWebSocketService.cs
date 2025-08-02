@@ -1,6 +1,6 @@
 using System.Collections.Concurrent;
 
-using Jiro.App.Options;
+using Jiro.Core.Options;
 using Jiro.Core.Services.CommandContext;
 using Jiro.Core.Services.CommandHandler;
 using Jiro.Shared.Websocket;
@@ -23,7 +23,7 @@ public class JiroWebSocketService : BackgroundService, ICommandQueueMonitor
 	private readonly IServiceScopeFactory _scopeFactory;
 	private readonly ILogger<JiroWebSocketService> _logger;
 	private readonly ICommandHandlerService _commandHandler;
-	private readonly WebSocketOptions _options;
+	private readonly JiroCloudOptions _jiroCloudOptions;
 	private readonly IJiroClient _jiroClient;
 	private readonly IJiroGrpcService _grpcService;
 
@@ -71,14 +71,14 @@ public class JiroWebSocketService : BackgroundService, ICommandQueueMonitor
 		IServiceScopeFactory scopeFactory,
 		ILogger<JiroWebSocketService> logger,
 		ICommandHandlerService commandHandler,
-		IOptions<WebSocketOptions> options,
+		IOptions<JiroCloudOptions> jiroCloudOptions,
 		IJiroClient jiroClientHub,
 		IJiroGrpcService grpcService)
 	{
 		_scopeFactory = scopeFactory ?? throw new ArgumentNullException(nameof(scopeFactory));
 		_logger = logger ?? throw new ArgumentNullException(nameof(logger));
 		_commandHandler = commandHandler ?? throw new ArgumentNullException(nameof(commandHandler));
-		_options = options?.Value ?? throw new ArgumentNullException(nameof(options));
+		_jiroCloudOptions = jiroCloudOptions?.Value ?? throw new ArgumentNullException(nameof(jiroCloudOptions));
 		_jiroClient = jiroClientHub ?? throw new ArgumentNullException(nameof(jiroClientHub));
 		_grpcService = grpcService ?? throw new ArgumentNullException(nameof(grpcService));
 	}
