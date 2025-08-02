@@ -156,6 +156,7 @@ If you prefer manual configuration:
 3. **Configure your settings**
 
    Edit `.env` file:
+
    ```bash
    # Required for AI features
    OPENAI_API_KEY=sk-your-openai-api-key
@@ -169,6 +170,7 @@ If you prefer manual configuration:
    ```
 
    Edit `appsettings.json`:
+
    ```json
    {
      "Gpt": {
@@ -512,6 +514,7 @@ This project is developed as part of an engineering thesis focused on building a
 ### Setup Issues
 
 **Q: Setup script fails with permission error**
+
 ```bash
 # Windows
 Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
@@ -521,11 +524,13 @@ chmod +x scripts/setup-project.sh
 ```
 
 **Q: OpenAI API key not working**
+
 - Ensure your API key starts with `sk-`
 - Check your OpenAI account has sufficient credits
 - Verify the key is set in both `.env` and `appsettings.json`
 
 **Q: Database migration fails**
+
 ```bash
 # Reset database
 dotnet ef database drop -p src/Jiro.Kernel/Jiro.Infrastructure -s src/Jiro.Kernel/Jiro.App --force
@@ -535,6 +540,7 @@ dotnet ef database update -p src/Jiro.Kernel/Jiro.Infrastructure -s src/Jiro.Ker
 ### Docker Issues
 
 **Q: Docker containers won't start**
+
 ```bash
 # Check if ports are available
 docker-compose down
@@ -543,6 +549,7 @@ docker-compose up -d
 ```
 
 **Q: Can't connect to MySQL in Docker**
+
 - Ensure `.env` file has correct MySQL credentials
 - Wait for MySQL container to fully initialize (30-60 seconds)
 

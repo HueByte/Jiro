@@ -44,6 +44,7 @@ jobs:
             --ignore _site \
             --ignore bin \
             --ignore obj \
+            --ignore CLAUDE.md \
             --config dev/config/.markdownlint.json
 
       - name: Markdown linting completed

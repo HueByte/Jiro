@@ -170,6 +170,7 @@ MARKDOWNLINT_ARGS=(
     --ignore "bin"
     --ignore "obj"
     --ignore "dev-local"
+    --ignore "CLAUDE.md"
 )
 
 # Add configuration file if present
