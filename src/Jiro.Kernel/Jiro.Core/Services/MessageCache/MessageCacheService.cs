@@ -156,7 +156,7 @@ public class MessageCacheService : IMessageCacheService
 	public void UpdateSessionCache(string sessionId, List<ChatMessageWithMetadata> messages)
 	{
 		string cacheKey = $"{Constants.CacheKeys.SessionKey}::{sessionId}";
-		
+
 		if (_memoryCache.TryGetValue(cacheKey, out Session? sessionWithMessages) && sessionWithMessages != null)
 		{
 			// Create new session with updated messages to avoid mutating cached object

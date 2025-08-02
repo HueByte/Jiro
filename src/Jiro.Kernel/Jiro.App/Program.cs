@@ -1,6 +1,6 @@
 using Jiro.App;
-using Jiro.App.Setup;
 using Jiro.App.Extensions;
+using Jiro.App.Setup;
 using Jiro.App.Validation;
 using Jiro.Commands.Base;
 using Jiro.Commands.Models;
