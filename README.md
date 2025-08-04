@@ -201,6 +201,26 @@ public class HelloCommand : BaseCommand
 Jiro is built as a modular, self-contained AI assistant that can run locally while optionally connecting to external services. The architecture follows clean separation of concerns with a focus on extensibility and performance:
 
 ```mermaid
+%%{init: {
+  "theme": "base",
+  "themeVariables": {
+    "background": "#1C1E26",
+    "primaryColor": "#FCD4B8",
+    "primaryTextColor": "#D5D8DA",
+    "primaryBorderColor": "#E95378",
+    "lineColor": "#6C6F93",
+    "sectionBkgColor": "#232530",
+    "altSectionBkgColor": "#2E303E",
+    "gridColor": "#16161C",
+    "secondaryColor": "#26BBD9",
+    "tertiaryColor": "#27D797",
+    "cScale0": "#1C1E26",
+    "cScale1": "#232530",
+    "cScale2": "#2E303E",
+    "cScale3": "#6C6F93",
+    "cScale4": "#D5D8DA"
+  }
+}}%%
 graph TB
     subgraph "🌐 External Services"
         JiroCloud[🚀 JiroCloud<br/>Optional Remote Commands]
@@ -277,14 +297,14 @@ graph TB
     EFCore --> SQLite
     EFCore -.->|Docker| MySQL
 
-    %% Styling
-    classDef external fill:#FFE6CC,stroke:#D79B00,stroke-width:2px
-    classDef client fill:#E1F5FE,stroke:#0277BD,stroke-width:2px
-    classDef app fill:#F3E5F5,stroke:#7B1FA2,stroke-width:2px
-    classDef core fill:#E8F5E8,stroke:#2E7D32,stroke-width:2px
-    classDef infra fill:#FFF3E0,stroke:#F57C00,stroke-width:2px
-    classDef storage fill:#ECEFF1,stroke:#455A64,stroke-width:2px
-    classDef plugins fill:#FCE4EC,stroke:#C2185B,stroke-width:2px
+    %% Horizon Theme Styling
+    classDef external fill:#FAB795,stroke:#E6A66A,stroke-width:2px,color:#06060C
+    classDef client fill:#26BBD9,stroke:#1A9CB8,stroke-width:2px,color:#06060C
+    classDef app fill:#FCD4B8,stroke:#E29A6B,stroke-width:2px,color:#06060C
+    classDef core fill:#27D797,stroke:#21BFC2,stroke-width:2px,color:#06060C
+    classDef infra fill:#6C6F93,stroke:#2E303E,stroke-width:2px,color:#D5D8DA
+    classDef storage fill:#2E303E,stroke:#6C6F93,stroke-width:2px,color:#D5D8DA
+    classDef plugins fill:#E95378,stroke:#F43E5C,stroke-width:2px,color:#06060C
 
     class JiroCloud,OpenAI,WeatherAPI external
     class PythonCLI,WebClient client

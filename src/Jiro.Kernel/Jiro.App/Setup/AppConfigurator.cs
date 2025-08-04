@@ -48,4 +48,5 @@ public class AppConfigurator
 
 		return this;
 	}
+
 }

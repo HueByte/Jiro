@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Setup script for Jiro project with default and interactive modes
+# Setup script for Jiro project configuration
 
 set -e
 
@@ -13,25 +13,23 @@ GRAY='\033[0;90m'
 NC='\033[0m' # No Color
 
 # Parse arguments
-DEV_MODE=false
+HELP=false
+DEFAULT=false
+NON_INTERACTIVE=false
 
 while [[ $# -gt 0 ]]; do
     case $1 in
-        --dev)
-            DEV_MODE=true
+        --default)
+            DEFAULT=true
+            shift
+            ;;
+        --non-interactive)
+            NON_INTERACTIVE=true
             shift
             ;;
         --help|-h)
-            echo -e "${CYAN}Jiro Project Setup Script${NC}"
-            echo ""
-            echo "This script will interactively configure your Jiro project by prompting for:"
-            echo "  - Jiro API Key (for instance and cloud services)"
-            echo "  - OpenAI API Key (for AI chat features)"
-            echo ""
-            echo "Usage: $0"
-            echo "       $0 --dev     (includes development tools installation)"
-            echo "       $0 --help    (show this help)"
-            exit 0
+            HELP=true
+            shift
             ;;
         *)
             echo -e "${RED}Unknown option: $1${NC}"
@@ -41,11 +39,21 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
-if [ "$DEV_MODE" = true ]; then
-    echo -e "${CYAN}=== Jiro Project Setup (Development Mode) ===${NC}"
-else
-    echo -e "${CYAN}=== Jiro Project Setup ===${NC}"
+if [ "$HELP" = true ]; then
+    echo -e "${CYAN}Jiro Project Setup Script${NC}"
+    echo ""
+    echo "This script will interactively configure your Jiro project by prompting for:"
+    echo "  - JiroCloud API Key (from Jiro Cloud web app - REQUIRED)"
+    echo "  - OpenAI API Key (for AI chat features - optional)"
+    echo ""
+    echo "Usage: $0 [OPTIONS]"
+    echo "       $0 --default         (interactive setup - recommended)"
+    echo "       $0 --non-interactive (uses secure defaults only)"
+    echo "       $0 --help            (show this help)"
+    exit 0
 fi
+
+echo -e "${CYAN}=== Jiro Project Setup ===${NC}"
 echo ""
 
 # Get script directory
@@ -60,8 +68,8 @@ generate_secure_string() {
 
 # Configuration variables
 declare -A config
-# Main API Key for this Jiro instance
-config[ApiKey]=""
+# JiroCloud API Key (provided by user from Jiro Cloud web app - required)
+config[JiroCloudApiKey]=""
 
 # Chat configuration
 config[ChatAuthToken]=""
@@ -69,7 +77,7 @@ config[ChatSystemMessage]="I want you to act as personal assistant called Jiro. 
 config[ChatTokenLimit]=2000
 config[ChatEnabled]="true"
 
-# Note: JiroCloudApiKey will use the same value as ApiKey
+config[JiroCloudApiUrl]="https://jiro.huebytes.com/api"
 config[JiroCloudGrpcServerUrl]="https://jiro.huebytes.com/grpc"
 config[JiroCloudGrpcMaxRetries]=3
 config[JiroCloudGrpcTimeoutMs]=30000
@@ -80,70 +88,61 @@ config[JiroCloudWebSocketReconnectionAttempts]=5
 config[JiroCloudWebSocketReconnectionDelayMs]=5000
 config[JiroCloudWebSocketServerTimeoutMs]=30000
 
-# Interactive setup
-echo -e "${GREEN}This script will configure your Jiro project with the necessary settings.${NC}"
-echo -e "${GRAY}Press Enter to use default values shown in [brackets]${NC}"
-echo ""
+if [ "$NON_INTERACTIVE" = false ]; then
+    # Interactive setup
+    echo -e "${GREEN}This script will configure your Jiro project with the necessary settings.${NC}"
+    echo -e "${GRAY}Press Enter to use default values shown in [brackets]${NC}"
+    echo ""
 
-# Main API Key
-echo -e "${CYAN}=== Core Configuration ===${NC}"
-read -p "Enter Jiro API Key (for instance and cloud services) [auto-generated]: " api_key
-if [ -n "$api_key" ]; then
-    config[ApiKey]="$api_key"
+    # JiroCloud API Key (required - from Jiro Cloud web app)
+    echo -e "${CYAN}=== Core Configuration ===${NC}"
+    echo -e "${GRAY}Get your JiroCloud API Key from the Jiro Cloud web application${NC}"
+    read -p "Enter JiroCloud API Key (required for all cloud services): " jiro_cloud_api_key
+    if [ -n "$jiro_cloud_api_key" ]; then
+        config[JiroCloudApiKey]="$jiro_cloud_api_key"
+        echo -e "${GREEN}JiroCloud API key configured successfully${NC}"
+    else
+        echo -e "${YELLOW}WARNING: JiroCloud API key is required for the application to function${NC}"
+    fi
+
+    # Chat Configuration
+    echo ""
+    echo -e "${CYAN}=== AI Chat Configuration ===${NC}"
+    read -p "Enter OpenAI API Key (required for AI chat features) [leave empty to configure later]: " chat_auth_token
+    if [ -n "$chat_auth_token" ]; then
+        config[ChatAuthToken]="$chat_auth_token"
+        echo -e "${GREEN}OpenAI API key configured successfully${NC}"
+    fi
+
+    # Set JiroCloud URL defaults (non-configurable)
+    echo ""
+    echo -e "${CYAN}=== JiroCloud Configuration ===${NC}"
+    echo -e "${GRAY}Setting JiroCloud service URLs to default production endpoints:${NC}"
+    echo -e "  ${GRAY}• gRPC Server: ${config[JiroCloudGrpcServerUrl]}${NC}"
+    echo -e "  ${GRAY}• WebSocket Hub: ${config[JiroCloudWebSocketHubUrl]}${NC}"
+    echo -e "  ${GRAY}• API URL: ${config[JiroCloudApiUrl]}${NC}"
 else
-    config[ApiKey]=$(generate_secure_string 32)
-    echo -e "${GREEN}Generated secure API key: ${config[ApiKey]}${NC}"
+    # Non-interactive setup - warn about required configuration
+    echo -e "${YELLOW}WARNING: JiroCloud API key must be configured manually in .env file${NC}"
+    echo -e "${GRAY}Using default JiroCloud service endpoints${NC}"
 fi
-
-# Chat Configuration
-echo ""
-echo -e "${CYAN}=== AI Chat Configuration ===${NC}"
-read -p "Enter OpenAI API Key (required for AI chat features) [leave empty to configure later]: " chat_auth_token
-if [ -n "$chat_auth_token" ]; then
-    config[ChatAuthToken]="$chat_auth_token"
-    echo -e "${GREEN}OpenAI API key configured successfully${NC}"
-fi
-
-# Set JiroCloud URL defaults (non-configurable)
-echo ""
-echo -e "${CYAN}=== JiroCloud Configuration ===${NC}"
-echo -e "${GRAY}Setting JiroCloud service URLs to default production endpoints:${NC}"
-echo -e "  ${GRAY}• gRPC Server: ${config[JiroCloudGrpcServerUrl]}${NC}"
-echo -e "  ${GRAY}• WebSocket Hub: ${config[JiroCloudWebSocketHubUrl]}${NC}"
-echo -e "  ${GRAY}• API URL: https://jiro.huebytes.com/api${NC}"
 
 # Create .env file
 echo ""
 echo -e "${CYAN}Creating .env file...${NC}"
 
 cat > "$PROJECT_ROOT/.env" << EOF
-# Jiro Environment Configuration
+# Jiro Client Environment Configuration
 # Generated by setup script on $(date '+%Y-%m-%d %H:%M:%S')
+# All configuration values can override appsettings.json using JIRO_ prefix
 
 # ======================
-# Docker Ports Configuration  
+# Core Application Configuration
 # ======================
-JIRO_HTTP_PORT=8080
-JIRO_HTTPS_PORT=8443
-JIRO_ADDITIONAL_PORT=18090
 
 # ======================
-# MySQL Database Configuration
-# ======================
-DB_SERVER=mysql
-MYSQL_DATABASE=jiro
-MYSQL_USER=jiro
-MYSQL_PASSWORD=your-secure-password-here
-MYSQL_ROOT_PASSWORD=your-root-password-here
-MYSQL_PORT=3306
-
-# ======================
-# Jiro Application Configuration (JIRO_ prefix)
-# ======================
-# Application API Configuration
-JIRO_ApiKey=${config[ApiKey]}
-
 # OpenAI Configuration (for AI features)
+# ======================
 EOF
 
 if [ -n "${config[ChatAuthToken]}" ]; then
@@ -165,8 +164,11 @@ JIRO_Chat__SystemMessage=${config[ChatSystemMessage]}
 JIRO_Chat__TokenLimit=${config[ChatTokenLimit]}
 JIRO_Chat__Enabled=${config[ChatEnabled]}
 
-# JiroCloud Configuration
-JIRO_JiroCloud__ApiKey=${config[ApiKey]}
+# ======================
+# JiroCloud Service Configuration
+# ======================
+JIRO_JiroCloud__ApiKey=${config[JiroCloudApiKey]}
+JIRO_JiroCloud__ApiUrl=${config[JiroCloudApiUrl]}
 JIRO_JiroCloud__Grpc__ServerUrl=${config[JiroCloudGrpcServerUrl]}
 JIRO_JiroCloud__Grpc__MaxRetries=${config[JiroCloudGrpcMaxRetries]}
 JIRO_JiroCloud__Grpc__TimeoutMs=${config[JiroCloudGrpcTimeoutMs]}
@@ -178,13 +180,25 @@ JIRO_JiroCloud__WebSocket__ReconnectionDelayMs=${config[JiroCloudWebSocketReconn
 JIRO_JiroCloud__WebSocket__ServerTimeoutMs=${config[JiroCloudWebSocketServerTimeoutMs]}
 
 # ======================
-# Advanced JIRO_ Configuration Overrides
+# Database Configuration (SQLite for local development)
 # ======================
-# Custom Data Paths (optional - uncomment to customize)
+JIRO_ConnectionStrings__JiroContext=Data Source=Data/Database/jiro.db
+
+# ======================
+# Optional Configuration Overrides
+# ======================
+# Uncomment and customize as needed:
+
+# Custom Data Paths
 # JIRO_DataPaths__Logs=Data/Logs
 # JIRO_DataPaths__Messages=Data/Messages
 # JIRO_DataPaths__Plugins=Data/Plugins
 # JIRO_DataPaths__Themes=Data/Themes
+
+# Logging Configuration
+# JIRO_Serilog__MinimumLevel__Default=Information
+# JIRO_Serilog__WriteTo__1__Args__path=Data/Logs/jiro-detailed_.txt
+# JIRO_Serilog__WriteTo__2__Args__path=Data/Logs/jiro-errors_.txt
 EOF
 
 # Create appsettings.json from example
@@ -201,8 +215,8 @@ if [ -f "$APPSETTINGS_EXAMPLE" ]; then
             .Chat.SystemMessage = \"${config[ChatSystemMessage]}\" |
             .Chat.TokenLimit = ${config[ChatTokenLimit]} |
             .Chat.Enabled = ${config[ChatEnabled]} |
-            .JiroCloud.ApiKey = \"${config[ApiKey]}\" |
-            .JiroCloud.ApiUrl = \"https://jiro.huebytes.com/api\" |
+            .JiroCloud.ApiKey = \"${config[JiroCloudApiKey]}\" |
+            .JiroCloud.ApiUrl = \"${config[JiroCloudApiUrl]}\" |
             .JiroCloud.Grpc.ServerUrl = \"${config[JiroCloudGrpcServerUrl]}\" |
             .JiroCloud.Grpc.MaxRetries = ${config[JiroCloudGrpcMaxRetries]} |
             .JiroCloud.Grpc.TimeoutMs = ${config[JiroCloudGrpcTimeoutMs]} |
@@ -228,8 +242,8 @@ if [ -f "$APPSETTINGS_EXAMPLE" ]; then
         sed -i.bak "s|\"Enabled\": [a-z]*|\"Enabled\": ${config[ChatEnabled]}|" "$APPSETTINGS"
         
         # Update JiroCloud values
-        sed -i.bak "s|\"your-jirocloud-api-key-here\"|\"${config[ApiKey]}\"|" "$APPSETTINGS"
-        sed -i.bak "s|\"ApiUrl\": \"https://jiro.huebytes.com/api\"|\"ApiUrl\": \"https://jiro.huebytes.com/api\"|" "$APPSETTINGS"
+        sed -i.bak "s|\"your-jirocloud-api-key-here\"|\"${config[JiroCloudApiKey]}\"|" "$APPSETTINGS"
+        sed -i.bak "s|\"ApiUrl\": \"https://jiro.huebytes.com/api\"|\"ApiUrl\": \"${config[JiroCloudApiUrl]}\"|" "$APPSETTINGS"
         sed -i.bak "s|\"ServerUrl\": \"https://jiro.huebytes.com/grpc\"|\"ServerUrl\": \"${config[JiroCloudGrpcServerUrl]}\"|" "$APPSETTINGS"
         sed -i.bak "s|\"MaxRetries\": [0-9]*|\"MaxRetries\": ${config[JiroCloudGrpcMaxRetries]}|" "$APPSETTINGS"
         sed -i.bak "s|\"TimeoutMs\": [0-9]*|\"TimeoutMs\": ${config[JiroCloudGrpcTimeoutMs]}|" "$APPSETTINGS"
@@ -260,147 +274,59 @@ echo ""
 echo -e "${CYAN}Building solution...${NC}"
 dotnet build src/Main.sln
 
-# Development mode specific setup
-if [ "$DEV_MODE" = true ]; then
-    echo ""
-    echo -e "${CYAN}Setting up development environment...${NC}"
-    
-    # Function to check if command exists
-    check_command() {
-        if command -v "$1" >/dev/null 2>&1; then
-            return 0
-        else
-            return 1
-        fi
-    }
-    
-    # Install global .NET tools
-    echo -e "${CYAN}Installing development tools...${NC}"
-    
-    # Install DocFX
-    if check_command "docfx"; then
-        echo -e "${GREEN}DocFX is already installed${NC}"
-    else
-        echo "Installing DocFX..."
-        if dotnet tool install -g docfx --version 2.75.3 >/dev/null 2>&1; then
-            echo -e "${GREEN}DocFX installed successfully${NC}"
-        else
-            echo -e "${YELLOW}Failed to install DocFX (may already be installed)${NC}"
-        fi
-    fi
-    
-    # Install markdownlint if Node.js is available
-    if check_command "node"; then
-        if check_command "markdownlint"; then
-            echo -e "${GREEN}markdownlint is already installed${NC}"
-        else
-            echo "Installing markdownlint-cli..."
-            if npm install -g markdownlint-cli >/dev/null 2>&1; then
-                echo -e "${GREEN}markdownlint-cli installed successfully${NC}"
-            else
-                echo -e "${YELLOW}Failed to install markdownlint-cli${NC}"
-            fi
-        fi
-    else
-        echo -e "${YELLOW}Node.js not available, skipping markdownlint installation${NC}"
-    fi
-    
-    # Create development guide
-    echo -e "${CYAN}Creating development guide...${NC}"
-    
-    cat > "$PROJECT_ROOT/DEV-SETUP.md" << 'DEVEOF'
-# Jiro AI Assistant - Development Configuration
-
-This file contains all the configuration values you need to set manually for development.
-After running setup with --dev flag, please review and update these settings.
-
-## Configuration Files Created:
-- .env (Docker environment)
-- appsettings.json (Application settings)
-
-## Environment Variables (.env)
-Location: .env
-
-Generated settings (review and update as needed):
-- Docker ports and MySQL configuration
-- Jiro API key (auto-generated)
-- JiroCloud configuration
-
-## Application Settings (appsettings.json)
-Location: src/Jiro.Kernel/Jiro.App/appsettings.json
-
-Required settings to update:
-- Chat.AuthToken: Add your OpenAI API key for AI features
-- ConnectionStrings.JiroContext: Database connection (auto-configured for SQLite)
-
-## Development Tools Installed:
-- DocFX (documentation generation)
-- markdownlint-cli (markdown linting, if Node.js available)
-
-## Next Steps:
-1. Review and update the configuration files listed above
-2. Configure OpenAI API key for chat features
-3. Run database migrations: dotnet ef database update -p src/Jiro.Kernel/Jiro.Infrastructure -s src/Jiro.Kernel/Jiro.App
-4. Start the application: cd src/Jiro.Kernel/Jiro.App && dotnet run
-5. Run tests: dotnet test src/Main.sln
-
-## Useful Development Commands:
-- Build project: dotnet build src/Main.sln
-- Run tests: dotnet test src/Main.sln
-- Format code: dotnet format src/Main.sln
-- Generate docs: ./scripts/docfx-gen.sh (if available)
-- Lint markdown: ./scripts/markdown-lint.sh (if available)
-- Local CI test: ./scripts/local-ci-test.sh (if available)
-
-For more information, see the project documentation.
-DEVEOF
-    
-    echo -e "${GREEN}Development guide created: DEV-SETUP.md${NC}"
-fi
 
 echo ""
 echo -e "${GREEN}=== Setup Complete ===${NC}"
 echo ""
 echo -e "${CYAN}Configuration files created:${NC}"
-echo "  - .env (Docker environment)"
-echo "  - appsettings.json (Application settings)"
+echo "  - .env (Environment variables - can override any appsettings.json value)"
+echo "  - appsettings.json (Application configuration)"
+echo ""
+echo -e "${CYAN}Service endpoints configured:${NC}"
+echo "  • JiroCloud API: ${config[JiroCloudApiUrl]}"
+echo "  • JiroCloud gRPC: ${config[JiroCloudGrpcServerUrl]}"
+echo "  • JiroCloud WebSocket: ${config[JiroCloudWebSocketHubUrl]}"
 echo ""
 
-if [ -z "${config[ChatAuthToken]}" ]; then
-    echo ""
-    echo -e "${YELLOW}IMPORTANT: Configuration items to set manually:${NC}"
-    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-    echo -e "  • ${RED}OpenAI API Key: Required for AI chat features${NC}"
-    echo "    - Update 'JIRO_Chat__AuthToken' in .env file"
-    echo "    - Update 'Chat.AuthToken' in appsettings.json"
-    echo ""
-    echo "  Generated secure values:"
-    echo "  • Jiro API Key: ${config[ApiKey]}"
-    echo ""
-    echo "  Service URLs:"
-    echo "  • JiroCloud gRPC: ${config[JiroCloudGrpcServerUrl]}"
-    echo "  • JiroCloud WebSocket: ${config[JiroCloudWebSocketHubUrl]}"
-    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-    echo ""
+has_warnings=false
+
+if [ -z "${config[JiroCloudApiKey]}" ]; then
+    if [ "$has_warnings" = false ]; then
+        echo -e "${YELLOW}IMPORTANT: Missing required configuration${NC}"
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        has_warnings=true
+    fi
+    echo -e "  • ${RED}JiroCloud API Key: Required for cloud services connection${NC}"
+    echo "    - Update 'JIRO_JiroCloud__ApiKey' in .env file"
 fi
+
+if [ -z "${config[ChatAuthToken]}" ]; then
+    if [ "$has_warnings" = false ]; then
+        echo -e "${YELLOW}IMPORTANT: Missing optional configuration${NC}"
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        has_warnings=true
+    fi
+    echo -e "  • ${YELLOW}OpenAI API Key: Required for AI chat features${NC}"
+    echo "    - Update 'OPENAI_API_KEY' and 'JIRO_Chat__AuthToken' in .env file"
+fi
+
 
 echo -e "${YELLOW}Next steps:${NC}"
-echo "1. Review the generated configuration files (.env and appsettings.json)"
-if [ -z "${config[ChatAuthToken]}" ]; then
-    echo "2. Configure OpenAI API Key (see above) for AI chat features"
-    echo "3. Run database migrations: dotnet ef database update -p src/Jiro.Kernel/Jiro.Infrastructure -s src/Jiro.Kernel/Jiro.App"
-    echo "4. Start the application:"
-else
-    echo "2. Run database migrations: dotnet ef database update -p src/Jiro.Kernel/Jiro.Infrastructure -s src/Jiro.Kernel/Jiro.App"
-    echo "3. Start the application:"
-fi
-echo "   - Direct: cd src/Jiro.Kernel/Jiro.App && dotnet run"
+step_number=1
 
-if [ "$DEV_MODE" = true ]; then
-    echo ""
-    echo -e "${CYAN}Development mode completed:${NC}"
-    echo "📋 Development tools installed and configured"
-    echo "📖 Development guide created: DEV-SETUP.md"
-    echo "🔧 Review DEV-SETUP.md for detailed configuration instructions"
+if [ -z "${config[JiroCloudApiKey]}" ]; then
+    echo "$step_number. Add your JiroCloud API key to .env file (required for cloud services)"
+    step_number=$((step_number + 1))
 fi
+
+if [ -z "${config[ChatAuthToken]}" ]; then
+    echo "$step_number. Add your OpenAI API key to .env file (optional for AI features)"
+    step_number=$((step_number + 1))
+fi
+
+echo "$step_number. Run database migrations: dotnet ef database update -p src/Jiro.Kernel/Jiro.Infrastructure -s src/Jiro.Kernel/Jiro.App"
+step_number=$((step_number + 1))
+echo "$step_number. Start the application: cd src/Jiro.Kernel/Jiro.App && dotnet run"
+echo ""
+echo -e "${GRAY}All configuration values can be overridden using environment variables with JIRO_ prefix.${NC}"
 echo ""

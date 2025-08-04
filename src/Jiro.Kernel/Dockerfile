@@ -54,18 +54,12 @@ COPY --from=build ${MAIN_WORK_DIR}/build ${MAIN_WORK_DIR}/build
 # Set up directories
 ARG DATA_PATH=${MAIN_WORK_DIR}/Data
 ENV ASPNETCORE_ENVIRONMENT=Production
-ENV ASPNETCORE_URLS=http://+:8080;https://+:8443
 
 # Create data directories and set permissions
 RUN mkdir -p ${DATA_PATH}/Logs ${DATA_PATH}/Database ${DATA_PATH}/Plugins ${DATA_PATH}/Themes ${DATA_PATH}/Messages && \
 	chown -R jiro:jiro ${MAIN_WORK_DIR}
 
 WORKDIR ${MAIN_WORK_DIR}/build
-
-# Expose ports
-EXPOSE 8080
-EXPOSE 8443
-EXPOSE 18090
 
 # Update dynamic linker bindings
 RUN ldconfig

@@ -6,93 +6,44 @@ services:
     build:
       context: ./src/Jiro.Kernel
       dockerfile: Dockerfile
-    ports:
-      - "${JIRO_HTTP_PORT}:8080"
-      - "${JIRO_HTTPS_PORT}:8443"
-      - "${JIRO_ADDITIONAL_PORT}:18090"
     environment:
-      # Database connection (JIRO_ prefix automatically maps to configuration)
-      - JIRO_ConnectionStrings__JiroContext=Server=${DB_SERVER};Database=${MYSQL_DATABASE};Uid=${MYSQL_USER};Pwd=${MYSQL_PASSWORD};
-      # Data paths configuration (optional - customize as needed)
-      - JIRO_DataPaths__Logs=${JIRO_LOGS_PATH:-Data/Logs}
-      - JIRO_DataPaths__Themes=${JIRO_THEMES_PATH:-Data/Themes}
-      - JIRO_DataPaths__Plugins=${JIRO_PLUGINS_PATH:-Data/Plugins}
-      - JIRO_DataPaths__Messages=${JIRO_MESSAGES_PATH:-Data/Messages}
-      # Application configuration
-      - JIRO_ApiKey=${JIRO_API_KEY}
-      - JIRO_JiroApi=${JIRO_JIRO_API:-https://localhost:18092}
-      # Serilog configuration overrides (optional - uncomment to customize)
-      # - JIRO_Serilog__WriteTo__1__Args__path=Data/Logs/jiro-detailed_.txt
-      # - JIRO_Serilog__WriteTo__2__Args__path=Data/Logs/jiro-errors_.txt
-      # - JIRO_Serilog__MinimumLevel__Default=Information
-      # OpenAI configuration (required for AI features)
-      # - JIRO_Chat__AuthToken=${OPENAI_API_KEY}
-      # JWT configuration (required for authentication)
-      # - JIRO_JWT__Secret=${JWT_SECRET}
-      # - JIRO_JWT__Issuer=${JWT_ISSUER}
-      # - JIRO_JWT__Audience=${JWT_AUDIENCE}
+      # Core application configuration
+      - JIRO_ApiKey=${JIRO_ApiKey}
+      
+      # OpenAI configuration
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - JIRO_Chat__AuthToken=${OPENAI_API_KEY}
+      - JIRO_Chat__SystemMessage=${JIRO_Chat__SystemMessage:-I want you to act as personal assistant called Jiro. You are friendly, funny and sarcastic. You can ask me anything you want and engage in conversation.}
+      - JIRO_Chat__TokenLimit=${JIRO_Chat__TokenLimit:-2000}
+      - JIRO_Chat__Enabled=${JIRO_Chat__Enabled:-true}
+      
+      # JiroCloud service configuration
+      - JIRO_JiroCloud__ApiKey=${JIRO_ApiKey}
+      - JIRO_JiroCloud__ApiUrl=${JIRO_JiroCloud__ApiUrl:-https://jiro.huebytes.com/api}
+      - JIRO_JiroCloud__Grpc__ServerUrl=${JIRO_JiroCloud__Grpc__ServerUrl:-https://jiro.huebytes.com/grpc}
+      - JIRO_JiroCloud__WebSocket__HubUrl=${JIRO_JiroCloud__WebSocket__HubUrl:-https://jiro.huebytes.com/hubs/instanceHub}
+      
+      # Database configuration (SQLite default)
+      - JIRO_ConnectionStrings__JiroContext=${JIRO_ConnectionStrings__JiroContext:-Data Source=Data/Database/jiro.db}
     volumes:
       - jiro_data:/home/app/jiro/Data
-      - jiro_logs:/home/app/jiro/Data/Logs
-      - jiro_themes:/home/app/jiro/Data/Themes
-      - jiro_plugins:/home/app/jiro/Data/Plugins
-      - jiro_database:/home/app/jiro/Data/Database
-      - jiro_messages:/home/app/jiro/Data/Messages
-    depends_on:
-      mysql:
-        condition: service_healthy
     networks:
       - jiro-network
     restart: unless-stopped
 
-  mysql:
-    container_name: jiro-mysql
-    image: mysql:8.0
-    environment:
-      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
-      - MYSQL_DATABASE=${MYSQL_DATABASE}
-      - MYSQL_USER=${MYSQL_USER}
-      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+  jiro-docs:
+    container_name: jiro-docs
+    build:
+      context: .
+      dockerfile: dev/Dockerfile
     ports:
-      - "${MYSQL_PORT}:3306"
-    volumes:
-      - mysql_data:/var/lib/mysql
-      - mysql_config:/etc/mysql/conf.d
+      - "${JIRO_DOCS_PORT:-8081}:80"
     networks:
       - jiro-network
     restart: unless-stopped
-    healthcheck:
-      test:
-        [
-          "CMD",
-          "mysqladmin",
-          "ping",
-          "-h",
-          "localhost",
-          "-u${MYSQL_USER}",
-          "-p${MYSQL_PASSWORD}",
-        ]
-      interval: ${MYSQL_HEALTH_CHECK_INTERVAL}
-      timeout: ${MYSQL_HEALTH_CHECK_TIMEOUT}
-      retries: ${MYSQL_HEALTH_CHECK_RETRIES}
-      start_period: ${MYSQL_HEALTH_CHECK_START_PERIOD}
 
 volumes:
   jiro_data:
-    driver: local
-  jiro_logs:
-    driver: local
-  jiro_themes:
-    driver: local
-  jiro_plugins:
-    driver: local
-  jiro_database:
-    driver: local
-  jiro_messages:
-    driver: local
-  mysql_data:
-    driver: local
-  mysql_config:
     driver: local
 
 networks:
