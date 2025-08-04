@@ -16,6 +16,30 @@ Jiro implements a hybrid communication architecture that combines WebSocket conn
 ## Communication Flow
 
 ```mermaid
+%%{init: {
+  "theme": "base",
+  "themeVariables": {
+    "background": "#1C1E26",
+    "primaryColor": "#FCD4B8",
+    "primaryTextColor": "#D5D8DA",
+    "primaryBorderColor": "#E95378",
+    "lineColor": "#6C6F93",
+    "sectionBkgColor": "#232530",
+    "altSectionBkgColor": "#2E303E",
+    "gridColor": "#16161C",
+    "secondaryColor": "#26BBD9",
+    "tertiaryColor": "#27D797",
+    "actorBkg": "#2E303E",
+    "actorBorder": "#6C6F93",
+    "actorTextColor": "#D5D8DA",
+    "activationBkgColor": "#FCD4B8",
+    "activationBorderColor": "#E29A6B",
+    "noteBkgColor": "#26BBD9",
+    "noteBorderColor": "#1A9CB8",
+    "noteTextColor": "#1C1E26",
+    "altColor": "#27D797"
+  }
+}}%%
 sequenceDiagram
     participant Server as Jiro Server
     participant WS as SignalR WebSocket
@@ -46,6 +70,26 @@ sequenceDiagram
 ## Service Architecture
 
 ```mermaid
+%%{init: {
+  "theme": "base",
+  "themeVariables": {
+    "background": "#1C1E26",
+    "primaryColor": "#FCD4B8",
+    "primaryTextColor": "#D5D8DA",
+    "primaryBorderColor": "#E95378",
+    "lineColor": "#6C6F93",
+    "sectionBkgColor": "#232530",
+    "altSectionBkgColor": "#2E303E",
+    "gridColor": "#16161C",
+    "secondaryColor": "#26BBD9",
+    "tertiaryColor": "#27D797",
+    "cScale0": "#1C1E26",
+    "cScale1": "#232530",
+    "cScale2": "#2E303E",
+    "cScale3": "#6C6F93",
+    "cScale4": "#D5D8DA"
+  }
+}}%%
 graph TB
     subgraph "Application Layer"
         App[Jiro Application]
@@ -81,14 +125,41 @@ graph TB
     WSConn <--> SignalR
     GrpcSvc --> GrpcServer
     
-    style WSService fill:#e1f5fe
-    style GrpcSvc fill:#f3e5f5
-    style WSConn fill:#e8f5e8
+    %% Horizon Theme Styling
+    classDef wsService fill:#26BBD9,stroke:#1A9CB8,stroke-width:2px,color:#06060C
+    classDef grpcService fill:#FCD4B8,stroke:#E29A6B,stroke-width:2px,color:#06060C
+    classDef wsConn fill:#27D797,stroke:#21BFC2,stroke-width:2px,color:#06060C
+    
+    class WSService wsService
+    class GrpcSvc grpcService
+    class WSConn wsConn
 ```
 
 ## Dependency Injection and Scoping
 
 ```mermaid
+%%{init: {
+  "theme": "base",
+  "themeVariables": {
+    "background": "#1C1E26",
+    "primaryColor": "#FCD4B8",
+    "primaryTextColor": "#D5D8DA",
+    "primaryBorderColor": "#E95378",
+    "lineColor": "#6C6F93",
+    "sectionBkgColor": "#232530",
+    "altSectionBkgColor": "#2E303E",
+    "gridColor": "#16161C",
+    "secondaryColor": "#26BBD9",
+    "tertiaryColor": "#27D797",
+    "cScale0": "#1C1E26",
+    "cScale1": "#232530",
+    "cScale2": "#2E303E",
+    "cScale3": "#6C6F93",
+    "cScale4": "#D5D8DA",
+    "clusterBkg": "#232530",
+    "clusterBorder": "#6C6F93"
+  }
+}}%%
 graph LR
     subgraph "Singleton Services"
         WSService[JiroWebSocketService]
@@ -116,9 +187,14 @@ graph LR
     WSService -.-> Monitor
     WSService --> WSConn
     
-    style Scope fill:#fff3e0
-    style GrpcSvc fill:#f3e5f5
-    style WSService fill:#e1f5fe
+    %% Horizon Theme Styling
+    classDef scopeStyle fill:#26BBD9,stroke:#1A9CB8,stroke-width:2px,color:#06060C
+    classDef grpcStyle fill:#27D797,stroke:#21BFC2,stroke-width:2px,color:#06060C
+    classDef wsStyle fill:#FCD4B8,stroke:#E29A6B,stroke-width:2px,color:#06060C
+    
+    class Scope scopeStyle
+    class GrpcSvc grpcStyle
+    class WSService wsStyle
 ```
 
 ## Message Flow and Data Structures
@@ -156,6 +232,27 @@ message ClientMessage {
 ## Connection Management
 
 ```mermaid
+%%{init: {
+  "theme": "base",
+  "themeVariables": {
+    "background": "#1C1E26",
+    "primaryColor": "#FCD4B8",
+    "primaryTextColor": "#D5D8DA",
+    "primaryBorderColor": "#E95378",
+    "lineColor": "#6C6F93",
+    "sectionBkgColor": "#232530",
+    "altSectionBkgColor": "#2E303E",
+    "gridColor": "#16161C",
+    "secondaryColor": "#26BBD9",
+    "tertiaryColor": "#27D797",
+    "cScale0": "#1C1E26",
+    "cScale1": "#232530",
+    "cScale2": "#2E303E",
+    "cScale3": "#6C6F93",
+    "cScale4": "#D5D8DA",
+    "stateLabelColor": "#D5D8DA"
+  }
+}}%%
 stateDiagram-v2
     [*] --> Disconnected
     
@@ -190,6 +287,28 @@ stateDiagram-v2
 ### WebSocket Connection Retry
 
 ```mermaid
+%%{init: {
+  "theme": "base",
+  "themeVariables": {
+    "background": "#1C1E26",
+    "primaryColor": "#FCD4B8",
+    "primaryTextColor": "#D5D8DA",
+    "primaryBorderColor": "#E95378",
+    "lineColor": "#6C6F93",
+    "sectionBkgColor": "#232530",
+    "altSectionBkgColor": "#2E303E",
+    "gridColor": "#16161C",
+    "secondaryColor": "#26BBD9",
+    "tertiaryColor": "#27D797",
+    "cScale0": "#1C1E26",
+    "cScale1": "#232530",
+    "cScale2": "#2E303E",
+    "cScale3": "#6C6F93",
+    "cScale4": "#D5D8DA",
+    "clusterBkg": "#232530",
+    "clusterBorder": "#6C6F93"
+  }
+}}%%
 flowchart TD
     Start[Connection Attempt] --> Try[Connect to Hub]
     Try --> Success{Connected?}
@@ -204,14 +323,41 @@ flowchart TD
     Lost -->|No| Monitor
     Auto --> Try
     
-    style Success fill:#4caf50
-    style Fail fill:#f44336
-    style Wait fill:#ff9800
+    %% Horizon Theme Styling
+    classDef successStyle fill:#27D797,stroke:#21BFC2,stroke-width:2px,color:#06060C
+    classDef failStyle fill:#E95378,stroke:#C7455C,stroke-width:2px,color:#06060C
+    classDef waitStyle fill:#FCD4B8,stroke:#E29A6B,stroke-width:2px,color:#06060C
+    
+    class Success successStyle
+    class Fail failStyle
+    class Wait waitStyle
 ```
 
 ### gRPC Result Sending Retry
 
 ```mermaid
+%%{init: {
+  "theme": "base",
+  "themeVariables": {
+    "background": "#1C1E26",
+    "primaryColor": "#FCD4B8",
+    "primaryTextColor": "#D5D8DA",
+    "primaryBorderColor": "#E95378",
+    "lineColor": "#6C6F93",
+    "sectionBkgColor": "#232530",
+    "altSectionBkgColor": "#2E303E",
+    "gridColor": "#16161C",
+    "secondaryColor": "#26BBD9",
+    "tertiaryColor": "#27D797",
+    "cScale0": "#1C1E26",
+    "cScale1": "#232530",
+    "cScale2": "#2E303E",
+    "cScale3": "#6C6F93",
+    "cScale4": "#D5D8DA",
+    "clusterBkg": "#232530",
+    "clusterBorder": "#6C6F93"
+  }
+}}%%
 flowchart TD
     Send[Send gRPC Message] --> Attempt[gRPC Call]
     Attempt --> Response{Successful?}
@@ -221,9 +367,14 @@ flowchart TD
     RetryCheck -->|No| Error[Throw Exception]
     Backoff --> Attempt
     
-    style Complete fill:#4caf50
-    style Error fill:#f44336
-    style Backoff fill:#ff9800
+    %% Horizon Theme Styling
+    classDef completeStyle fill:#27D797,stroke:#21BFC2,stroke-width:2px,color:#06060C
+    classDef errorStyle fill:#E95378,stroke:#C7455C,stroke-width:2px,color:#06060C
+    classDef backoffStyle fill:#FCD4B8,stroke:#E29A6B,stroke-width:2px,color:#06060C
+    
+    class Complete completeStyle
+    class Error errorStyle
+    class Backoff backoffStyle
 ```
 
 ## Configuration
@@ -284,6 +435,34 @@ services.AddSingleton<ICommandQueueMonitor, JiroWebSocketService>();
 ## Command Execution Lifecycle
 
 ```mermaid
+%%{init: {
+  "theme": "base",
+  "themeVariables": {
+    "background": "#1C1E26",
+    "primaryColor": "#FCD4B8",
+    "primaryTextColor": "#D5D8DA",
+    "primaryBorderColor": "#E95378",
+    "lineColor": "#6C6F93",
+    "sectionBkgColor": "#232530",
+    "altSectionBkgColor": "#2E303E",
+    "gridColor": "#16161C",
+    "secondaryColor": "#26BBD9",
+    "tertiaryColor": "#27D797",
+    "cScale0": "#1C1E26",
+    "cScale1": "#232530",
+    "cScale2": "#2E303E",
+    "cScale3": "#6C6F93",
+    "cScale4": "#D5D8DA",
+    "actorBkg": "#2E303E",
+    "actorBorder": "#6C6F93",
+    "actorTextColor": "#D5D8DA",
+    "activationBkgColor": "#FCD4B8",
+    "activationBorderColor": "#E29A6B",
+    "noteBkgColor": "#26BBD9",
+    "noteBorderColor": "#1A9CB8",
+    "noteTextColor": "#1C1E26"
+  }
+}}%%
 sequenceDiagram
     participant WS as WebSocket
     participant Service as JiroWebSocketService

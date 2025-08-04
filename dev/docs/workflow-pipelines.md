@@ -13,6 +13,28 @@ The Jiro project utilizes multiple GitHub Actions workflows organized by respons
 When a Pull Request is created, multiple validation workflows run in parallel:
 
 ```mermaid
+%%{init: {
+  "theme": "base",
+  "themeVariables": {
+    "background": "#1C1E26",
+    "primaryColor": "#FCD4B8",
+    "primaryTextColor": "#D5D8DA",
+    "primaryBorderColor": "#E95378",
+    "lineColor": "#6C6F93",
+    "sectionBkgColor": "#232530",
+    "altSectionBkgColor": "#2E303E", 
+    "gridColor": "#16161C",
+    "secondaryColor": "#26BBD9",
+    "tertiaryColor": "#27D797",
+    "cScale0": "#1C1E26",
+    "cScale1": "#232530",
+    "cScale2": "#2E303E",
+    "cScale3": "#6C6F93",
+    "cScale4": "#D5D8DA",
+    "clusterBkg": "#232530",
+    "clusterBorder": "#6C6F93"
+  }
+}}%%
 graph TD
     A[PR Created/Updated] --> B[.NET CI]
     A --> C[Docker Build]
@@ -32,6 +54,28 @@ graph TD
 When PR is merged to main, production workflows execute:
 
 ```mermaid
+%%{init: {
+  "theme": "base",
+  "themeVariables": {
+    "background": "#1C1E26",
+    "primaryColor": "#FCD4B8",
+    "primaryTextColor": "#D5D8DA",
+    "primaryBorderColor": "#E95378",
+    "lineColor": "#6C6F93",
+    "sectionBkgColor": "#232530",
+    "altSectionBkgColor": "#2E303E", 
+    "gridColor": "#16161C",
+    "secondaryColor": "#26BBD9",
+    "tertiaryColor": "#27D797",
+    "cScale0": "#1C1E26",
+    "cScale1": "#232530",
+    "cScale2": "#2E303E",
+    "cScale3": "#6C6F93",
+    "cScale4": "#D5D8DA",
+    "clusterBkg": "#232530",
+    "clusterBorder": "#6C6F93"
+  }
+}}%%
 graph TD
     A[Merge to Main] --> B[☁️ Auto-Versioning]
     A --> C[🐳 Docker Push]
@@ -333,6 +377,28 @@ docker pull ghcr.io/huebyte/jiro-kernel:main
 ### **Workflow Dependencies**
 
 ```mermaid
+%%{init: {
+  "theme": "base",
+  "themeVariables": {
+    "background": "#1C1E26",
+    "primaryColor": "#FCD4B8",
+    "primaryTextColor": "#D5D8DA",
+    "primaryBorderColor": "#E95378",
+    "lineColor": "#6C6F93",
+    "sectionBkgColor": "#232530",
+    "altSectionBkgColor": "#2E303E", 
+    "gridColor": "#16161C",
+    "secondaryColor": "#26BBD9",
+    "tertiaryColor": "#27D797",
+    "cScale0": "#1C1E26",
+    "cScale1": "#232530",
+    "cScale2": "#2E303E",
+    "cScale3": "#6C6F93",
+    "cScale4": "#D5D8DA",
+    "clusterBkg": "#232530",
+    "clusterBorder": "#6C6F93"
+  }
+}}%%
 graph LR
     A[PR Created] --> B[All Validation Workflows]
     B --> C[Merge Approved]
@@ -711,6 +777,28 @@ All scripts are available in both PowerShell (`.ps1`) and Bash (`.sh`) versions:
 #### **Script Integration with Workflows**
 
 ```mermaid
+%%{init: {
+  "theme": "base",
+  "themeVariables": {
+    "background": "#1C1E26",
+    "primaryColor": "#FCD4B8",
+    "primaryTextColor": "#D5D8DA",
+    "primaryBorderColor": "#E95378",
+    "lineColor": "#6C6F93",
+    "sectionBkgColor": "#232530",
+    "altSectionBkgColor": "#2E303E", 
+    "gridColor": "#16161C",
+    "secondaryColor": "#26BBD9",
+    "tertiaryColor": "#27D797",
+    "cScale0": "#1C1E26",
+    "cScale1": "#232530",
+    "cScale2": "#2E303E",
+    "cScale3": "#6C6F93",
+    "cScale4": "#D5D8DA",
+    "clusterBkg": "#232530",
+    "clusterBorder": "#6C6F93"
+  }
+}}%%
 graph TD
     A[Developer Scripts] --> B[Local Testing]
     A --> C[CI/CD Workflows]

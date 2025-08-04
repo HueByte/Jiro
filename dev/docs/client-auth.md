@@ -125,6 +125,29 @@ The system reads authentication credentials from:
 ### 1. Application Startup
 
 ```mermaid
+%%{init: {
+  "theme": "base",
+  "themeVariables": {
+    "background": "#1C1E26",
+    "primaryColor": "#FCD4B8",
+    "primaryTextColor": "#D5D8DA",
+    "primaryBorderColor": "#E95378",
+    "lineColor": "#6C6F93",
+    "sectionBkgColor": "#232530",
+    "altSectionBkgColor": "#2E303E",
+    "gridColor": "#16161C",
+    "secondaryColor": "#26BBD9",
+    "tertiaryColor": "#27D797",
+    "actorBkg": "#2E303E",
+    "actorBorder": "#6C6F93",
+    "actorTextColor": "#D5D8DA",
+    "activationBkgColor": "#FCD4B8",
+    "activationBorderColor": "#E29A6B",
+    "noteBkgColor": "#26BBD9",
+    "noteBorderColor": "#1A9CB8",
+    "noteTextColor": "#1C1E26"
+  }
+}}%%
 sequenceDiagram
     participant App as Jiro App
     participant Config as Configuration
@@ -149,6 +172,29 @@ sequenceDiagram
 #### gRPC Requests
 
 ```mermaid
+%%{init: {
+  "theme": "base",
+  "themeVariables": {
+    "background": "#1C1E26",
+    "primaryColor": "#FCD4B8",
+    "primaryTextColor": "#D5D8DA",
+    "primaryBorderColor": "#E95378",
+    "lineColor": "#6C6F93",
+    "sectionBkgColor": "#232530",
+    "altSectionBkgColor": "#2E303E",
+    "gridColor": "#16161C",
+    "secondaryColor": "#26BBD9",
+    "tertiaryColor": "#27D797",
+    "actorBkg": "#2E303E",
+    "actorBorder": "#6C6F93",
+    "actorTextColor": "#D5D8DA",
+    "activationBkgColor": "#FCD4B8",
+    "activationBorderColor": "#E29A6B",
+    "noteBkgColor": "#26BBD9",
+    "noteBorderColor": "#1A9CB8",
+    "noteTextColor": "#1C1E26"
+  }
+}}%%
 sequenceDiagram
     participant Client as Jiro Client
     participant gRPC as gRPC Service
@@ -165,6 +211,30 @@ sequenceDiagram
 #### WebSocket Connection
 
 ```mermaid
+%%{init: {
+  "theme": "base",
+  "themeVariables": {
+    "background": "#1C1E26",
+    "primaryColor": "#FCD4B8",
+    "primaryTextColor": "#D5D8DA",
+    "primaryBorderColor": "#E95378",
+    "lineColor": "#6C6F93",
+    "sectionBkgColor": "#232530",
+    "altSectionBkgColor": "#2E303E",
+    "gridColor": "#16161C",
+    "secondaryColor": "#26BBD9",
+    "tertiaryColor": "#27D797",
+    "actorBkg": "#2E303E",
+    "actorBorder": "#6C6F93",
+    "actorTextColor": "#D5D8DA",
+    "activationBkgColor": "#FCD4B8",
+    "activationBorderColor": "#E29A6B",
+    "noteBkgColor": "#26BBD9",
+    "noteBorderColor": "#1A9CB8",
+    "noteTextColor": "#1C1E26",
+    "loopTextColor": "#D5D8DA"
+  }
+}}%%
 sequenceDiagram
     participant Client as Jiro Client  
     participant WS as SignalR Client
