@@ -12,6 +12,9 @@ using OpenAI.Chat;
 
 namespace Jiro.Core.Services.Conversation;
 
+/// <summary>
+/// Service for managing personalized chat conversations with AI integration, message history optimization, and token usage tracking.
+/// </summary>
 public class PersonalizedConversationService : IPersonalizedConversationService
 {
 	private readonly ILogger<PersonalizedConversationService> _logger;
@@ -28,6 +31,18 @@ public class PersonalizedConversationService : IPersonalizedConversationService
 	private const float PRICING_INPUT_CACHED = 0.075f;
 	private const float ONE_MILLION = 1_000_000;
 
+	/// <summary>
+	/// Initializes a new instance of the <see cref="PersonalizedConversationService"/> class.
+	/// </summary>
+	/// <param name="logger">The logger for recording conversation operations.</param>
+	/// <param name="chatCoreService">The core chat service for AI interactions.</param>
+	/// <param name="personaService">The persona service for managing AI personality.</param>
+	/// <param name="messageCacheService">The message cache service for managing conversation history.</param>
+	/// <param name="historyOptimizerService">The history optimizer service for managing token usage.</param>
+	/// <param name="commandContext">The command context for processing commands.</param>
+	/// <param name="chatSessionRepository">The repository for chat session data.</param>
+	/// <param name="messageRepository">The repository for message data.</param>
+	/// <param name="instanceMetadataAccessor">The accessor for instance metadata.</param>
 	public PersonalizedConversationService(ILogger<PersonalizedConversationService> logger, IConversationCoreService chatCoreService, IPersonaService personaService, IMessageManager messageCacheService, IHistoryOptimizerService historyOptimizerService, ICommandContext commandContext, IChatSessionRepository chatSessionRepository, IMessageRepository messageRepository, IInstanceMetadataAccessor instanceMetadataAccessor)
 	{
 		_logger = logger ?? throw new ArgumentNullException(nameof(logger), "Logger cannot be null.");
@@ -41,6 +56,14 @@ public class PersonalizedConversationService : IPersonalizedConversationService
 		_instanceMetadataAccessor = instanceMetadataAccessor ?? throw new ArgumentNullException(nameof(instanceMetadataAccessor), "Instance metadata accessor cannot be null.");
 	}
 
+	/// <summary>
+	/// Processes a chat message for a specific instance and session, managing conversation history and AI response generation.
+	/// </summary>
+	/// <param name="instanceId">The unique identifier of the instance.</param>
+	/// <param name="sessionId">The unique identifier of the chat session.</param>
+	/// <param name="message">The user message to process.</param>
+	/// <returns>A task that represents the asynchronous operation, containing the AI assistant's response.</returns>
+	/// <exception cref="Exception">Thrown when persona is not found or no assistant response is received.</exception>
 	public async Task<string> ChatAsync(string instanceId, string sessionId, string message)
 	{
 		try
@@ -103,6 +126,11 @@ public class PersonalizedConversationService : IPersonalizedConversationService
 		}
 	}
 
+	/// <summary>
+	/// Exchanges a single message with the AI assistant without session management.
+	/// </summary>
+	/// <param name="message">The message to send to the AI assistant.</param>
+	/// <returns>A task that represents the asynchronous operation, containing the AI assistant's response.</returns>
 	public async Task<string> ExchangeMessageAsync(string message)
 	{
 		var persona = await _personaService.GetPersonaAsync();
@@ -153,6 +181,10 @@ public class PersonalizedConversationService : IPersonalizedConversationService
 		}
 	}
 
+	/// <summary>
+	/// Logs detailed token usage information and calculates estimated message cost.
+	/// </summary>
+	/// <param name="usage">The token usage information from the AI service.</param>
 	private void LogTokenUsage(ChatTokenUsage usage)
 	{
 		_logger.LogInformation("Chat used [Total: {totalTokens}] ~ [Input: {inputTokens}] ~ [CachedInput: {cachedInputTokens}] ~ [Output: {outputTokens}] ~ [JiroCounter: {JiroTokens}] tokens",
@@ -161,6 +193,12 @@ public class PersonalizedConversationService : IPersonalizedConversationService
 		_logger.LogInformation("Estimated message price: {messagePrice}$", CalculateMessagePrice(usage));
 	}
 
+	/// <summary>
+	/// Prepares message history for chat processing by loading existing messages and adding the new user message.
+	/// </summary>
+	/// <param name="session">The chat session containing existing messages.</param>
+	/// <param name="message">The new user message to add to the conversation.</param>
+	/// <returns>A tuple containing the conversation for chat processing and the complete conversation history.</returns>
 	private (List<ChatMessageWithMetadata>, List<ChatMessageWithMetadata>) PrepareMessageHistory(Session session, string message)
 	{
 		try
@@ -193,6 +231,11 @@ public class PersonalizedConversationService : IPersonalizedConversationService
 		}
 	}
 
+	/// <summary>
+	/// Calculates the estimated cost of a message based on token usage and pricing rates.
+	/// </summary>
+	/// <param name="tokenUsage">The token usage information from the AI service.</param>
+	/// <returns>The estimated cost in dollars for the message processing.</returns>
 	private float CalculateMessagePrice(ChatTokenUsage tokenUsage)
 	{
 		var messagePrice =

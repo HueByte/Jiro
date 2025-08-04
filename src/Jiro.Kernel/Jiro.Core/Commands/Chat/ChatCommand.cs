@@ -5,14 +5,40 @@ using Jiro.Core.Services.MessageCache;
 
 namespace Jiro.Core.Commands.Chat;
 
+/// <summary>
+/// Command module that provides chat functionality using AI conversation services.
+/// </summary>
 [CommandModule("Chat")]
 public class ChatCommand : ICommandBase
 {
+	/// <summary>
+	/// The personalized conversation service for AI chat interactions.
+	/// </summary>
 	private readonly IPersonalizedConversationService _chatService;
+
+	/// <summary>
+	/// The command context for accessing session information.
+	/// </summary>
 	private readonly ICommandContext _commandContext;
+
+	/// <summary>
+	/// The message manager for handling chat messages.
+	/// </summary>
 	private readonly IMessageManager _messageManager;
+
+	/// <summary>
+	/// The instance metadata accessor for retrieving instance information.
+	/// </summary>
 	private readonly IInstanceMetadataAccessor _instanceMetadataAccessor;
 
+	/// <summary>
+	/// Initializes a new instance of the ChatCommand class.
+	/// </summary>
+	/// <param name="chatService">The personalized conversation service.</param>
+	/// <param name="commandContext">The command context.</param>
+	/// <param name="messageManager">The message manager.</param>
+	/// <param name="instanceMetadataAccessor">The instance metadata accessor.</param>
+	/// <exception cref="ArgumentNullException">Thrown when any of the required parameters is null.</exception>
 	public ChatCommand(IPersonalizedConversationService chatService, ICommandContext commandContext, IMessageManager messageManager, IInstanceMetadataAccessor instanceMetadataAccessor)
 	{
 		_messageManager = messageManager ?? throw new ArgumentNullException(nameof(messageManager), "Chat storage service cannot be null.");
@@ -21,6 +47,12 @@ public class ChatCommand : ICommandBase
 		_instanceMetadataAccessor = instanceMetadataAccessor ?? throw new ArgumentNullException(nameof(instanceMetadataAccessor), "Instance metadata accessor cannot be null.");
 	}
 
+	/// <summary>
+	/// Processes a chat prompt using the AI conversation service and returns the response.
+	/// </summary>
+	/// <param name="prompt">The user's chat prompt or message.</param>
+	/// <returns>A task representing the asynchronous operation that returns the AI's response.</returns>
+	/// <exception cref="JiroException">Thrown when the session is not found.</exception>
 	[Command("chat")]
 	public async Task<ICommandResult> Chat(string prompt)
 	{

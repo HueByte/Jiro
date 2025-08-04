@@ -7,6 +7,9 @@ using Microsoft.Extensions.Logging;
 
 namespace Jiro.Core.Services.Persona;
 
+/// <summary>
+/// Service for managing AI persona configuration, including personality messages and conversation summaries.
+/// </summary>
 public class PersonaService : IPersonaService
 {
 	private readonly ILogger<PersonaService> _logger;
@@ -15,6 +18,14 @@ public class PersonaService : IPersonaService
 	private readonly IMemoryCache _memoryCache;
 	private readonly ISemaphoreManager _chatSemaphoreManager;
 
+	/// <summary>
+	/// Initializes a new instance of the <see cref="PersonaService"/> class.
+	/// </summary>
+	/// <param name="logger">The logger for recording persona operations.</param>
+	/// <param name="messageCacheService">The message cache service for persona data.</param>
+	/// <param name="chatService">The core conversation service.</param>
+	/// <param name="memoryCache">The memory cache for storing computed persona messages.</param>
+	/// <param name="chatSemaphoreManager">The semaphore manager for controlling concurrent access.</param>
 	public PersonaService(ILogger<PersonaService> logger, IMessageManager messageCacheService, IConversationCoreService chatService, IMemoryCache memoryCache, ISemaphoreManager chatSemaphoreManager)
 	{
 		_logger = logger;
@@ -24,6 +35,11 @@ public class PersonaService : IPersonaService
 		_chatSemaphoreManager = chatSemaphoreManager;
 	}
 
+	/// <summary>
+	/// Retrieves the persona message for the specified instance, using thread-safe access control.
+	/// </summary>
+	/// <param name="instanceId">The unique identifier of the instance. If empty, returns the default persona.</param>
+	/// <returns>A task that represents the asynchronous operation, containing the persona message.</returns>
 	public async Task<string> GetPersonaAsync(string instanceId = "")
 	{
 		if (string.IsNullOrEmpty(instanceId))
@@ -53,6 +69,11 @@ public class PersonaService : IPersonaService
 		return personaMessage;
 	}
 
+	/// <summary>
+	/// Adds a conversation summary to the persona message to maintain context across sessions.
+	/// </summary>
+	/// <param name="updateMessage">The summary message to append to the persona.</param>
+	/// <returns>A task that represents the asynchronous operation.</returns>
 	public async Task AddSummaryAsync(string updateMessage)
 	{
 		try
@@ -76,6 +97,10 @@ public class PersonaService : IPersonaService
 		}
 	}
 
+	/// <summary>
+	/// Internal method to retrieve and cache the persona message, with fallback to default message.
+	/// </summary>
+	/// <returns>A task that represents the asynchronous operation, containing the persona message.</returns>
 	private async Task<string> GetPersonaInternalAsync()
 	{
 		try

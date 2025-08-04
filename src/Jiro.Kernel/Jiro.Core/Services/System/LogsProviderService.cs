@@ -196,7 +196,7 @@ public class LogsProviderService : ILogsProviderService
 	}
 
 	/// <inheritdoc/>
-	public async Task<IEnumerable<LogFileInfo>> GetLogFilesAsync()
+	public Task<IEnumerable<LogFileInfo>> GetLogFilesAsync()
 	{
 		var (logsDirectory, logPatterns) = GetLogPathsFromSerilogConfig();
 		var files = new List<LogFileInfo>();
@@ -229,12 +229,12 @@ public class LogsProviderService : ILogsProviderService
 				}
 			}
 
-			return files.OrderByDescending(f => f.LastModified);
+			return Task.FromResult<IEnumerable<LogFileInfo>>(files.OrderByDescending(f => f.LastModified));
 		}
 		catch (Exception ex)
 		{
 			_logger.LogError(ex, "Error retrieving log files");
-			return Enumerable.Empty<LogFileInfo>();
+			return Task.FromResult<IEnumerable<LogFileInfo>>(Enumerable.Empty<LogFileInfo>());
 		}
 	}
 
