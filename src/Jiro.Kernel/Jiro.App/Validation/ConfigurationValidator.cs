@@ -61,10 +61,16 @@ public static class ConfigurationValidator
 				configManager["JiroCloud:Grpc:ServerUrl"] = "https://jiro.huebytes.com/grpc";
 			}
 
-			// Set default WebSocket API key if missing
+			// Set default JiroCloud API key if missing
 			if (string.IsNullOrWhiteSpace(configuration.GetSection("JiroCloud:ApiKey").Value))
 			{
 				configManager["JiroCloud:ApiKey"] = "test-jirocloud-api-key";
+			}
+
+			// Set default JiroCloud API URL if missing
+			if (string.IsNullOrWhiteSpace(configuration.GetSection("JiroCloud:ApiUrl").Value))
+			{
+				configManager["JiroCloud:ApiUrl"] = "https://jiro.huebytes.com/api";
 			}
 
 			// Set default WebSocket Hub URL if missing
@@ -116,6 +122,16 @@ public static class ConfigurationValidator
 				jiroCloudOptions.ApiKey == "your-api-key-here")
 			{
 				errors.Add("❌ JiroCloud:ApiKey is required. Set it in appsettings.json or use JIRO_JiroCloud__ApiKey environment variable.");
+			}
+
+			// Validate JiroCloud API URL
+			if (string.IsNullOrWhiteSpace(jiroCloudOptions.ApiUrl))
+			{
+				errors.Add("❌ JiroCloud:ApiUrl is required. Set it in appsettings.json or use JIRO_JiroCloud__ApiUrl environment variable.");
+			}
+			else if (!Uri.TryCreate(jiroCloudOptions.ApiUrl, UriKind.Absolute, out var apiUri))
+			{
+				errors.Add("❌ JiroCloud:ApiUrl must be a valid URL. Current value: " + jiroCloudOptions.ApiUrl);
 			}
 
 			// Validate WebSocket configuration
@@ -238,8 +254,8 @@ public static class ConfigurationValidator
 			Console.WriteLine();
 			Console.WriteLine("💡 Tips:");
 			Console.WriteLine("  • Copy Configuration/appsettings.example.json to Configuration/appsettings.json and configure your values");
-			Console.WriteLine("  • Use environment variables with JIRO_ prefix (e.g., JIRO_ApiKey=your-key)");
-			Console.WriteLine("  • Use double underscores for nested settings (e.g., JIRO_JiroCloud__ApiKey=your-key)");
+			Console.WriteLine("  • Use environment variables with JIRO_ prefix (e.g., JIRO_JiroCloud__ApiKey=your-key)");
+			Console.WriteLine("  • Use double underscores for nested settings (e.g., JIRO_JiroCloud__ApiUrl=your-api-url)");
 			Console.WriteLine("  • Run the setup script: ./scripts/setup-project.ps1 (Windows) or ./scripts/setup-project.sh (Linux/macOS)");
 		}
 	}

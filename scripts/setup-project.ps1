@@ -3,27 +3,23 @@
 .SYNOPSIS
     Setup script for Jiro project configuration
 .DESCRIPTION
-    Configures the Jiro project with either interactive prompts for important values or non-interactive defaults
-.PARAMETER Default
-    Interactive setup - prompts for important values like API keys (recommended)
-.PARAMETER NonInteractive
-    Non-interactive setup - uses secure defaults, no prompts (mentions what needs to be configured)
+    Interactive setup script that prompts for critical configuration values and sets up the Jiro project
 #>
 
 param(
-    [switch]$Default,
-    [switch]$NonInteractive
+    [switch]$Help
 )
 
-# Ensure only one mode is selected
-if ($Default -and $NonInteractive) {
-    Write-Error "Please specify either -Default or -NonInteractive, not both"
-    exit 1
-}
-
-if (-not $Default -and -not $NonInteractive) {
-    Write-Error "Please specify either -Default or -NonInteractive mode"
-    exit 1
+if ($Help) {
+    Write-Host "Jiro Project Setup Script" -ForegroundColor Cyan
+    Write-Host ""
+    Write-Host "This script will interactively configure your Jiro project by prompting for:"
+    Write-Host "  - Jiro API Key (for instance and cloud services)"
+    Write-Host "  - OpenAI API Key (for AI chat features)"
+    Write-Host ""
+    Write-Host "Usage: ./setup-project.ps1"
+    Write-Host "       ./setup-project.ps1 -Help    (show this help)"
+    exit 0
 }
 
 Write-Host "=== Jiro Project Setup ===" -ForegroundColor Cyan
@@ -62,48 +58,36 @@ function New-SecureString {
     return $result
 }
 
-if ($Default) {
-    Write-Host "Interactive setup mode (prompting for important values)" -ForegroundColor Green
-    Write-Host "Press Enter to use default value shown in [brackets]" -ForegroundColor Gray
-    Write-Host ""
-    
-    # Main API Key (used for both Jiro instance and JiroCloud)
-    $apiKey = Read-Host "Jiro API Key (for instance and cloud services) [auto-generated]"
-    if ($apiKey) { 
-        $config.ApiKey = $apiKey 
-    } else {
-        $config.ApiKey = New-SecureString -Length 32
-        Write-Host "Generated: $($config.ApiKey)" -ForegroundColor DarkGray
-    }
-    
-    # Chat Configuration
-    Write-Host ""
-    Write-Host "Chat Configuration:" -ForegroundColor Yellow
-    $chatAuthToken = Read-Host "OpenAI API Key (required for AI chat features)"
-    if ($chatAuthToken) { $config.ChatAuthToken = $chatAuthToken }
-    
-    # JiroCloud Configuration
-    Write-Host ""
-    Write-Host "JiroCloud Configuration:" -ForegroundColor Yellow
-    
-    $grpcServerUrl = Read-Host "JiroCloud gRPC Server URL [$($config.JiroCloudGrpcServerUrl)]"
-    if ($grpcServerUrl) { $config.JiroCloudGrpcServerUrl = $grpcServerUrl }
-    
-    $webSocketHubUrl = Read-Host "JiroCloud WebSocket Hub URL [$($config.JiroCloudWebSocketHubUrl)]"
-    if ($webSocketHubUrl) { $config.JiroCloudWebSocketHubUrl = $webSocketHubUrl }
-}
-elseif ($NonInteractive) {
-    Write-Host "Non-interactive setup mode (using secure defaults)" -ForegroundColor Yellow
-    Write-Host ""
-    
-    # Generate secure defaults for all values
+Write-Host "This script will configure your Jiro project with the necessary settings." -ForegroundColor Green
+Write-Host "Press Enter to use default values shown in [brackets]" -ForegroundColor Gray
+Write-Host ""
+
+# Main API Key (used for both Jiro instance and JiroCloud)
+Write-Host "=== Core Configuration ===" -ForegroundColor Cyan
+$apiKey = Read-Host "Enter Jiro API Key (for instance and cloud services) [auto-generated]"
+if ($apiKey) { 
+    $config.ApiKey = $apiKey 
+} else {
     $config.ApiKey = New-SecureString -Length 32
-    
-    Write-Host "Generated secure default values for:" -ForegroundColor Green
-    Write-Host "  - Jiro API Key (for instance and cloud services)"
-    Write-Host ""
-    Write-Warning "OpenAI API Key not set - you'll need to configure this manually for AI chat features"
+    Write-Host "Generated secure API key: $($config.ApiKey)" -ForegroundColor Green
 }
+
+# Chat Configuration
+Write-Host ""
+Write-Host "=== AI Chat Configuration ===" -ForegroundColor Cyan
+$chatAuthToken = Read-Host "Enter OpenAI API Key (required for AI chat features) [leave empty to configure later]"
+if ($chatAuthToken) { 
+    $config.ChatAuthToken = $chatAuthToken 
+    Write-Host "OpenAI API key configured successfully" -ForegroundColor Green
+}
+
+# Set JiroCloud URL defaults (non-configurable)
+Write-Host ""
+Write-Host "=== JiroCloud Configuration ===" -ForegroundColor Cyan
+Write-Host "Setting JiroCloud service URLs to default production endpoints:" -ForegroundColor Gray
+Write-Host "  • gRPC Server: $($config.JiroCloudGrpcServerUrl)" -ForegroundColor Gray
+Write-Host "  • WebSocket Hub: $($config.JiroCloudWebSocketHubUrl)" -ForegroundColor Gray
+Write-Host "  • API URL: https://jiro.huebytes.com/api" -ForegroundColor Gray
 
 # Create .env file
 Write-Host ""
@@ -179,9 +163,9 @@ $appSettingsPath = Join-Path $PSScriptRoot ".." "src" "Jiro.Kernel" "Jiro.App" "
 if (Test-Path $appSettingsExamplePath) {
     $appSettings = Get-Content $appSettingsExamplePath -Raw | ConvertFrom-Json
     
-    # Update main API key
+    # Remove main API key property if it exists (consolidated to JiroCloud.ApiKey)
     if ($appSettings.PSObject.Properties["ApiKey"]) {
-        $appSettings.ApiKey = $config.ApiKey
+        $appSettings.PSObject.Properties.Remove("ApiKey")
     }
     
     # Update Chat settings
@@ -195,6 +179,7 @@ if (Test-Path $appSettingsExamplePath) {
     # Update JiroCloud settings
     if ($appSettings.JiroCloud) {
         $appSettings.JiroCloud.ApiKey = $config.ApiKey
+        $appSettings.JiroCloud.ApiUrl = "https://jiro.huebytes.com/api"
         if ($appSettings.JiroCloud.Grpc) {
             $appSettings.JiroCloud.Grpc.ServerUrl = $config.JiroCloudGrpcServerUrl
             $appSettings.JiroCloud.Grpc.MaxRetries = $config.JiroCloudGrpcMaxRetries

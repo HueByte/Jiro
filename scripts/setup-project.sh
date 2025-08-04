@@ -13,32 +13,24 @@ GRAY='\033[0;90m'
 NC='\033[0m' # No Color
 
 # Parse arguments
-DEFAULT=false
-NON_INTERACTIVE=false
 DEV_MODE=false
 
 while [[ $# -gt 0 ]]; do
     case $1 in
-        --default)
-            DEFAULT=true
-            shift
-            ;;
-        --non-interactive)
-            NON_INTERACTIVE=true
-            shift
-            ;;
         --dev)
             DEV_MODE=true
             shift
             ;;
         --help|-h)
-            echo "Usage: $0 [--default|--non-interactive] [--dev]"
+            echo -e "${CYAN}Jiro Project Setup Script${NC}"
             echo ""
-            echo "Options:"
-            echo "  --default          Interactive setup - prompts for important values like API keys (recommended)"
-            echo "  --non-interactive  Non-interactive setup - uses secure defaults, no prompts"
-            echo "  --dev              Development mode - install dev tools and create development guide"
-            echo "  --help, -h         Show this help message"
+            echo "This script will interactively configure your Jiro project by prompting for:"
+            echo "  - Jiro API Key (for instance and cloud services)"
+            echo "  - OpenAI API Key (for AI chat features)"
+            echo ""
+            echo "Usage: $0"
+            echo "       $0 --dev     (includes development tools installation)"
+            echo "       $0 --help    (show this help)"
             exit 0
             ;;
         *)
@@ -48,23 +40,6 @@ while [[ $# -gt 0 ]]; do
             ;;
     esac
 done
-
-# Validate arguments
-if [ "$DEFAULT" = true ] && [ "$NON_INTERACTIVE" = true ]; then
-    echo -e "${RED}Please specify either --default or --non-interactive, not both${NC}"
-    exit 1
-fi
-
-if [ "$DEFAULT" = false ] && [ "$NON_INTERACTIVE" = false ] && [ "$DEV_MODE" = false ]; then
-    echo -e "${RED}Please specify either --default, --non-interactive, or --dev mode${NC}"
-    exit 1
-fi
-
-# If --dev is specified without --default or --non-interactive, default to --default
-if [ "$DEV_MODE" = true ] && [ "$DEFAULT" = false ] && [ "$NON_INTERACTIVE" = false ]; then
-    DEFAULT=true
-    echo -e "${YELLOW}Development mode enabled - using interactive setup for configuration${NC}"
-fi
 
 if [ "$DEV_MODE" = true ]; then
     echo -e "${CYAN}=== Jiro Project Setup (Development Mode) ===${NC}"
@@ -105,55 +80,37 @@ config[JiroCloudWebSocketReconnectionAttempts]=5
 config[JiroCloudWebSocketReconnectionDelayMs]=5000
 config[JiroCloudWebSocketServerTimeoutMs]=30000
 
-# Setup based on mode
-if [ "$DEFAULT" = true ]; then
-    echo -e "${GREEN}Interactive setup mode (prompting for important values)${NC}"
-    echo -e "${GRAY}Press Enter to use default value shown in [brackets]${NC}"
-    echo ""
-    
-    # Main API Key
-    read -p "Jiro API Key (for instance and cloud services) [auto-generated]: " api_key
-    if [ -n "$api_key" ]; then
-        config[ApiKey]="$api_key"
-    else
-        config[ApiKey]=$(generate_secure_string 32)
-        echo -e "${GRAY}Generated: ${config[ApiKey]}${NC}"
-    fi
-    
-    # Chat Configuration
-    echo ""
-    echo -e "${YELLOW}Chat Configuration:${NC}"
-    read -p "OpenAI API Key (required for AI chat features): " chat_auth_token
-    if [ -n "$chat_auth_token" ]; then
-        config[ChatAuthToken]="$chat_auth_token"
-    fi
-    
-    # JiroCloud Configuration
-    echo ""
-    echo -e "${YELLOW}JiroCloud Configuration:${NC}"
-    
-    read -p "JiroCloud gRPC Server URL [${config[JiroCloudGrpcServerUrl]}]: " grpc_server_url
-    if [ -n "$grpc_server_url" ]; then
-        config[JiroCloudGrpcServerUrl]="$grpc_server_url"
-    fi
-    
-    read -p "JiroCloud WebSocket Hub URL [${config[JiroCloudWebSocketHubUrl]}]: " websocket_hub_url
-    if [ -n "$websocket_hub_url" ]; then
-        config[JiroCloudWebSocketHubUrl]="$websocket_hub_url"
-    fi
-    
-elif [ "$NON_INTERACTIVE" = true ]; then
-    echo -e "${YELLOW}Non-interactive setup mode (using secure defaults)${NC}"
-    echo ""
-    
-    # Generate secure defaults for all values
+# Interactive setup
+echo -e "${GREEN}This script will configure your Jiro project with the necessary settings.${NC}"
+echo -e "${GRAY}Press Enter to use default values shown in [brackets]${NC}"
+echo ""
+
+# Main API Key
+echo -e "${CYAN}=== Core Configuration ===${NC}"
+read -p "Enter Jiro API Key (for instance and cloud services) [auto-generated]: " api_key
+if [ -n "$api_key" ]; then
+    config[ApiKey]="$api_key"
+else
     config[ApiKey]=$(generate_secure_string 32)
-    
-    echo -e "${GREEN}Generated secure default values for:${NC}"
-    echo "  - Jiro API Key (for instance and cloud services)"
-    echo ""
-    echo -e "${YELLOW}⚠️  OpenAI API Key not set - you'll need to configure this manually for AI chat features${NC}"
+    echo -e "${GREEN}Generated secure API key: ${config[ApiKey]}${NC}"
 fi
+
+# Chat Configuration
+echo ""
+echo -e "${CYAN}=== AI Chat Configuration ===${NC}"
+read -p "Enter OpenAI API Key (required for AI chat features) [leave empty to configure later]: " chat_auth_token
+if [ -n "$chat_auth_token" ]; then
+    config[ChatAuthToken]="$chat_auth_token"
+    echo -e "${GREEN}OpenAI API key configured successfully${NC}"
+fi
+
+# Set JiroCloud URL defaults (non-configurable)
+echo ""
+echo -e "${CYAN}=== JiroCloud Configuration ===${NC}"
+echo -e "${GRAY}Setting JiroCloud service URLs to default production endpoints:${NC}"
+echo -e "  ${GRAY}• gRPC Server: ${config[JiroCloudGrpcServerUrl]}${NC}"
+echo -e "  ${GRAY}• WebSocket Hub: ${config[JiroCloudWebSocketHubUrl]}${NC}"
+echo -e "  ${GRAY}• API URL: https://jiro.huebytes.com/api${NC}"
 
 # Create .env file
 echo ""
@@ -239,12 +196,13 @@ APPSETTINGS="$PROJECT_ROOT/src/Jiro.Kernel/Jiro.App/Configuration/appsettings.js
 if [ -f "$APPSETTINGS_EXAMPLE" ]; then
     # Copy and update appsettings.json using jq if available, otherwise use sed
     if command -v jq &> /dev/null; then
-        jq ".ApiKey = \"${config[ApiKey]}\" | 
+        jq "del(.ApiKey) | 
             .Chat.AuthToken = \"${config[ChatAuthToken]:-your-openai-api-key}\" |
             .Chat.SystemMessage = \"${config[ChatSystemMessage]}\" |
             .Chat.TokenLimit = ${config[ChatTokenLimit]} |
             .Chat.Enabled = ${config[ChatEnabled]} |
             .JiroCloud.ApiKey = \"${config[ApiKey]}\" |
+            .JiroCloud.ApiUrl = \"https://jiro.huebytes.com/api\" |
             .JiroCloud.Grpc.ServerUrl = \"${config[JiroCloudGrpcServerUrl]}\" |
             .JiroCloud.Grpc.MaxRetries = ${config[JiroCloudGrpcMaxRetries]} |
             .JiroCloud.Grpc.TimeoutMs = ${config[JiroCloudGrpcTimeoutMs]} |
@@ -262,8 +220,8 @@ if [ -f "$APPSETTINGS_EXAMPLE" ]; then
         # Update values using sed - escaping special characters in sed patterns
         ESCAPED_SYSTEM_MESSAGE=$(echo "${config[ChatSystemMessage]}" | sed 's/[[\.*^$()+?{|]/\\&/g')
         
-        # Update main values
-        sed -i.bak "s|\"ApiKey\": \".*\"|\"ApiKey\": \"${config[ApiKey]}\"|" "$APPSETTINGS"
+        # Remove main ApiKey property (consolidated to JiroCloud.ApiKey)
+        sed -i.bak '/\"ApiKey\": \".*\",$/d' "$APPSETTINGS"
         sed -i.bak "s|\"AuthToken\": \".*\"|\"AuthToken\": \"${config[ChatAuthToken]:-your-openai-api-key}\"|" "$APPSETTINGS"
         sed -i.bak "s|\"SystemMessage\": \".*\"|\"SystemMessage\": \"$ESCAPED_SYSTEM_MESSAGE\"|" "$APPSETTINGS"
         sed -i.bak "s|\"TokenLimit\": [0-9]*|\"TokenLimit\": ${config[ChatTokenLimit]}|" "$APPSETTINGS"
@@ -271,6 +229,7 @@ if [ -f "$APPSETTINGS_EXAMPLE" ]; then
         
         # Update JiroCloud values
         sed -i.bak "s|\"your-jirocloud-api-key-here\"|\"${config[ApiKey]}\"|" "$APPSETTINGS"
+        sed -i.bak "s|\"ApiUrl\": \"https://jiro.huebytes.com/api\"|\"ApiUrl\": \"https://jiro.huebytes.com/api\"|" "$APPSETTINGS"
         sed -i.bak "s|\"ServerUrl\": \"https://jiro.huebytes.com/grpc\"|\"ServerUrl\": \"${config[JiroCloudGrpcServerUrl]}\"|" "$APPSETTINGS"
         sed -i.bak "s|\"MaxRetries\": [0-9]*|\"MaxRetries\": ${config[JiroCloudGrpcMaxRetries]}|" "$APPSETTINGS"
         sed -i.bak "s|\"TimeoutMs\": [0-9]*|\"TimeoutMs\": ${config[JiroCloudGrpcTimeoutMs]}|" "$APPSETTINGS"

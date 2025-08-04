@@ -393,3 +393,5 @@ MigrationBackup/
 # Ionide (cross platform F# VS Code tools) working folder
 .ionide/
 src/Jiro.Kernel/Jiro.App/Configuration/appsettings.dev.json
+src/Jiro.Kernel/Jiro.App/Configuration/appsettings.backup.json
+.env.backup
