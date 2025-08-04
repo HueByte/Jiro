@@ -58,7 +58,7 @@ public static class ConfigurationValidator
 			// Set default gRPC server URL if missing
 			if (string.IsNullOrWhiteSpace(configuration.GetSection("JiroCloud:Grpc:ServerUrl").Value))
 			{
-				configManager["JiroCloud:Grpc:ServerUrl"] = "https://localhost:5001";
+				configManager["JiroCloud:Grpc:ServerUrl"] = "https://jiro.huebytes.com/grpc";
 			}
 
 			// Set default WebSocket API key if missing
@@ -70,7 +70,7 @@ public static class ConfigurationValidator
 			// Set default WebSocket Hub URL if missing
 			if (string.IsNullOrWhiteSpace(configuration.GetSection("JiroCloud:WebSocket:HubUrl").Value))
 			{
-				configManager["JiroCloud:WebSocket:HubUrl"] = "https://localhost:5001/instanceHub";
+				configManager["JiroCloud:WebSocket:HubUrl"] = "https://jiro.huebytes.com/hubs/instanceHub";
 			}
 		}
 	}
@@ -86,11 +86,6 @@ public static class ConfigurationValidator
 
 		if (!isTestMode)
 		{
-			if (string.IsNullOrWhiteSpace(appOptions.ApiKey))
-			{
-				errors.Add("❌ ApiKey is required. Set it in appsettings.json or use JIRO_ApiKey environment variable.");
-			}
-
 			if (string.IsNullOrWhiteSpace(appOptions.JiroApi))
 			{
 				errors.Add("❌ JiroApi is required. Set it in appsettings.json or use JIRO_JiroApi environment variable.");
@@ -118,7 +113,7 @@ public static class ConfigurationValidator
 		{
 			// Validate JiroCloud API key
 			if (string.IsNullOrWhiteSpace(jiroCloudOptions.ApiKey) ||
-				jiroCloudOptions.ApiKey == "your-jirocloud-api-key-here")
+				jiroCloudOptions.ApiKey == "your-api-key-here")
 			{
 				errors.Add("❌ JiroCloud:ApiKey is required. Set it in appsettings.json or use JIRO_JiroCloud__ApiKey environment variable.");
 			}

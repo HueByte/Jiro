@@ -103,7 +103,7 @@ public class InstanceMetadataAccessor : IInstanceMetadataAccessor
 	private readonly IMemoryCache _memoryCache;
 	private readonly IInstanceContext _instanceContext;
 	private readonly IHttpClientFactory _httpClientFactory;
-	private readonly ApplicationOptions _applicationOptions;
+	private readonly JiroCloudOptions _jiroCloudOptions;
 	private const int MEMORY_CACHE_EXPIRATION_DAYS = 1;
 	private const string STARTUP_INSTANCE_CACHE_KEY = "StartupInstanceId";
 	private const string STARTUP_METADATA_CACHE_KEY = "StartupInstanceMetadata";
@@ -115,19 +115,19 @@ public class InstanceMetadataAccessor : IInstanceMetadataAccessor
 	/// <param name="memoryCache">The memory cache instance.</param>
 	/// <param name="instanceContext">The instance context service.</param>
 	/// <param name="httpClientFactory">The HTTP client factory for API calls.</param>
-	/// <param name="applicationOptions">The application options for API configuration.</param>
+	/// <param name="jiroCloudOptions">The JiroCloud options for API configuration.</param>
 	public InstanceMetadataAccessor(
 		ILogger<InstanceMetadataAccessor> logger,
 		IMemoryCache memoryCache,
 		IInstanceContext instanceContext,
 		IHttpClientFactory httpClientFactory,
-		IOptions<ApplicationOptions> applicationOptions)
+		IOptions<JiroCloudOptions> jiroCloudOptions)
 	{
 		_logger = logger ?? throw new ArgumentNullException(nameof(logger));
 		_memoryCache = memoryCache ?? throw new ArgumentNullException(nameof(memoryCache));
 		_instanceContext = instanceContext ?? throw new ArgumentNullException(nameof(instanceContext));
 		_httpClientFactory = httpClientFactory ?? throw new ArgumentNullException(nameof(httpClientFactory));
-		_applicationOptions = applicationOptions?.Value ?? throw new ArgumentNullException(nameof(applicationOptions));
+		_jiroCloudOptions = jiroCloudOptions?.Value ?? throw new ArgumentNullException(nameof(jiroCloudOptions));
 	}
 
 	/// <summary>
@@ -146,7 +146,7 @@ public class InstanceMetadataAccessor : IInstanceMetadataAccessor
 
 		// If not cached, fetch from API and cache it
 		_logger.LogInformation("Instance ID not found in cache, fetching from API");
-		var metadata = await FetchInstanceMetadataFromApiAsync(_applicationOptions.ApiKey);
+		var metadata = await FetchInstanceMetadataFromApiAsync(_jiroCloudOptions.ApiKey);
 
 		if (metadata?.Data != null && !string.IsNullOrWhiteSpace(metadata.Data.Id))
 		{
@@ -261,8 +261,8 @@ public class InstanceMetadataAccessor : IInstanceMetadataAccessor
 		{
 			using var httpClient = _httpClientFactory.CreateClient(HttpClients.JIRO);
 
-			var requestUri = $"api/instance/GetInstanceMetadata?apiKey={Uri.EscapeDataString(apiKey)}";
-			_logger.LogDebug("Fetching instance metadata from API endpoint: {RequestUri}", requestUri);
+			var requestUri = $"instance/GetInstanceMetadata?apiKey={Uri.EscapeDataString(apiKey)}";
+			_logger.LogInformation("Fetching instance metadata from API endpoint: {RequestUri}", httpClient.BaseAddress + requestUri);
 
 			var jsonOptions = new JsonSerializerOptions
 			{

@@ -13,12 +13,6 @@ public class ApplicationOptions : IOption
 	public const string Application = "";
 
 	/// <summary>
-	/// Gets or sets the API key for Jiro service authentication.
-	/// Can be overridden with JIRO_ApiKey environment variable.
-	/// </summary>
-	public string ApiKey { get; set; } = string.Empty;
-
-	/// <summary>
 	/// Gets or sets the Jiro API base URL.
 	/// Can be overridden with JIRO_JiroApi environment variable.
 	/// </summary>
@@ -37,8 +31,7 @@ public class ApplicationOptions : IOption
 	/// <returns>True if configuration is valid, false otherwise.</returns>
 	public bool IsValid()
 	{
-		return !string.IsNullOrWhiteSpace(ApiKey) &&
-			   !string.IsNullOrWhiteSpace(JiroApi);
+		return !string.IsNullOrWhiteSpace(JiroApi);
 	}
 
 	/// <summary>
@@ -48,9 +41,6 @@ public class ApplicationOptions : IOption
 	public IEnumerable<string> GetValidationErrors()
 	{
 		var errors = new List<string>();
-
-		if (string.IsNullOrWhiteSpace(ApiKey))
-			errors.Add("ApiKey is required. Set it in appsettings.json or use JIRO_ApiKey environment variable.");
 
 		if (string.IsNullOrWhiteSpace(JiroApi))
 			errors.Add("JiroApi is required. Set it in appsettings.json or use JIRO_JiroApi environment variable.");

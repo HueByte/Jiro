@@ -95,10 +95,10 @@ config[ChatTokenLimit]=2000
 config[ChatEnabled]="true"
 
 # Note: JiroCloudApiKey will use the same value as ApiKey
-config[JiroCloudGrpcServerUrl]="https://localhost:5001"
+config[JiroCloudGrpcServerUrl]="https://jiro.huebytes.com/grpc"
 config[JiroCloudGrpcMaxRetries]=3
 config[JiroCloudGrpcTimeoutMs]=30000
-config[JiroCloudWebSocketHubUrl]="https://localhost:5001/instanceHub"
+config[JiroCloudWebSocketHubUrl]="https://jiro.huebytes.com/hubs/instanceHub"
 config[JiroCloudWebSocketHandshakeTimeoutMs]=15000
 config[JiroCloudWebSocketKeepAliveIntervalMs]=15000
 config[JiroCloudWebSocketReconnectionAttempts]=5
@@ -271,10 +271,10 @@ if [ -f "$APPSETTINGS_EXAMPLE" ]; then
         
         # Update JiroCloud values
         sed -i.bak "s|\"your-jirocloud-api-key-here\"|\"${config[ApiKey]}\"|" "$APPSETTINGS"
-        sed -i.bak "s|\"ServerUrl\": \"https://localhost:5001\"|\"ServerUrl\": \"${config[JiroCloudGrpcServerUrl]}\"|" "$APPSETTINGS"
+        sed -i.bak "s|\"ServerUrl\": \"https://jiro.huebytes.com/grpc\"|\"ServerUrl\": \"${config[JiroCloudGrpcServerUrl]}\"|" "$APPSETTINGS"
         sed -i.bak "s|\"MaxRetries\": [0-9]*|\"MaxRetries\": ${config[JiroCloudGrpcMaxRetries]}|" "$APPSETTINGS"
         sed -i.bak "s|\"TimeoutMs\": [0-9]*|\"TimeoutMs\": ${config[JiroCloudGrpcTimeoutMs]}|" "$APPSETTINGS"
-        sed -i.bak "s|\"HubUrl\": \"https://localhost:5001/instanceHub\"|\"HubUrl\": \"${config[JiroCloudWebSocketHubUrl]}\"|" "$APPSETTINGS"
+        sed -i.bak "s|\"HubUrl\": \"https://jiro.huebytes.com/hubs/instanceHub\"|\"HubUrl\": \"${config[JiroCloudWebSocketHubUrl]}\"|" "$APPSETTINGS"
         sed -i.bak "s|\"HandshakeTimeoutMs\": [0-9]*|\"HandshakeTimeoutMs\": ${config[JiroCloudWebSocketHandshakeTimeoutMs]}|" "$APPSETTINGS"
         sed -i.bak "s|\"KeepAliveIntervalMs\": [0-9]*|\"KeepAliveIntervalMs\": ${config[JiroCloudWebSocketKeepAliveIntervalMs]}|" "$APPSETTINGS"
         sed -i.bak "s|\"ReconnectionAttempts\": [0-9]*|\"ReconnectionAttempts\": ${config[JiroCloudWebSocketReconnectionAttempts]}|" "$APPSETTINGS"

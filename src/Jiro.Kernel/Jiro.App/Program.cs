@@ -83,29 +83,34 @@ host.ConfigureServices(services =>
 	// Configure options first so they can be used by other services
 	services.AddOptions(configManager);
 
-	// Get application options to configure services
+	// Get application and JiroCloud options to configure services
 	var appOptions = new ApplicationOptions();
 	configManager.Bind(appOptions);
+
+	var jiroCloudOptions = new JiroCloudOptions();
+	configManager.GetSection(JiroCloudOptions.JiroCloud).Bind(jiroCloudOptions);
 
 	// In test mode, use dummy values if not provided
 	if (isTestMode)
 	{
-		appOptions.ApiKey = string.IsNullOrWhiteSpace(appOptions.ApiKey) ? "test-api-key" : appOptions.ApiKey;
+		jiroCloudOptions.ApiKey = string.IsNullOrWhiteSpace(jiroCloudOptions.ApiKey) ? "test-api-key" : jiroCloudOptions.ApiKey;
 		appOptions.JiroApi = string.IsNullOrWhiteSpace(appOptions.JiroApi) ? "https://localhost:18092" : appOptions.JiroApi;
 	}
 
-	services.AddGrpcClient<JiroHubProto.JiroHubProtoClient>("JiroClient", options =>
+	services.AddGrpcClient<JiroHubProto.JiroHubProtoClient>("JiroClient", (serviceProvider, options) =>
 		{
-			var grpcServerUrl = configManager.GetSection("JiroCloud:Grpc:ServerUrl").Value;
-			if (string.IsNullOrEmpty(grpcServerUrl) && !isTestMode)
+			if (!isTestMode)
 			{
-				throw new InvalidOperationException("JiroCloud:Grpc:ServerUrl is required in configuration");
+				if (string.IsNullOrEmpty(jiroCloudOptions.Grpc.ServerUrl))
+				{
+					throw new InvalidOperationException("JiroCloud:Grpc:ServerUrl is required in configuration");
+				}
 			}
-			options.Address = new Uri(grpcServerUrl ?? "https://localhost:5001");
+			options.Address = new Uri(jiroCloudOptions.Grpc.ServerUrl ?? "https://localhost:8088");
 		})
 		.AddCallCredentials((context, metadata) =>
 		{
-			metadata.Add("X-Api-Key", appOptions.ApiKey);
+			metadata.Add("X-Api-Key", jiroCloudOptions.ApiKey);
 
 			return Task.CompletedTask;
 		})
@@ -122,10 +127,9 @@ host.ConfigureServices(services =>
 			};
 
 			// For localhost development, skip TLS certificate validation
-			var grpcServerUrl = configManager.GetSection("JiroCloud:Grpc:ServerUrl").Value;
-			if (!string.IsNullOrEmpty(grpcServerUrl))
+			if (!string.IsNullOrEmpty(jiroCloudOptions.Grpc.ServerUrl))
 			{
-				var uri = new Uri(grpcServerUrl);
+				var uri = new Uri(jiroCloudOptions.Grpc.ServerUrl);
 				if (uri.Host == "localhost" || uri.Host == "127.0.0.1")
 				{
 					socketsHandler.SslOptions.RemoteCertificateValidationCallback =
@@ -134,6 +138,8 @@ host.ConfigureServices(services =>
 			}
 
 			options.HttpHandler = socketsHandler;
+			options.HttpVersion = new Version(2, 0);
+			options.HttpVersionPolicy = HttpVersionPolicy.RequestVersionExact;
 		});
 
 	pluginManager = new(services, configManager, logger);
@@ -198,10 +204,10 @@ foreach (var module in commandContainer.CommandModules.Keys) Log.Information("Mo
 using (var scope = app.Services.CreateScope())
 {
 	var instanceMetadataAccessor = scope.ServiceProvider.GetRequiredService<Jiro.Core.Services.Context.IInstanceMetadataAccessor>();
-	var appOptions = scope.ServiceProvider.GetRequiredService<Microsoft.Extensions.Options.IOptions<Jiro.Core.Options.ApplicationOptions>>().Value;
+	var jiroCloudOptions = scope.ServiceProvider.GetRequiredService<Microsoft.Extensions.Options.IOptions<Jiro.Core.Options.JiroCloudOptions>>().Value;
 
 	Log.Information("Initializing instance ID from Jiro API...");
-	var instanceId = await instanceMetadataAccessor.InitializeInstanceIdAsync(appOptions.ApiKey);
+	var instanceId = await instanceMetadataAccessor.InitializeInstanceIdAsync(jiroCloudOptions.ApiKey);
 
 	if (!string.IsNullOrWhiteSpace(instanceId))
 	{

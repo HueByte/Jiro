@@ -23,8 +23,8 @@ public class InstanceMetadataAccessorTests : IDisposable
 	private readonly IMemoryCache _memoryCache;
 	private readonly Mock<IInstanceContext> _instanceContextMock;
 	private readonly Mock<IHttpClientFactory> _httpClientFactoryMock;
-	private readonly Mock<IOptions<ApplicationOptions>> _applicationOptionsMock;
-	private readonly ApplicationOptions _applicationOptions;
+	private readonly Mock<IOptions<JiroCloudOptions>> _jiroCloudOptionsMock;
+	private readonly JiroCloudOptions _jiroCloudOptions;
 	private readonly InstanceMetadataAccessor _instanceMetadataAccessor;
 
 	public InstanceMetadataAccessorTests()
@@ -33,22 +33,22 @@ public class InstanceMetadataAccessorTests : IDisposable
 		_memoryCache = new MemoryCache(new MemoryCacheOptions());
 		_instanceContextMock = new Mock<IInstanceContext>();
 		_httpClientFactoryMock = new Mock<IHttpClientFactory>();
-		_applicationOptionsMock = new Mock<IOptions<ApplicationOptions>>();
+		_jiroCloudOptionsMock = new Mock<IOptions<JiroCloudOptions>>();
 
-		_applicationOptions = new ApplicationOptions
+		_jiroCloudOptions = new JiroCloudOptions
 		{
 			ApiKey = "test-api-key",
-			JiroApi = "https://api.test.com"
+			ApiUrl = "https://api.test.com"
 		};
 
-		_applicationOptionsMock.Setup(x => x.Value).Returns(_applicationOptions);
+		_jiroCloudOptionsMock.Setup(x => x.Value).Returns(_jiroCloudOptions);
 
 		_instanceMetadataAccessor = new InstanceMetadataAccessor(
 			_loggerMock.Object,
 			_memoryCache,
 			_instanceContextMock.Object,
 			_httpClientFactoryMock.Object,
-			_applicationOptionsMock.Object
+			_jiroCloudOptionsMock.Object
 		);
 	}
 
@@ -66,7 +66,7 @@ public class InstanceMetadataAccessorTests : IDisposable
 			_memoryCache,
 			_instanceContextMock.Object,
 			_httpClientFactoryMock.Object,
-			_applicationOptionsMock.Object
+			_jiroCloudOptionsMock.Object
 		);
 
 		// Assert
@@ -82,7 +82,7 @@ public class InstanceMetadataAccessorTests : IDisposable
 			_memoryCache,
 			_instanceContextMock.Object,
 			_httpClientFactoryMock.Object,
-			_applicationOptionsMock.Object
+			_jiroCloudOptionsMock.Object
 		));
 	}
 
@@ -95,7 +95,7 @@ public class InstanceMetadataAccessorTests : IDisposable
 			null!,
 			_instanceContextMock.Object,
 			_httpClientFactoryMock.Object,
-			_applicationOptionsMock.Object
+			_jiroCloudOptionsMock.Object
 		));
 	}
 
@@ -108,7 +108,7 @@ public class InstanceMetadataAccessorTests : IDisposable
 			_memoryCache,
 			null!,
 			_httpClientFactoryMock.Object,
-			_applicationOptionsMock.Object
+			_jiroCloudOptionsMock.Object
 		));
 	}
 
@@ -121,7 +121,7 @@ public class InstanceMetadataAccessorTests : IDisposable
 			_memoryCache,
 			_instanceContextMock.Object,
 			null!,
-			_applicationOptionsMock.Object
+			_jiroCloudOptionsMock.Object
 		));
 	}
 
@@ -175,7 +175,7 @@ public class InstanceMetadataAccessorTests : IDisposable
 
 		var httpClient = new HttpClient(httpMessageHandlerMock.Object)
 		{
-			BaseAddress = new Uri(_applicationOptions.JiroApi)
+			BaseAddress = new Uri(_jiroCloudOptions.ApiUrl)
 		};
 
 		_httpClientFactoryMock.Setup(x => x.CreateClient(HttpClients.JIRO)).Returns(httpClient);
@@ -205,7 +205,7 @@ public class InstanceMetadataAccessorTests : IDisposable
 
 		var httpClient = new HttpClient(httpMessageHandlerMock.Object)
 		{
-			BaseAddress = new Uri(_applicationOptions.JiroApi)
+			BaseAddress = new Uri(_jiroCloudOptions.ApiUrl)
 		};
 
 		_httpClientFactoryMock.Setup(x => x.CreateClient(HttpClients.JIRO)).Returns(httpClient);
@@ -309,7 +309,7 @@ public class InstanceMetadataAccessorTests : IDisposable
 
 		var httpClient = new HttpClient(httpMessageHandlerMock.Object)
 		{
-			BaseAddress = new Uri(_applicationOptions.JiroApi)
+			BaseAddress = new Uri(_jiroCloudOptions.ApiUrl)
 		};
 
 		_httpClientFactoryMock.Setup(x => x.CreateClient(HttpClients.JIRO)).Returns(httpClient);
@@ -365,7 +365,7 @@ public class InstanceMetadataAccessorTests : IDisposable
 
 		var httpClient = new HttpClient(httpMessageHandlerMock.Object)
 		{
-			BaseAddress = new Uri(_applicationOptions.JiroApi)
+			BaseAddress = new Uri(_jiroCloudOptions.ApiUrl)
 		};
 
 		_httpClientFactoryMock.Setup(x => x.CreateClient(HttpClients.JIRO)).Returns(httpClient);
@@ -400,7 +400,7 @@ public class InstanceMetadataAccessorTests : IDisposable
 
 		var httpClient = new HttpClient(httpMessageHandlerMock.Object)
 		{
-			BaseAddress = new Uri(_applicationOptions.JiroApi)
+			BaseAddress = new Uri(_jiroCloudOptions.ApiUrl)
 		};
 
 		_httpClientFactoryMock.Setup(x => x.CreateClient(HttpClients.JIRO)).Returns(httpClient);

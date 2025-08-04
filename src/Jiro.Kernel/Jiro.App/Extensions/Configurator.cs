@@ -101,6 +101,7 @@ public static class Configurator
 		services.Configure<ChatOptions>(configuration.GetSection(ChatOptions.Chat));
 		services.Configure<LogOptions>(configuration.GetSection(LogOptions.Log));
 		services.Configure<DataPathsOptions>(configuration.GetSection(DataPathsOptions.DataPaths));
+		services.Configure<JiroCloudOptions>(configuration.GetSection(JiroCloudOptions.JiroCloud));
 		services.Configure<ApplicationOptions>(configuration);
 
 		return services;
@@ -127,19 +128,39 @@ public static class Configurator
 
 		services.AddHttpClient(HttpClients.JIRO, (serviceProvider, httpClient) =>
 		{
-			var grpcServerUrl = serviceProvider.GetRequiredService<IConfiguration>().GetSection("JiroCloud:Grpc:ServerUrl").Value;
-			if (string.IsNullOrEmpty(grpcServerUrl))
+			var jiroCloudOptions = serviceProvider.GetRequiredService<IOptions<JiroCloudOptions>>().Value;
+			if (string.IsNullOrEmpty(jiroCloudOptions.ApiKey))
+			{
+				throw new InvalidOperationException("JiroCloud:ApiKey is required in configuration");
+			}
+			if (string.IsNullOrEmpty(jiroCloudOptions.ApiUrl))
+			{
+				throw new InvalidOperationException("JiroCloud:ApiUrl is required in configuration");
+			}
+			var baseUri = jiroCloudOptions.ApiUrl;
+			httpClient.BaseAddress = new Uri(baseUri);
+			httpClient.DefaultRequestHeaders.Add("X-Api-Key", jiroCloudOptions.ApiKey);
+			httpClient.DefaultRequestVersion = new Version(2, 0);
+			httpClient.DefaultVersionPolicy = HttpVersionPolicy.RequestVersionOrHigher;
+		});
+
+		services.AddHttpClient(HttpClients.JIRO_GRPC, (serviceProvider, httpClient) =>
+		{
+			var jiroCloudOptions = serviceProvider.GetRequiredService<IOptions<JiroCloudOptions>>().Value;
+			if (string.IsNullOrEmpty(jiroCloudOptions.Grpc.ServerUrl))
 			{
 				throw new InvalidOperationException("JiroCloud:Grpc:ServerUrl is required in configuration");
 			}
-			httpClient.BaseAddress = new Uri(grpcServerUrl);
+			// Use the gRPC server URL from configuration for HTTP client base address
+			// This assumes the gRPC server URL can also serve HTTP requests
+			httpClient.BaseAddress = new Uri(jiroCloudOptions.Grpc.ServerUrl);
 			httpClient.DefaultRequestVersion = new Version(2, 0);
 			httpClient.DefaultVersionPolicy = HttpVersionPolicy.RequestVersionOrHigher;
 		})
 		.ConfigurePrimaryHttpMessageHandler((serviceProvider) =>
 		{
-			var grpcServerUrl = serviceProvider.GetRequiredService<IConfiguration>().GetSection("JiroCloud:Grpc:ServerUrl").Value;
-			if (string.IsNullOrEmpty(grpcServerUrl))
+			var jiroCloudOptions = serviceProvider.GetRequiredService<IOptions<JiroCloudOptions>>().Value;
+			if (string.IsNullOrEmpty(jiroCloudOptions.Grpc.ServerUrl))
 			{
 				throw new InvalidOperationException("JiroCloud:Grpc:ServerUrl is required in configuration");
 			}
@@ -153,7 +174,7 @@ public static class Configurator
 			};
 
 			// For localhost development, skip TLS certificate validation
-			var uri = new Uri(grpcServerUrl);
+			var uri = new Uri(jiroCloudOptions.Grpc.ServerUrl);
 			if (uri.Host == "localhost" || uri.Host == "127.0.0.1")
 			{
 				handler.SslOptions.RemoteCertificateValidationCallback =

@@ -11,6 +11,11 @@ public class HttpClients
 	public const string JIRO = "Jiro";
 
 	/// <summary>
+	/// The name of the HTTP client used for Jiro-specific gRPC operations.
+	/// </summary>
+	public const string JIRO_GRPC = "JiroGrpc";
+
+	/// <summary>
 	/// The name of the HTTP client used for weather-related operations.
 	/// </summary>
 	public const string WEATHER_CLIENT = "WeatherClient";

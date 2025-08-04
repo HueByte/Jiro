@@ -15,7 +15,17 @@ public class JiroCloudOptions : IOption
 	/// Gets or sets the API key for JiroCloud authentication.
 	/// Can be overridden with JIRO_JiroCloud__ApiKey environment variable.
 	/// </summary>
-	public string ApiKey { get; set; } = "your-jirocloud-api-key-here";
+	public string ApiKey { get; set; } = "your-api-key-here";
+
+	/// <summary>
+	/// Gets or sets the base URL for JiroCloud API.
+	/// Can be overridden with JIRO_JiroCloud__ApiUrl environment variable.
+	/// </summary>
+	/// <remarks>
+	/// This URL is used for making API requests to JiroCloud services.
+	/// Default value is set to "https://jiro.huebytes.com/api".
+	/// </remarks>
+	public string ApiUrl { get; set; } = "https://jiro.huebytes.com/api";
 
 	/// <summary>
 	/// Gets or sets the gRPC configuration for JiroCloud communication.
@@ -42,7 +52,7 @@ public class JiroCloudOptions : IOption
 		/// Gets or sets the gRPC server URL.
 		/// Can be overridden with JIRO_JiroCloud__Grpc__ServerUrl environment variable.
 		/// </summary>
-		public string ServerUrl { get; set; } = "https://localhost:5001";
+		public string ServerUrl { get; set; } = "https://jiro.huebytes.com/grpc";
 
 		/// <summary>
 		/// Gets or sets the gRPC timeout in milliseconds.
@@ -74,7 +84,7 @@ public class JiroCloudOptions : IOption
 		/// Gets or sets the SignalR hub URL for WebSocket connections.
 		/// Can be overridden with JIRO_JiroCloud__WebSocket__HubUrl environment variable.
 		/// </summary>
-		public string HubUrl { get; set; } = "https://localhost:5001/instanceHub";
+		public string HubUrl { get; set; } = "https://jiro.huebytes.com/hubs/instanceHub";
 
 		/// <summary>
 		/// Gets or sets the keep-alive interval in milliseconds.
