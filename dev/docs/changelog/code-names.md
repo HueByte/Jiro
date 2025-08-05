@@ -17,6 +17,7 @@ Jiro uses Japanese-inspired code names that reflect the spirit and theme of each
 | v0.1.0-alpha | Hajimari | 始まり | Beginning | Genesis & Initial Foundation |
 | v0.1.0-beta | Kiban | 基盤 | Foundation | Infrastructure & Development Tooling |
 | v0.1.1-beta | Kouzou | 構造 | Structure | Project Organization & Real-time Foundation |
+| v1.0.0-beta | Kakushin | 革新 | Innovation | Architectural Evolution & Cloud Integration |
 
 ## Future Code Name Ideas
 

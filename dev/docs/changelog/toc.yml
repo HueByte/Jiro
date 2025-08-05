@@ -5,6 +5,8 @@ items:
   href: code-names.md
 - name: Versions
   items:
+  - name: v1.0.0-beta
+    href: v1.0.0-beta.md
   - name: v0.1.1-beta
     href: v0.1.1-beta.md
   - name: v0.1.0-beta
