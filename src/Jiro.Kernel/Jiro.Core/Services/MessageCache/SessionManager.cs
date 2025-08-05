@@ -117,6 +117,7 @@ public class SessionManager : ISessionManager
 				if (includeMessages)
 				{
 					session = await query.Include(x => x.Messages).FirstOrDefaultAsync();
+					_logger.LogInformation("Fetched session {SessionId} from database with {MessageCount} messages", sessionId, session?.Messages?.Count ?? 0);
 				}
 				else
 				{
@@ -166,8 +167,8 @@ public class SessionManager : ISessionManager
 			{
 				entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromDays(MEMORY_CACHE_EXPIRATION_DAYS);
 
+				// Get all sessions - the instanceId filtering should be done elsewhere if needed
 				var sessions = await _chatSessionRepository.AsQueryable()
-					.Where(x => x.Messages.Any(m => m.InstanceId == instanceId) || !x.Messages.Any())
 					.Select(x => new ChatSession
 					{
 						Id = x.Id,
@@ -325,7 +326,8 @@ public class SessionManager : ISessionManager
 		{
 			var result = CreateSessionFromEntity(session, instanceId, includeMessages);
 			_memoryCache.Set(cacheKey, result, TimeSpan.FromDays(MEMORY_CACHE_EXPIRATION_DAYS));
-			_logger.LogInformation("Session fetched from database and cached with sessionId: '{SessionId}' (IncludeMessages: {IncludeMessages})", sessionId, includeMessages);
+			_logger.LogInformation("Session fetched from database and cached with sessionId: '{SessionId}' (IncludeMessages: {IncludeMessages}, MessageCount: {MessageCount})", 
+				sessionId, includeMessages, result.Messages.Count);
 			return CreateImmutableCopy(result);
 		}
 		else

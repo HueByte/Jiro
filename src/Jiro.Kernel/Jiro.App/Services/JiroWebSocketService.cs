@@ -173,16 +173,19 @@ public class JiroWebSocketService : BackgroundService, ICommandQueueMonitor
 			// Execute command
 			var result = await _commandHandler.ExecuteCommandAsync(scope.ServiceProvider, commandMessage.Command);
 
+			// Get the possibly updated session ID from command context
+			var finalSessionId = commandContext.SessionId ?? commandMessage.SessionId;
+
 			// Send result via gRPC to server
 			if (result.IsSuccess)
 			{
-				await _grpcService.SendCommandResultAsync(commandSyncId, result);
+				await _grpcService.SendCommandResultAsync(commandSyncId, result, finalSessionId);
 				_logger.LogInformation("Command result sent via gRPC: {Command} [{SyncId}]", commandMessage.Command, commandSyncId);
 			}
 			else
 			{
 				var errorMessage = result.Result?.Message ?? "Command execution failed";
-				await _grpcService.SendCommandErrorAsync(commandSyncId, errorMessage);
+				await _grpcService.SendCommandErrorAsync(commandSyncId, errorMessage, finalSessionId);
 				_logger.LogWarning("Command error sent via gRPC: {Command} [{SyncId}] Error: {Error}",
 					commandMessage.Command, commandSyncId, errorMessage);
 			}
@@ -198,7 +201,20 @@ public class JiroWebSocketService : BackgroundService, ICommandQueueMonitor
 			try
 			{
 				// Send error via gRPC to server
-				await _grpcService.SendCommandErrorAsync(commandSyncId, ex.Message);
+				// Get the session ID from context or use the original one
+				var sessionId = "";
+				try
+				{
+					await using var errorScope = _scopeFactory.CreateAsyncScope();
+					var errorCommandContext = errorScope.ServiceProvider.GetRequiredService<ICommandContext>();
+					sessionId = errorCommandContext.SessionId ?? commandMessage.SessionId;
+				}
+				catch
+				{
+					sessionId = commandMessage.SessionId;
+				}
+				
+				await _grpcService.SendCommandErrorAsync(commandSyncId, ex.Message, sessionId);
 				_logger.LogInformation("Command error sent via gRPC: {Command} [{SyncId}]", commandMessage.Command, commandSyncId);
 
 				// Error handling is now managed by the base client class automatically

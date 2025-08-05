@@ -35,11 +35,11 @@ internal class JiroGrpcService : IJiroGrpcService
 		_jiroCloudOptions = jiroCloudOptions.Value;
 	}
 
-	public async Task SendCommandResultAsync(string commandSyncId, CommandResponse commandResult)
+	public async Task SendCommandResultAsync(string commandSyncId, CommandResponse commandResult, string sessionId)
 	{
 		try
 		{
-			var clientMessage = CreateMessage(commandSyncId, commandResult);
+			var clientMessage = CreateMessage(commandSyncId, commandResult, sessionId);
 			await SendMessageWithRetryAsync(clientMessage);
 
 			_logger.LogInformation("Command result sent successfully [{syncId}]", commandSyncId);
@@ -51,7 +51,7 @@ internal class JiroGrpcService : IJiroGrpcService
 		}
 	}
 
-	public async Task SendCommandErrorAsync(string commandSyncId, string errorMessage)
+	public async Task SendCommandErrorAsync(string commandSyncId, string errorMessage, string sessionId)
 	{
 		try
 		{
@@ -63,7 +63,7 @@ internal class JiroGrpcService : IJiroGrpcService
 				Result = Jiro.Commands.Results.TextResult.Create(errorMessage)
 			};
 
-			var clientMessage = CreateMessage(commandSyncId, errorResult);
+			var clientMessage = CreateMessage(commandSyncId, errorResult, sessionId);
 			await SendMessageWithRetryAsync(clientMessage);
 
 			_logger.LogInformation("Command error sent successfully [{syncId}]", commandSyncId);
@@ -118,7 +118,7 @@ internal class JiroGrpcService : IJiroGrpcService
 	/// <param name="syncId">The synchronization ID for the command.</param>
 	/// <param name="commandResult">The command execution result to serialize.</param>
 	/// <returns>A protobuf client message ready for transmission.</returns>
-	private ClientMessage CreateMessage(string syncId, CommandResponse commandResult)
+	private ClientMessage CreateMessage(string syncId, CommandResponse commandResult, string sessionId)
 	{
 		var dataType = commandResult.CommandType switch
 		{
@@ -132,7 +132,8 @@ internal class JiroGrpcService : IJiroGrpcService
 			CommandSyncId = syncId,
 			CommandName = commandResult.CommandName,
 			DataType = dataType,
-			IsSuccess = commandResult.IsSuccess
+			IsSuccess = commandResult.IsSuccess,
+			SessionId = sessionId
 		};
 
 		try

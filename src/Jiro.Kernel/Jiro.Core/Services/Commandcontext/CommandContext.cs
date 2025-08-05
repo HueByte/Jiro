@@ -26,9 +26,7 @@ public class CommandContext : InstanceContext, ICommandContext
 
 	public void SetSessionId(string sessionId)
 	{
-		if (string.IsNullOrEmpty(sessionId))
-			throw new JiroException(new ArgumentException(null, nameof(sessionId)), "Something went wrong with parsing session", "Try to relogin");
-
+		// Allow empty sessionId - it will trigger new session creation
 		SessionId = sessionId;
 	}
 }

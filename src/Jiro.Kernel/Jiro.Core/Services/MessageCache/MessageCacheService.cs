@@ -89,6 +89,7 @@ public class MessageCacheService : IMessageCacheService
 			// Persist messages to database
 			await _messageRepository.AddRangeAsync(modelMessages);
 			await _messageRepository.SaveChangesAsync();
+			_logger.LogInformation("Saved {MessageCount} messages to database for session {SessionId}", modelMessages.Count, sessionId);
 
 			// Update cache safely
 			UpdateSessionCache(sessionId, messages);
@@ -97,7 +98,7 @@ public class MessageCacheService : IMessageCacheService
 			var sessionsListCacheKey = $"{Constants.CacheKeys.SessionsKey}::{instanceId}";
 			_memoryCache.Remove(sessionsListCacheKey);
 
-			_logger.LogInformation("Added {MessageCount} messages to session {SessionId}", messages.Count, sessionId);
+			_logger.LogInformation("Added {MessageCount} messages to session {SessionId} - Cache updated", messages.Count, sessionId);
 		}
 		catch (Exception ex)
 		{
@@ -175,11 +176,14 @@ public class MessageCacheService : IMessageCacheService
 
 			_memoryCache.Set(cacheKey, updatedSession, TimeSpan.FromDays(MEMORY_CACHE_EXPIRATION_DAYS));
 
-			_logger.LogInformation("Updated cached session with {MessageCount} new messages for session {SessionId}", messages.Count, sessionId);
+			_logger.LogInformation("Updated cached session with {MessageCount} new messages for session {SessionId} (Total: {TotalCount})", 
+				messages.Count, sessionId, updatedMessages.Count);
 		}
 		else
 		{
-			_logger.LogInformation("Session not in cache, messages persisted to database only for session {SessionId}", sessionId);
+			// Session not in cache - remove it to force reload from database next time
+			_memoryCache.Remove(cacheKey);
+			_logger.LogInformation("Session not in cache, cleared cache key and messages persisted to database for session {SessionId}", sessionId);
 		}
 	}
 

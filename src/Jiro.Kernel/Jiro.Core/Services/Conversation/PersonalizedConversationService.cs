@@ -144,9 +144,16 @@ public class PersonalizedConversationService : IPersonalizedConversationService
 	{
 		try
 		{
+			var userMessageId = Guid.NewGuid().ToString();
+			var assistantMessageId = Guid.NewGuid().ToString();
+
+			// Update the metadata objects with the generated IDs
+			userMessage.MessageId = userMessageId;
+			assistantMessage.MessageId = assistantMessageId;
+
 			var userMessageModel = new Message
 			{
-				Id = Guid.NewGuid().ToString(),
+				Id = userMessageId,
 				InstanceId = instanceId,
 				Content = userMessage.Message.Content.FirstOrDefault()?.Text ?? string.Empty,
 				IsUser = true,
@@ -157,7 +164,7 @@ public class PersonalizedConversationService : IPersonalizedConversationService
 
 			var assistantMessageModel = new Message
 			{
-				Id = Guid.NewGuid().ToString(),
+				Id = assistantMessageId,
 				InstanceId = instanceId,
 				Content = assistantMessage.Message.Content.FirstOrDefault()?.Text ?? string.Empty,
 				IsUser = false,
@@ -205,6 +212,7 @@ public class PersonalizedConversationService : IPersonalizedConversationService
 		{
 			// Load existing messages from session (already loaded from cache with messages)
 			var existingMessages = session.Messages?.OrderBy(static m => m.CreatedAt).ToList() ?? new List<ChatMessageWithMetadata>();
+			_logger.LogInformation("PrepareMessageHistory: Session {SessionId} has {MessageCount} existing messages", session.SessionId, existingMessages.Count);
 
 			var conversationHistory = new List<ChatMessageWithMetadata>(existingMessages);
 

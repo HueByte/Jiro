@@ -57,8 +57,16 @@ public class ChatCommand : ICommandBase
 	public async Task<ICommandResult> Chat(string prompt)
 	{
 		var sessionId = _commandContext.SessionId;
+		
+		// If no sessionId provided, generate a new one
 		if (string.IsNullOrEmpty(sessionId))
-			throw new JiroException("Session not found");
+		{
+			sessionId = Guid.NewGuid().ToString();
+			_commandContext.SetSessionId(sessionId);
+			
+			// Store sessionId in context data for response
+			_commandContext.Data["generatedSessionId"] = sessionId;
+		}
 
 		var instanceId = await _instanceMetadataAccessor.GetInstanceIdAsync("") ?? _instanceMetadataAccessor.GetCurrentInstanceId() ?? "";
 		var result = await _chatService.ChatAsync(instanceId, sessionId, prompt);
