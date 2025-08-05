@@ -1,7 +1,6 @@
 using System.Text.Json;
 
 using Jiro.Core.Services.System;
-using Jiro.Shared.Websocket.Responses;
 
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;

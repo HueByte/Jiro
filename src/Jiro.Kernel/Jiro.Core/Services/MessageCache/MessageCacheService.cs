@@ -6,7 +6,6 @@ using Jiro.Core.Services.StaticMessage;
 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
 namespace Jiro.Core.Services.MessageCache;
@@ -176,7 +175,7 @@ public class MessageCacheService : IMessageCacheService
 
 			_memoryCache.Set(cacheKey, updatedSession, TimeSpan.FromDays(MEMORY_CACHE_EXPIRATION_DAYS));
 
-			_logger.LogInformation("Updated cached session with {MessageCount} new messages for session {SessionId} (Total: {TotalCount})", 
+			_logger.LogInformation("Updated cached session with {MessageCount} new messages for session {SessionId} (Total: {TotalCount})",
 				messages.Count, sessionId, updatedMessages.Count);
 		}
 		else

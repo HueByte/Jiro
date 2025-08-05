@@ -1,7 +1,6 @@
 using Jiro.Core.Constants;
 using Jiro.Core.IRepositories;
 using Jiro.Core.Models;
-using Jiro.Core.Services.CommandContext;
 using Jiro.Core.Services.Context;
 using Jiro.Core.Services.Conversation.Models;
 using Jiro.Core.Services.MessageCache;

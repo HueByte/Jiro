@@ -1,5 +1,3 @@
-using System.Runtime.CompilerServices;
-
 using Jiro.Core.Services.System.Models;
 
 namespace Jiro.Core.Services.System;

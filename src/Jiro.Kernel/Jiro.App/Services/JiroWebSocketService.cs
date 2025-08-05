@@ -11,7 +11,6 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 using SharedCommandMessage = Jiro.Shared.Websocket.Requests.CommandMessage;
-using SharedErrorResponse = Jiro.Shared.Websocket.Responses.ErrorResponse;
 
 namespace Jiro.App.Services;
 
@@ -213,7 +212,7 @@ public class JiroWebSocketService : BackgroundService, ICommandQueueMonitor
 				{
 					sessionId = commandMessage.SessionId;
 				}
-				
+
 				await _grpcService.SendCommandErrorAsync(commandSyncId, ex.Message, sessionId);
 				_logger.LogInformation("Command error sent via gRPC: {Command} [{SyncId}]", commandMessage.Command, commandSyncId);
 
