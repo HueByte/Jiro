@@ -36,7 +36,7 @@ public static class ServiceCollectionExtensions
 		// Register gRPC service for sending command results
 		services.AddScoped<IJiroGrpcService, JiroGrpcService>();
 
-		// Register IJiroClientHub implementation for WebSocket communication
+		// Register IJiroClient implementation for WebSocket communication
 		services.AddSingleton<IJiroClient, WebSocketConnection>(services =>
 		{
 			var logger = services.GetRequiredService<ILogger<WebSocketConnection>>();

@@ -1,7 +1,6 @@
 using System.Text;
 
 using Google.Protobuf;
-
 using Grpc.Net.ClientFactory;
 
 using Jiro.Commands.Models;

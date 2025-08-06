@@ -15,6 +15,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
+using static JiroCloud.Api.Proto.JiroHubProto;
+
 using Serilog;
 using Serilog.Extensions.Logging;
 
@@ -97,7 +99,7 @@ host.ConfigureServices(services =>
 		appOptions.JiroApi = string.IsNullOrWhiteSpace(appOptions.JiroApi) ? "https://localhost:18092" : appOptions.JiroApi;
 	}
 
-	services.AddGrpcClient<JiroHubProto.JiroHubProtoClient>("JiroClient", (serviceProvider, options) =>
+	services.AddGrpcClient<JiroHubProtoClient>("JiroClient", (serviceProvider, options) =>
 		{
 			if (!isTestMode)
 			{

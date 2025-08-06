@@ -9,6 +9,8 @@ items:
   href: database-schema.md
 - name: WebSocket Communication
   href: websocket-communication.md
+- name: Command Flow Architecture
+  href: command-flow.md
 - name: User Guide
   href: user-guide.md
 - name: Scripts Reference
