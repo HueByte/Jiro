@@ -2,7 +2,9 @@ using System.Diagnostics;
 using System.Text.RegularExpressions;
 
 using Jiro.Commands.Exceptions;
+using Jiro.Core.Services.CommandContext;
 
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 namespace Jiro.Core.Services.CommandHandler;
@@ -48,6 +50,9 @@ public partial class CommandHandlerService : ICommandHandlerService
 
 		try
 		{
+			// Ensure session ID is available before command execution
+			await EnsureSessionIdAsync(scopedProvider);
+
 			command = GetCommand(commandName);
 			// Pass tokens without the command name (skip first token if it's a command)
 			var argTokens = tokens.Length > 1 && tokens[0].StartsWith('$') ? tokens[1..] : tokens;
@@ -141,6 +146,33 @@ public partial class CommandHandlerService : ICommandHandlerService
 		}
 
 		return tokens;
+	}
+
+	/// <summary>
+	/// Ensures that a session ID is available in the command context, creating one if necessary.
+	/// </summary>
+	/// <param name="scopedProvider">The scoped service provider for dependency injection.</param>
+	private async Task EnsureSessionIdAsync(IServiceProvider scopedProvider)
+	{
+		var commandContext = scopedProvider.GetRequiredService<ICommandContext>();
+		
+		// If no sessionId provided, generate a new one
+		if (string.IsNullOrEmpty(commandContext.SessionId))
+		{
+			var sessionId = Guid.NewGuid().ToString();
+			commandContext.SetSessionId(sessionId);
+
+			// Store sessionId in context data for response
+			commandContext.Data["generatedSessionId"] = sessionId;
+			
+			_logger.LogInformation("Generated new SessionId: '{NewSessionId}' for command execution", sessionId);
+		}
+		else
+		{
+			_logger.LogInformation("Using existing SessionId: '{SessionId}' for command execution", commandContext.SessionId);
+		}
+
+		await Task.CompletedTask;
 	}
 
 	/// <summary>

@@ -3,6 +3,8 @@ using Jiro.Core.Services.Context;
 using Jiro.Core.Services.Conversation;
 using Jiro.Core.Services.MessageCache;
 
+using Microsoft.Extensions.Logging;
+
 namespace Jiro.Core.Commands.Chat;
 
 /// <summary>
@@ -32,19 +34,26 @@ public class ChatCommand : ICommandBase
 	private readonly IInstanceMetadataAccessor _instanceMetadataAccessor;
 
 	/// <summary>
+	/// The logger for this command.
+	/// </summary>
+	private readonly ILogger<ChatCommand> _logger;
+
+	/// <summary>
 	/// Initializes a new instance of the ChatCommand class.
 	/// </summary>
 	/// <param name="chatService">The personalized conversation service.</param>
 	/// <param name="commandContext">The command context.</param>
 	/// <param name="messageManager">The message manager.</param>
 	/// <param name="instanceMetadataAccessor">The instance metadata accessor.</param>
+	/// <param name="logger">The logger for this command.</param>
 	/// <exception cref="ArgumentNullException">Thrown when any of the required parameters is null.</exception>
-	public ChatCommand(IPersonalizedConversationService chatService, ICommandContext commandContext, IMessageManager messageManager, IInstanceMetadataAccessor instanceMetadataAccessor)
+	public ChatCommand(IPersonalizedConversationService chatService, ICommandContext commandContext, IMessageManager messageManager, IInstanceMetadataAccessor instanceMetadataAccessor, ILogger<ChatCommand> logger)
 	{
 		_messageManager = messageManager ?? throw new ArgumentNullException(nameof(messageManager), "Chat storage service cannot be null.");
 		_chatService = chatService ?? throw new ArgumentNullException(nameof(chatService), "Chat service cannot be null.");
 		_commandContext = commandContext ?? throw new ArgumentNullException(nameof(commandContext), "Command context cannot be null.");
 		_instanceMetadataAccessor = instanceMetadataAccessor ?? throw new ArgumentNullException(nameof(instanceMetadataAccessor), "Instance metadata accessor cannot be null.");
+		_logger = logger ?? throw new ArgumentNullException(nameof(logger), "Logger cannot be null.");
 	}
 
 	/// <summary>
@@ -57,19 +66,19 @@ public class ChatCommand : ICommandBase
 	public async Task<ICommandResult> Chat(string prompt)
 	{
 		var sessionId = _commandContext.SessionId;
+		_logger.LogInformation("Chat command started with SessionId: '{SessionId}' (IsEmpty: {IsEmpty})", 
+			sessionId ?? "null", string.IsNullOrEmpty(sessionId));
 
-		// If no sessionId provided, generate a new one
+		// Session ID is now guaranteed to be available from CommandHandler
 		if (string.IsNullOrEmpty(sessionId))
 		{
-			sessionId = Guid.NewGuid().ToString();
-			_commandContext.SetSessionId(sessionId);
-
-			// Store sessionId in context data for response
-			_commandContext.Data["generatedSessionId"] = sessionId;
+			throw new JiroException("Session ID should have been created by CommandHandler but is still empty");
 		}
 
 		var instanceId = await _instanceMetadataAccessor.GetInstanceIdAsync("") ?? _instanceMetadataAccessor.GetCurrentInstanceId() ?? "";
 		var result = await _chatService.ChatAsync(instanceId, sessionId, prompt);
+
+		_logger.LogInformation("Chat completed for SessionId: '{SessionId}'", sessionId);
 
 		return TextResult.Create(result);
 	}

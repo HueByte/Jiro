@@ -159,7 +159,8 @@ public class JiroWebSocketService : BackgroundService, ICommandQueueMonitor
 
 		try
 		{
-			_logger.LogInformation("Processing command: {Command} [{SyncId}]", commandMessage.Command, commandSyncId);
+			_logger.LogInformation("Processing command: {Command} [{SyncId}] with SessionId: '{SessionId}' (IsEmpty: {IsEmpty})", 
+				commandMessage.Command, commandSyncId, commandMessage.SessionId ?? "null", string.IsNullOrEmpty(commandMessage.SessionId));
 
 			await using var scope = _scopeFactory.CreateAsyncScope();
 			var commandContext = scope.ServiceProvider.GetRequiredService<ICommandContext>();
@@ -175,12 +176,15 @@ public class JiroWebSocketService : BackgroundService, ICommandQueueMonitor
 
 			// Get the possibly updated session ID from command context
 			var finalSessionId = commandContext.SessionId ?? commandMessage.SessionId;
+			_logger.LogInformation("Final SessionId for response: '{FinalSessionId}' (Original: '{OriginalSessionId}', Context: '{ContextSessionId}')", 
+				finalSessionId, commandMessage.SessionId ?? "null", commandContext.SessionId ?? "null");
 
 			// Send result via gRPC to server
 			if (result.IsSuccess)
 			{
 				await _grpcService.SendCommandResultAsync(commandSyncId, result, finalSessionId);
-				_logger.LogInformation("Command result sent via gRPC: {Command} [{SyncId}]", commandMessage.Command, commandSyncId);
+				_logger.LogInformation("Command result sent via gRPC: {Command} [{SyncId}] with SessionId: '{SessionId}'", 
+					commandMessage.Command, commandSyncId, finalSessionId);
 			}
 			else
 			{

@@ -242,29 +242,33 @@ public class LogsProviderService : ILogsProviderService
 	public async IAsyncEnumerable<LogEntry> StreamLogsAsync(string? level = null,
 		[EnumeratorCancellation] CancellationToken cancellationToken = default)
 	{
-		// Future implementation for real-time log streaming
-		// This would watch log files for changes and yield new entries
 		var (logsDirectory, logPatterns) = GetLogPathsFromSerilogConfig();
 
 		if (!Directory.Exists(logsDirectory))
+		{
+			_logger.LogWarning("Logs directory does not exist: {LogsDirectory}", logsDirectory);
 			yield break;
+		}
 
-		// For now, just yield existing logs (placeholder for future streaming implementation)
-		var logFiles = logPatterns
-			.SelectMany(pattern => Directory.EnumerateFiles(logsDirectory, pattern))
-			.OrderByDescending(f => File.GetLastWriteTime(f))
-			.Take(1); // Only latest file for streaming
+		_logger.LogInformation("Starting real-time log streaming for directory: {LogsDirectory} with level: {Level}",
+			logsDirectory, level ?? "all");
 
-		foreach (var logFile in logFiles)
+		// First, yield existing recent log entries (last 50 entries)
+		await foreach (var existingEntry in GetRecentLogEntriesAsync(logsDirectory, logPatterns, level, 50, cancellationToken))
 		{
 			if (cancellationToken.IsCancellationRequested)
 				yield break;
+			
+			yield return existingEntry;
+		}
 
-			// Use async enumerable helper method to handle file operations safely
-			await foreach (var logEntry in StreamLogFileAsync(logFile, level, cancellationToken))
-			{
-				yield return logEntry;
-			}
+		// Then start simple polling-based monitoring for new log entries
+		await foreach (var newEntry in PollLogFilesAsync(logsDirectory, logPatterns, level, cancellationToken))
+		{
+			if (cancellationToken.IsCancellationRequested)
+				yield break;
+			
+			yield return newEntry;
 		}
 	}
 
@@ -955,6 +959,312 @@ public class LogsProviderService : ILogsProviderService
 		}
 
 		return entries;
+	}
+
+	/// <summary>
+	/// Gets recent log entries from existing log files for initial streaming
+	/// </summary>
+	private async IAsyncEnumerable<LogEntry> GetRecentLogEntriesAsync(string logsDirectory, string[] logPatterns, 
+		string? level, int limit, [EnumeratorCancellation] CancellationToken cancellationToken)
+	{
+		IEnumerable<LogEntry> recentEntries;
+		
+		try
+		{
+			recentEntries = await GetRecentLogEntriesInternalAsync(logsDirectory, logPatterns, level, limit, cancellationToken);
+		}
+		catch (Exception ex)
+		{
+			_logger.LogError(ex, "Error getting recent log entries");
+			yield break;
+		}
+
+		// Return the entries
+		foreach (var entry in recentEntries)
+		{
+			if (cancellationToken.IsCancellationRequested)
+				yield break;
+			yield return entry;
+		}
+	}
+
+	/// <summary>
+	/// Internal method to get recent log entries without yield in try-catch
+	/// </summary>
+	private async Task<List<LogEntry>> GetRecentLogEntriesInternalAsync(string logsDirectory, string[] logPatterns, 
+		string? level, int limit, CancellationToken cancellationToken)
+	{
+		var recentEntries = new List<LogEntry>();
+		
+		// Get the most recent log file
+		var logFiles = logPatterns
+			.SelectMany(pattern => Directory.EnumerateFiles(logsDirectory, pattern))
+			.OrderByDescending(f => File.GetLastWriteTime(f))
+			.Take(2); // Take 2 files in case we need to look at previous file
+
+		foreach (var logFile in logFiles)
+		{
+			if (cancellationToken.IsCancellationRequested)
+				break;
+
+			try
+			{
+				using var fileStream = new FileStream(logFile, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+				using var reader = new StreamReader(fileStream);
+				
+				var entries = (await ParseLogEntriesAsync(reader)).ToList();
+				var fileName = Path.GetFileName(logFile);
+				
+				// Add file name and filter by level
+				foreach (var entry in entries)
+				{
+					entry.File = fileName;
+				}
+				
+				// Take the last entries and filter by level
+				var filteredEntries = entries
+					.Where(e => string.IsNullOrEmpty(level) || 
+							level.Equals("all", StringComparison.OrdinalIgnoreCase) ||
+							IsLogLevelMatch(e.Level, level))
+					.TakeLast(limit)
+					.ToList();
+				
+				recentEntries.AddRange(filteredEntries);
+				
+				// If we have enough entries, break
+				if (recentEntries.Count >= limit)
+					break;
+			}
+			catch (Exception ex)
+			{
+				_logger.LogWarning(ex, "Error reading recent entries from log file: {LogFile}", logFile);
+			}
+		}
+		
+		return recentEntries.TakeLast(limit).ToList();
+	}
+
+	/// <summary>
+	/// Polls log files for changes and streams new entries as they appear
+	/// </summary>
+	private async IAsyncEnumerable<LogEntry> PollLogFilesAsync(string logsDirectory, string[] logPatterns, 
+		string? level, [EnumeratorCancellation] CancellationToken cancellationToken)
+	{
+		var filePositions = new Dictionary<string, long>();
+		var pendingLines = new Dictionary<string, List<string>>();
+		
+		_logger.LogInformation("Starting log file polling for patterns: {Patterns}", string.Join(", ", logPatterns));
+
+		// Initialize positions for existing files
+		var existingFiles = logPatterns
+			.SelectMany(pattern => Directory.EnumerateFiles(logsDirectory, pattern));
+			
+		foreach (var file in existingFiles)
+		{
+			try
+			{
+				var fileInfo = new FileInfo(file);
+				filePositions[file] = fileInfo.Length;
+				pendingLines[file] = new List<string>();
+				_logger.LogDebug("Initialized position {Position} for file: {File}", fileInfo.Length, file);
+			}
+			catch (Exception ex)
+			{
+				_logger.LogWarning(ex, "Error initializing position for file: {File}", file);
+			}
+		}
+
+		// Process file changes
+		while (!cancellationToken.IsCancellationRequested)
+		{
+			var hasNewEntries = false;
+			
+			// Check all monitored files for changes
+			foreach (var filePath in filePositions.Keys.ToList())
+			{
+				if (cancellationToken.IsCancellationRequested)
+					yield break;
+
+				if (!File.Exists(filePath))
+				{
+					// File may have been rotated, remove from tracking
+					filePositions.Remove(filePath);
+					pendingLines.Remove(filePath);
+					continue;
+				}
+
+				// Check if file has new content
+				long currentSize = 0;
+				long lastPosition = 0;
+				bool hasFileGrown = false;
+				
+				try
+				{
+					var currentFileInfo = new FileInfo(filePath);
+					currentSize = currentFileInfo.Length;
+					lastPosition = filePositions[filePath];
+					hasFileGrown = currentSize > lastPosition;
+					
+					if (currentSize < lastPosition)
+					{
+						// File was truncated or rotated, reset position
+						filePositions[filePath] = 0;
+						pendingLines[filePath].Clear();
+						_logger.LogInformation("File appears to have been rotated: {File}", filePath);
+					}
+				}
+				catch (Exception ex)
+				{
+					_logger.LogWarning(ex, "Error checking file info: {File}", filePath);
+					continue;
+				}
+
+				// Read new content if file has grown
+				if (hasFileGrown)
+				{
+					await foreach (var entry in ReadNewLogContentAsync(filePath, lastPosition, level, pendingLines[filePath], cancellationToken))
+					{
+						hasNewEntries = true;
+						yield return entry;
+					}
+					
+					filePositions[filePath] = currentSize;
+				}
+			}
+
+			// Check for new files that match our patterns
+			var currentFiles = logPatterns
+				.SelectMany(pattern => Directory.EnumerateFiles(logsDirectory, pattern))
+				.ToHashSet();
+
+			foreach (var newFile in currentFiles.Where(f => !filePositions.ContainsKey(f)))
+			{
+				try
+				{
+					var fileInfo = new FileInfo(newFile);
+					filePositions[newFile] = 0; // Start from beginning for new files
+					pendingLines[newFile] = new List<string>();
+					_logger.LogInformation("New log file detected: {File}", newFile);
+				}
+				catch (Exception ex)
+				{
+					_logger.LogWarning(ex, "Error adding new file to monitoring: {File}", newFile);
+				}
+			}
+
+			// Wait before next check if no new entries
+			if (!hasNewEntries)
+			{
+				await Task.Delay(500, cancellationToken); // Check every 500ms
+			}
+		}
+		
+		_logger.LogInformation("Log file polling stopped");
+	}
+
+	/// <summary>
+	/// Reads new content from a log file since the last position
+	/// </summary>
+	private async IAsyncEnumerable<LogEntry> ReadNewLogContentAsync(string filePath, long fromPosition, 
+		string? level, List<string> pendingLines, [EnumeratorCancellation] CancellationToken cancellationToken)
+	{
+		IEnumerable<LogEntry> entries;
+		
+		try
+		{
+			entries = await ReadNewLogContentInternalAsync(filePath, fromPosition, level, pendingLines, cancellationToken);
+		}
+		catch (Exception ex)
+		{
+			_logger.LogWarning(ex, "Error reading new log content from: {File}", filePath);
+			yield break;
+		}
+
+		// Yield the entries
+		foreach (var entry in entries)
+		{
+			if (cancellationToken.IsCancellationRequested)
+				yield break;
+			yield return entry;
+		}
+	}
+
+	/// <summary>
+	/// Internal method to read new log content without yield in try-catch
+	/// </summary>
+	private async Task<List<LogEntry>> ReadNewLogContentInternalAsync(string filePath, long fromPosition, 
+		string? level, List<string> pendingLines, CancellationToken cancellationToken)
+	{
+		using var fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+		fileStream.Seek(fromPosition, SeekOrigin.Begin);
+		
+		using var reader = new StreamReader(fileStream);
+		var fileName = Path.GetFileName(filePath);
+		var newLines = new List<string>();
+		
+		string? line;
+		while ((line = await reader.ReadLineAsync()) != null)
+		{
+			if (cancellationToken.IsCancellationRequested)
+				break;
+			
+			newLines.Add(line);
+		}
+
+		if (newLines.Count == 0)
+			return new List<LogEntry>();
+
+		// Combine with pending lines from previous reads
+		var allLines = new List<string>(pendingLines);
+		allLines.AddRange(newLines);
+		pendingLines.Clear();
+
+		// Parse complete log entries
+		var entries = ParseLogEntriesFromLines(allLines, fileName);
+		
+		// The last entry might be incomplete if the line doesn't end with a newline
+		// Keep the last incomplete entry for next read
+		if (entries.Count > 0)
+		{
+			var lastEntry = entries[entries.Count - 1];
+			if (!newLines[newLines.Count - 1].EndsWith('\n') && !newLines[newLines.Count - 1].EndsWith('\r'))
+			{
+				// Last line might be incomplete, store it for next read
+				var lastLineIndex = allLines.FindLastIndex(l => l == newLines[newLines.Count - 1]);
+				if (lastLineIndex >= 0)
+				{
+					// Keep lines from the last log entry start for next read
+					for (int i = lastLineIndex; i < allLines.Count; i++)
+					{
+						if (LogEntryStartRegex.Value.IsMatch(allLines[i]))
+						{
+							// Found start of last entry, keep remaining lines
+							pendingLines.AddRange(allLines.Skip(i));
+							entries.RemoveAt(entries.Count - 1);
+							break;
+						}
+					}
+				}
+			}
+		}
+
+		// Filter entries by level
+		var filteredEntries = new List<LogEntry>();
+		foreach (var entry in entries)
+		{
+			if (cancellationToken.IsCancellationRequested)
+				break;
+
+			// Apply level filter
+			if (string.IsNullOrEmpty(level) || 
+				level.Equals("all", StringComparison.OrdinalIgnoreCase) ||
+				IsLogLevelMatch(entry.Level, level))
+			{
+				filteredEntries.Add(entry);
+			}
+		}
+
+		return filteredEntries;
 	}
 }
 

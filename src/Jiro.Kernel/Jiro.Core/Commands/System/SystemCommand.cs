@@ -188,4 +188,31 @@ public class SystemCommand : ICommandBase
 			return Task.FromResult<ICommandResult>(TextResult.Create("Error retrieving commands metadata: " + ex.Message));
 		}
 	}
+
+	/// <summary>
+	/// Shows current session information - demonstrates session context availability
+	/// </summary>
+	[Command("sessionInfo", commandDescription: "Shows current session information")]
+	public Task<ICommandResult> GetSessionInfo()
+	{
+		try
+		{
+			_logger.LogInformation("Getting session information");
+
+			var sessionInfo = new
+			{
+				SessionId = _commandContext.SessionId ?? "null",
+				InstanceId = _commandContext.InstanceId ?? "null",
+				HasSessionData = !string.IsNullOrEmpty(_commandContext.SessionId),
+				ContextDataCount = _commandContext.Data?.Count ?? 0
+			};
+
+			return Task.FromResult<ICommandResult>(JsonResult.Create(sessionInfo));
+		}
+		catch (Exception ex)
+		{
+			_logger.LogError(ex, "Error retrieving session information");
+			return Task.FromResult<ICommandResult>(TextResult.Create("Error retrieving session information: " + ex.Message));
+		}
+	}
 }
