@@ -98,12 +98,12 @@ check_prerequisites() {
     print_success ".NET SDK version: $DOTNET_VERSION"
     
     # Prepare configuration files
-    if [ ! -f "./src/Jiro.Kernel/Jiro.App/appsettings.json" ]; then
-        if [ -f "./src/Jiro.Kernel/Jiro.App/appsettings.example.json" ]; then
-            cp "./src/Jiro.Kernel/Jiro.App/appsettings.example.json" "./src/Jiro.Kernel/Jiro.App/appsettings.json"
-            print_success "Copied appsettings.example.json to appsettings.json"
+    if [ ! -f "./src/Jiro.Kernel/Jiro.App/Configuration/appsettings.json" ]; then
+        if [ -f "./src/Jiro.Kernel/Jiro.App/Configuration/appsettings.example.json" ]; then
+            cp "./src/Jiro.Kernel/Jiro.App/Configuration/appsettings.example.json" "./src/Jiro.Kernel/Jiro.App/Configuration/appsettings.json"
+            print_success "Copied Configuration/appsettings.example.json to Configuration/appsettings.json"
         else
-            print_warning "No appsettings.example.json found"
+            print_warning "No Configuration/appsettings.example.json found"
         fi
     fi
 }

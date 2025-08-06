@@ -32,8 +32,8 @@ jobs:
 
       - name: Prepare configuration files
         run: |
-          if [ ! -f ./src/Jiro.Kernel/Jiro.App/appsettings.json ]; then
-            cp ./src/Jiro.Kernel/Jiro.App/appsettings.example.json ./src/Jiro.Kernel/Jiro.App/appsettings.json
+          if [ ! -f ./src/Jiro.Kernel/Jiro.App/Configuration/appsettings.json ]; then
+            cp ./src/Jiro.Kernel/Jiro.App/Configuration/appsettings.example.json ./src/Jiro.Kernel/Jiro.App/Configuration/appsettings.json
           fi
 
       - name: Restore dependencies

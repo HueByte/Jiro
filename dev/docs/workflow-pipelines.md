@@ -110,7 +110,7 @@ graph TD
 - **Steps:**
   - Checkout source code with GitHub token
   - Setup .NET 9.0 SDK
-  - Prepare configuration files (`appsettings.json`)
+  - Prepare configuration files (`Configuration/appsettings.json`)
   - Cache NuGet packages for performance
   - Restore dependencies
   - Build solution (Release configuration)
@@ -361,6 +361,28 @@ docker pull ghcr.io/huebyte/jiro-kernel:main
 ---
 
 ## 🔧 Configuration Management
+
+### **Configuration File Structure**
+
+Jiro uses an organized configuration structure with all settings centralized in the `Configuration` directory:
+
+```
+src/Jiro.Kernel/Jiro.App/Configuration/
+├── appsettings.json          # Main configuration (created from example)
+├── appsettings.example.json  # Configuration template
+├── appsettings.dev.json      # Development-specific overrides
+└── appsettings.backup.json   # Backup configuration
+```
+
+**Configuration File Hierarchy:**
+1. `appsettings.json` - Base configuration
+2. `appsettings.{environment}.json` - Environment-specific overrides
+3. Environment variables with `JIRO_` prefix - Runtime overrides
+
+**Workflow Integration:**
+- CI/CD pipelines automatically copy `appsettings.example.json` to `appsettings.json`
+- The example file contains safe defaults for build and test environments
+- Production deployments use environment variables for sensitive values
 
 ### **Environment Variables**
 
