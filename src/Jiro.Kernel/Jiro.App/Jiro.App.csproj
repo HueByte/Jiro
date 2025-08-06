@@ -31,7 +31,7 @@
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
-		<ProjectReference Include="..\..\..\dev-local\Jiro.Shared\source\Jiro.Shared\Jiro.Shared.csproj" />
+		<PackageReference Include="Jiro.Shared" Version="1.4.4" />
 		<PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="9.0.8" />
 		<PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.8" />
 		<PackageReference Include="Serilog.AspNetCore" Version="9.0.0" />

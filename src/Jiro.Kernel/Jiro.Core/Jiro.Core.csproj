@@ -9,7 +9,7 @@
 
   <ItemGroup>
     <PackageReference Include="Jiro.Commands" Version="3.0.4" />
-    <ProjectReference Include="..\..\..\dev-local\Jiro.Shared\source\Jiro.Shared\Jiro.Shared.csproj" />
+    <PackageReference Include="Jiro.Shared" Version="1.4.4" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Abstractions" Version="2.3.0" />
     <PackageReference Include="Microsoft.Extensions.AI.OpenAI" Version="9.7.1-preview.1.25365.4" />
     <PackageReference Include="Microsoft.Extensions.Configuration" Version="9.0.8" />

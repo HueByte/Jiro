@@ -4,6 +4,7 @@ using Jiro.Core.Options;
 using Jiro.Core.Services.CommandContext;
 using Jiro.Core.Services.CommandHandler;
 using Jiro.Shared.Websocket;
+using Jiro.Shared.Websocket.Requests;
 
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -23,7 +24,7 @@ public class JiroWebSocketService : BackgroundService, ICommandQueueMonitor
 	private readonly ILogger<JiroWebSocketService> _logger;
 	private readonly ICommandHandlerService _commandHandler;
 	private readonly JiroCloudOptions _jiroCloudOptions;
-	private readonly IJiroClient _jiroClient;
+	private readonly IJiroInstance _jiroClient;
 	private readonly IJiroGrpcService _grpcService;
 
 	// Command queue monitoring
@@ -71,7 +72,7 @@ public class JiroWebSocketService : BackgroundService, ICommandQueueMonitor
 		ILogger<JiroWebSocketService> logger,
 		ICommandHandlerService commandHandler,
 		IOptions<JiroCloudOptions> jiroCloudOptions,
-		IJiroClient jiroClientHub,
+		IJiroInstance jiroClientHub,
 		IJiroGrpcService grpcService)
 	{
 		_scopeFactory = scopeFactory ?? throw new ArgumentNullException(nameof(scopeFactory));
@@ -150,7 +151,7 @@ public class JiroWebSocketService : BackgroundService, ICommandQueueMonitor
 		}
 	}
 
-	private async Task HandleCommandAsync(SharedCommandMessage commandMessage)
+	private async Task<ActionResult> HandleCommandAsync(SharedCommandMessage commandMessage)
 	{
 		var commandSyncId = commandMessage.CommandSyncId;
 		_activeCommands.TryAdd(commandSyncId, DateTime.UtcNow);
@@ -192,6 +193,12 @@ public class JiroWebSocketService : BackgroundService, ICommandQueueMonitor
 			Interlocked.Increment(ref _successfulCommands);
 			_logger.LogInformation("Command completed successfully: {Command} [{SyncId}] Result: {Result}",
 				commandMessage.Command, commandSyncId, result);
+
+			return new ActionResult
+			{
+				IsSuccess = true,
+				Message = $"Command '{commandMessage.Command}' executed successfully"
+			};
 		}
 		catch (Exception ex)
 		{
@@ -224,6 +231,13 @@ public class JiroWebSocketService : BackgroundService, ICommandQueueMonitor
 			}
 
 			Interlocked.Increment(ref _failedCommands);
+
+			return new ActionResult
+			{
+				IsSuccess = false,
+				Message = $"Command '{commandMessage.Command}' failed: {ex.Message}",
+				Errors = new[] { ex.Message }
+			};
 		}
 		finally
 		{

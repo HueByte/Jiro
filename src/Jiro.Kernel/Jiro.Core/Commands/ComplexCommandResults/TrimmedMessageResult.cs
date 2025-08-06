@@ -1,4 +1,3 @@
-
 using Jiro.Core.Models;
 
 namespace Jiro.Core.Commands.ComplexCommandResults;

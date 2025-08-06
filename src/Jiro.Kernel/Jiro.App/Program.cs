@@ -9,16 +9,12 @@ using Jiro.Core.Options;
 using Jiro.Core.Utils;
 using Jiro.Infrastructure;
 
-using JiroCloud.Api.Proto;
-
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
 using Serilog;
 using Serilog.Extensions.Logging;
-
-using static JiroCloud.Api.Proto.JiroHubProto;
 
 AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
 
@@ -99,7 +95,7 @@ host.ConfigureServices(services =>
 		appOptions.JiroApi = string.IsNullOrWhiteSpace(appOptions.JiroApi) ? "https://localhost:18092" : appOptions.JiroApi;
 	}
 
-	services.AddGrpcClient<JiroHubProtoClient>("JiroClient", (serviceProvider, options) =>
+	services.AddGrpcClient<Jiro.Shared.Grpc.JiroHubProto.JiroHubProtoClient>("JiroClient", (serviceProvider, options) =>
 		{
 			if (!isTestMode)
 			{

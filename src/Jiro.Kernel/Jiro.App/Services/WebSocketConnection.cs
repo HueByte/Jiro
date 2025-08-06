@@ -23,7 +23,7 @@ namespace Jiro.App.Services;
 /// <summary>
 /// SignalR implementation of the WebSocket connection interface
 /// </summary>
-public class WebSocketConnection : JiroClientBase, IDisposable
+public class WebSocketConnection : JiroInstanceBase, IDisposable
 {
 	private readonly ILogger<WebSocketConnection> _webSocketLogger;
 	private readonly JiroCloudOptions _jiroCloudOptions;
@@ -52,7 +52,7 @@ public class WebSocketConnection : JiroClientBase, IDisposable
 		IOptions<JiroCloudOptions> jiroCloudOptions,
 		IServiceScopeFactory scopeFactory,
 		ICommandHandlerService commandHandler,
-		WebSocketExceptionHandler exceptionHandler) : base(connection, logger as ILogger<JiroClientBase>)
+		WebSocketExceptionHandler exceptionHandler) : base(connection, logger as ILogger<JiroInstanceBase>)
 	{
 		_webSocketLogger = logger ?? throw new ArgumentNullException(nameof(logger));
 		_jiroCloudOptions = jiroCloudOptions?.Value ?? throw new ArgumentNullException(nameof(jiroCloudOptions));

@@ -7,8 +7,6 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 using MockQueryable;
-using MockQueryable.EntityFrameworkCore;
-using MockQueryable.Moq;
 
 using Moq;
 
