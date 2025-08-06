@@ -15,10 +15,10 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
-using static JiroCloud.Api.Proto.JiroHubProto;
-
 using Serilog;
 using Serilog.Extensions.Logging;
+
+using static JiroCloud.Api.Proto.JiroHubProto;
 
 AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
 

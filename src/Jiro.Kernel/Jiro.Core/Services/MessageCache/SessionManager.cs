@@ -326,7 +326,7 @@ public class SessionManager : ISessionManager
 		{
 			var result = CreateSessionFromEntity(session, instanceId, includeMessages);
 			_memoryCache.Set(cacheKey, result, TimeSpan.FromDays(MEMORY_CACHE_EXPIRATION_DAYS));
-			_logger.LogInformation("Session fetched from database and cached with sessionId: '{SessionId}' (IncludeMessages: {IncludeMessages}, MessageCount: {MessageCount})", 
+			_logger.LogInformation("Session fetched from database and cached with sessionId: '{SessionId}' (IncludeMessages: {IncludeMessages}, MessageCount: {MessageCount})",
 				sessionId, includeMessages, result.Messages.Count);
 			return CreateImmutableCopy(result);
 		}
