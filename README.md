@@ -109,7 +109,7 @@ Jiro: "🌐 Pinging google.com... Response time: 23ms ✅"
    dotnet run
    ```
 
-4. **Open your browser** and navigate to `https://jiro.huebytes.com/` 🎉
+4. **Open your browser** and navigate to https://jiro.huebytes.com/ 🎉
 
 ### 🔧 Manual Setup (Alternative)
 
