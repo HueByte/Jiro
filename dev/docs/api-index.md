@@ -7,8 +7,19 @@ This directory contains the automatically generated API documentation for the Ji
 The API documentation covers all public classes, interfaces, methods, and properties from:
 
 - **Jiro.Core** - Core business logic, services, and abstractions
+  - SessionManager - Advanced session lifecycle management
+  - MessageCacheService - Optimized message operations
+  - LogsProviderService - Real-time log streaming
+  - ConfigProviderService - Dynamic configuration management
+  - ThemeService - Runtime theming system
+  - VersionService - Application versioning
 - **Jiro.App** - Application entry point and configuration
+  - JiroWebSocketService - WebSocket orchestration
+  - JiroGrpcService - gRPC communication
+  - WebSocketConnection - SignalR integration
 - **Jiro.Infrastructure** - Data access layer and infrastructure services
+  - Enhanced repositories with cascade delete
+  - Entity Framework Core 9 integration
 
 ## 🏗️ Generation Process
 

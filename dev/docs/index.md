@@ -1,6 +1,8 @@
 # 📚 Jiro Documentation
 
-This directory contains the documentation for the Jiro AI Assistant project, built using [DocFX](https://dotnet.github.io/docfx/).
+Welcome to the Jiro AI Assistant documentation. This is the official documentation for **v1.0.0-beta "Kakushin"** - a production-ready AI-powered personal assistant with real-time cloud integration, extensible plugin system, and enterprise-grade deployment capabilities.
+
+> **Latest Release**: v1.0.0-beta (2025-01-08) - [View Changelog](changelog/v1.0.0-beta.md)
 
 ## 🏗️ Structure
 

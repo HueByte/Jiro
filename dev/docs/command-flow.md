@@ -4,6 +4,12 @@
 
 Jiro implements a sophisticated command execution pipeline that handles command processing from reception through completion. This document details the complete command flow, from initial WebSocket reception through gRPC result transmission, including all intermediate processing steps and error handling mechanisms.
 
+### Key Updates (v1.0.0-beta)
+- **Client-side session ID generation**: Sessions are now created on the client side
+- **Enhanced error handling**: Improved command synchronization and error recovery
+- **Service separation**: SessionManager and MessageCacheService now handle session/message operations
+- **Improved WebSocket contracts**: Using `IJiroInstance` interface for better type safety
+
 ## Command Flow Pipeline
 
 ### High-Level Flow
@@ -12,16 +18,16 @@ Jiro implements a sophisticated command execution pipeline that handles command 
 %%{init: {
   "theme": "base",
   "themeVariables": {
-    "background": "#1C1E26",
-    "primaryColor": "#FCD4B8",
-    "primaryTextColor": "#D5D8DA",
-    "primaryBorderColor": "#E95378",
-    "lineColor": "#6C6F93",
-    "sectionBkgColor": "#232530",
-    "altSectionBkgColor": "#2E303E",
-    "gridColor": "#16161C",
-    "secondaryColor": "#26BBD9",
-    "tertiaryColor": "#27D797"
+    "background": "#FFFFFF",
+    "primaryColor": "#2E7D32",
+    "primaryTextColor": "#000000",
+    "primaryBorderColor": "#1B5E20",
+    "lineColor": "#424242",
+    "sectionBkgColor": "#E8F5E9",
+    "altSectionBkgColor": "#C8E6C9",
+    "gridColor": "#E0E0E0",
+    "secondaryColor": "#1976D2",
+    "tertiaryColor": "#7B1FA2"
   }
 }}%%
 flowchart TB
@@ -63,11 +69,11 @@ flowchart TB
     GrpcService --> GrpcClient
     GrpcClient -->|gRPC Response| CloudGrpc
     
-    %% Horizon Theme Styling
-    classDef cloudStyle fill:#E95378,stroke:#C7455C,stroke-width:2px,color:#FCD4B8
-    classDef receptionStyle fill:#26BBD9,stroke:#1A9CB8,stroke-width:2px,color:#06060C
-    classDef processingStyle fill:#FCD4B8,stroke:#E29A6B,stroke-width:2px,color:#06060C
-    classDef responseStyle fill:#27D797,stroke:#21BFC2,stroke-width:2px,color:#06060C
+    %% High Contrast Styling
+    classDef cloudStyle fill:#9C27B0,stroke:#4A148C,stroke-width:2px,color:#FFFFFF
+    classDef receptionStyle fill:#2196F3,stroke:#0D47A1,stroke-width:2px,color:#FFFFFF
+    classDef processingStyle fill:#FF9800,stroke:#E65100,stroke-width:2px,color:#000000
+    classDef responseStyle fill:#4CAF50,stroke:#1B5E20,stroke-width:2px,color:#FFFFFF
     
     class CloudCmd,CloudGrpc cloudStyle
     class WSHub,WSConn,WSService receptionStyle
@@ -83,24 +89,24 @@ flowchart TB
 %%{init: {
   "theme": "base",
   "themeVariables": {
-    "background": "#1C1E26",
-    "primaryColor": "#FCD4B8",
-    "primaryTextColor": "#D5D8DA",
-    "primaryBorderColor": "#E95378",
-    "lineColor": "#6C6F93",
-    "sectionBkgColor": "#232530",
-    "altSectionBkgColor": "#2E303E",
-    "gridColor": "#16161C",
-    "secondaryColor": "#26BBD9",
-    "tertiaryColor": "#27D797",
-    "actorBkg": "#2E303E",
-    "actorBorder": "#6C6F93",
-    "actorTextColor": "#D5D8DA",
-    "activationBkgColor": "#FCD4B8",
-    "activationBorderColor": "#E29A6B",
-    "noteBkgColor": "#26BBD9",
-    "noteBorderColor": "#1A9CB8",
-    "noteTextColor": "#1C1E26"
+    "background": "#FFFFFF",
+    "primaryColor": "#2E7D32",
+    "primaryTextColor": "#000000",
+    "primaryBorderColor": "#1B5E20",
+    "lineColor": "#424242",
+    "sectionBkgColor": "#E8F5E9",
+    "altSectionBkgColor": "#C8E6C9",
+    "gridColor": "#E0E0E0",
+    "secondaryColor": "#1976D2",
+    "tertiaryColor": "#7B1FA2",
+    "actorBkg": "#E3F2FD",
+    "actorBorder": "#1565C0",
+    "actorTextColor": "#000000",
+    "activationBkgColor": "#FFF3E0",
+    "activationBorderColor": "#E65100",
+    "noteBkgColor": "#FFFDE7",
+    "noteBorderColor": "#F57C00",
+    "noteTextColor": "#000000"
   }
 }}%%
 sequenceDiagram
@@ -132,7 +138,7 @@ interface CommandMessage {
   instanceId: string;        // Target Jiro instance identifier
   command: string;           // Command text to execute
   commandSyncId: string;     // Unique synchronization identifier
-  sessionId: string;         // Chat session identifier
+  sessionId: string;         // Chat session identifier (client-generated in v1.0.0-beta)
   parameters: Record<string, string>; // Additional command parameters
 }
 ```
@@ -143,16 +149,16 @@ interface CommandMessage {
 %%{init: {
   "theme": "base",
   "themeVariables": {
-    "background": "#1C1E26",
-    "primaryColor": "#FCD4B8",
-    "primaryTextColor": "#D5D8DA",
-    "primaryBorderColor": "#E95378",
-    "lineColor": "#6C6F93",
-    "sectionBkgColor": "#232530",
-    "altSectionBkgColor": "#2E303E",
-    "gridColor": "#16161C",
-    "secondaryColor": "#26BBD9",
-    "tertiaryColor": "#27D797"
+    "background": "#FFFFFF",
+    "primaryColor": "#2E7D32",
+    "primaryTextColor": "#000000",
+    "primaryBorderColor": "#1B5E20",
+    "lineColor": "#424242",
+    "sectionBkgColor": "#E8F5E9",
+    "altSectionBkgColor": "#C8E6C9",
+    "gridColor": "#E0E0E0",
+    "secondaryColor": "#1976D2",
+    "tertiaryColor": "#7B1FA2"
   }
 }}%%
 flowchart TD
@@ -166,10 +172,10 @@ flowchart TD
     SetSession --> SetParams[Set Command Parameters]
     SetParams --> Ready[Context Ready for Execution]
     
-    %% Horizon Theme Styling
-    classDef setupStyle fill:#26BBD9,stroke:#1A9CB8,stroke-width:2px,color:#06060C
-    classDef resolveStyle fill:#FCD4B8,stroke:#E29A6B,stroke-width:2px,color:#06060C
-    classDef configStyle fill:#27D797,stroke:#21BFC2,stroke-width:2px,color:#06060C
+    %% High Contrast Styling
+    classDef setupStyle fill:#2196F3,stroke:#0D47A1,stroke-width:2px,color:#FFFFFF
+    classDef resolveStyle fill:#FF9800,stroke:#E65100,stroke-width:2px,color:#000000
+    classDef configStyle fill:#4CAF50,stroke:#1B5E20,stroke-width:2px,color:#FFFFFF
     
     class CreateScope setupStyle
     class ResolveContext,ResolveHandler,ResolveGrpc resolveStyle
@@ -192,24 +198,24 @@ commandContext.SetData(commandMessage.Parameters.Select(kvp =>
 %%{init: {
   "theme": "base",
   "themeVariables": {
-    "background": "#1C1E26",
-    "primaryColor": "#FCD4B8",
-    "primaryTextColor": "#D5D8DA",
-    "primaryBorderColor": "#E95378",
-    "lineColor": "#6C6F93",
-    "sectionBkgColor": "#232530",
-    "altSectionBkgColor": "#2E303E",
-    "gridColor": "#16161C",
-    "secondaryColor": "#26BBD9",
-    "tertiaryColor": "#27D797",
-    "actorBkg": "#2E303E",
-    "actorBorder": "#6C6F93",
-    "actorTextColor": "#D5D8DA",
-    "activationBkgColor": "#FCD4B8",
-    "activationBorderColor": "#E29A6B",
-    "noteBkgColor": "#26BBD9",
-    "noteBorderColor": "#1A9CB8",
-    "noteTextColor": "#1C1E26"
+    "background": "#FFFFFF",
+    "primaryColor": "#2E7D32",
+    "primaryTextColor": "#000000",
+    "primaryBorderColor": "#1B5E20",
+    "lineColor": "#424242",
+    "sectionBkgColor": "#E8F5E9",
+    "altSectionBkgColor": "#C8E6C9",
+    "gridColor": "#E0E0E0",
+    "secondaryColor": "#1976D2",
+    "tertiaryColor": "#7B1FA2",
+    "actorBkg": "#E3F2FD",
+    "actorBorder": "#1565C0",
+    "actorTextColor": "#000000",
+    "activationBkgColor": "#FFF3E0",
+    "activationBorderColor": "#E65100",
+    "noteBkgColor": "#FFFDE7",
+    "noteBorderColor": "#F57C00",
+    "noteTextColor": "#000000"
   }
 }}%%
 sequenceDiagram
@@ -256,24 +262,24 @@ sequenceDiagram
 %%{init: {
   "theme": "base",
   "themeVariables": {
-    "background": "#1C1E26",
-    "primaryColor": "#FCD4B8",
-    "primaryTextColor": "#D5D8DA",
-    "primaryBorderColor": "#E95378",
-    "lineColor": "#6C6F93",
-    "sectionBkgColor": "#232530",
-    "altSectionBkgColor": "#2E303E",
-    "gridColor": "#16161C",
-    "secondaryColor": "#26BBD9",
-    "tertiaryColor": "#27D797",
-    "actorBkg": "#2E303E",
-    "actorBorder": "#6C6F93",
-    "actorTextColor": "#D5D8DA",
-    "activationBkgColor": "#FCD4B8",
-    "activationBorderColor": "#E29A6B",
-    "noteBkgColor": "#26BBD9",
-    "noteBorderColor": "#1A9CB8",
-    "noteTextColor": "#1C1E26"
+    "background": "#FFFFFF",
+    "primaryColor": "#2E7D32",
+    "primaryTextColor": "#000000",
+    "primaryBorderColor": "#1B5E20",
+    "lineColor": "#424242",
+    "sectionBkgColor": "#E8F5E9",
+    "altSectionBkgColor": "#C8E6C9",
+    "gridColor": "#E0E0E0",
+    "secondaryColor": "#1976D2",
+    "tertiaryColor": "#7B1FA2",
+    "actorBkg": "#E3F2FD",
+    "actorBorder": "#1565C0",
+    "actorTextColor": "#000000",
+    "activationBkgColor": "#FFF3E0",
+    "activationBorderColor": "#E65100",
+    "noteBkgColor": "#FFFDE7",
+    "noteBorderColor": "#F57C00",
+    "noteTextColor": "#000000"
   }
 }}%%
 sequenceDiagram
@@ -356,16 +362,16 @@ enum TextType {
 %%{init: {
   "theme": "base",
   "themeVariables": {
-    "background": "#1C1E26",
-    "primaryColor": "#FCD4B8",
-    "primaryTextColor": "#D5D8DA",
-    "primaryBorderColor": "#E95378",
-    "lineColor": "#6C6F93",
-    "sectionBkgColor": "#232530",
-    "altSectionBkgColor": "#2E303E",
-    "gridColor": "#16161C",
-    "secondaryColor": "#26BBD9",
-    "tertiaryColor": "#27D797"
+    "background": "#FFFFFF",
+    "primaryColor": "#2E7D32",
+    "primaryTextColor": "#000000",
+    "primaryBorderColor": "#1B5E20",
+    "lineColor": "#424242",
+    "sectionBkgColor": "#E8F5E9",
+    "altSectionBkgColor": "#C8E6C9",
+    "gridColor": "#E0E0E0",
+    "secondaryColor": "#1976D2",
+    "tertiaryColor": "#7B1FA2"
   }
 }}%%
 flowchart TD
@@ -398,16 +404,16 @@ flowchart TD
 %%{init: {
   "theme": "base",
   "themeVariables": {
-    "background": "#1C1E26",
-    "primaryColor": "#FCD4B8",
-    "primaryTextColor": "#D5D8DA",
-    "primaryBorderColor": "#E95378",
-    "lineColor": "#6C6F93",
-    "sectionBkgColor": "#232530",
-    "altSectionBkgColor": "#2E303E",
-    "gridColor": "#16161C",
-    "secondaryColor": "#26BBD9",
-    "tertiaryColor": "#27D797"
+    "background": "#FFFFFF",
+    "primaryColor": "#2E7D32",
+    "primaryTextColor": "#000000",
+    "primaryBorderColor": "#1B5E20",
+    "lineColor": "#424242",
+    "sectionBkgColor": "#E8F5E9",
+    "altSectionBkgColor": "#C8E6C9",
+    "gridColor": "#E0E0E0",
+    "secondaryColor": "#1976D2",
+    "tertiaryColor": "#7B1FA2"
   }
 }}%%
 flowchart TD
@@ -461,16 +467,16 @@ var errorResult = new CommandResponse
 %%{init: {
   "theme": "base",
   "themeVariables": {
-    "background": "#1C1E26",
-    "primaryColor": "#FCD4B8",
-    "primaryTextColor": "#D5D8DA",
-    "primaryBorderColor": "#E95378",
-    "lineColor": "#6C6F93",
-    "sectionBkgColor": "#232530",
-    "altSectionBkgColor": "#2E303E",
-    "gridColor": "#16161C",
-    "secondaryColor": "#26BBD9",
-    "tertiaryColor": "#27D797"
+    "background": "#FFFFFF",
+    "primaryColor": "#2E7D32",
+    "primaryTextColor": "#000000",
+    "primaryBorderColor": "#1B5E20",
+    "lineColor": "#424242",
+    "sectionBkgColor": "#E8F5E9",
+    "altSectionBkgColor": "#C8E6C9",
+    "gridColor": "#E0E0E0",
+    "secondaryColor": "#1976D2",
+    "tertiaryColor": "#7B1FA2"
   }
 }}%%
 graph TB
@@ -542,16 +548,16 @@ public long FailedCommands => _failedCommands;
 %%{init: {
   "theme": "base",
   "themeVariables": {
-    "background": "#1C1E26",
-    "primaryColor": "#FCD4B8",
-    "primaryTextColor": "#D5D8DA",
-    "primaryBorderColor": "#E95378",
-    "lineColor": "#6C6F93",
-    "sectionBkgColor": "#232530",
-    "altSectionBkgColor": "#2E303E",
-    "gridColor": "#16161C",
-    "secondaryColor": "#26BBD9",
-    "tertiaryColor": "#27D797"
+    "background": "#FFFFFF",
+    "primaryColor": "#2E7D32",
+    "primaryTextColor": "#000000",
+    "primaryBorderColor": "#1B5E20",
+    "lineColor": "#424242",
+    "sectionBkgColor": "#E8F5E9",
+    "altSectionBkgColor": "#C8E6C9",
+    "gridColor": "#E0E0E0",
+    "secondaryColor": "#1976D2",
+    "tertiaryColor": "#7B1FA2"
   }
 }}%%
 graph TB

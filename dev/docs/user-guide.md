@@ -6,7 +6,7 @@
 
 ## 🌟 What is Jiro?
 
-Imagine having a smart, helpful assistant that never gets tired, remembers your conversations, and can help you with everything from checking the weather to having meaningful discussions. That's Jiro - an AI-powered virtual assistant that combines the intelligence of ChatGPT with powerful custom features to make your digital life easier.
+Imagine having a smart, helpful assistant that never gets tired, remembers your conversations, and can help you with everything from checking the weather to having meaningful discussions. That's Jiro - an AI-powered virtual assistant that combines the intelligence of advanced Large Language Models with powerful custom features to make your digital life easier.
 
 Think of Jiro as your personal AI companion that:
 
