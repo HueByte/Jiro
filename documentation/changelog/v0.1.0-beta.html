@@ -1,0 +1,487 @@
+﻿<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+      <title>Version 0.1.0-beta &quot;Kiban&quot; | Jiro Documentation </title>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <meta name="title" content="Version 0.1.0-beta &quot;Kiban&quot; | Jiro Documentation ">
+      
+      
+      <link rel="icon" href="../../assets/Jiro-Icon.png">
+      <link rel="stylesheet" href="../../public/docfx.min.css">
+      <link rel="stylesheet" href="../../public/main.css">
+      <meta name="docfx:navrel" content="../../toc.html">
+      <meta name="docfx:tocrel" content="../toc.html">
+      
+      <meta name="docfx:rel" content="../../">
+      
+      
+      <meta name="docfx:docurl" content="https://github.com/HueByte/Jiro/blob/main/dev/#L1">
+      <meta name="loc:inThisArticle" content="In this article">
+      <meta name="loc:searchResultsCount" content="{count} results for &quot;{query}&quot;">
+      <meta name="loc:searchNoResults" content="No results for &quot;{query}&quot;">
+      <meta name="loc:tocFilter" content="Filter by title">
+      <meta name="loc:nextArticle" content="Next">
+      <meta name="loc:prevArticle" content="Previous">
+      <meta name="loc:themeLight" content="Light">
+      <meta name="loc:themeDark" content="Dark">
+      <meta name="loc:themeAuto" content="Auto">
+      <meta name="loc:changeTheme" content="Change theme">
+      <meta name="loc:copy" content="Copy">
+      <meta name="loc:downloadPdf" content="Download PDF">
+  </head>
+
+  <script type="module" src="./../../public/docfx.min.js"></script>
+
+  <script>
+    const theme = localStorage.getItem('theme') || 'auto'
+    document.documentElement.setAttribute('data-bs-theme', theme === 'auto' ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : theme)
+  </script>
+
+
+  <body class="tex2jax_ignore" data-layout="" data-yaml-mime="">
+    <header class="bg-body border-bottom">
+      <nav id="autocollapse" class="navbar navbar-expand-md" role="navigation">
+        <div class="container-xxl flex-nowrap">
+          <a class="navbar-brand" href="../../index.html">
+            <img id="logo" class="svg" src="../../assets/Jiro-Icon.png" alt="Jiro - AI Assistant">
+            Jiro - AI Assistant
+          </a>
+          <button class="btn btn-lg d-md-none border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navpanel" aria-controls="navpanel" aria-expanded="false" aria-label="Toggle navigation">
+            <i class="bi bi-three-dots"></i>
+          </button>
+          <div class="collapse navbar-collapse" id="navpanel">
+            <div id="navbar">
+              <form class="search" role="search" id="search">
+                <i class="bi bi-search"></i>
+                <input class="form-control" id="search-query" type="search" disabled="" placeholder="Search" autocomplete="off" aria-label="Search">
+              </form>
+            </div>
+          </div>
+        </div>
+      </nav>
+    </header>
+
+    <main class="container-xxl">
+      <div class="toc-offcanvas">
+        <div class="offcanvas-md offcanvas-start" tabindex="-1" id="tocOffcanvas" aria-labelledby="tocOffcanvasLabel">
+          <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="tocOffcanvasLabel">Table of Contents</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#tocOffcanvas" aria-label="Close"></button>
+          </div>
+          <div class="offcanvas-body">
+            <nav class="toc" id="toc"></nav>
+          </div>
+        </div>
+      </div>
+
+      <div class="content">
+        <div class="actionbar">
+          <button class="btn btn-lg border-0 d-md-none" style="margin-top: -.65em; margin-left: -.8em" type="button" data-bs-toggle="offcanvas" data-bs-target="#tocOffcanvas" aria-controls="tocOffcanvas" aria-expanded="false" aria-label="Show table of contents">
+            <i class="bi bi-list"></i>
+          </button>
+
+          <nav id="breadcrumb"></nav>
+        </div>
+
+        <article data-uid="">
+<h1 id="version-010-beta-kiban">Version 0.1.0-beta &quot;Kiban&quot;</h1>
+
+<blockquote>
+<p><strong>Release Date</strong>: 2025-07-11<br>
+<strong>Status</strong>: Beta<br>
+<strong>Branch</strong>: <code>main</code><br>
+<strong>Code Name</strong>: Kiban (基盤) - &quot;Foundation&quot;</p>
+</blockquote>
+<h2 id="overview">Overview</h2>
+<p>A major infrastructure and development experience overhaul that introduces comprehensive CI/CD pipelines, cross-platform development tooling, enhanced documentation systems, and improved Docker containerization. This beta release focuses on developer productivity, reliability, and establishing robust foundation for future development.</p>
+<h2 id="-features-added">🚀 Features Added</h2>
+<h3 id="development-infrastructure">Development Infrastructure</h3>
+<h4 id="github-actions--cicd">GitHub Actions &amp; CI/CD</h4>
+<ul>
+<li><strong>Enhanced Docker Build Workflow</strong>: Complete redesign with two-phase testing approach
+<ul>
+<li>Startup validation test for quick container health checks</li>
+<li>Graceful exit handling with proper exit code validation</li>
+<li>Improved error reporting and debugging capabilities</li>
+</ul>
+</li>
+<li><strong>Cross-Platform Setup Actions</strong>: New composite actions for development tools
+<ul>
+<li><code>.github/actions/setup-eza/</code> for Linux/macOS with cargo fallback</li>
+<li><code>.github/actions/setup-eza-windows/</code> for Windows with winget and cargo fallback</li>
+</ul>
+</li>
+<li><strong>Release Management Automation</strong>: Manual tag-triggered release workflow
+<ul>
+<li>Multi-platform binary distribution (Linux, Windows, macOS)</li>
+<li>Automated release notes generation</li>
+<li>Enhanced artifact building and management</li>
+</ul>
+</li>
+</ul>
+<h4 id="development-scripts-suite">Development Scripts Suite</h4>
+<ul>
+<li><strong>Cross-Platform Development Scripts</strong>: Complete PowerShell and Bash script pairs
+<ul>
+<li><code>scripts/create-release.ps1/.sh</code> - Automated release creation with version detection</li>
+<li><code>scripts/docfx-gen.ps1/.sh</code> - Documentation generation and serving</li>
+<li><code>scripts/generate-project-structure.ps1/.sh</code> - Project structure documentation</li>
+<li><code>scripts/markdown-lint.ps1/.sh</code> - Markdown linting and validation</li>
+<li><code>scripts/setup-dev.ps1/.sh</code> - Development environment setup</li>
+<li><code>scripts/local-ci-test.ps1/.sh</code> - Local CI pipeline testing</li>
+</ul>
+</li>
+</ul>
+<h3 id="application-features">Application Features</h3>
+<h4 id="docker-test-mode-support">Docker Test Mode Support</h4>
+<ul>
+<li><strong>Enhanced Application Startup</strong>: New test mode for containerized environments
+<ul>
+<li><code>--test-mode</code> command line argument support</li>
+<li><code>JIRO_TEST_MODE</code> environment variable detection</li>
+<li>Graceful startup validation without external dependencies</li>
+<li>Dummy configuration fallbacks for testing scenarios</li>
+</ul>
+</li>
+<li><strong>Improved Error Handling</strong>: Better startup failure detection and reporting
+<ul>
+<li>Service resolution validation</li>
+<li>Configuration validation with meaningful error messages</li>
+<li>Clean exit codes for automated testing</li>
+</ul>
+</li>
+</ul>
+<h3 id="documentation-system">Documentation System</h3>
+<h4 id="comprehensive-documentation-structure">Comprehensive Documentation Structure</h4>
+<ul>
+<li><strong>Organized Documentation Hierarchy</strong>: Complete restructuring under <code>src/docs/</code>
+<ul>
+<li>Versioned changelog system (<code>src/docs/changelog/</code>)</li>
+<li>API documentation with proper indexing (<code>src/docs/api-index.md</code>)</li>
+<li>Workflow pipeline documentation (<code>src/docs/workflow-pipelines.md</code>)</li>
+<li>Scripts reference documentation (<code>src/docs/scripts-reference.md</code>)</li>
+<li>User guides and project descriptions</li>
+</ul>
+</li>
+<li><strong>DocFX Integration</strong>: Professional documentation build system
+<ul>
+<li>Updated <code>dev/docfx.json</code> with proper metadata and structure</li>
+<li>Organized table of contents (<code>src/docs/toc.yml</code>)</li>
+<li>Cross-referenced documentation with proper navigation</li>
+</ul>
+</li>
+</ul>
+<h2 id="-changes">🔧 Changes</h2>
+<h3 id="configuration-improvements">Configuration Improvements</h3>
+<h4 id="serilog-configuration">Serilog Configuration</h4>
+<ul>
+<li><strong>Fixed Console Theme Configuration</strong>: Resolved Docker startup crashes
+<ul>
+<li>Changed from <code>&quot;AnsiConsoleTheme.Code&quot;</code> to <code>&quot;Ansi&quot;</code> in <code>appsettings.example.json</code></li>
+<li>Updated default configurations for better testing compatibility</li>
+<li>Enhanced logging output formatting</li>
+</ul>
+</li>
+</ul>
+<h4 id="project-structure-reorganization">Project Structure Reorganization</h4>
+<ul>
+<li><strong>Major File Restructuring</strong>: Improved project organization
+<ul>
+<li>Moved API documentation from root to <code>src/api/</code></li>
+<li>Consolidated all documentation under <code>src/docs/</code></li>
+<li>Updated file references and import paths throughout codebase</li>
+<li>Improved separation of concerns between components</li>
+</ul>
+</li>
+</ul>
+<h3 id="workflow-enhancements">Workflow Enhancements</h3>
+<h4 id="docker-testing-strategy">Docker Testing Strategy</h4>
+<ul>
+<li><strong>Replaced Long-Running Container Tests</strong>: New validation-based approach
+<ul>
+<li>Quick startup validation instead of 10-second wait times</li>
+<li>Health check with graceful exit support</li>
+<li>Better error logging and container inspection</li>
+<li>Reduced CI/CD pipeline execution time</li>
+</ul>
+</li>
+</ul>
+<h4 id="release-process-transformation">Release Process Transformation</h4>
+<ul>
+<li><strong>Manual Tag-Triggered Releases</strong>: Changed from automated to controlled releases
+<ul>
+<li>Manual version control with proper semantic versioning</li>
+<li>Enhanced release notes generation from commit history</li>
+<li>Multi-platform binary distribution support</li>
+<li>Improved artifact organization and deployment</li>
+</ul>
+</li>
+</ul>
+<h2 id="-bug-fixes">🐛 Bug Fixes</h2>
+<h3 id="docker-and-containerization">Docker and Containerization</h3>
+<h4 id="critical-startup-issues">Critical Startup Issues</h4>
+<ul>
+<li><strong>Resolved Application Crashes</strong>: Fixed <code>System.InvalidOperationException: Type AnsiConsoleTheme.Code was not found</code>
+<ul>
+<li>Root cause: Invalid Serilog theme configuration in JSON settings</li>
+<li>Solution: Updated to use correct theme string format</li>
+<li>Added proper configuration file preparation in Docker workflows</li>
+</ul>
+</li>
+</ul>
+<h4 id="container-health-checks">Container Health Checks</h4>
+<ul>
+<li><strong>Improved Container Testing</strong>: Fixed Docker workflow test failures
+<ul>
+<li>Removed dependency on long-running container requirements</li>
+<li>Added proper exit code validation for graceful shutdowns</li>
+<li>Enhanced error reporting with container log inspection</li>
+</ul>
+</li>
+</ul>
+<h3 id="build-and-cicd-reliability">Build and CI/CD Reliability</h3>
+<h4 id="github-actions-stability">GitHub Actions Stability</h4>
+<ul>
+<li><strong>Enhanced Workflow Reliability</strong>: Improved GitHub Actions pipeline stability
+<ul>
+<li>Added fallback mechanisms for tool installation (eza setup)</li>
+<li>Better error handling and retry logic</li>
+<li>Improved debugging and troubleshooting capabilities</li>
+</ul>
+</li>
+</ul>
+<h2 id="-technical-details">🛠️ Technical Details</h2>
+<h3 id="architecture-changes">Architecture Changes</h3>
+<h4 id="application-structure">Application Structure</h4>
+<ul>
+<li><strong>Enhanced Startup Flow</strong>: Improved application initialization process
+<ul>
+<li>Test mode integration with minimal external dependencies</li>
+<li>Better separation between development and production configurations</li>
+<li>Improved service resolution and dependency injection setup</li>
+</ul>
+</li>
+</ul>
+<h4 id="development-environment">Development Environment</h4>
+<ul>
+<li><strong>Cross-Platform Compatibility</strong>: Enhanced support for Windows, Linux, and macOS
+<ul>
+<li>PowerShell Core and Bash script pairs for all development tasks</li>
+<li>Unified development experience across platforms</li>
+<li>Improved tool installation and setup processes</li>
+</ul>
+</li>
+</ul>
+<h3 id="dependencies-and-tools">Dependencies and Tools</h3>
+<h4 id="new-development-dependencies">New Development Dependencies</h4>
+<ul>
+<li><strong>Enhanced Toolchain</strong>: Added support for modern development tools
+<ul>
+<li><code>eza</code> for improved directory listings in project structure generation</li>
+<li>Enhanced markdown linting with <code>markdownlint-cli</code></li>
+<li>DocFX for professional documentation building</li>
+<li>Cross-platform script execution support</li>
+</ul>
+</li>
+</ul>
+<h4 id="docker-improvements">Docker Improvements</h4>
+<ul>
+<li><strong>Enhanced Containerization</strong>: Updated Docker configuration
+<ul>
+<li>Better dependency management in multi-stage builds</li>
+<li>Improved security practices with non-root user execution</li>
+<li>Enhanced health check implementations</li>
+<li>Optimized layer caching for faster builds</li>
+</ul>
+</li>
+</ul>
+<h2 id="-metrics">📊 Metrics</h2>
+<table>
+<thead>
+<tr>
+<th>Metric</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Lines of Code</td>
+<td>~25,000+</td>
+</tr>
+<tr>
+<td>Test Coverage</td>
+<td>45%</td>
+</tr>
+<tr>
+<td>Core Features</td>
+<td>15+</td>
+</tr>
+<tr>
+<td>Documentation Pages</td>
+<td>25+</td>
+</tr>
+<tr>
+<td>GitHub Actions Workflows</td>
+<td>10</td>
+</tr>
+<tr>
+<td>Development Scripts</td>
+<td>12</td>
+</tr>
+<tr>
+<td>Engineering Thesis Project</td>
+<td>Solo Development</td>
+</tr>
+<tr>
+<td>Docker Layers</td>
+<td>8</td>
+</tr>
+</tbody>
+</table>
+<h2 id="-development">🎓 Development</h2>
+<p>This release is part of an engineering thesis project demonstrating modern software development practices and AI integration.</p>
+<h2 id="-security-enhancements">🔒 Security Enhancements</h2>
+<h3 id="workflow-security">Workflow Security</h3>
+<ul>
+<li><strong>Enhanced Vulnerability Scanning</strong>: Improved Trivy integration
+<ul>
+<li>SARIF report generation and upload to GitHub Security tab</li>
+<li>Better error handling for security scan failures</li>
+<li>Comprehensive container image vulnerability assessment</li>
+</ul>
+</li>
+</ul>
+<h3 id="container-security">Container Security</h3>
+<ul>
+<li><strong>Improved Docker Security</strong>: Enhanced container security practices
+<ul>
+<li>Non-root user execution in production containers</li>
+<li>Minimal base image with reduced attack surface</li>
+<li>Proper secret and configuration management</li>
+</ul>
+</li>
+</ul>
+<h2 id="-breaking-changes">⚠️ Breaking Changes</h2>
+<h3 id="documentation-structure">Documentation Structure</h3>
+<ul>
+<li><strong>File Location Changes</strong>: Major reorganization of documentation files
+<ul>
+<li>API documentation moved from root to <code>src/api/</code></li>
+<li>All documentation consolidated under <code>src/docs/</code></li>
+<li>Updated references required in external tools and scripts</li>
+</ul>
+</li>
+</ul>
+<h3 id="release-process">Release Process</h3>
+<ul>
+<li><strong>Manual Release Workflow</strong>: Changed from automatic to manual tag-triggered releases
+<ul>
+<li>No longer auto-generates releases on main branch pushes</li>
+<li>Requires manual tag creation for release triggering</li>
+<li>Enhanced control over release timing and content</li>
+</ul>
+</li>
+</ul>
+<h3 id="docker-testing">Docker Testing</h3>
+<ul>
+<li><strong>Container Test Strategy</strong>: Changed Docker testing approach
+<ul>
+<li>No longer requires containers to run continuously for testing</li>
+<li>Uses validation-based testing instead of time-based checks</li>
+<li>May affect custom Docker deployment scripts</li>
+</ul>
+</li>
+</ul>
+<h2 id="-migration-guide">🚀 Migration Guide</h2>
+<h3 id="from-v010-alpha">From v0.1.0-alpha</h3>
+<h4 id="documentation-references">Documentation References</h4>
+<ol>
+<li>Update any direct file references to documentation:
+<ul>
+<li>Old: <code>docs/api.md</code> → New: <code>src/docs/api-index.md</code></li>
+<li>Old: <code>README.md</code> references → New: <code>src/docs/</code> structure</li>
+</ul>
+</li>
+</ol>
+<h4 id="development-workflow">Development Workflow</h4>
+<ol>
+<li>Use new script locations for development tasks:
+<ul>
+<li>All scripts now available in both PowerShell (<code>.ps1</code>) and Bash (<code>.sh</code>) versions</li>
+<li>Run <code>scripts/setup-dev.ps1</code> or <code>scripts/setup-dev.sh</code> for environment setup</li>
+</ul>
+</li>
+</ol>
+<h4 id="docker-deployment">Docker Deployment</h4>
+<ol>
+<li>Review Docker configurations if using custom setups:
+<ul>
+<li>Test mode now available with <code>JIRO_TEST_MODE=true</code> environment variable</li>
+<li>Container testing uses validation approach instead of continuous running</li>
+</ul>
+</li>
+</ol>
+<h4 id="cicd-integration">CI/CD Integration</h4>
+<ol>
+<li>Update CI/CD processes to use new release workflow:
+<ul>
+<li>Manual tag creation required for releases</li>
+<li>Use new workflow patterns for enhanced reliability</li>
+</ul>
+</li>
+</ol>
+<h2 id="-whats-next">🎯 What's Next</h2>
+<h3 id="planned-for-v100">Planned for v1.0.0</h3>
+<ul>
+<li>Enhanced AI capabilities and model support</li>
+<li>Improved user interface and experience</li>
+<li>Advanced security features and authentication</li>
+<li>Performance optimizations and scalability improvements</li>
+<li>Comprehensive testing coverage expansion</li>
+</ul>
+<h3 id="thesis-development-goals">Thesis Development Goals</h3>
+<ul>
+<li>Advanced AI integration patterns</li>
+<li>Clean architecture implementation</li>
+<li>Modern development practices demonstration</li>
+<li>Comprehensive documentation and testing</li>
+</ul>
+<hr>
+<h2 id="-additional-notes">📝 Additional Notes</h2>
+<p>This beta release represents a significant milestone in establishing robust development practices and infrastructure. The focus on developer experience, documentation, and reliability sets the foundation for rapid feature development in future releases.</p>
+<p>Key achievements:</p>
+<ul>
+<li><strong>100% Cross-Platform Support</strong>: All development scripts work on Windows, Linux, and macOS</li>
+<li><strong>Enhanced CI/CD Reliability</strong>: Improved workflow stability and error handling</li>
+<li><strong>Professional Documentation</strong>: DocFX integration with comprehensive structure</li>
+<li><strong>Docker Production Readiness</strong>: Robust containerization with proper testing</li>
+</ul>
+<p>For technical support or questions about this release, please refer to the documentation or create an issue in the GitHub repository.</p>
+
+</article>
+
+        <div class="contribution d-print-none">
+          <a href="https://github.com/HueByte/Jiro/blob/main/dev/#L1" class="edit-link">Edit this page</a>
+        </div>
+
+        <div class="next-article d-print-none border-top" id="nextArticle"></div>
+
+      </div>
+
+      <div class="affix">
+        <nav id="affix"></nav>
+      </div>
+    </main>
+
+    <div class="container-xxl search-results" id="search-results"></div>
+
+    <footer class="border-top text-secondary">
+      <div class="container-xxl">
+        <div class="flex-fill">
+          <div class="footer-custom"><div class="footer-inner d-flex justify-content-between align-items-center"><div class="footer-text">Made with <strong>💖</strong> By HueByte</div><div class="footer-links"><a href="https://github.com/HueByte/Jiro" class="footer-link" target="_blank"><i class="fab fa-github"></i>GitHub</a><a href="#" class="footer-link scroll-to-top" onclick="scrollToTop()"><i class="fas fa-arrow-up"></i>Top</a></div></div></div><script>function scrollToTop(){window.scrollTo({top:0,behavior:'smooth'});}</script>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>

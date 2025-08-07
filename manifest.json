@@ -1,0 +1,2221 @@
+{
+  "source_base_path": "/home/runner/work/Jiro/Jiro/dev",
+  "xrefmap": "xrefmap.yml",
+  "files": [
+    {
+      "type": "Resource",
+      "output": {
+        "resource": {
+          "relative_path": "index.json"
+        }
+      }
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.App.Extensions.Configurator.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.App.Extensions.Configurator.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.App.Extensions.ServiceCollectionExtensions.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.App.Extensions.ServiceCollectionExtensions.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.App.Extensions.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.App.Extensions.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.App.Interceptors.InstanceContextInterceptor.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.App.Interceptors.InstanceContextInterceptor.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.App.Interceptors.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.App.Interceptors.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.App.Middleware.InstanceContextMiddleware.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.App.Middleware.InstanceContextMiddleware.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.App.Middleware.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.App.Middleware.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.App.Services.GrpcExceptionInterceptor.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.App.Services.GrpcExceptionInterceptor.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.App.Services.ICommandQueueMonitor.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.App.Services.ICommandQueueMonitor.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.App.Services.IJiroGrpcService.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.App.Services.IJiroGrpcService.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.App.Services.JiroWebSocketService.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.App.Services.JiroWebSocketService.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.App.Services.SocketRetryPolicy.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.App.Services.SocketRetryPolicy.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.App.Services.WebSocketConnection.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.App.Services.WebSocketConnection.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.App.Services.WebSocketExceptionHandler.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.App.Services.WebSocketExceptionHandler.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.App.Services.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.App.Services.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.App.Setup.AppConfigurator.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.App.Setup.AppConfigurator.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.App.Setup.EnvironmentConfigurator.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.App.Setup.EnvironmentConfigurator.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.App.Setup.EventsConfigurator.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.App.Setup.EventsConfigurator.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.App.Setup.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.App.Setup.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.App.Validation.ConfigurationValidator.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.App.Validation.ConfigurationValidator.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.App.Validation.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.App.Validation.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.Core.Abstraction.BaseRepository-3.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.Core.Abstraction.BaseRepository-3.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.Core.Abstraction.DbModel-1.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.Core.Abstraction.DbModel-1.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.Core.Abstraction.IIdentityRepository-2.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.Core.Abstraction.IIdentityRepository-2.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.Core.Abstraction.IRepository-2.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.Core.Abstraction.IRepository-2.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.Core.Abstraction.IdentityBaseRepository-3.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.Core.Abstraction.IdentityBaseRepository-3.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.Core.Abstraction.IdentityDbModel-2.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.Core.Abstraction.IdentityDbModel-2.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.Core.Abstraction.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.Core.Abstraction.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.Core.Attributes.AnomifyAttribute.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.Core.Attributes.AnomifyAttribute.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.Core.Attributes.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.Core.Attributes.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.Core.Commands.BaseCommands.BaseCommand.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.Core.Commands.BaseCommands.BaseCommand.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.Core.Commands.BaseCommands.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.Core.Commands.BaseCommands.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.Core.Commands.Chat.ChatCommand.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.Core.Commands.Chat.ChatCommand.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.Core.Commands.Chat.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.Core.Commands.Chat.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.Core.Commands.ComplexCommandResults.SessionResult.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.Core.Commands.ComplexCommandResults.SessionResult.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.Core.Commands.ComplexCommandResults.TrimmedMessageResult.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.Core.Commands.ComplexCommandResults.TrimmedMessageResult.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.Core.Commands.ComplexCommandResults.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.Core.Commands.ComplexCommandResults.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.Core.Commands.Net.NetCommands.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.Core.Commands.Net.NetCommands.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.Core.Commands.Net.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.Core.Commands.Net.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.Core.Commands.System.SystemCommand.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.Core.Commands.System.SystemCommand.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.Core.Commands.System.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.Core.Commands.System.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.Core.Commands.Weather.WeatherCommand.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.Core.Commands.Weather.WeatherCommand.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.Core.Commands.Weather.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.Core.Commands.Weather.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.Core.Constants.AI.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.Core.Constants.AI.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.Core.Constants.AgentMetadata.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.Core.Constants.AgentMetadata.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.Core.Constants.ApiEndpoints.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.Core.Constants.ApiEndpoints.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.Core.Constants.CacheKeys.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.Core.Constants.CacheKeys.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.Core.Constants.CookieNames.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.Core.Constants.CookieNames.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.Core.Constants.Environment.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.Core.Constants.Environment.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.Core.Constants.HttpClients.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.Core.Constants.HttpClients.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.Core.Constants.Paths.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.Core.Constants.Paths.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.Core.Constants.Policies.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.Core.Constants.Policies.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.Core.Constants.Roles.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.Core.Constants.Roles.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.Core.Constants.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.Core.Constants.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.Core.DTO.AssignRoleDTO.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.Core.DTO.AssignRoleDTO.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.Core.DTO.ChangeEmailDTO.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.Core.DTO.ChangeEmailDTO.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.Core.DTO.ChangePasswordDTO.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.Core.DTO.ChangePasswordDTO.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.Core.DTO.ChatGpt.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.Core.DTO.ChatGpt.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.Core.DTO.ConnectionStrings.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.Core.DTO.ConnectionStrings.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.Core.DTO.Gpt.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.Core.DTO.Gpt.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.Core.DTO.InstanceConfigDTO.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.Core.DTO.InstanceConfigDTO.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.Core.DTO.JiroPromptDTO.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.Core.DTO.JiroPromptDTO.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.Core.DTO.Log.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.Core.DTO.Log.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.Core.DTO.LoginUsernameDTO.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.Core.DTO.LoginUsernameDTO.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.Core.DTO.RegisterDTO.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.Core.DTO.RegisterDTO.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.Core.DTO.SingleGpt.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.Core.DTO.SingleGpt.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.Core.DTO.UserIdDTO.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.Core.DTO.UserIdDTO.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.Core.DTO.UserInfoDTO.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.Core.DTO.UserInfoDTO.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.Core.DTO.WhitelistedUserDTO.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.Core.DTO.WhitelistedUserDTO.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.Core.DTO.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.Core.DTO.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.Core.IRepositories.IChatSessionRepository.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.Core.IRepositories.IChatSessionRepository.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.Core.IRepositories.IMessageRepository.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.Core.IRepositories.IMessageRepository.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.Core.IRepositories.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.Core.IRepositories.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.Core.JiroException.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.Core.JiroException.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.Core.Models.AppRole.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.Core.Models.AppRole.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.Core.Models.AppUser.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.Core.Models.AppUser.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.Core.Models.AppUserRole.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.Core.Models.AppUserRole.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.Core.Models.ChatSession.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.Core.Models.ChatSession.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.Core.Models.Message.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.Core.Models.Message.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.Core.Models.MessageType.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.Core.Models.MessageType.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.Core.Models.RefreshToken.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.Core.Models.RefreshToken.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.Core.Models.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.Core.Models.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.Core.Options.ApplicationOptions.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.Core.Options.ApplicationOptions.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.Core.Options.BotOptions.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.Core.Options.BotOptions.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.Core.Options.ChatOptions.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.Core.Options.ChatOptions.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.Core.Options.DataPathsOptions.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.Core.Options.DataPathsOptions.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.Core.Options.IOption.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.Core.Options.IOption.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.Core.Options.JiroCloudOptions.GrpcOptions.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.Core.Options.JiroCloudOptions.GrpcOptions.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.Core.Options.JiroCloudOptions.WebSocketOptions.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.Core.Options.JiroCloudOptions.WebSocketOptions.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.Core.Options.JiroCloudOptions.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.Core.Options.JiroCloudOptions.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.Core.Options.LogOptions.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.Core.Options.LogOptions.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.Core.Options.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.Core.Options.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.Core.Services.Admin.AdminService.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.Core.Services.Admin.AdminService.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.Core.Services.Admin.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.Core.Services.Admin.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.Core.Services.CommandContext.CommandContext.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.Core.Services.CommandContext.CommandContext.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.Core.Services.CommandContext.ICommandContext.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.Core.Services.CommandContext.ICommandContext.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.Core.Services.CommandContext.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.Core.Services.CommandContext.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.Core.Services.CommandHandler.CommandHandlerService.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.Core.Services.CommandHandler.CommandHandlerService.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.Core.Services.CommandHandler.ICommandHandlerService.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.Core.Services.CommandHandler.ICommandHandlerService.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.Core.Services.CommandHandler.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.Core.Services.CommandHandler.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.Core.Services.CommandSystem.CommandMetadata.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.Core.Services.CommandSystem.CommandMetadata.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.Core.Services.CommandSystem.HelpService.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.Core.Services.CommandSystem.HelpService.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.Core.Services.CommandSystem.IHelpService.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.Core.Services.CommandSystem.IHelpService.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.Core.Services.CommandSystem.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.Core.Services.CommandSystem.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.Core.Services.Configuration.IConfigProviderService.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.Core.Services.Configuration.IConfigProviderService.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.Core.Services.Configuration.Models.ConfigUpdateResponse.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.Core.Services.Configuration.Models.ConfigUpdateResponse.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.Core.Services.Configuration.Models.ConfigurationSection.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.Core.Services.Configuration.Models.ConfigurationSection.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.Core.Services.Configuration.Models.FeaturesConfig.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.Core.Services.Configuration.Models.FeaturesConfig.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.Core.Services.Configuration.Models.SystemConfigResponse.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.Core.Services.Configuration.Models.SystemConfigResponse.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.Core.Services.Configuration.Models.SystemInfo.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.Core.Services.Configuration.Models.SystemInfo.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.Core.Services.Configuration.Models.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.Core.Services.Configuration.Models.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.Core.Services.Configuration.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.Core.Services.Configuration.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.Core.Services.Context.IInstanceContext.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.Core.Services.Context.IInstanceContext.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.Core.Services.Context.IInstanceMetadataAccessor.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.Core.Services.Context.IInstanceMetadataAccessor.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.Core.Services.Context.InstanceContext.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.Core.Services.Context.InstanceContext.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.Core.Services.Context.InstanceDataModel.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.Core.Services.Context.InstanceDataModel.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.Core.Services.Context.InstanceMetadataAccessor.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.Core.Services.Context.InstanceMetadataAccessor.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.Core.Services.Context.InstanceMetadataResponse.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.Core.Services.Context.InstanceMetadataResponse.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.Core.Services.Context.UserModel.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.Core.Services.Context.UserModel.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.Core.Services.Context.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.Core.Services.Context.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.Core.Services.Conversation.ConversationCoreService.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.Core.Services.Conversation.ConversationCoreService.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.Core.Services.Conversation.HistoryOptimizerService.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.Core.Services.Conversation.HistoryOptimizerService.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.Core.Services.Conversation.IConversationCoreService.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.Core.Services.Conversation.IConversationCoreService.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.Core.Services.Conversation.IHistoryOptimizerService.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.Core.Services.Conversation.IHistoryOptimizerService.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.Core.Services.Conversation.IPersonalizedConversationService.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.Core.Services.Conversation.IPersonalizedConversationService.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.Core.Services.Conversation.Models.ChatMessageWithMetadata.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.Core.Services.Conversation.Models.ChatMessageWithMetadata.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.Core.Services.Conversation.Models.OptimizerResult.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.Core.Services.Conversation.Models.OptimizerResult.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.Core.Services.Conversation.Models.Session.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.Core.Services.Conversation.Models.Session.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.Core.Services.Conversation.Models.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.Core.Services.Conversation.Models.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.Core.Services.Conversation.PersonalizedConversationService.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.Core.Services.Conversation.PersonalizedConversationService.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.Core.Services.Conversation.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.Core.Services.Conversation.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.Core.Services.Geolocation.GeolocationService.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.Core.Services.Geolocation.GeolocationService.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.Core.Services.Geolocation.IGeolocationService.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.Core.Services.Geolocation.IGeolocationService.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.Core.Services.Geolocation.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.Core.Services.Geolocation.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.Core.Services.MessageCache.CompositeMessageManager.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.Core.Services.MessageCache.CompositeMessageManager.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.Core.Services.MessageCache.IMessageCacheService.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.Core.Services.MessageCache.IMessageCacheService.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.Core.Services.MessageCache.IMessageManager.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.Core.Services.MessageCache.IMessageManager.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.Core.Services.MessageCache.ISessionManager.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.Core.Services.MessageCache.ISessionManager.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.Core.Services.MessageCache.MessageCacheService.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.Core.Services.MessageCache.MessageCacheService.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.Core.Services.MessageCache.SessionManager.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.Core.Services.MessageCache.SessionManager.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.Core.Services.MessageCache.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.Core.Services.MessageCache.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.Core.Services.Persona.IPersonaService.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.Core.Services.Persona.IPersonaService.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.Core.Services.Persona.PersonaService.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.Core.Services.Persona.PersonaService.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.Core.Services.Persona.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.Core.Services.Persona.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.Core.Services.Semaphore.ISemaphoreManager.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.Core.Services.Semaphore.ISemaphoreManager.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.Core.Services.Semaphore.SemaphoreManager.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.Core.Services.Semaphore.SemaphoreManager.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.Core.Services.Semaphore.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.Core.Services.Semaphore.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.Core.Services.StaticMessage.IStaticMessageService.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.Core.Services.StaticMessage.IStaticMessageService.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.Core.Services.StaticMessage.StaticMessageService.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.Core.Services.StaticMessage.StaticMessageService.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.Core.Services.StaticMessage.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.Core.Services.StaticMessage.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.Core.Services.Supervisor.SupervisorService.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.Core.Services.Supervisor.SupervisorService.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.Core.Services.Supervisor.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.Core.Services.Supervisor.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.Core.Services.System.ConfigProviderService.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.Core.Services.System.ConfigProviderService.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.Core.Services.System.IConfigProviderService.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.Core.Services.System.IConfigProviderService.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.Core.Services.System.ILogsProviderService.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.Core.Services.System.ILogsProviderService.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.Core.Services.System.IThemeService.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.Core.Services.System.IThemeService.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.Core.Services.System.IVersionService.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.Core.Services.System.IVersionService.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.Core.Services.System.LogFileInfo.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.Core.Services.System.LogFileInfo.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.Core.Services.System.LogsProviderService.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.Core.Services.System.LogsProviderService.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.Core.Services.System.Models.ColorScheme.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.Core.Services.System.Models.ColorScheme.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.Core.Services.System.Models.LogEntry.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.Core.Services.System.Models.LogEntry.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.Core.Services.System.Models.LogsResponse.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.Core.Services.System.Models.LogsResponse.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.Core.Services.System.Models.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.Core.Services.System.Models.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.Core.Services.System.ThemeService.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.Core.Services.System.ThemeService.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.Core.Services.System.VersionService.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.Core.Services.System.VersionService.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.Core.Services.System.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.Core.Services.System.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.Core.Services.Weather.IWeatherService.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.Core.Services.Weather.IWeatherService.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.Core.Services.Weather.Models.CurrentWeather.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.Core.Services.Weather.Models.CurrentWeather.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.Core.Services.Weather.Models.GeoLocationResponse.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.Core.Services.Weather.Models.GeoLocationResponse.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.Core.Services.Weather.Models.GeoLocationResponseRoot.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.Core.Services.Weather.Models.GeoLocationResponseRoot.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.Core.Services.Weather.Models.Hourly.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.Core.Services.Weather.Models.Hourly.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.Core.Services.Weather.Models.HourlyUnits.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.Core.Services.Weather.Models.HourlyUnits.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.Core.Services.Weather.Models.WeatherGraphData.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.Core.Services.Weather.Models.WeatherGraphData.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.Core.Services.Weather.Models.WeatherResponse.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.Core.Services.Weather.Models.WeatherResponse.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.Core.Services.Weather.Models.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.Core.Services.Weather.Models.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.Core.Services.Weather.WeatherService.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.Core.Services.Weather.WeatherService.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.Core.Services.Weather.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.Core.Services.Weather.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.Core.TokenException.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.Core.TokenException.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.Core.Utils.AppUtils.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.Core.Utils.AppUtils.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.Core.Utils.Tokenizer.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.Core.Utils.Tokenizer.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.Core.Utils.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.Core.Utils.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.Core.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.Core.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.Infrastructure.Extensions.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.Infrastructure.Extensions.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.Infrastructure.JiroContext.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.Infrastructure.JiroContext.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.Infrastructure.Migrations.ChatSessions.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.Infrastructure.Migrations.ChatSessions.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.Infrastructure.Migrations.ChatSessions_Clear.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.Infrastructure.Migrations.ChatSessions_Clear.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.Infrastructure.Migrations.ConfigureChatSessionMessageRelationship.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.Infrastructure.Migrations.ConfigureChatSessionMessageRelationship.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.Infrastructure.Migrations.init.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.Infrastructure.Migrations.init.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.Infrastructure.Migrations.refresh_token.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.Infrastructure.Migrations.refresh_token.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.Infrastructure.Migrations.session_adjustments.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.Infrastructure.Migrations.session_adjustments.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.Infrastructure.Migrations.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.Infrastructure.Migrations.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.Infrastructure.Repositories.ChatSessionRepository.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.Infrastructure.Repositories.ChatSessionRepository.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.Infrastructure.Repositories.MessageRepository.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.Infrastructure.Repositories.MessageRepository.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.Infrastructure.Repositories.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.Infrastructure.Repositories.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "_temp/api/Jiro.Infrastructure.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Jiro.Infrastructure.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "Toc",
+      "source_relative_path": "_temp/api/toc.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/toc.html"
+        },
+        ".json": {
+          "relative_path": "api/toc.json"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "Conceptual",
+      "source_relative_path": "api/index.md",
+      "output": {
+        ".html": {
+          "relative_path": "api/index.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "Resource",
+      "source_relative_path": "assets/Jiro-Icon.png",
+      "output": {
+        "resource": {
+          "relative_path": "assets/Jiro-Icon.png"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "Resource",
+      "source_relative_path": "assets/JiroBanner.png",
+      "output": {
+        "resource": {
+          "relative_path": "assets/JiroBanner.png"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "Conceptual",
+      "source_relative_path": "docs/api-index.md",
+      "output": {
+        ".html": {
+          "relative_path": "documentation/api-index.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "Conceptual",
+      "source_relative_path": "docs/changelog/code-names.md",
+      "output": {
+        ".html": {
+          "relative_path": "documentation/changelog/code-names.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "Conceptual",
+      "source_relative_path": "docs/changelog/index.md",
+      "output": {
+        ".html": {
+          "relative_path": "documentation/changelog/index.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "Toc",
+      "source_relative_path": "docs/changelog/toc.yml",
+      "output": {
+        ".html": {
+          "relative_path": "documentation/changelog/toc.html"
+        },
+        ".json": {
+          "relative_path": "documentation/changelog/toc.json"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "Conceptual",
+      "source_relative_path": "docs/changelog/v0.1.0-alpha.md",
+      "output": {
+        ".html": {
+          "relative_path": "documentation/changelog/v0.1.0-alpha.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "Conceptual",
+      "source_relative_path": "docs/changelog/v0.1.0-beta.md",
+      "output": {
+        ".html": {
+          "relative_path": "documentation/changelog/v0.1.0-beta.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "Conceptual",
+      "source_relative_path": "docs/changelog/v0.1.1-beta.md",
+      "output": {
+        ".html": {
+          "relative_path": "documentation/changelog/v0.1.1-beta.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "Conceptual",
+      "source_relative_path": "docs/changelog/v1.0.0-beta.md",
+      "output": {
+        ".html": {
+          "relative_path": "documentation/changelog/v1.0.0-beta.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "Conceptual",
+      "source_relative_path": "docs/client-auth.md",
+      "output": {
+        ".html": {
+          "relative_path": "documentation/client-auth.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "Conceptual",
+      "source_relative_path": "docs/command-flow.md",
+      "output": {
+        ".html": {
+          "relative_path": "documentation/command-flow.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "Conceptual",
+      "source_relative_path": "docs/database-schema.md",
+      "output": {
+        ".html": {
+          "relative_path": "documentation/database-schema.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "Conceptual",
+      "source_relative_path": "docs/index.md",
+      "output": {
+        ".html": {
+          "relative_path": "documentation/index.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "Conceptual",
+      "source_relative_path": "docs/project-description.md",
+      "output": {
+        ".html": {
+          "relative_path": "documentation/project-description.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "Conceptual",
+      "source_relative_path": "docs/scripts-reference.md",
+      "output": {
+        ".html": {
+          "relative_path": "documentation/scripts-reference.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "Toc",
+      "source_relative_path": "docs/toc.yml",
+      "output": {
+        ".html": {
+          "relative_path": "documentation/toc.html"
+        },
+        ".json": {
+          "relative_path": "documentation/toc.json"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "Conceptual",
+      "source_relative_path": "docs/user-guide.md",
+      "output": {
+        ".html": {
+          "relative_path": "documentation/user-guide.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "Conceptual",
+      "source_relative_path": "docs/websocket-communication.md",
+      "output": {
+        ".html": {
+          "relative_path": "documentation/websocket-communication.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "Conceptual",
+      "source_relative_path": "docs/workflow-pipelines.md",
+      "output": {
+        ".html": {
+          "relative_path": "documentation/workflow-pipelines.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "Conceptual",
+      "source_relative_path": "index.md",
+      "output": {
+        ".html": {
+          "relative_path": "index.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "Toc",
+      "source_relative_path": "toc.yml",
+      "output": {
+        ".html": {
+          "relative_path": "toc.html"
+        },
+        ".json": {
+          "relative_path": "toc.json"
+        }
+      },
+      "version": ""
+    }
+  ],
+  "groups": [
+    {
+      "xrefmap": "xrefmap.yml"
+    }
+  ]
+}

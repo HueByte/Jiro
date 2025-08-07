@@ -1,0 +1,763 @@
+﻿<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+      <title>Command Flow Architecture | Jiro Documentation </title>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <meta name="title" content="Command Flow Architecture | Jiro Documentation ">
+      
+      
+      <link rel="icon" href="../assets/Jiro-Icon.png">
+      <link rel="stylesheet" href="../public/docfx.min.css">
+      <link rel="stylesheet" href="../public/main.css">
+      <meta name="docfx:navrel" content="../toc.html">
+      <meta name="docfx:tocrel" content="toc.html">
+      
+      <meta name="docfx:rel" content="../">
+      
+      
+      <meta name="docfx:docurl" content="https://github.com/HueByte/Jiro/blob/main/dev/#L1">
+      <meta name="loc:inThisArticle" content="In this article">
+      <meta name="loc:searchResultsCount" content="{count} results for &quot;{query}&quot;">
+      <meta name="loc:searchNoResults" content="No results for &quot;{query}&quot;">
+      <meta name="loc:tocFilter" content="Filter by title">
+      <meta name="loc:nextArticle" content="Next">
+      <meta name="loc:prevArticle" content="Previous">
+      <meta name="loc:themeLight" content="Light">
+      <meta name="loc:themeDark" content="Dark">
+      <meta name="loc:themeAuto" content="Auto">
+      <meta name="loc:changeTheme" content="Change theme">
+      <meta name="loc:copy" content="Copy">
+      <meta name="loc:downloadPdf" content="Download PDF">
+  </head>
+
+  <script type="module" src="./../public/docfx.min.js"></script>
+
+  <script>
+    const theme = localStorage.getItem('theme') || 'auto'
+    document.documentElement.setAttribute('data-bs-theme', theme === 'auto' ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : theme)
+  </script>
+
+
+  <body class="tex2jax_ignore" data-layout="" data-yaml-mime="">
+    <header class="bg-body border-bottom">
+      <nav id="autocollapse" class="navbar navbar-expand-md" role="navigation">
+        <div class="container-xxl flex-nowrap">
+          <a class="navbar-brand" href="../index.html">
+            <img id="logo" class="svg" src="../assets/Jiro-Icon.png" alt="Jiro - AI Assistant">
+            Jiro - AI Assistant
+          </a>
+          <button class="btn btn-lg d-md-none border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navpanel" aria-controls="navpanel" aria-expanded="false" aria-label="Toggle navigation">
+            <i class="bi bi-three-dots"></i>
+          </button>
+          <div class="collapse navbar-collapse" id="navpanel">
+            <div id="navbar">
+              <form class="search" role="search" id="search">
+                <i class="bi bi-search"></i>
+                <input class="form-control" id="search-query" type="search" disabled="" placeholder="Search" autocomplete="off" aria-label="Search">
+              </form>
+            </div>
+          </div>
+        </div>
+      </nav>
+    </header>
+
+    <main class="container-xxl">
+      <div class="toc-offcanvas">
+        <div class="offcanvas-md offcanvas-start" tabindex="-1" id="tocOffcanvas" aria-labelledby="tocOffcanvasLabel">
+          <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="tocOffcanvasLabel">Table of Contents</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#tocOffcanvas" aria-label="Close"></button>
+          </div>
+          <div class="offcanvas-body">
+            <nav class="toc" id="toc"></nav>
+          </div>
+        </div>
+      </div>
+
+      <div class="content">
+        <div class="actionbar">
+          <button class="btn btn-lg border-0 d-md-none" style="margin-top: -.65em; margin-left: -.8em" type="button" data-bs-toggle="offcanvas" data-bs-target="#tocOffcanvas" aria-controls="tocOffcanvas" aria-expanded="false" aria-label="Show table of contents">
+            <i class="bi bi-list"></i>
+          </button>
+
+          <nav id="breadcrumb"></nav>
+        </div>
+
+        <article data-uid="">
+<h1 id="command-flow-architecture">Command Flow Architecture</h1>
+
+<h2 id="overview">Overview</h2>
+<p>Jiro implements a sophisticated command execution pipeline that handles command processing from reception through completion. This document details the complete command flow, from initial WebSocket reception through gRPC result transmission, including all intermediate processing steps and error handling mechanisms.</p>
+<h3 id="key-updates-v100-beta">Key Updates (v1.0.0-beta)</h3>
+<ul>
+<li><strong>Client-side session ID generation</strong>: Sessions are now created on the client side</li>
+<li><strong>Enhanced error handling</strong>: Improved command synchronization and error recovery</li>
+<li><strong>Service separation</strong>: SessionManager and MessageCacheService now handle session/message operations</li>
+<li><strong>Improved WebSocket contracts</strong>: Using <code>IJiroInstance</code> interface for better type safety</li>
+</ul>
+<h2 id="command-flow-pipeline">Command Flow Pipeline</h2>
+<h3 id="high-level-flow">High-Level Flow</h3>
+<pre><code class="lang-mermaid">%%{init: {
+  &quot;theme&quot;: &quot;base&quot;,
+  &quot;themeVariables&quot;: {
+    &quot;background&quot;: &quot;#FFFFFF&quot;,
+    &quot;primaryColor&quot;: &quot;#2E7D32&quot;,
+    &quot;primaryTextColor&quot;: &quot;#000000&quot;,
+    &quot;primaryBorderColor&quot;: &quot;#1B5E20&quot;,
+    &quot;lineColor&quot;: &quot;#424242&quot;,
+    &quot;sectionBkgColor&quot;: &quot;#E8F5E9&quot;,
+    &quot;altSectionBkgColor&quot;: &quot;#C8E6C9&quot;,
+    &quot;gridColor&quot;: &quot;#E0E0E0&quot;,
+    &quot;secondaryColor&quot;: &quot;#1976D2&quot;,
+    &quot;tertiaryColor&quot;: &quot;#7B1FA2&quot;
+  }
+}}%%
+flowchart TB
+    subgraph &quot;Jiro Cloud Server&quot;
+        CloudCmd[Command Dispatch]
+        CloudGrpc[gRPC Result Reception]
+    end
+    
+    subgraph &quot;Jiro Client - Reception Layer&quot;
+        WSHub[SignalR Hub]
+        WSConn[WebSocketConnection]
+        WSService[JiroWebSocketService]
+    end
+    
+    subgraph &quot;Jiro Client - Processing Layer&quot;
+        Scope[Service Scope Creation]
+        Context[Command Context Setup]
+        Handler[Command Handler]
+        Execution[Command Execution]
+    end
+    
+    subgraph &quot;Jiro Client - Response Layer&quot;
+        ResultProc[Result Processing]
+        GrpcService[JiroGrpcService]
+        GrpcClient[gRPC Client]
+    end
+    
+    CloudCmd --&gt;|WebSocket| WSHub
+    WSHub --&gt; WSConn
+    WSConn --&gt; WSService
+    
+    WSService --&gt; Scope
+    Scope --&gt; Context
+    Context --&gt; Handler
+    Handler --&gt; Execution
+    
+    Execution --&gt; ResultProc
+    ResultProc --&gt; GrpcService
+    GrpcService --&gt; GrpcClient
+    GrpcClient --&gt;|gRPC Response| CloudGrpc
+    
+    %% High Contrast Styling
+    classDef cloudStyle fill:#9C27B0,stroke:#4A148C,stroke-width:2px,color:#FFFFFF
+    classDef receptionStyle fill:#2196F3,stroke:#0D47A1,stroke-width:2px,color:#FFFFFF
+    classDef processingStyle fill:#FF9800,stroke:#E65100,stroke-width:2px,color:#000000
+    classDef responseStyle fill:#4CAF50,stroke:#1B5E20,stroke-width:2px,color:#FFFFFF
+    
+    class CloudCmd,CloudGrpc cloudStyle
+    class WSHub,WSConn,WSService receptionStyle
+    class Scope,Context,Handler,Execution processingStyle
+    class ResultProc,GrpcService,GrpcClient responseStyle
+</code></pre>
+<h2 id="detailed-command-execution-flow">Detailed Command Execution Flow</h2>
+<h3 id="1-command-reception-phase">1. Command Reception Phase</h3>
+<pre><code class="lang-mermaid">%%{init: {
+  &quot;theme&quot;: &quot;base&quot;,
+  &quot;themeVariables&quot;: {
+    &quot;background&quot;: &quot;#FFFFFF&quot;,
+    &quot;primaryColor&quot;: &quot;#2E7D32&quot;,
+    &quot;primaryTextColor&quot;: &quot;#000000&quot;,
+    &quot;primaryBorderColor&quot;: &quot;#1B5E20&quot;,
+    &quot;lineColor&quot;: &quot;#424242&quot;,
+    &quot;sectionBkgColor&quot;: &quot;#E8F5E9&quot;,
+    &quot;altSectionBkgColor&quot;: &quot;#C8E6C9&quot;,
+    &quot;gridColor&quot;: &quot;#E0E0E0&quot;,
+    &quot;secondaryColor&quot;: &quot;#1976D2&quot;,
+    &quot;tertiaryColor&quot;: &quot;#7B1FA2&quot;,
+    &quot;actorBkg&quot;: &quot;#E3F2FD&quot;,
+    &quot;actorBorder&quot;: &quot;#1565C0&quot;,
+    &quot;actorTextColor&quot;: &quot;#000000&quot;,
+    &quot;activationBkgColor&quot;: &quot;#FFF3E0&quot;,
+    &quot;activationBorderColor&quot;: &quot;#E65100&quot;,
+    &quot;noteBkgColor&quot;: &quot;#FFFDE7&quot;,
+    &quot;noteBorderColor&quot;: &quot;#F57C00&quot;,
+    &quot;noteTextColor&quot;: &quot;#000000&quot;
+  }
+}}%%
+sequenceDiagram
+    participant Server as Jiro Cloud
+    participant SignalR as SignalR Hub
+    participant WSConn as WebSocketConnection
+    participant WSService as JiroWebSocketService
+    participant Queue as Command Queue
+    
+    Server-&gt;&gt;SignalR: Send Command Message
+    Note over SignalR: JSON Deserialization&lt;br/&gt;CommandMessage Object
+    
+    SignalR-&gt;&gt;WSConn: CommandReceived Event
+    Note over WSConn: Event Handler Setup&lt;br/&gt;via JiroClientBase
+    
+    WSConn-&gt;&gt;WSService: HandleCommandAsync()
+    Note over WSService: Command Validation&lt;br/&gt;Queue Monitoring
+    
+    WSService-&gt;&gt;Queue: Add Command (CommandSyncId)
+    Note over Queue: Active Commands Tracking&lt;br/&gt;Metrics Increment
+</code></pre>
+<h4 id="command-message-structure">Command Message Structure</h4>
+<p>The incoming command follows this structure:</p>
+<pre><code class="lang-typescript">interface CommandMessage {
+  instanceId: string;        // Target Jiro instance identifier
+  command: string;           // Command text to execute
+  commandSyncId: string;     // Unique synchronization identifier
+  sessionId: string;         // Chat session identifier (client-generated in v1.0.0-beta)
+  parameters: Record&lt;string, string&gt;; // Additional command parameters
+}
+</code></pre>
+<h3 id="2-service-scope-and-context-setup">2. Service Scope and Context Setup</h3>
+<pre><code class="lang-mermaid">%%{init: {
+  &quot;theme&quot;: &quot;base&quot;,
+  &quot;themeVariables&quot;: {
+    &quot;background&quot;: &quot;#FFFFFF&quot;,
+    &quot;primaryColor&quot;: &quot;#2E7D32&quot;,
+    &quot;primaryTextColor&quot;: &quot;#000000&quot;,
+    &quot;primaryBorderColor&quot;: &quot;#1B5E20&quot;,
+    &quot;lineColor&quot;: &quot;#424242&quot;,
+    &quot;sectionBkgColor&quot;: &quot;#E8F5E9&quot;,
+    &quot;altSectionBkgColor&quot;: &quot;#C8E6C9&quot;,
+    &quot;gridColor&quot;: &quot;#E0E0E0&quot;,
+    &quot;secondaryColor&quot;: &quot;#1976D2&quot;,
+    &quot;tertiaryColor&quot;: &quot;#7B1FA2&quot;
+  }
+}}%%
+flowchart TD
+    Start[Command Received] --&gt; CreateScope[Create AsyncServiceScope]
+    CreateScope --&gt; ResolveContext[Resolve ICommandContext]
+    ResolveContext --&gt; ResolveHandler[Resolve ICommandHandlerService]
+    ResolveHandler --&gt; ResolveGrpc[Resolve IJiroGrpcService]
+    
+    ResolveGrpc --&gt; SetInstance[Set Current Instance ID]
+    SetInstance --&gt; SetSession[Set Session ID]
+    SetSession --&gt; SetParams[Set Command Parameters]
+    SetParams --&gt; Ready[Context Ready for Execution]
+    
+    %% High Contrast Styling
+    classDef setupStyle fill:#2196F3,stroke:#0D47A1,stroke-width:2px,color:#FFFFFF
+    classDef resolveStyle fill:#FF9800,stroke:#E65100,stroke-width:2px,color:#000000
+    classDef configStyle fill:#4CAF50,stroke:#1B5E20,stroke-width:2px,color:#FFFFFF
+    
+    class CreateScope setupStyle
+    class ResolveContext,ResolveHandler,ResolveGrpc resolveStyle
+    class SetInstance,SetSession,SetParams,Ready configStyle
+</code></pre>
+<h4 id="context-configuration-details">Context Configuration Details</h4>
+<pre><code class="lang-csharp">// Command context setup in JiroWebSocketService
+commandContext.SetCurrentInstance(commandMessage.InstanceId);
+commandContext.SetSessionId(commandMessage.SessionId);
+commandContext.SetData(commandMessage.Parameters.Select(kvp =&gt;
+    new KeyValuePair&lt;string, object&gt;(kvp.Key, kvp.Value)));
+</code></pre>
+<h3 id="3-command-execution-phase">3. Command Execution Phase</h3>
+<pre><code class="lang-mermaid">%%{init: {
+  &quot;theme&quot;: &quot;base&quot;,
+  &quot;themeVariables&quot;: {
+    &quot;background&quot;: &quot;#FFFFFF&quot;,
+    &quot;primaryColor&quot;: &quot;#2E7D32&quot;,
+    &quot;primaryTextColor&quot;: &quot;#000000&quot;,
+    &quot;primaryBorderColor&quot;: &quot;#1B5E20&quot;,
+    &quot;lineColor&quot;: &quot;#424242&quot;,
+    &quot;sectionBkgColor&quot;: &quot;#E8F5E9&quot;,
+    &quot;altSectionBkgColor&quot;: &quot;#C8E6C9&quot;,
+    &quot;gridColor&quot;: &quot;#E0E0E0&quot;,
+    &quot;secondaryColor&quot;: &quot;#1976D2&quot;,
+    &quot;tertiaryColor&quot;: &quot;#7B1FA2&quot;,
+    &quot;actorBkg&quot;: &quot;#E3F2FD&quot;,
+    &quot;actorBorder&quot;: &quot;#1565C0&quot;,
+    &quot;actorTextColor&quot;: &quot;#000000&quot;,
+    &quot;activationBkgColor&quot;: &quot;#FFF3E0&quot;,
+    &quot;activationBorderColor&quot;: &quot;#E65100&quot;,
+    &quot;noteBkgColor&quot;: &quot;#FFFDE7&quot;,
+    &quot;noteBorderColor&quot;: &quot;#F57C00&quot;,
+    &quot;noteTextColor&quot;: &quot;#000000&quot;
+  }
+}}%%
+sequenceDiagram
+    participant WSService as JiroWebSocketService
+    participant Context as ICommandContext
+    participant Handler as ICommandHandlerService
+    participant Parser as Command Parser
+    participant Executor as Command Executor
+    participant Plugins as Plugin Commands
+    
+    WSService-&gt;&gt;Handler: ExecuteCommandAsync(scope, command)
+    Handler-&gt;&gt;Parser: Parse Command String
+    Parser-&gt;&gt;Handler: Command Metadata
+    
+    Handler-&gt;&gt;Context: Get Current Session/Instance
+    Context-&gt;&gt;Handler: Context Data
+    
+    Handler-&gt;&gt;Executor: Route to Command Executor
+    
+    alt Built-in Command
+        Executor-&gt;&gt;Executor: Execute Core Command
+    else Plugin Command
+        Executor-&gt;&gt;Plugins: Execute Plugin Command
+        Plugins-&gt;&gt;Executor: Plugin Result
+    end
+    
+    Executor-&gt;&gt;Handler: Command Result
+    Handler-&gt;&gt;WSService: CommandResponse Object
+    
+    Note over WSService: Result Contains:&lt;br/&gt;• Command Name&lt;br/&gt;• Command Type&lt;br/&gt;• Success Status&lt;br/&gt;• Result Data
+</code></pre>
+<h4 id="command-processing-pipeline">Command Processing Pipeline</h4>
+<ol>
+<li><strong>Command Parsing</strong>: Text command parsed into executable format</li>
+<li><strong>Command Resolution</strong>: Determine target command handler (core vs plugin)</li>
+<li><strong>Context Injection</strong>: Current session and instance data provided</li>
+<li><strong>Command Execution</strong>: Actual business logic execution</li>
+<li><strong>Result Formatting</strong>: Output formatted for transmission</li>
+</ol>
+<h3 id="4-result-processing-and-transmission">4. Result Processing and Transmission</h3>
+<pre><code class="lang-mermaid">%%{init: {
+  &quot;theme&quot;: &quot;base&quot;,
+  &quot;themeVariables&quot;: {
+    &quot;background&quot;: &quot;#FFFFFF&quot;,
+    &quot;primaryColor&quot;: &quot;#2E7D32&quot;,
+    &quot;primaryTextColor&quot;: &quot;#000000&quot;,
+    &quot;primaryBorderColor&quot;: &quot;#1B5E20&quot;,
+    &quot;lineColor&quot;: &quot;#424242&quot;,
+    &quot;sectionBkgColor&quot;: &quot;#E8F5E9&quot;,
+    &quot;altSectionBkgColor&quot;: &quot;#C8E6C9&quot;,
+    &quot;gridColor&quot;: &quot;#E0E0E0&quot;,
+    &quot;secondaryColor&quot;: &quot;#1976D2&quot;,
+    &quot;tertiaryColor&quot;: &quot;#7B1FA2&quot;,
+    &quot;actorBkg&quot;: &quot;#E3F2FD&quot;,
+    &quot;actorBorder&quot;: &quot;#1565C0&quot;,
+    &quot;actorTextColor&quot;: &quot;#000000&quot;,
+    &quot;activationBkgColor&quot;: &quot;#FFF3E0&quot;,
+    &quot;activationBorderColor&quot;: &quot;#E65100&quot;,
+    &quot;noteBkgColor&quot;: &quot;#FFFDE7&quot;,
+    &quot;noteBorderColor&quot;: &quot;#F57C00&quot;,
+    &quot;noteTextColor&quot;: &quot;#000000&quot;
+  }
+}}%%
+sequenceDiagram
+    participant WSService as JiroWebSocketService
+    participant GrpcService as JiroGrpcService
+    participant Context as ICommandContext
+    participant ProtoClient as gRPC Client
+    participant Server as Jiro Cloud
+    
+    WSService-&gt;&gt;Context: Get Final Session ID
+    Context-&gt;&gt;WSService: Updated Session ID
+    
+    alt Successful Execution
+        WSService-&gt;&gt;GrpcService: SendCommandResultAsync()
+        Note over GrpcService: Convert to ClientMessage&lt;br/&gt;Protobuf Format
+    else Failed Execution
+        WSService-&gt;&gt;GrpcService: SendCommandErrorAsync()
+        Note over GrpcService: Create Error Response&lt;br/&gt;Protobuf Format
+    end
+    
+    GrpcService-&gt;&gt;GrpcService: CreateMessage()
+    Note over GrpcService: Data Type Detection:&lt;br/&gt;• Text/JSON&lt;br/&gt;• Graph Data&lt;br/&gt;• Error Response
+    
+    GrpcService-&gt;&gt;ProtoClient: SendCommandResultAsync()
+    
+    loop Retry Logic (Max 3 attempts)
+        ProtoClient-&gt;&gt;Server: gRPC Call with ClientMessage
+        Server-&gt;&gt;ProtoClient: CommandResultResponse
+        
+        alt Success Response
+            Note over ProtoClient: Operation Complete
+        else Error Response
+            Note over ProtoClient: Exponential Backoff&lt;br/&gt;Retry Attempt
+        end
+    end
+    
+    ProtoClient-&gt;&gt;GrpcService: Final Result
+    GrpcService-&gt;&gt;WSService: Transmission Complete
+</code></pre>
+<h4 id="protobuf-message-structure">Protobuf Message Structure</h4>
+<p>The result is converted to this protobuf structure:</p>
+<pre><code class="lang-protobuf">message ClientMessage {
+    string commandSyncId = 6;
+    string commandName = 1;
+    string sessionId = 8;
+    DataType dataType = 2;
+    bool isSuccess = 5;
+    oneof result {
+        TextResult textResult = 3;
+        GraphResult graphResult = 4;
+    }
+}
+
+enum DataType {
+    TEXT = 0;
+    GRAPH = 1;
+}
+
+message TextResult {
+    string response = 1;
+    TextType textType = 2;
+}
+
+enum TextType {
+    PLAIN = 0;
+    JSON = 1;
+    BASE64 = 2;
+    MARKDOWN = 3;
+    HTML = 4;
+}
+</code></pre>
+<h3 id="5-resource-cleanup-and-monitoring">5. Resource Cleanup and Monitoring</h3>
+<pre><code class="lang-mermaid">%%{init: {
+  &quot;theme&quot;: &quot;base&quot;,
+  &quot;themeVariables&quot;: {
+    &quot;background&quot;: &quot;#FFFFFF&quot;,
+    &quot;primaryColor&quot;: &quot;#2E7D32&quot;,
+    &quot;primaryTextColor&quot;: &quot;#000000&quot;,
+    &quot;primaryBorderColor&quot;: &quot;#1B5E20&quot;,
+    &quot;lineColor&quot;: &quot;#424242&quot;,
+    &quot;sectionBkgColor&quot;: &quot;#E8F5E9&quot;,
+    &quot;altSectionBkgColor&quot;: &quot;#C8E6C9&quot;,
+    &quot;gridColor&quot;: &quot;#E0E0E0&quot;,
+    &quot;secondaryColor&quot;: &quot;#1976D2&quot;,
+    &quot;tertiaryColor&quot;: &quot;#7B1FA2&quot;
+  }
+}}%%
+flowchart TD
+    Complete[Command Execution Complete] --&gt; UpdateMetrics[Update Command Metrics]
+    UpdateMetrics --&gt; RemoveFromQueue[Remove from Active Commands]
+    RemoveFromQueue --&gt; DisposeScope[Dispose Service Scope]
+    
+    DisposeScope --&gt; CleanupContext[Cleanup Command Context]
+    CleanupContext --&gt; CleanupGrpc[Cleanup gRPC Service]
+    CleanupGrpc --&gt; FinalMetrics[Final Metrics Update]
+    
+    FinalMetrics --&gt; LogResult[Log Command Completion]
+    LogResult --&gt; Ready[Ready for Next Command]
+    
+    %% Horizon Theme Styling
+    classDef cleanupStyle fill:#FCD4B8,stroke:#E29A6B,stroke-width:2px,color:#06060C
+    classDef metricsStyle fill:#26BBD9,stroke:#1A9CB8,stroke-width:2px,color:#06060C
+    classDef completeStyle fill:#27D797,stroke:#21BFC2,stroke-width:2px,color:#06060C
+    
+    class DisposeScope,CleanupContext,CleanupGrpc cleanupStyle
+    class UpdateMetrics,RemoveFromQueue,FinalMetrics metricsStyle
+    class LogResult,Ready completeStyle
+</code></pre>
+<h2 id="error-handling-flow">Error Handling Flow</h2>
+<h3 id="exception-processing-pipeline">Exception Processing Pipeline</h3>
+<pre><code class="lang-mermaid">%%{init: {
+  &quot;theme&quot;: &quot;base&quot;,
+  &quot;themeVariables&quot;: {
+    &quot;background&quot;: &quot;#FFFFFF&quot;,
+    &quot;primaryColor&quot;: &quot;#2E7D32&quot;,
+    &quot;primaryTextColor&quot;: &quot;#000000&quot;,
+    &quot;primaryBorderColor&quot;: &quot;#1B5E20&quot;,
+    &quot;lineColor&quot;: &quot;#424242&quot;,
+    &quot;sectionBkgColor&quot;: &quot;#E8F5E9&quot;,
+    &quot;altSectionBkgColor&quot;: &quot;#C8E6C9&quot;,
+    &quot;gridColor&quot;: &quot;#E0E0E0&quot;,
+    &quot;secondaryColor&quot;: &quot;#1976D2&quot;,
+    &quot;tertiaryColor&quot;: &quot;#7B1FA2&quot;
+  }
+}}%%
+flowchart TD
+    Exception[Exception Thrown] --&gt; Catch[Exception Caught]
+    Catch --&gt; LogError[Log Error Details]
+    LogError --&gt; CreateErrorScope[Create Error Scope]
+    CreateErrorScope --&gt; GetSessionId[Get Final Session ID]
+    GetSessionId --&gt; SendError[Send Error via gRPC]
+    SendError --&gt; UpdateFailedCount[Update Failed Commands Count]
+    UpdateFailedCount --&gt; CleanupError[Cleanup Resources]
+    CleanupError --&gt; RemoveFromQueue[Remove from Active Commands]
+    
+    %% Error types
+    Catch --&gt; ParseError{Command Parse Error?}
+    Catch --&gt; ExecutionError{Execution Error?}
+    Catch --&gt; GrpcError{gRPC Send Error?}
+    
+    ParseError --&gt;|Yes| SendError
+    ExecutionError --&gt;|Yes| SendError
+    GrpcError --&gt;|Yes| LogGrpcFailure[Log gRPC Failure]
+    LogGrpcFailure --&gt; UpdateFailedCount
+    
+    %% Horizon Theme Styling
+    classDef errorStyle fill:#E95378,stroke:#C7455C,stroke-width:2px,color:#FCD4B8
+    classDef processStyle fill:#FCD4B8,stroke:#E29A6B,stroke-width:2px,color:#06060C
+    classDef cleanupStyle fill:#26BBD9,stroke:#1A9CB8,stroke-width:2px,color:#06060C
+    
+    class Exception,ParseError,ExecutionError,GrpcError errorStyle
+    class Catch,LogError,SendError processStyle
+    class UpdateFailedCount,CleanupError,RemoveFromQueue cleanupStyle
+</code></pre>
+<h3 id="error-response-structure">Error Response Structure</h3>
+<pre><code class="lang-csharp">// Error response creation in JiroGrpcService
+var errorResult = new CommandResponse
+{
+    CommandName = &quot;Error&quot;,
+    CommandType = Jiro.Commands.CommandType.Text,
+    IsSuccess = false,
+    Result = Jiro.Commands.Results.TextResult.Create(errorMessage)
+};
+</code></pre>
+<h2 id="command-queue-monitoring">Command Queue Monitoring</h2>
+<h3 id="real-time-metrics-tracking">Real-time Metrics Tracking</h3>
+<pre><code class="lang-mermaid">%%{init: {
+  &quot;theme&quot;: &quot;base&quot;,
+  &quot;themeVariables&quot;: {
+    &quot;background&quot;: &quot;#FFFFFF&quot;,
+    &quot;primaryColor&quot;: &quot;#2E7D32&quot;,
+    &quot;primaryTextColor&quot;: &quot;#000000&quot;,
+    &quot;primaryBorderColor&quot;: &quot;#1B5E20&quot;,
+    &quot;lineColor&quot;: &quot;#424242&quot;,
+    &quot;sectionBkgColor&quot;: &quot;#E8F5E9&quot;,
+    &quot;altSectionBkgColor&quot;: &quot;#C8E6C9&quot;,
+    &quot;gridColor&quot;: &quot;#E0E0E0&quot;,
+    &quot;secondaryColor&quot;: &quot;#1976D2&quot;,
+    &quot;tertiaryColor&quot;: &quot;#7B1FA2&quot;
+  }
+}}%%
+graph TB
+    subgraph &quot;Command Metrics&quot;
+        ActiveCount[Active Command Count]
+        TotalProcessed[Total Commands Processed]
+        SuccessfulCount[Successful Commands]
+        FailedCount[Failed Commands]
+    end
+    
+    subgraph &quot;Queue Operations&quot;
+        AddCommand[Command Started]
+        RemoveCommand[Command Completed]
+        IncrementSuccess[Success Counter++]
+        IncrementFailed[Failed Counter++]
+    end
+    
+    subgraph &quot;Monitoring Interface&quot;
+        Monitor[ICommandQueueMonitor]
+        ActiveIds[Active Command IDs]
+        Metrics[Real-time Metrics]
+    end
+    
+    AddCommand --&gt; ActiveCount
+    RemoveCommand --&gt; ActiveCount
+    IncrementSuccess --&gt; SuccessfulCount
+    IncrementFailed --&gt; FailedCount
+    
+    ActiveCount --&gt; Monitor
+    TotalProcessed --&gt; Monitor
+    SuccessfulCount --&gt; Monitor
+    FailedCount --&gt; Monitor
+    
+    Monitor --&gt; ActiveIds
+    Monitor --&gt; Metrics
+    
+    %% Horizon Theme Styling
+    classDef metricsStyle fill:#26BBD9,stroke:#1A9CB8,stroke-width:2px,color:#06060C
+    classDef operationsStyle fill:#FCD4B8,stroke:#E29A6B,stroke-width:2px,color:#06060C
+    classDef interfaceStyle fill:#27D797,stroke:#21BFC2,stroke-width:2px,color:#06060C
+    
+    class ActiveCount,TotalProcessed,SuccessfulCount,FailedCount metricsStyle
+    class AddCommand,RemoveCommand,IncrementSuccess,IncrementFailed operationsStyle
+    class Monitor,ActiveIds,Metrics interfaceStyle
+</code></pre>
+<h3 id="metrics-implementation">Metrics Implementation</h3>
+<pre><code class="lang-csharp">// Command queue monitoring in JiroWebSocketService
+private readonly ConcurrentDictionary&lt;string, DateTime&gt; _activeCommands = new();
+private long _totalCommandsProcessed = 0;
+private long _successfulCommands = 0;
+private long _failedCommands = 0;
+
+// Metrics properties
+public int ActiveCommandCount =&gt; _activeCommands.Count;
+public IEnumerable&lt;string&gt; ActiveCommandIds =&gt; _activeCommands.Keys;
+public long TotalCommandsProcessed =&gt; _totalCommandsProcessed;
+public long SuccessfulCommands =&gt; _successfulCommands;
+public long FailedCommands =&gt; _failedCommands;
+</code></pre>
+<h2 id="concurrency-and-threading">Concurrency and Threading</h2>
+<h3 id="thread-safety-considerations">Thread Safety Considerations</h3>
+<pre><code class="lang-mermaid">%%{init: {
+  &quot;theme&quot;: &quot;base&quot;,
+  &quot;themeVariables&quot;: {
+    &quot;background&quot;: &quot;#FFFFFF&quot;,
+    &quot;primaryColor&quot;: &quot;#2E7D32&quot;,
+    &quot;primaryTextColor&quot;: &quot;#000000&quot;,
+    &quot;primaryBorderColor&quot;: &quot;#1B5E20&quot;,
+    &quot;lineColor&quot;: &quot;#424242&quot;,
+    &quot;sectionBkgColor&quot;: &quot;#E8F5E9&quot;,
+    &quot;altSectionBkgColor&quot;: &quot;#C8E6C9&quot;,
+    &quot;gridColor&quot;: &quot;#E0E0E0&quot;,
+    &quot;secondaryColor&quot;: &quot;#1976D2&quot;,
+    &quot;tertiaryColor&quot;: &quot;#7B1FA2&quot;
+  }
+}}%%
+graph TB
+    subgraph &quot;Thread-Safe Components&quot;
+        ConcurrentDict[ConcurrentDictionary&lt;br/&gt;Active Commands]
+        InterlockedCounters[Interlocked Counters&lt;br/&gt;Command Metrics]
+        ScopedServices[Scoped Services&lt;br/&gt;Per Command]
+    end
+    
+    subgraph &quot;Threading Patterns&quot;
+        AsyncAwait[Async/Await Pattern]
+        TaskRun[Task.Run for Background]
+        Semaphores[Semaphores for Connection]
+    end
+    
+    subgraph &quot;Isolation Mechanisms&quot;
+        ServiceScope[Service Scope Isolation]
+        CommandContext[Command Context Isolation]
+        GrpcScoped[Scoped gRPC Services]
+    end
+    
+    ConcurrentDict --&gt; ServiceScope
+    InterlockedCounters --&gt; CommandContext
+    ScopedServices --&gt; GrpcScoped
+    
+    AsyncAwait --&gt; ServiceScope
+    TaskRun --&gt; CommandContext
+    Semaphores --&gt; GrpcScoped
+    
+    %% Horizon Theme Styling
+    classDef threadSafeStyle fill:#27D797,stroke:#21BFC2,stroke-width:2px,color:#06060C
+    classDef patternStyle fill:#26BBD9,stroke:#1A9CB8,stroke-width:2px,color:#06060C
+    classDef isolationStyle fill:#FCD4B8,stroke:#E29A6B,stroke-width:2px,color:#06060C
+    
+    class ConcurrentDict,InterlockedCounters,ScopedServices threadSafeStyle
+    class AsyncAwait,TaskRun,Semaphores patternStyle
+    class ServiceScope,CommandContext,GrpcScoped isolationStyle
+</code></pre>
+<h3 id="concurrent-command-processing">Concurrent Command Processing</h3>
+<ul>
+<li><strong>Multiple Commands</strong>: Can process multiple commands simultaneously</li>
+<li><strong>Thread Isolation</strong>: Each command gets its own service scope and context</li>
+<li><strong>Resource Safety</strong>: Thread-safe collections and atomic operations</li>
+<li><strong>Connection Management</strong>: Semaphores protect WebSocket connection operations</li>
+</ul>
+<h2 id="performance-characteristics">Performance Characteristics</h2>
+<h3 id="processing-metrics">Processing Metrics</h3>
+<table>
+<thead>
+<tr>
+<th>Metric</th>
+<th>Typical Value</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Command Reception Latency</td>
+<td>&lt; 10ms</td>
+<td>WebSocket to service handler</td>
+</tr>
+<tr>
+<td>Service Scope Creation</td>
+<td>&lt; 5ms</td>
+<td>Dependency injection overhead</td>
+</tr>
+<tr>
+<td>Command Execution Time</td>
+<td>Variable</td>
+<td>Depends on command complexity</td>
+</tr>
+<tr>
+<td>gRPC Transmission Time</td>
+<td>10-100ms</td>
+<td>Network dependent</td>
+</tr>
+<tr>
+<td>Resource Cleanup Time</td>
+<td>&lt; 5ms</td>
+<td>Service scope disposal</td>
+</tr>
+</tbody>
+</table>
+<h3 id="scalability-considerations">Scalability Considerations</h3>
+<ol>
+<li><strong>Memory Usage</strong>: Scoped services prevent memory leaks</li>
+<li><strong>Connection Limits</strong>: Single WebSocket, multiple gRPC calls</li>
+<li><strong>Command Throughput</strong>: Limited by command execution time</li>
+<li><strong>Error Recovery</strong>: Automatic retry and reconnection mechanisms</li>
+<li><strong>Resource Management</strong>: Proper disposal patterns throughout</li>
+</ol>
+<h2 id="integration-points">Integration Points</h2>
+<h3 id="command-handler-integration">Command Handler Integration</h3>
+<pre><code class="lang-csharp">// Custom command handler registration
+services.RegisterCommands(nameof(ChatCommand.Chat));
+
+// Command execution flow
+var result = await _commandHandler.ExecuteCommandAsync(
+    scope.ServiceProvider, 
+    commandMessage.Command);
+</code></pre>
+<h3 id="context-provider-integration">Context Provider Integration</h3>
+<pre><code class="lang-csharp">// Command context setup
+commandContext.SetCurrentInstance(commandMessage.InstanceId);
+commandContext.SetSessionId(commandMessage.SessionId);
+commandContext.SetData(commandMessage.Parameters.Select(kvp =&gt;
+    new KeyValuePair&lt;string, object&gt;(kvp.Key, kvp.Value)));
+</code></pre>
+<h3 id="grpc-service-integration">gRPC Service Integration</h3>
+<pre><code class="lang-csharp">// gRPC client configuration
+services.AddGrpcClient&lt;JiroHubProtoClient&gt;(&quot;JiroClient&quot;, options =&gt;
+{
+    options.Address = new Uri(jiroCloudOptions.Grpc.ServerUrl);
+})
+.AddCallCredentials((context, metadata) =&gt;
+{
+    metadata.Add(&quot;X-Api-Key&quot;, jiroCloudOptions.ApiKey);
+    return Task.CompletedTask;
+});
+</code></pre>
+<h2 id="best-practices">Best Practices</h2>
+<h3 id="command-flow-optimization">Command Flow Optimization</h3>
+<ol>
+<li><strong>Minimize Scope Lifetime</strong>: Create and dispose service scopes quickly</li>
+<li><strong>Async All the Way</strong>: Use async/await throughout the pipeline</li>
+<li><strong>Error Boundary</strong>: Catch exceptions at the service boundary</li>
+<li><strong>Resource Cleanup</strong>: Always dispose scoped services properly</li>
+<li><strong>Monitoring Integration</strong>: Track metrics at key pipeline points</li>
+</ol>
+<h3 id="error-handling-guidelines">Error Handling Guidelines</h3>
+<ol>
+<li><strong>Graceful Degradation</strong>: Continue processing other commands on failures</li>
+<li><strong>Comprehensive Logging</strong>: Log at each major pipeline stage</li>
+<li><strong>Retry Logic</strong>: Implement exponential backoff for transient failures</li>
+<li><strong>Context Preservation</strong>: Maintain command context through error flows</li>
+<li><strong>Cleanup Guarantee</strong>: Ensure resources are cleaned up even on errors</li>
+</ol>
+<p>This command flow architecture provides a robust, scalable, and maintainable pipeline for processing commands in the Jiro application, with comprehensive error handling, monitoring, and resource management capabilities.</p>
+
+</article>
+
+        <div class="contribution d-print-none">
+          <a href="https://github.com/HueByte/Jiro/blob/main/dev/#L1" class="edit-link">Edit this page</a>
+        </div>
+
+        <div class="next-article d-print-none border-top" id="nextArticle"></div>
+
+      </div>
+
+      <div class="affix">
+        <nav id="affix"></nav>
+      </div>
+    </main>
+
+    <div class="container-xxl search-results" id="search-results"></div>
+
+    <footer class="border-top text-secondary">
+      <div class="container-xxl">
+        <div class="flex-fill">
+          <div class="footer-custom"><div class="footer-inner d-flex justify-content-between align-items-center"><div class="footer-text">Made with <strong>💖</strong> By HueByte</div><div class="footer-links"><a href="https://github.com/HueByte/Jiro" class="footer-link" target="_blank"><i class="fab fa-github"></i>GitHub</a><a href="#" class="footer-link scroll-to-top" onclick="scrollToTop()"><i class="fas fa-arrow-up"></i>Top</a></div></div></div><script>function scrollToTop(){window.scrollTo({top:0,behavior:'smooth'});}</script>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>

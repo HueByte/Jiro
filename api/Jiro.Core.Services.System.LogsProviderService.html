@@ -1,0 +1,455 @@
+﻿<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+      <title>Class LogsProviderService | Jiro Documentation </title>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <meta name="title" content="Class LogsProviderService | Jiro Documentation ">
+      
+      <meta name="description" content="Supports all classes in the .NET class hierarchy and provides low-level services to derived classes. This is the ultimate base class of all .NET classes; it is the root of the type hierarchy.">
+      <link rel="icon" href="../assets/Jiro-Icon.png">
+      <link rel="stylesheet" href="../public/docfx.min.css">
+      <link rel="stylesheet" href="../public/main.css">
+      <meta name="docfx:navrel" content="../toc.html">
+      <meta name="docfx:tocrel" content="toc.html">
+      
+      <meta name="docfx:rel" content="../">
+      
+      
+      <meta name="docfx:docurl" content="https://github.com/HueByte/Jiro/new/main/apiSpec/new?filename=Jiro_Core_Services_System_LogsProviderService.md&amp;value=---%0Auid%3A%20Jiro.Core.Services.System.LogsProviderService%0Asummary%3A%20&#39;*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax&#39;%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">
+      <meta name="loc:inThisArticle" content="In this article">
+      <meta name="loc:searchResultsCount" content="{count} results for &quot;{query}&quot;">
+      <meta name="loc:searchNoResults" content="No results for &quot;{query}&quot;">
+      <meta name="loc:tocFilter" content="Filter by title">
+      <meta name="loc:nextArticle" content="Next">
+      <meta name="loc:prevArticle" content="Previous">
+      <meta name="loc:themeLight" content="Light">
+      <meta name="loc:themeDark" content="Dark">
+      <meta name="loc:themeAuto" content="Auto">
+      <meta name="loc:changeTheme" content="Change theme">
+      <meta name="loc:copy" content="Copy">
+      <meta name="loc:downloadPdf" content="Download PDF">
+  </head>
+
+  <script type="module" src="./../public/docfx.min.js"></script>
+
+  <script>
+    const theme = localStorage.getItem('theme') || 'auto'
+    document.documentElement.setAttribute('data-bs-theme', theme === 'auto' ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : theme)
+  </script>
+
+
+  <body class="tex2jax_ignore" data-layout="" data-yaml-mime="ManagedReference">
+    <header class="bg-body border-bottom">
+      <nav id="autocollapse" class="navbar navbar-expand-md" role="navigation">
+        <div class="container-xxl flex-nowrap">
+          <a class="navbar-brand" href="../index.html">
+            <img id="logo" class="svg" src="../assets/Jiro-Icon.png" alt="Jiro - AI Assistant">
+            Jiro - AI Assistant
+          </a>
+          <button class="btn btn-lg d-md-none border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navpanel" aria-controls="navpanel" aria-expanded="false" aria-label="Toggle navigation">
+            <i class="bi bi-three-dots"></i>
+          </button>
+          <div class="collapse navbar-collapse" id="navpanel">
+            <div id="navbar">
+              <form class="search" role="search" id="search">
+                <i class="bi bi-search"></i>
+                <input class="form-control" id="search-query" type="search" disabled="" placeholder="Search" autocomplete="off" aria-label="Search">
+              </form>
+            </div>
+          </div>
+        </div>
+      </nav>
+    </header>
+
+    <main class="container-xxl">
+      <div class="toc-offcanvas">
+        <div class="offcanvas-md offcanvas-start" tabindex="-1" id="tocOffcanvas" aria-labelledby="tocOffcanvasLabel">
+          <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="tocOffcanvasLabel">Table of Contents</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#tocOffcanvas" aria-label="Close"></button>
+          </div>
+          <div class="offcanvas-body">
+            <nav class="toc" id="toc"></nav>
+          </div>
+        </div>
+      </div>
+
+      <div class="content">
+        <div class="actionbar">
+          <button class="btn btn-lg border-0 d-md-none" style="margin-top: -.65em; margin-left: -.8em" type="button" data-bs-toggle="offcanvas" data-bs-target="#tocOffcanvas" aria-controls="tocOffcanvas" aria-expanded="false" aria-label="Show table of contents">
+            <i class="bi bi-list"></i>
+          </button>
+
+          <nav id="breadcrumb"></nav>
+        </div>
+
+        <article data-uid="Jiro.Core.Services.System.LogsProviderService">
+
+
+
+  <h1 id="Jiro_Core_Services_System_LogsProviderService" data-uid="Jiro.Core.Services.System.LogsProviderService" class="text-break">
+Class LogsProviderService  <a class="header-action link-secondary" title="View source" href="https://github.com/HueByte/Jiro/blob/main/src/Jiro.Kernel/Jiro.Core/Services/System/LogsProviderService.cs/#L14"><i class="bi bi-code-slash"></i></a>
+  </h1>
+
+  <div class="facts text-secondary">
+    <dl><dt>Namespace</dt><dd><a class="xref" href="Jiro.html">Jiro</a>.<a class="xref" href="Jiro.Core.html">Core</a>.<a class="xref" href="Jiro.Core.Services.html">Services</a>.<a class="xref" href="Jiro.Core.Services.System.html">System</a></dd></dl>
+  <dl><dt>Assembly</dt><dd>Jiro.Core.dll</dd></dl>
+  </div>
+
+  <div class="markdown summary"><p>Supports all classes in the .NET class hierarchy and provides low-level services to derived classes. This is the ultimate base class of all .NET classes; it is the root of the type hierarchy.</p>
+</div>
+  <div class="markdown conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public class LogsProviderService : ILogsProviderService</code></pre>
+  </div>
+
+
+
+
+  <dl class="typelist inheritance">
+    <dt>Inheritance</dt>
+    <dd>
+      <div><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object">object</a></div>
+      <div><span class="xref">LogsProviderService</span></div>
+    </dd>
+  </dl>
+
+  <dl class="typelist implements">
+    <dt>Implements</dt>
+    <dd>
+      <div><a class="xref" href="Jiro.Core.Services.System.ILogsProviderService.html">ILogsProviderService</a></div>
+    </dd>
+  </dl>
+
+
+  <dl class="typelist inheritedMembers">
+    <dt>Inherited Members</dt>
+    <dd>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)">object.Equals(object)</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)">object.Equals(object, object)</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.gethashcode">object.GetHashCode()</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.gettype">object.GetType()</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.memberwiseclone">object.MemberwiseClone()</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.referenceequals">object.ReferenceEquals(object, object)</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.tostring">object.ToString()</a>
+    </div>
+  </dd></dl>
+
+
+
+
+
+
+  <h2 class="section" id="constructors">Constructors
+</h2>
+
+
+  <a id="Jiro_Core_Services_System_LogsProviderService__ctor_" data-uid="Jiro.Core.Services.System.LogsProviderService.#ctor*"></a>
+
+  <h3 id="Jiro_Core_Services_System_LogsProviderService__ctor_Microsoft_Extensions_Logging_ILogger_Jiro_Core_Services_System_LogsProviderService__Microsoft_Extensions_Configuration_IConfiguration_" data-uid="Jiro.Core.Services.System.LogsProviderService.#ctor(Microsoft.Extensions.Logging.ILogger{Jiro.Core.Services.System.LogsProviderService},Microsoft.Extensions.Configuration.IConfiguration)">
+  LogsProviderService(ILogger&lt;LogsProviderService&gt;, IConfiguration)
+  <a class="header-action link-secondary" title="View source" href="https://github.com/HueByte/Jiro/blob/main/src/Jiro.Kernel/Jiro.Core/Services/System/LogsProviderService.cs/#L48"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Initializes a new instance of the <a class="xref" href="Jiro.Core.Services.System.LogsProviderService.html">LogsProviderService</a> class.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public LogsProviderService(ILogger&lt;LogsProviderService&gt; logger, IConfiguration configuration)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>logger</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1">ILogger</a>&lt;<a class="xref" href="Jiro.Core.Services.System.LogsProviderService.html">LogsProviderService</a>&gt;</dt>
+    <dd><p>Logger instance for logging.</p>
+</dd>
+    <dt><code>configuration</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/microsoft.extensions.configuration.iconfiguration">IConfiguration</a></dt>
+    <dd><p>Configuration instance to read Serilog settings.</p>
+</dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+
+  <h2 class="section" id="methods">Methods
+</h2>
+
+
+  <a id="Jiro_Core_Services_System_LogsProviderService_GetLogCountAsync_" data-uid="Jiro.Core.Services.System.LogsProviderService.GetLogCountAsync*"></a>
+
+  <h3 id="Jiro_Core_Services_System_LogsProviderService_GetLogCountAsync_System_String_System_Nullable_System_DateTime__System_Nullable_System_DateTime__System_String_" data-uid="Jiro.Core.Services.System.LogsProviderService.GetLogCountAsync(System.String,System.Nullable{System.DateTime},System.Nullable{System.DateTime},System.String)">
+  GetLogCountAsync(string?, DateTime?, DateTime?, string?)
+  <a class="header-action link-secondary" title="View source" href="https://github.com/HueByte/Jiro/blob/main/src/Jiro.Kernel/Jiro.Core/Services/System/LogsProviderService.cs/#L152"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Gets total count of logs matching the specified criteria</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public Task&lt;int&gt; GetLogCountAsync(string? level = null, DateTime? fromDate = null, DateTime? toDate = null, string? searchTerm = null)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>level</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd><p>Log level filter (optional)</p>
+</dd>
+    <dt><code>fromDate</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.datetime">DateTime</a>?</dt>
+    <dd><p>Start date filter (optional)</p>
+</dd>
+    <dt><code>toDate</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.datetime">DateTime</a>?</dt>
+    <dd><p>End date filter (optional)</p>
+</dd>
+    <dt><code>searchTerm</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd><p>Search term to filter messages (optional)</p>
+</dd>
+  </dl>
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1">Task</a>&lt;<a class="xref" href="https://learn.microsoft.com/dotnet/api/system.int32">int</a>&gt;</dt>
+    <dd><p>Total count of matching log entries</p>
+</dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+  <a id="Jiro_Core_Services_System_LogsProviderService_GetLogFilesAsync_" data-uid="Jiro.Core.Services.System.LogsProviderService.GetLogFilesAsync*"></a>
+
+  <h3 id="Jiro_Core_Services_System_LogsProviderService_GetLogFilesAsync" data-uid="Jiro.Core.Services.System.LogsProviderService.GetLogFilesAsync">
+  GetLogFilesAsync()
+  <a class="header-action link-secondary" title="View source" href="https://github.com/HueByte/Jiro/blob/main/src/Jiro.Kernel/Jiro.Core/Services/System/LogsProviderService.cs/#L199"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Gets available log files for selection</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public Task&lt;IEnumerable&lt;LogFileInfo&gt;&gt; GetLogFilesAsync()</code></pre>
+  </div>
+
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1">Task</a>&lt;<a class="xref" href="https://learn.microsoft.com/dotnet/api/system.collections.generic.ienumerable-1">IEnumerable</a>&lt;<a class="xref" href="Jiro.Core.Services.System.LogFileInfo.html">LogFileInfo</a>&gt;&gt;</dt>
+    <dd><p>List of available log files with metadata</p>
+</dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+  <a id="Jiro_Core_Services_System_LogsProviderService_GetLogsAsync_" data-uid="Jiro.Core.Services.System.LogsProviderService.GetLogsAsync*"></a>
+
+  <h3 id="Jiro_Core_Services_System_LogsProviderService_GetLogsAsync_System_String_System_Int32_System_Int32_System_Nullable_System_DateTime__System_Nullable_System_DateTime__System_String_" data-uid="Jiro.Core.Services.System.LogsProviderService.GetLogsAsync(System.String,System.Int32,System.Int32,System.Nullable{System.DateTime},System.Nullable{System.DateTime},System.String)">
+  GetLogsAsync(string?, int, int, DateTime?, DateTime?, string?)
+  <a class="header-action link-secondary" title="View source" href="https://github.com/HueByte/Jiro/blob/main/src/Jiro.Kernel/Jiro.Core/Services/System/LogsProviderService.cs/#L55"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Retrieves logs based on level filter, pagination, and other criteria</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public Task&lt;LogsResponse&gt; GetLogsAsync(string? level = null, int limit = 100, int offset = 0, DateTime? fromDate = null, DateTime? toDate = null, string? searchTerm = null)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>level</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd><p>Log level filter (optional)</p>
+</dd>
+    <dt><code>limit</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.int32">int</a></dt>
+    <dd><p>Maximum number of logs to retrieve per page</p>
+</dd>
+    <dt><code>offset</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.int32">int</a></dt>
+    <dd><p>Number of logs to skip (for pagination)</p>
+</dd>
+    <dt><code>fromDate</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.datetime">DateTime</a>?</dt>
+    <dd><p>Start date filter (optional)</p>
+</dd>
+    <dt><code>toDate</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.datetime">DateTime</a>?</dt>
+    <dd><p>End date filter (optional)</p>
+</dd>
+    <dt><code>searchTerm</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd><p>Search term to filter messages (optional)</p>
+</dd>
+  </dl>
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1">Task</a>&lt;<a class="xref" href="Jiro.Core.Services.System.Models.LogsResponse.html">LogsResponse</a>&gt;</dt>
+    <dd><p>Log response containing filtered logs with pagination info</p>
+</dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+  <a id="Jiro_Core_Services_System_LogsProviderService_StreamLogBatchesAsync_" data-uid="Jiro.Core.Services.System.LogsProviderService.StreamLogBatchesAsync*"></a>
+
+  <h3 id="Jiro_Core_Services_System_LogsProviderService_StreamLogBatchesAsync_System_String_System_Int32_System_Int32_System_Threading_CancellationToken_" data-uid="Jiro.Core.Services.System.LogsProviderService.StreamLogBatchesAsync(System.String,System.Int32,System.Int32,System.Threading.CancellationToken)">
+  StreamLogBatchesAsync(string?, int, int, CancellationToken)
+  <a class="header-action link-secondary" title="View source" href="https://github.com/HueByte/Jiro/blob/main/src/Jiro.Kernel/Jiro.Core/Services/System/LogsProviderService.cs/#L276"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Streams logs in batches - first yields the last N logs in batches, then streams new logs in real-time batches</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public IAsyncEnumerable&lt;IEnumerable&lt;LogEntry&gt;&gt; StreamLogBatchesAsync(string? level = null, int initialLimit = 50, int batchSize = 10, CancellationToken cancellationToken = default)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>level</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd><p>Log level filter (optional)</p>
+</dd>
+    <dt><code>initialLimit</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.int32">int</a></dt>
+    <dd><p>Number of recent logs to fetch initially (default 50)</p>
+</dd>
+    <dt><code>batchSize</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.int32">int</a></dt>
+    <dd><p>Size of each batch (default 10)</p>
+</dd>
+    <dt><code>cancellationToken</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.threading.cancellationtoken">CancellationToken</a></dt>
+    <dd><p>Cancellation token</p>
+</dd>
+  </dl>
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.collections.generic.iasyncenumerable-1">IAsyncEnumerable</a>&lt;<a class="xref" href="https://learn.microsoft.com/dotnet/api/system.collections.generic.ienumerable-1">IEnumerable</a>&lt;<a class="xref" href="Jiro.Core.Services.System.Models.LogEntry.html">LogEntry</a>&gt;&gt;</dt>
+    <dd><p>Async enumerable of log entry batches</p>
+</dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+  <a id="Jiro_Core_Services_System_LogsProviderService_StreamLogsAsync_" data-uid="Jiro.Core.Services.System.LogsProviderService.StreamLogsAsync*"></a>
+
+  <h3 id="Jiro_Core_Services_System_LogsProviderService_StreamLogsAsync_System_String_System_Int32_System_Threading_CancellationToken_" data-uid="Jiro.Core.Services.System.LogsProviderService.StreamLogsAsync(System.String,System.Int32,System.Threading.CancellationToken)">
+  StreamLogsAsync(string?, int, CancellationToken)
+  <a class="header-action link-secondary" title="View source" href="https://github.com/HueByte/Jiro/blob/main/src/Jiro.Kernel/Jiro.Core/Services/System/LogsProviderService.cs/#L242"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Streams logs continuously - first yields the last N logs, then streams new logs in real-time</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public IAsyncEnumerable&lt;LogEntry&gt; StreamLogsAsync(string? level = null, int initialLimit = 50, CancellationToken cancellationToken = default)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>level</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd><p>Log level filter (optional)</p>
+</dd>
+    <dt><code>initialLimit</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.int32">int</a></dt>
+    <dd><p>Number of recent logs to fetch initially (default 50)</p>
+</dd>
+    <dt><code>cancellationToken</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.threading.cancellationtoken">CancellationToken</a></dt>
+    <dd><p>Cancellation token</p>
+</dd>
+  </dl>
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.collections.generic.iasyncenumerable-1">IAsyncEnumerable</a>&lt;<a class="xref" href="Jiro.Core.Services.System.Models.LogEntry.html">LogEntry</a>&gt;</dt>
+    <dd><p>Async enumerable of log entries</p>
+</dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+
+</article>
+
+        <div class="contribution d-print-none">
+          <a href="https://github.com/HueByte/Jiro/blob/main/src/Jiro.Kernel/Jiro.Core/Services/System/LogsProviderService.cs/#L14" class="edit-link">Edit this page</a>
+        </div>
+
+
+      </div>
+
+      <div class="affix">
+        <nav id="affix"></nav>
+      </div>
+    </main>
+
+    <div class="container-xxl search-results" id="search-results"></div>
+
+    <footer class="border-top text-secondary">
+      <div class="container-xxl">
+        <div class="flex-fill">
+          <div class="footer-custom"><div class="footer-inner d-flex justify-content-between align-items-center"><div class="footer-text">Made with <strong>💖</strong> By HueByte</div><div class="footer-links"><a href="https://github.com/HueByte/Jiro" class="footer-link" target="_blank"><i class="fab fa-github"></i>GitHub</a><a href="#" class="footer-link scroll-to-top" onclick="scrollToTop()"><i class="fas fa-arrow-up"></i>Top</a></div></div></div><script>function scrollToTop(){window.scrollTo({top:0,behavior:'smooth'});}</script>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>

@@ -1,0 +1,740 @@
+﻿<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+      <title>&#129302; Jiro - Advanced AI Virtual Assistant | Jiro Documentation </title>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <meta name="title" content="&#129302; Jiro - Advanced AI Virtual Assistant | Jiro Documentation ">
+      
+      
+      <link rel="icon" href="../assets/Jiro-Icon.png">
+      <link rel="stylesheet" href="../public/docfx.min.css">
+      <link rel="stylesheet" href="../public/main.css">
+      <meta name="docfx:navrel" content="../toc.html">
+      <meta name="docfx:tocrel" content="toc.html">
+      
+      <meta name="docfx:rel" content="../">
+      
+      
+      <meta name="docfx:docurl" content="https://github.com/HueByte/Jiro/blob/main/dev/#L1">
+      <meta name="loc:inThisArticle" content="In this article">
+      <meta name="loc:searchResultsCount" content="{count} results for &quot;{query}&quot;">
+      <meta name="loc:searchNoResults" content="No results for &quot;{query}&quot;">
+      <meta name="loc:tocFilter" content="Filter by title">
+      <meta name="loc:nextArticle" content="Next">
+      <meta name="loc:prevArticle" content="Previous">
+      <meta name="loc:themeLight" content="Light">
+      <meta name="loc:themeDark" content="Dark">
+      <meta name="loc:themeAuto" content="Auto">
+      <meta name="loc:changeTheme" content="Change theme">
+      <meta name="loc:copy" content="Copy">
+      <meta name="loc:downloadPdf" content="Download PDF">
+  </head>
+
+  <script type="module" src="./../public/docfx.min.js"></script>
+
+  <script>
+    const theme = localStorage.getItem('theme') || 'auto'
+    document.documentElement.setAttribute('data-bs-theme', theme === 'auto' ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : theme)
+  </script>
+
+
+  <body class="tex2jax_ignore" data-layout="" data-yaml-mime="">
+    <header class="bg-body border-bottom">
+      <nav id="autocollapse" class="navbar navbar-expand-md" role="navigation">
+        <div class="container-xxl flex-nowrap">
+          <a class="navbar-brand" href="../index.html">
+            <img id="logo" class="svg" src="../assets/Jiro-Icon.png" alt="Jiro - AI Assistant">
+            Jiro - AI Assistant
+          </a>
+          <button class="btn btn-lg d-md-none border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navpanel" aria-controls="navpanel" aria-expanded="false" aria-label="Toggle navigation">
+            <i class="bi bi-three-dots"></i>
+          </button>
+          <div class="collapse navbar-collapse" id="navpanel">
+            <div id="navbar">
+              <form class="search" role="search" id="search">
+                <i class="bi bi-search"></i>
+                <input class="form-control" id="search-query" type="search" disabled="" placeholder="Search" autocomplete="off" aria-label="Search">
+              </form>
+            </div>
+          </div>
+        </div>
+      </nav>
+    </header>
+
+    <main class="container-xxl">
+      <div class="toc-offcanvas">
+        <div class="offcanvas-md offcanvas-start" tabindex="-1" id="tocOffcanvas" aria-labelledby="tocOffcanvasLabel">
+          <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="tocOffcanvasLabel">Table of Contents</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#tocOffcanvas" aria-label="Close"></button>
+          </div>
+          <div class="offcanvas-body">
+            <nav class="toc" id="toc"></nav>
+          </div>
+        </div>
+      </div>
+
+      <div class="content">
+        <div class="actionbar">
+          <button class="btn btn-lg border-0 d-md-none" style="margin-top: -.65em; margin-left: -.8em" type="button" data-bs-toggle="offcanvas" data-bs-target="#tocOffcanvas" aria-controls="tocOffcanvas" aria-expanded="false" aria-label="Show table of contents">
+            <i class="bi bi-list"></i>
+          </button>
+
+          <nav id="breadcrumb"></nav>
+        </div>
+
+        <article data-uid="">
+<h1 id="-jiro---advanced-ai-virtual-assistant">🤖 Jiro - Advanced AI Virtual Assistant</h1>
+
+<p><img src="../assets/JiroBanner.png" alt="Jiro Banner"></p>
+<h2 id="-table-of-contents">📋 Table of Contents</h2>
+<ul>
+<li><a href="#-project-overview">Project Overview</a></li>
+<li><a href="#%EF%B8%8F-architecture">Architecture</a></li>
+<li><a href="#-core-technologies">Core Technologies</a></li>
+<li><a href="#%EF%B8%8F-core-services">Core Services</a></li>
+<li><a href="#-command-system">Command System</a></li>
+<li><a href="#-communication-protocols">Communication Protocols</a></li>
+<li><a href="#%EF%B8%8F-infrastructure--database">Infrastructure &amp; Database</a></li>
+<li><a href="#-deployment--docker">Deployment &amp; Docker</a></li>
+<li><a href="#-ai--machine-learning">AI &amp; Machine Learning</a></li>
+<li><a href="#-testing-framework">Testing Framework</a></li>
+<li><a href="#-development-workflow">Development Workflow</a></li>
+<li><a href="#-project-structure">Project Structure</a></li>
+</ul>
+<h2 id="-project-overview">🌟 Project Overview</h2>
+<p><strong>Jiro v1.0.0-beta &quot;Kakushin&quot;</strong> is a production-ready, enterprise-grade AI virtual assistant platform that combines the power of Large Language Models (LLMs) with a robust custom command system and extensible plugin architecture. Built on modern .NET 9 technologies following Clean Architecture principles, Jiro provides a comprehensive solution for AI-powered assistance, featuring real-time bidirectional communication, intelligent conversation management, and cloud-native deployment capabilities.</p>
+<h3 id="key-features-v100-beta">Key Features (v1.0.0-beta)</h3>
+<ul>
+<li><strong>AI-Powered Conversations</strong>: Integration with state-of-the-art LLMs for intelligent dialogue</li>
+<li><strong>Plugin System</strong>: Extensible command architecture for custom functionality</li>
+<li><strong>Real-time Communication</strong>: WebSocket + gRPC hybrid architecture for instant bidirectional streaming</li>
+<li><strong>Real-time Log Streaming</strong>: Continuous log monitoring with <code>StreamLogsAsync</code> and batch delivery</li>
+<li><strong>Enhanced Session Management</strong>: Client-side session ID generation with advanced caching</li>
+<li><strong>Multi-Client Support</strong>: Web, CLI, and API interfaces with SignalR hub integration</li>
+<li><strong>Service Architecture</strong>: Separated SessionManager, MessageCacheService, and LogsProviderService</li>
+<li><strong>Intelligent Memory Management</strong>: Conversation history optimization and persona management</li>
+<li><strong>Weather Integration</strong>: Real-time weather data with geolocation services</li>
+<li><strong>Token Management</strong>: Advanced token counting and optimization for cost efficiency</li>
+<li><strong>Docker Profiles</strong>: Multi-profile deployment (default, docs, full) with comprehensive environment configuration</li>
+<li><strong>90+ Configuration Options</strong>: Flexible deployment with JIRO_ prefixed environment variables</li>
+</ul>
+<h2 id="-architecture">🏗️ Architecture</h2>
+<p>Jiro follows a <strong>clean architecture</strong> pattern with clear separation of concerns:</p>
+<pre><code class="lang-cs">┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│   Presentation  │    │    Application  │    │   Infrastructure│
+│                 │    │                 │    │                 │
+│ • gRPC Services │◄──►│ • Services      │◄──►│ • Repositories  │
+│ • Controllers   │    │ • Commands      │    │ • HTTP Clients  │
+│ • Client Apps   │    │ • Handlers      │    │ • Database      │
+└─────────────────┘    └─────────────────┘    └─────────────────┘
+          │                        │                        │
+          └──────────┬───────────────────────────────────────┘
+                     │
+          ┌─────────────────┐
+          │      Domain     │
+          │                 │
+          │ • Models        │
+          │ • Interfaces    │
+          │ • Constants     │
+          └─────────────────┘
+</code></pre>
+<h2 id="-core-technologies">🔧 Core Technologies</h2>
+<h3 id="backend-framework"><strong>Backend Framework</strong></h3>
+<ul>
+<li><strong>.NET 9.0</strong>: Latest .NET framework with performance improvements</li>
+<li><strong>ASP.NET Core</strong>: Web API and hosting infrastructure</li>
+<li><strong>Entity Framework Core</strong>: ORM for database operations</li>
+<li><strong>gRPC</strong>: High-performance RPC framework for real-time communication</li>
+</ul>
+<h3 id="ai--machine-learning"><strong>AI &amp; Machine Learning</strong></h3>
+<ul>
+<li><strong>LLM Integration</strong>: Support for advanced language models via OpenAI API</li>
+<li><strong>Custom Token Management</strong>: Tiktoken integration for token counting</li>
+<li><strong>Conversation Optimization</strong>: Intelligent history management</li>
+</ul>
+<h3 id="communication--protocols"><strong>Communication &amp; Protocols</strong></h3>
+<ul>
+<li><strong>gRPC Streaming</strong>: Bidirectional streaming for real-time communication</li>
+<li><strong>Protocol Buffers</strong>: Efficient serialization format</li>
+<li><strong>HTTP/2</strong>: Modern HTTP protocol support</li>
+</ul>
+<h3 id="data--caching"><strong>Data &amp; Caching</strong></h3>
+<ul>
+<li><strong>MySQL 8.0</strong>: Primary relational database</li>
+<li><strong>In-Memory Caching</strong>: High-performance memory caching</li>
+<li><strong>Entity Framework Migrations</strong>: Database schema management</li>
+</ul>
+<h3 id="containerization--deployment"><strong>Containerization &amp; Deployment</strong></h3>
+<ul>
+<li><strong>Docker</strong>: Multi-stage containerization</li>
+<li><strong>Docker Compose</strong>: Orchestration for development and production</li>
+<li><strong>Linux Containers</strong>: Optimized runtime environment</li>
+</ul>
+<h2 id="-core-services">🛠️ Core Services</h2>
+<h3 id="conversation-management"><strong>Conversation Management</strong></h3>
+<h4 id="conversationcoreservice"><strong>ConversationCoreService</strong></h4>
+<ul>
+<li><strong>Purpose</strong>: Core conversation logic with OpenAI integration</li>
+<li><strong>Features</strong>:
+<ul>
+<li>Direct chat completion with LLM models</li>
+<li>Token usage tracking and optimization</li>
+<li>Semaphore-based concurrency control</li>
+<li>Temperature and parameter management</li>
+</ul>
+</li>
+<li><strong>Key Methods</strong>:
+<ul>
+<li><code>ChatAsync()</code>: Full conversation with history</li>
+<li><code>ExchangeMessageAsync()</code>: Single message exchange</li>
+</ul>
+</li>
+</ul>
+<h4 id="personalizedconversationservice"><strong>PersonalizedConversationService</strong></h4>
+<ul>
+<li><strong>Purpose</strong>: Session-based personalized conversations</li>
+<li><strong>Features</strong>:
+<ul>
+<li>Session management and persistence</li>
+<li>Message history optimization</li>
+<li>Persona integration</li>
+<li>Cost tracking and optimization</li>
+</ul>
+</li>
+<li><strong>Advanced Capabilities</strong>:</li>
+</ul>
+<h4 id="advanced-capabilities"><strong>Advanced Capabilities</strong></h4>
+<ul>
+<li>Automatic history pruning when token limits are exceeded</li>
+<li>Dynamic persona updates based on conversation summaries</li>
+<li>Real-time pricing calculations
+<ul>
+<li>Dynamic persona updates based on conversation summaries</li>
+<li>Real-time pricing calculations</li>
+</ul>
+</li>
+</ul>
+<h3 id="message--session-management-v100-beta"><strong>Message &amp; Session Management (v1.0.0-beta)</strong></h3>
+<h4 id="sessionmanager"><strong>SessionManager</strong></h4>
+<ul>
+<li><strong>Purpose</strong>: Dedicated chat session lifecycle management</li>
+<li><strong>Features</strong>:
+<ul>
+<li>Advanced session caching with 5-day default expiration</li>
+<li>Session state management with persistence and recovery</li>
+<li>Multi-session support with user-based isolation</li>
+<li>Session metadata tracking and analytics</li>
+</ul>
+</li>
+</ul>
+<h4 id="messagecacheservice"><strong>MessageCacheService</strong></h4>
+<ul>
+<li><strong>Purpose</strong>: Specialized message operations and optimization</li>
+<li><strong>Features</strong>:
+<ul>
+<li>Message history optimization with performance-focused caching</li>
+<li>Message exchange handling with thread-safe operations</li>
+<li>Memory-efficient message storage with automatic cleanup</li>
+<li>Message retrieval optimization for large conversation histories</li>
+</ul>
+</li>
+</ul>
+<h4 id="compositemessagemanager"><strong>CompositeMessageManager</strong></h4>
+<ul>
+<li><strong>Purpose</strong>: Unified message management orchestration</li>
+<li><strong>Features</strong>:
+<ul>
+<li>Coordinates between SessionManager and MessageCacheService</li>
+<li>Provides high-level message operations with service abstraction</li>
+<li>Handles complex message workflows and cross-service coordination</li>
+</ul>
+</li>
+</ul>
+<h3 id="ai-persona-system"><strong>AI Persona System</strong></h3>
+<h4 id="personaservice"><strong>PersonaService</strong></h4>
+<ul>
+<li><strong>Purpose</strong>: Dynamic AI personality management</li>
+<li><strong>Features</strong>:
+<ul>
+<li>Core persona message management</li>
+<li>Conversation summary integration</li>
+<li>Cache-based performance optimization</li>
+<li>Thread-safe persona updates</li>
+</ul>
+</li>
+<li><strong>Intelligence Features</strong>:
+<ul>
+<li>Adaptive persona based on conversation history</li>
+<li>Automatic summary generation for long conversations</li>
+</ul>
+</li>
+</ul>
+<h3 id="weather--geolocation-services"><strong>Weather &amp; Geolocation Services</strong></h3>
+<h4 id="weatherservice"><strong>WeatherService</strong></h4>
+<ul>
+<li><strong>Purpose</strong>: Real-time weather data integration</li>
+<li><strong>Data Sources</strong>:
+<ul>
+<li><strong>Open-Meteo API</strong>: Weather forecasting data</li>
+<li><strong>OpenStreetMap Nominatim</strong>: Geolocation services</li>
+</ul>
+</li>
+<li><strong>Features</strong>:
+<ul>
+<li>Location-based weather queries</li>
+<li>Multi-day forecasting (up to 7 days)</li>
+<li>Structured weather data for graphing</li>
+<li>Temperature, rainfall, and wind speed tracking</li>
+</ul>
+</li>
+</ul>
+<h4 id="geolocationservice"><strong>GeolocationService</strong></h4>
+<ul>
+<li><strong>Purpose</strong>: City-to-coordinates conversion</li>
+<li><strong>Features</strong>:
+<ul>
+<li>City name to latitude/longitude resolution</li>
+<li>Support for international locations</li>
+<li>Error handling for invalid locations</li>
+</ul>
+</li>
+</ul>
+<h3 id="command-system-services"><strong>Command System Services</strong></h3>
+<h4 id="commandhandlerservice"><strong>CommandHandlerService</strong></h4>
+<ul>
+<li><strong>Purpose</strong>: Plugin command execution and management</li>
+<li><strong>Features</strong>:
+<ul>
+<li>Command parsing with regex pattern matching</li>
+<li>Dynamic command discovery and execution</li>
+<li>Exception handling and error reporting</li>
+<li>Performance monitoring with execution timing</li>
+</ul>
+</li>
+<li><strong>Command Types</strong>:
+<ul>
+<li><strong>Text Commands</strong>: Simple text responses</li>
+<li><strong>Graph Commands</strong>: Data visualization responses</li>
+</ul>
+</li>
+</ul>
+<h4 id="helpservice"><strong>HelpService</strong></h4>
+<ul>
+<li><strong>Purpose</strong>: Dynamic help system generation</li>
+<li><strong>Features</strong>:
+<ul>
+<li>Automatic help message generation from registered commands</li>
+<li>Command description and usage examples</li>
+<li>Runtime command discovery</li>
+</ul>
+</li>
+</ul>
+<h3 id="infrastructure-services"><strong>Infrastructure Services</strong></h3>
+<h4 id="semaphoremanager"><strong>SemaphoreManager</strong></h4>
+<ul>
+<li><strong>Purpose</strong>: Concurrency control for chat instances</li>
+<li><strong>Features</strong>:
+<ul>
+<li>Per-instance semaphore management</li>
+<li>Thread-safe operations</li>
+<li>Resource contention prevention</li>
+</ul>
+</li>
+</ul>
+<h4 id="historyoptimizerservice"><strong>HistoryOptimizerService</strong></h4>
+<ul>
+<li><strong>Purpose</strong>: Intelligent conversation history management</li>
+<li><strong>Features</strong>:
+<ul>
+<li>Token-based optimization decisions</li>
+<li>Message summarization</li>
+<li>History pruning strategies</li>
+</ul>
+</li>
+</ul>
+<h2 id="-command-system">⚡ Command System</h2>
+<h3 id="plugin-architecture"><strong>Plugin Architecture</strong></h3>
+<p>Jiro uses a sophisticated plugin system based on the <strong>Jiro.Commands</strong> framework:</p>
+<h4 id="command-attributes"><strong>Command Attributes</strong></h4>
+<pre><code class="lang-csharp">[CommandModule(&quot;Weather&quot;)]
+public class WeatherCommand : ICommandBase
+{
+    [Command(&quot;weather&quot;, CommandType.Graph, &quot;weather \&quot;Location\&quot; [daysRange]&quot;, 
+             &quot;Shows weather forecast for the specified location&quot;)]
+    public async Task&lt;ICommandResult&gt; Weather(string location, int daysRange)
+    {
+        // Implementation
+    }
+}
+</code></pre>
+<h4 id="built-in-commands"><strong>Built-in Commands</strong></h4>
+<h5 id="chat-commands"><strong>Chat Commands</strong></h5>
+<ul>
+<li><code>chat &lt;message&gt;</code>: AI conversation</li>
+<li><code>getSessions</code>: Retrieve user chat sessions</li>
+<li><code>getSessionHistory &lt;sessionId&gt;</code>: Get specific session history</li>
+<li><code>reset</code>: Clear current session</li>
+</ul>
+<h5 id="weather-commands"><strong>Weather Commands</strong></h5>
+<ul>
+<li><code>weather &quot;Location&quot; [days]</code>: Weather forecast with graphical data
+<ul>
+<li>Returns temperature, rainfall, and wind speed</li>
+<li>Supports 1-7 day forecasting</li>
+<li>Includes current weather conditions</li>
+</ul>
+</li>
+</ul>
+<h3 id="command-processing-pipeline"><strong>Command Processing Pipeline</strong></h3>
+<ol>
+<li><strong>Input Parsing</strong>: Regex-based token extraction</li>
+<li><strong>Command Resolution</strong>: Dynamic command discovery</li>
+<li><strong>Parameter Binding</strong>: Automatic parameter mapping</li>
+<li><strong>Execution</strong>: Async command execution with error handling</li>
+<li><strong>Result Formatting</strong>: Type-specific result formatting</li>
+</ol>
+<h2 id="-communication-protocols">📡 Communication Protocols</h2>
+<h3 id="grpc-service-definition"><strong>gRPC Service Definition</strong></h3>
+<h4 id="jirohubproto-service"><strong>JiroHubProto Service</strong></h4>
+<pre><code class="lang-proto">service JiroHubProto {
+    rpc GetUserSessions (Empty) returns (SessionsReply);
+    rpc InstanceCommand (stream ClientMessage) returns (stream ServerMessage);
+    rpc Hello (HelloRequest) returns (HelloReply);
+}
+</code></pre>
+<h4 id="message-types"><strong>Message Types</strong></h4>
+<ul>
+<li><strong>ClientMessage</strong>: Command requests with parameters and session info</li>
+<li><strong>ServerMessage</strong>: Command responses with execution results</li>
+<li><strong>Result Types</strong>:
+<ul>
+<li><code>TextResult</code>: Simple text responses</li>
+<li><code>GraphResult</code>: Data visualization with metadata</li>
+</ul>
+</li>
+</ul>
+<h4 id="streaming-architecture"><strong>Streaming Architecture</strong></h4>
+<ul>
+<li><strong>Bidirectional Streaming</strong>: Real-time command execution</li>
+<li><strong>Session Management</strong>: Per-session command queuing</li>
+<li><strong>Error Handling</strong>: Graceful error propagation</li>
+</ul>
+<h3 id="communication-clients"><strong>Communication Clients</strong></h3>
+<h4 id="python-cli-client-jirocommunication"><strong>Python CLI Client</strong> (<code>Jiro.Communication</code>)</h4>
+<ul>
+<li><strong>Features</strong>:
+<ul>
+<li>Interactive command-line interface</li>
+<li>Real-time streaming responses</li>
+<li>Graph visualization for weather data</li>
+<li>Color-coded output formatting</li>
+</ul>
+</li>
+</ul>
+<h4 id="token-api-jirotokenapi"><strong>Token API</strong> (<code>Jiro.TokenApi</code>)</h4>
+<ul>
+<li><strong>FastAPI-based service</strong> for token management</li>
+<li><strong>Endpoints</strong>:
+<ul>
+<li><code>/reduce</code>: Message history optimization</li>
+<li><code>/tokenize</code>: Token counting for cost estimation</li>
+</ul>
+</li>
+<li><strong>Features</strong>:
+<ul>
+<li>Tiktoken integration for accurate LLM token counting</li>
+<li>Automatic message pruning when limits exceeded</li>
+</ul>
+</li>
+</ul>
+<h2 id="-infrastructure--database">🗄️ Infrastructure &amp; Database</h2>
+<h3 id="database-schema"><strong>Database Schema</strong></h3>
+<p>Jiro utilizes <strong>ASP.NET Core Identity</strong> for user management combined with custom business entities for conversation management.</p>
+<h4 id="core-database-tables"><strong>Core Database Tables</strong></h4>
+<h5 id="identity-system"><strong>Identity System</strong></h5>
+<ul>
+<li><strong>AspNetUsers</strong>: User accounts with extended properties (<code>AccountCreatedDate</code>)</li>
+<li><strong>AspNetRoles</strong>: System roles and permissions</li>
+<li><strong>AspNetUserRoles</strong>: Many-to-many user-role relationships</li>
+</ul>
+<h5 id="conversation-system"><strong>Conversation System</strong></h5>
+<ul>
+<li><strong>ChatSessions</strong>: Conversation sessions with metadata</li>
+<li><strong>Messages</strong>: Individual messages with type classification and user attribution</li>
+</ul>
+<h4 id="key-relationships"><strong>Key Relationships</strong></h4>
+<ul>
+<li><code>Users 1:N RefreshTokens</code> - Token-based authentication</li>
+<li><code>ChatSessions 1:N Messages</code> - Session-based conversations</li>
+<li><code>Users M:N Roles</code> - Role-based authorization</li>
+</ul>
+<p>For detailed database schema documentation, see <a href="database-schema.html">Database Schema</a>.</p>
+<h3 id="entity-framework-configuration"><strong>Entity Framework Configuration</strong></h3>
+<ul>
+<li><strong>Code-First Migrations</strong>: Version-controlled schema changes</li>
+<li><strong>Connection String Management</strong>: Environment-based configuration</li>
+<li><strong>Repository Pattern</strong>: Clean data access abstraction</li>
+</ul>
+<h3 id="caching-strategy"><strong>Caching Strategy</strong></h3>
+<ul>
+<li><strong>In-Memory Cache</strong>: Fast access to frequently used data</li>
+<li><strong>TTL-based Expiration</strong>: Automatic cache invalidation</li>
+<li><strong>Cache Keys</strong>: Structured caching with prefixed keys</li>
+</ul>
+<h2 id="-deployment--docker">🐳 Deployment &amp; Docker</h2>
+<h3 id="multi-stage-docker-build"><strong>Multi-Stage Docker Build</strong></h3>
+<pre><code class="lang-dockerfile"># Build Stage
+FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
+# ... build process
+
+# Runtime Stage  
+FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS runtime
+# ... optimized runtime environment
+</code></pre>
+<h3 id="docker-compose-architecture"><strong>Docker Compose Architecture</strong></h3>
+<pre><code class="lang-yaml">services:
+  jiro-kernel:     # Main application
+  mysql:           # Database server
+  # Future: jiro-tokenapi, jiro-communication
+</code></pre>
+<h3 id="production-optimizations"><strong>Production Optimizations</strong></h3>
+<ul>
+<li><strong>Self-contained deployment</strong>: No runtime dependencies</li>
+<li><strong>Trimmed assemblies</strong>: Reduced image size</li>
+<li><strong>Non-root user</strong>: Security best practices</li>
+<li><strong>Health checks</strong>: Container health monitoring</li>
+<li><strong>Volume mounts</strong>: Persistent data and logs</li>
+</ul>
+<h2 id="-ai--machine-learning">🧠 AI &amp; Machine Learning</h2>
+<h3 id="openai-integration"><strong>OpenAI Integration</strong></h3>
+<ul>
+<li><strong>Models</strong>: Multiple LLM options including latest generation models</li>
+<li><strong>Temperature Control</strong>: Configurable response creativity (default: 0.6)</li>
+<li><strong>Token Management</strong>: Advanced cost optimization</li>
+<li><strong>Context Handling</strong>: Intelligent conversation context management</li>
+</ul>
+<h3 id="token-optimization"><strong>Token Optimization</strong></h3>
+<ul>
+<li><strong>Real-time Token Counting</strong>: Accurate cost prediction</li>
+<li><strong>History Pruning</strong>: Automatic conversation trimming</li>
+<li><strong>Cache Optimization</strong>: Reduced API calls through caching</li>
+<li><strong>Cost Tracking</strong>: Per-message pricing calculations</li>
+</ul>
+<h3 id="conversation-intelligence"><strong>Conversation Intelligence</strong></h3>
+<ul>
+<li><strong>Persona Management</strong>: Dynamic AI personality adaptation</li>
+<li><strong>Summary Generation</strong>: Automatic conversation summarization</li>
+<li><strong>Context Preservation</strong>: Intelligent history optimization</li>
+<li><strong>Session Continuity</strong>: Seamless multi-session conversations</li>
+</ul>
+<h2 id="-testing-framework">🧪 Testing Framework</h2>
+<h3 id="comprehensive-test-suite"><strong>Comprehensive Test Suite</strong></h3>
+<ul>
+<li><strong>Unit Tests</strong>: Service-level testing with mocking</li>
+<li><strong>Integration Tests</strong>: End-to-end scenario testing</li>
+<li><strong>Service Tests</strong>: Individual service validation</li>
+</ul>
+<h3 id="tested-components"><strong>Tested Components</strong></h3>
+<ul>
+<li><code>ConversationCoreServiceTests</code></li>
+<li><code>PersonalizedConversationServiceTests</code></li>
+<li><code>WeatherServiceTests</code></li>
+<li><code>CommandHandlerServiceTests</code></li>
+<li><code>MessageManagerTests</code></li>
+<li><code>PersonaServiceTests</code></li>
+<li><code>GeolocationServiceTests</code></li>
+</ul>
+<h3 id="testing-technologies"><strong>Testing Technologies</strong></h3>
+<ul>
+<li><strong>xUnit</strong>: Primary testing framework</li>
+<li><strong>Moq</strong>: Mocking framework for dependencies</li>
+<li><strong>In-Memory Database</strong>: Isolated test data</li>
+</ul>
+<h2 id="-development-workflow">🔄 Development Workflow</h2>
+<h3 id="build--run-process"><strong>Build &amp; Run Process</strong></h3>
+<ol>
+<li><strong>Configuration Setup</strong>: <code>appsettings.json</code> with OpenAI keys</li>
+<li><strong>Database Migration</strong>: Automatic schema updates</li>
+<li><strong>Service Registration</strong>: Dependency injection configuration</li>
+<li><strong>gRPC Service Startup</strong>: Real-time communication initialization</li>
+</ol>
+<h3 id="development-tools"><strong>Development Tools</strong></h3>
+<ul>
+<li><strong>Hot Reload</strong>: Real-time code updates</li>
+<li><strong>Logging</strong>: Structured logging with Serilog</li>
+<li><strong>Health Checks</strong>: Service health monitoring</li>
+<li><strong>API Documentation</strong>: Auto-generated from gRPC proto files</li>
+</ul>
+<h3 id="plugin-development"><strong>Plugin Development</strong></h3>
+<ol>
+<li><strong>Reference Jiro.Commands NuGet package</strong></li>
+<li><strong>Implement ICommandBase interface</strong></li>
+<li><strong>Add command attributes</strong></li>
+<li><strong>Register in module configuration</strong></li>
+</ol>
+<h2 id="-project-structure">📁 Project Structure</h2>
+<pre><code class="lang-text">Jiro/
+├── src/                           # Source code
+│   ├── Jiro.Kernel/              # Main application kernel
+│   │   ├── Jiro.App/            # Web API &amp; gRPC host (v0.1.2)
+│   │   ├── Jiro.Core/           # Business logic &amp; services
+│   │   └── Jiro.Infrastructure/ # Data access &amp; external services
+│   ├── Jiro.Communication/       # Python CLI client
+│   ├── Jiro.TokenApi/           # Token management FastAPI service
+│   ├── Jiro.Tests/              # Comprehensive test suite
+│   └── Main.sln                 # Solution file
+├── .github/                      # GitHub automation &amp; workflows
+│   ├── workflows/               # CI/CD pipeline definitions
+│   │   ├── jiro-kernel-ci.yml       # 🔧 .NET CI (build, test, quality gate)
+│   │   ├── create-release.yml       # 🚀 Version-based releases &amp; artifacts
+│   │   ├── docker-build.yml         # 🐳 Container build &amp; security scanning
+│   │   ├── markdown-lint.yml        # 📝 Documentation quality assurance
+│   │   ├── jiro-kernel-security.yml # 🔒 Security vulnerability scanning
+│   │   ├── deploy-docs.yml          # 📚 Documentation deployment
+│   │   └── jiro-kernel-performance.yml # 📊 Performance monitoring
+│   └── WORKFLOWS.md             # Workflow documentation
+├── docs/                        # Documentation content
+│   ├── project-description.md   # This comprehensive project overview
+│   ├── user-guide.md           # End-user documentation  
+│   ├── workflow-pipelines.md   # ☁️ CI/CD automation documentation
+│   ├── database-schema.md      # 🗄️ Complete database schema documentation
+│   ├── api-index.md            # API documentation index
+│   └── README.md               # Documentation setup guide
+├── assets/                      # Documentation assets (logos, images)
+├── scripts/                     # Build and deployment scripts
+├── _site/                       # DocFX build output (auto-generated)
+├── api/                         # Generated API documentation (auto-generated)
+├── docfx.json                  # DocFX documentation configuration
+├── toc.yml                     # Main navigation structure
+├── index.md                    # Documentation homepage
+├── docker-compose.yml          # Container orchestration
+├── filterConfig.yml            # API documentation filter
+└── README.md                   # Project setup and usage guide
+</code></pre>
+<h3 id="-core-application-architecture"><strong>🔧 Core Application Architecture</strong></h3>
+<h4 id="jirocore-services-business-logic-layer"><strong>Jiro.Core Services</strong> (Business Logic Layer)</h4>
+<ul>
+<li><code>Services/Conversation/</code>: AI conversation management
+<ul>
+<li><code>ConversationCoreService</code>: Direct OpenAI integration</li>
+<li><code>PersonalizedConversationService</code>: Session-based conversations</li>
+<li><code>HistoryOptimizerService</code>: Token optimization</li>
+</ul>
+</li>
+<li><code>Services/Weather/</code>: Weather and geolocation services</li>
+<li><code>Services/MessageCache/</code>: Session and message management</li>
+<li><code>Services/Persona/</code>: AI personality system</li>
+<li><code>Services/CommandSystem/</code>: Plugin command framework</li>
+<li><code>Services/Semaphore/</code>: Concurrency control</li>
+</ul>
+<h4 id="jiroapp-presentation-layer"><strong>Jiro.App</strong> (Presentation Layer)</h4>
+<ul>
+<li><code>Controllers/</code>: Web API endpoints</li>
+<li><code>Services/</code>: gRPC service implementations</li>
+<li><code>Configurator/</code>: Application startup and dependency injection</li>
+<li><code>Proto/</code>: Protocol buffer definitions</li>
+</ul>
+<h4 id="jiroinfrastructure-data-access-layer"><strong>Jiro.Infrastructure</strong> (Data Access Layer)</h4>
+<ul>
+<li><code>Repositories/</code>: Entity Framework repositories</li>
+<li><code>Migrations/</code>: Database schema management</li>
+<li><code>JiroContext.cs</code>: Database context configuration</li>
+</ul>
+<h4 id="command-modules-plugin-system"><strong>Command Modules</strong> (Plugin System)</h4>
+<ul>
+<li><code>Commands/Chat/</code>: Conversation commands (<code>chat</code>, <code>getSessions</code>, <code>reset</code>)</li>
+<li><code>Commands/Weather/</code>: Weather data commands (<code>weather</code>)</li>
+<li><code>Commands/BaseCommands/</code>: Command framework infrastructure</li>
+<li><code>Commands/Net/</code>: Network utility commands</li>
+</ul>
+<h3 id="-cicd-pipeline-architecture"><strong>🚀 CI/CD Pipeline Architecture</strong></h3>
+<h4 id="automated-workflows-organization"><strong>Automated Workflows Organization</strong></h4>
+<pre><code class="lang-text">Pull Request → Multiple Validation Workflows (Parallel)
+    ├── .NET CI: Build, Test, Format, Quality Gate
+    ├── Docker Build: Container build &amp; security scan  
+    ├── Markdown Lint: Documentation quality
+    ├── Security Scan: CodeQL, Snyk, .NET audit
+    └── Release Validation: Additional pre-merge checks
+
+Merge to Main → Production Workflows (Sequential)
+    ├── Manual Version Control: Developer-controlled release timing
+    ├── Release Artifacts: Multi-platform binaries (Linux, Windows, macOS)
+    ├── Docker Push: Container registry deployment
+    ├── Documentation Deploy: GitHub Pages update
+    └── Security Monitoring: Ongoing vulnerability tracking
+</code></pre>
+<h4 id="deployment-artifacts"><strong>Deployment Artifacts</strong></h4>
+<ul>
+<li><strong>🐳 Container Images</strong>: <code>ghcr.io/huebyte/jiro-kernel:latest</code></li>
+<li><strong>📦 GitHub Releases</strong>: Manual version-controlled releases with multi-platform binaries
+<ul>
+<li>Linux x64: <code>jiro-kernel-vX.X.X-linux-x64.tar.gz</code></li>
+<li>Windows x64: <code>jiro-kernel-vX.X.X-win-x64.zip</code></li>
+<li>macOS x64: <code>jiro-kernel-vX.X.X-osx-x64.tar.gz</code></li>
+</ul>
+</li>
+<li><strong>📚 Documentation</strong>: Live API docs on GitHub Pages</li>
+<li><strong>🔒 Security Reports</strong>: Continuous vulnerability monitoring</li>
+</ul>
+<h3 id="-quality-assurance--security"><strong>🛡️ Quality Assurance &amp; Security</strong></h3>
+<h4 id="automated-quality-gates"><strong>Automated Quality Gates</strong></h4>
+<ul>
+<li><strong>Pre-merge</strong>: Build verification, test execution, code formatting</li>
+<li><strong>Security</strong>: CodeQL analysis, dependency scanning, container security</li>
+<li><strong>Documentation</strong>: Markdown linting, API doc generation</li>
+<li><strong>Performance</strong>: NuGet caching, parallel execution, smart triggers</li>
+</ul>
+<h4 id="development-best-practices"><strong>Development Best Practices</strong></h4>
+<ul>
+<li><strong>Clean Architecture</strong>: Clear separation of concerns across layers</li>
+<li><strong>Dependency Injection</strong>: Configured in <code>Jiro.App/Configurator/</code></li>
+<li><strong>Entity Framework</strong>: Code-first migrations with repository pattern</li>
+<li><strong>Testing</strong>: Comprehensive unit and integration test coverage</li>
+<li><strong>Documentation</strong>: Auto-generated from XML comments and markdown</li>
+</ul>
+<p>This architecture ensures scalable development with automated quality assurance, security monitoring, and deployment automation through the comprehensive ☁️ CI/CD pipeline.</p>
+<ul>
+<li><code>Options/</code>: Configuration models</li>
+</ul>
+<hr>
+<h2 id="-getting-started">🚀 Getting Started</h2>
+<p>To get started with Jiro development:</p>
+<ol>
+<li><strong>Clone the repository</strong></li>
+<li><strong>Configure OpenAI API key</strong> in <code>appsettings.json</code></li>
+<li><strong>Run database migrations</strong></li>
+<li><strong>Start the application</strong> with <code>dotnet run</code></li>
+<li><strong>Connect clients</strong> via gRPC or Python CLI</li>
+</ol>
+<p>For detailed setup instructions, refer to the main project README.</p>
+<hr>
+<p><strong>Jiro</strong> represents a modern approach to AI assistant development as part of an engineering thesis project. It combines cutting-edge technologies with robust engineering practices to deliver a scalable, intelligent, and extensible platform for AI-powered assistance, demonstrating the practical application of clean architecture patterns and modern software development methodologies.</p>
+
+</article>
+
+        <div class="contribution d-print-none">
+          <a href="https://github.com/HueByte/Jiro/blob/main/dev/#L1" class="edit-link">Edit this page</a>
+        </div>
+
+        <div class="next-article d-print-none border-top" id="nextArticle"></div>
+
+      </div>
+
+      <div class="affix">
+        <nav id="affix"></nav>
+      </div>
+    </main>
+
+    <div class="container-xxl search-results" id="search-results"></div>
+
+    <footer class="border-top text-secondary">
+      <div class="container-xxl">
+        <div class="flex-fill">
+          <div class="footer-custom"><div class="footer-inner d-flex justify-content-between align-items-center"><div class="footer-text">Made with <strong>💖</strong> By HueByte</div><div class="footer-links"><a href="https://github.com/HueByte/Jiro" class="footer-link" target="_blank"><i class="fab fa-github"></i>GitHub</a><a href="#" class="footer-link scroll-to-top" onclick="scrollToTop()"><i class="fas fa-arrow-up"></i>Top</a></div></div></div><script>function scrollToTop(){window.scrollTo({top:0,behavior:'smooth'});}</script>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>

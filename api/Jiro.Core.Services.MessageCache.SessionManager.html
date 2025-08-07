@@ -1,0 +1,515 @@
+﻿<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+      <title>Class SessionManager | Jiro Documentation </title>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <meta name="title" content="Class SessionManager | Jiro Documentation ">
+      
+      <meta name="description" content="Manages chat session operations with caching for performance optimization.">
+      <link rel="icon" href="../assets/Jiro-Icon.png">
+      <link rel="stylesheet" href="../public/docfx.min.css">
+      <link rel="stylesheet" href="../public/main.css">
+      <meta name="docfx:navrel" content="../toc.html">
+      <meta name="docfx:tocrel" content="toc.html">
+      
+      <meta name="docfx:rel" content="../">
+      
+      
+      <meta name="docfx:docurl" content="https://github.com/HueByte/Jiro/new/main/apiSpec/new?filename=Jiro_Core_Services_MessageCache_SessionManager.md&amp;value=---%0Auid%3A%20Jiro.Core.Services.MessageCache.SessionManager%0Asummary%3A%20&#39;*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax&#39;%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">
+      <meta name="loc:inThisArticle" content="In this article">
+      <meta name="loc:searchResultsCount" content="{count} results for &quot;{query}&quot;">
+      <meta name="loc:searchNoResults" content="No results for &quot;{query}&quot;">
+      <meta name="loc:tocFilter" content="Filter by title">
+      <meta name="loc:nextArticle" content="Next">
+      <meta name="loc:prevArticle" content="Previous">
+      <meta name="loc:themeLight" content="Light">
+      <meta name="loc:themeDark" content="Dark">
+      <meta name="loc:themeAuto" content="Auto">
+      <meta name="loc:changeTheme" content="Change theme">
+      <meta name="loc:copy" content="Copy">
+      <meta name="loc:downloadPdf" content="Download PDF">
+  </head>
+
+  <script type="module" src="./../public/docfx.min.js"></script>
+
+  <script>
+    const theme = localStorage.getItem('theme') || 'auto'
+    document.documentElement.setAttribute('data-bs-theme', theme === 'auto' ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : theme)
+  </script>
+
+
+  <body class="tex2jax_ignore" data-layout="" data-yaml-mime="ManagedReference">
+    <header class="bg-body border-bottom">
+      <nav id="autocollapse" class="navbar navbar-expand-md" role="navigation">
+        <div class="container-xxl flex-nowrap">
+          <a class="navbar-brand" href="../index.html">
+            <img id="logo" class="svg" src="../assets/Jiro-Icon.png" alt="Jiro - AI Assistant">
+            Jiro - AI Assistant
+          </a>
+          <button class="btn btn-lg d-md-none border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navpanel" aria-controls="navpanel" aria-expanded="false" aria-label="Toggle navigation">
+            <i class="bi bi-three-dots"></i>
+          </button>
+          <div class="collapse navbar-collapse" id="navpanel">
+            <div id="navbar">
+              <form class="search" role="search" id="search">
+                <i class="bi bi-search"></i>
+                <input class="form-control" id="search-query" type="search" disabled="" placeholder="Search" autocomplete="off" aria-label="Search">
+              </form>
+            </div>
+          </div>
+        </div>
+      </nav>
+    </header>
+
+    <main class="container-xxl">
+      <div class="toc-offcanvas">
+        <div class="offcanvas-md offcanvas-start" tabindex="-1" id="tocOffcanvas" aria-labelledby="tocOffcanvasLabel">
+          <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="tocOffcanvasLabel">Table of Contents</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#tocOffcanvas" aria-label="Close"></button>
+          </div>
+          <div class="offcanvas-body">
+            <nav class="toc" id="toc"></nav>
+          </div>
+        </div>
+      </div>
+
+      <div class="content">
+        <div class="actionbar">
+          <button class="btn btn-lg border-0 d-md-none" style="margin-top: -.65em; margin-left: -.8em" type="button" data-bs-toggle="offcanvas" data-bs-target="#tocOffcanvas" aria-controls="tocOffcanvas" aria-expanded="false" aria-label="Show table of contents">
+            <i class="bi bi-list"></i>
+          </button>
+
+          <nav id="breadcrumb"></nav>
+        </div>
+
+        <article data-uid="Jiro.Core.Services.MessageCache.SessionManager">
+
+
+
+  <h1 id="Jiro_Core_Services_MessageCache_SessionManager" data-uid="Jiro.Core.Services.MessageCache.SessionManager" class="text-break">
+Class SessionManager  <a class="header-action link-secondary" title="View source" href="https://github.com/HueByte/Jiro/blob/main/src/Jiro.Kernel/Jiro.Core/Services/MessageCache/SessionManager.cs/#L17"><i class="bi bi-code-slash"></i></a>
+  </h1>
+
+  <div class="facts text-secondary">
+    <dl><dt>Namespace</dt><dd><a class="xref" href="Jiro.html">Jiro</a>.<a class="xref" href="Jiro.Core.html">Core</a>.<a class="xref" href="Jiro.Core.Services.html">Services</a>.<a class="xref" href="Jiro.Core.Services.MessageCache.html">MessageCache</a></dd></dl>
+  <dl><dt>Assembly</dt><dd>Jiro.Core.dll</dd></dl>
+  </div>
+
+  <div class="markdown summary"><p>Manages chat session operations with caching for performance optimization.</p>
+</div>
+  <div class="markdown conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public class SessionManager : ISessionManager</code></pre>
+  </div>
+
+
+
+
+  <dl class="typelist inheritance">
+    <dt>Inheritance</dt>
+    <dd>
+      <div><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object">object</a></div>
+      <div><span class="xref">SessionManager</span></div>
+    </dd>
+  </dl>
+
+  <dl class="typelist implements">
+    <dt>Implements</dt>
+    <dd>
+      <div><a class="xref" href="Jiro.Core.Services.MessageCache.ISessionManager.html">ISessionManager</a></div>
+    </dd>
+  </dl>
+
+
+  <dl class="typelist inheritedMembers">
+    <dt>Inherited Members</dt>
+    <dd>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)">object.Equals(object)</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)">object.Equals(object, object)</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.gethashcode">object.GetHashCode()</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.gettype">object.GetType()</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.memberwiseclone">object.MemberwiseClone()</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.referenceequals">object.ReferenceEquals(object, object)</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.tostring">object.ToString()</a>
+    </div>
+  </dd></dl>
+
+
+
+
+
+
+  <h2 class="section" id="constructors">Constructors
+</h2>
+
+
+  <a id="Jiro_Core_Services_MessageCache_SessionManager__ctor_" data-uid="Jiro.Core.Services.MessageCache.SessionManager.#ctor*"></a>
+
+  <h3 id="Jiro_Core_Services_MessageCache_SessionManager__ctor_Microsoft_Extensions_Logging_ILogger_Jiro_Core_Services_MessageCache_SessionManager__Microsoft_Extensions_Caching_Memory_IMemoryCache_Jiro_Core_IRepositories_IChatSessionRepository_Jiro_Core_Services_Context_IInstanceMetadataAccessor_" data-uid="Jiro.Core.Services.MessageCache.SessionManager.#ctor(Microsoft.Extensions.Logging.ILogger{Jiro.Core.Services.MessageCache.SessionManager},Microsoft.Extensions.Caching.Memory.IMemoryCache,Jiro.Core.IRepositories.IChatSessionRepository,Jiro.Core.Services.Context.IInstanceMetadataAccessor)">
+  SessionManager(ILogger&lt;SessionManager&gt;, IMemoryCache, IChatSessionRepository, IInstanceMetadataAccessor)
+  <a class="header-action link-secondary" title="View source" href="https://github.com/HueByte/Jiro/blob/main/src/Jiro.Kernel/Jiro.Core/Services/MessageCache/SessionManager.cs/#L33"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Initializes a new instance of the SessionManager class.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public SessionManager(ILogger&lt;SessionManager&gt; logger, IMemoryCache memoryCache, IChatSessionRepository chatSessionRepository, IInstanceMetadataAccessor instanceMetadataAccessor)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>logger</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1">ILogger</a>&lt;<a class="xref" href="Jiro.Core.Services.MessageCache.SessionManager.html">SessionManager</a>&gt;</dt>
+    <dd><p>The logger instance for this service.</p>
+</dd>
+    <dt><code>memoryCache</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/microsoft.extensions.caching.memory.imemorycache">IMemoryCache</a></dt>
+    <dd><p>The memory cache for session caching.</p>
+</dd>
+    <dt><code>chatSessionRepository</code> <a class="xref" href="Jiro.Core.IRepositories.IChatSessionRepository.html">IChatSessionRepository</a></dt>
+    <dd><p>The repository for session data access.</p>
+</dd>
+    <dt><code>instanceMetadataAccessor</code> <a class="xref" href="Jiro.Core.Services.Context.IInstanceMetadataAccessor.html">IInstanceMetadataAccessor</a></dt>
+    <dd><p>The service for accessing instance metadata.</p>
+</dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+  <h4 class="section">Exceptions</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.argumentnullexception">ArgumentNullException</a></dt>
+    <dd><p>Thrown when instanceMetadataAccessor is null.</p>
+</dd>
+  </dl>
+
+
+
+  <h2 class="section" id="methods">Methods
+</h2>
+
+
+  <a id="Jiro_Core_Services_MessageCache_SessionManager_GetOrCreateChatSessionAsync_" data-uid="Jiro.Core.Services.MessageCache.SessionManager.GetOrCreateChatSessionAsync*"></a>
+
+  <h3 id="Jiro_Core_Services_MessageCache_SessionManager_GetOrCreateChatSessionAsync_System_String_System_Boolean_" data-uid="Jiro.Core.Services.MessageCache.SessionManager.GetOrCreateChatSessionAsync(System.String,System.Boolean)">
+  GetOrCreateChatSessionAsync(string, bool)
+  <a class="header-action link-secondary" title="View source" href="https://github.com/HueByte/Jiro/blob/main/src/Jiro.Kernel/Jiro.Core/Services/MessageCache/SessionManager.cs/#L83"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Gets or creates a chat session.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public Task&lt;Session&gt; GetOrCreateChatSessionAsync(string sessionId, bool includeMessages = false)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>sessionId</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd><p>The session identifier.</p>
+</dd>
+    <dt><code>includeMessages</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.boolean">bool</a></dt>
+    <dd><p>Whether to include messages in the result.</p>
+</dd>
+  </dl>
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1">Task</a>&lt;<a class="xref" href="Jiro.Core.Services.Conversation.Models.Session.html">Session</a>&gt;</dt>
+    <dd><p>The session with or without messages.</p>
+</dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+  <a id="Jiro_Core_Services_MessageCache_SessionManager_GetSessionAsync_" data-uid="Jiro.Core.Services.MessageCache.SessionManager.GetSessionAsync*"></a>
+
+  <h3 id="Jiro_Core_Services_MessageCache_SessionManager_GetSessionAsync_System_String_System_Boolean_System_String_" data-uid="Jiro.Core.Services.MessageCache.SessionManager.GetSessionAsync(System.String,System.Boolean,System.String)">
+  GetSessionAsync(string, bool, string?)
+  <a class="header-action link-secondary" title="View source" href="https://github.com/HueByte/Jiro/blob/main/src/Jiro.Kernel/Jiro.Core/Services/MessageCache/SessionManager.cs/#L46"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Retrieves a session by ID with optional message loading.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public Task&lt;Session?&gt; GetSessionAsync(string sessionId, bool includeMessages = false, string? instanceId = null)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>sessionId</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd><p>The session identifier.</p>
+</dd>
+    <dt><code>includeMessages</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.boolean">bool</a></dt>
+    <dd><p>Whether to include messages in the result.</p>
+</dd>
+    <dt><code>instanceId</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd><p>The instance ID. If null, will be resolved automatically.</p>
+</dd>
+  </dl>
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1">Task</a>&lt;<a class="xref" href="Jiro.Core.Services.Conversation.Models.Session.html">Session</a>&gt;</dt>
+    <dd><p>The session or null if not found.</p>
+</dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+  <a id="Jiro_Core_Services_MessageCache_SessionManager_GetSessionsAsync_" data-uid="Jiro.Core.Services.MessageCache.SessionManager.GetSessionsAsync*"></a>
+
+  <h3 id="Jiro_Core_Services_MessageCache_SessionManager_GetSessionsAsync_System_String_" data-uid="Jiro.Core.Services.MessageCache.SessionManager.GetSessionsAsync(System.String)">
+  GetSessionsAsync(string)
+  <a class="header-action link-secondary" title="View source" href="https://github.com/HueByte/Jiro/blob/main/src/Jiro.Kernel/Jiro.Core/Services/MessageCache/SessionManager.cs/#L160"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Retrieves all chat sessions for an instance.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public Task&lt;List&lt;ChatSession&gt;&gt; GetSessionsAsync(string instanceId)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>instanceId</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd><p>The instance identifier.</p>
+</dd>
+  </dl>
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1">Task</a>&lt;<a class="xref" href="https://learn.microsoft.com/dotnet/api/system.collections.generic.list-1">List</a>&lt;<a class="xref" href="Jiro.Core.Models.ChatSession.html">ChatSession</a>&gt;&gt;</dt>
+    <dd><p>List of chat sessions without messages for performance.</p>
+</dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+  <a id="Jiro_Core_Services_MessageCache_SessionManager_InvalidateInstanceSessionsCache_" data-uid="Jiro.Core.Services.MessageCache.SessionManager.InvalidateInstanceSessionsCache*"></a>
+
+  <h3 id="Jiro_Core_Services_MessageCache_SessionManager_InvalidateInstanceSessionsCache_System_String_" data-uid="Jiro.Core.Services.MessageCache.SessionManager.InvalidateInstanceSessionsCache(System.String)">
+  InvalidateInstanceSessionsCache(string)
+  <a class="header-action link-secondary" title="View source" href="https://github.com/HueByte/Jiro/blob/main/src/Jiro.Kernel/Jiro.Core/Services/MessageCache/SessionManager.cs/#L294"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Invalidates all sessions cache for an instance.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void InvalidateInstanceSessionsCache(string instanceId)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>instanceId</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd><p>The instance identifier.</p>
+</dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+
+  <a id="Jiro_Core_Services_MessageCache_SessionManager_InvalidateSessionCache_" data-uid="Jiro.Core.Services.MessageCache.SessionManager.InvalidateSessionCache*"></a>
+
+  <h3 id="Jiro_Core_Services_MessageCache_SessionManager_InvalidateSessionCache_System_String_" data-uid="Jiro.Core.Services.MessageCache.SessionManager.InvalidateSessionCache(System.String)">
+  InvalidateSessionCache(string)
+  <a class="header-action link-secondary" title="View source" href="https://github.com/HueByte/Jiro/blob/main/src/Jiro.Kernel/Jiro.Core/Services/MessageCache/SessionManager.cs/#L286"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Invalidates cached session data.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void InvalidateSessionCache(string sessionId)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>sessionId</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd><p>The session identifier.</p>
+</dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+
+  <a id="Jiro_Core_Services_MessageCache_SessionManager_RemoveSessionAsync_" data-uid="Jiro.Core.Services.MessageCache.SessionManager.RemoveSessionAsync*"></a>
+
+  <h3 id="Jiro_Core_Services_MessageCache_SessionManager_RemoveSessionAsync_System_String_" data-uid="Jiro.Core.Services.MessageCache.SessionManager.RemoveSessionAsync(System.String)">
+  RemoveSessionAsync(string)
+  <a class="header-action link-secondary" title="View source" href="https://github.com/HueByte/Jiro/blob/main/src/Jiro.Kernel/Jiro.Core/Services/MessageCache/SessionManager.cs/#L255"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Removes a session and all its messages.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public Task&lt;bool&gt; RemoveSessionAsync(string sessionId)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>sessionId</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd><p>The session identifier.</p>
+</dd>
+  </dl>
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1">Task</a>&lt;<a class="xref" href="https://learn.microsoft.com/dotnet/api/system.boolean">bool</a>&gt;</dt>
+    <dd><p>True if removed successfully.</p>
+</dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+  <a id="Jiro_Core_Services_MessageCache_SessionManager_UpdateSessionAsync_" data-uid="Jiro.Core.Services.MessageCache.SessionManager.UpdateSessionAsync*"></a>
+
+  <h3 id="Jiro_Core_Services_MessageCache_SessionManager_UpdateSessionAsync_System_String_System_String_System_String_" data-uid="Jiro.Core.Services.MessageCache.SessionManager.UpdateSessionAsync(System.String,System.String,System.String)">
+  UpdateSessionAsync(string, string?, string?)
+  <a class="header-action link-secondary" title="View source" href="https://github.com/HueByte/Jiro/blob/main/src/Jiro.Kernel/Jiro.Core/Services/MessageCache/SessionManager.cs/#L202"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Updates session metadata.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public Task&lt;bool&gt; UpdateSessionAsync(string sessionId, string? name = null, string? description = null)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>sessionId</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd><p>The session identifier.</p>
+</dd>
+    <dt><code>name</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd><p>New session name.</p>
+</dd>
+    <dt><code>description</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd><p>New session description.</p>
+</dd>
+  </dl>
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1">Task</a>&lt;<a class="xref" href="https://learn.microsoft.com/dotnet/api/system.boolean">bool</a>&gt;</dt>
+    <dd><p>True if updated successfully.</p>
+</dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+
+</article>
+
+        <div class="contribution d-print-none">
+          <a href="https://github.com/HueByte/Jiro/blob/main/src/Jiro.Kernel/Jiro.Core/Services/MessageCache/SessionManager.cs/#L17" class="edit-link">Edit this page</a>
+        </div>
+
+
+      </div>
+
+      <div class="affix">
+        <nav id="affix"></nav>
+      </div>
+    </main>
+
+    <div class="container-xxl search-results" id="search-results"></div>
+
+    <footer class="border-top text-secondary">
+      <div class="container-xxl">
+        <div class="flex-fill">
+          <div class="footer-custom"><div class="footer-inner d-flex justify-content-between align-items-center"><div class="footer-text">Made with <strong>💖</strong> By HueByte</div><div class="footer-links"><a href="https://github.com/HueByte/Jiro" class="footer-link" target="_blank"><i class="fab fa-github"></i>GitHub</a><a href="#" class="footer-link scroll-to-top" onclick="scrollToTop()"><i class="fas fa-arrow-up"></i>Top</a></div></div></div><script>function scrollToTop(){window.scrollTo({top:0,behavior:'smooth'});}</script>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>

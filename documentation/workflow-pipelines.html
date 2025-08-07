@@ -1,0 +1,1060 @@
+﻿<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+      <title>&#128260; Jiro Workflow Pipelines Documentation | Jiro Documentation </title>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <meta name="title" content="&#128260; Jiro Workflow Pipelines Documentation | Jiro Documentation ">
+      
+      
+      <link rel="icon" href="../assets/Jiro-Icon.png">
+      <link rel="stylesheet" href="../public/docfx.min.css">
+      <link rel="stylesheet" href="../public/main.css">
+      <meta name="docfx:navrel" content="../toc.html">
+      <meta name="docfx:tocrel" content="toc.html">
+      
+      <meta name="docfx:rel" content="../">
+      
+      
+      <meta name="docfx:docurl" content="https://github.com/HueByte/Jiro/blob/main/dev/#L1">
+      <meta name="loc:inThisArticle" content="In this article">
+      <meta name="loc:searchResultsCount" content="{count} results for &quot;{query}&quot;">
+      <meta name="loc:searchNoResults" content="No results for &quot;{query}&quot;">
+      <meta name="loc:tocFilter" content="Filter by title">
+      <meta name="loc:nextArticle" content="Next">
+      <meta name="loc:prevArticle" content="Previous">
+      <meta name="loc:themeLight" content="Light">
+      <meta name="loc:themeDark" content="Dark">
+      <meta name="loc:themeAuto" content="Auto">
+      <meta name="loc:changeTheme" content="Change theme">
+      <meta name="loc:copy" content="Copy">
+      <meta name="loc:downloadPdf" content="Download PDF">
+  </head>
+
+  <script type="module" src="./../public/docfx.min.js"></script>
+
+  <script>
+    const theme = localStorage.getItem('theme') || 'auto'
+    document.documentElement.setAttribute('data-bs-theme', theme === 'auto' ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : theme)
+  </script>
+
+
+  <body class="tex2jax_ignore" data-layout="" data-yaml-mime="">
+    <header class="bg-body border-bottom">
+      <nav id="autocollapse" class="navbar navbar-expand-md" role="navigation">
+        <div class="container-xxl flex-nowrap">
+          <a class="navbar-brand" href="../index.html">
+            <img id="logo" class="svg" src="../assets/Jiro-Icon.png" alt="Jiro - AI Assistant">
+            Jiro - AI Assistant
+          </a>
+          <button class="btn btn-lg d-md-none border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navpanel" aria-controls="navpanel" aria-expanded="false" aria-label="Toggle navigation">
+            <i class="bi bi-three-dots"></i>
+          </button>
+          <div class="collapse navbar-collapse" id="navpanel">
+            <div id="navbar">
+              <form class="search" role="search" id="search">
+                <i class="bi bi-search"></i>
+                <input class="form-control" id="search-query" type="search" disabled="" placeholder="Search" autocomplete="off" aria-label="Search">
+              </form>
+            </div>
+          </div>
+        </div>
+      </nav>
+    </header>
+
+    <main class="container-xxl">
+      <div class="toc-offcanvas">
+        <div class="offcanvas-md offcanvas-start" tabindex="-1" id="tocOffcanvas" aria-labelledby="tocOffcanvasLabel">
+          <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="tocOffcanvasLabel">Table of Contents</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#tocOffcanvas" aria-label="Close"></button>
+          </div>
+          <div class="offcanvas-body">
+            <nav class="toc" id="toc"></nav>
+          </div>
+        </div>
+      </div>
+
+      <div class="content">
+        <div class="actionbar">
+          <button class="btn btn-lg border-0 d-md-none" style="margin-top: -.65em; margin-left: -.8em" type="button" data-bs-toggle="offcanvas" data-bs-target="#tocOffcanvas" aria-controls="tocOffcanvas" aria-expanded="false" aria-label="Show table of contents">
+            <i class="bi bi-list"></i>
+          </button>
+
+          <nav id="breadcrumb"></nav>
+        </div>
+
+        <article data-uid="">
+<h1 id="-jiro-workflow-pipelines-documentation">🔄 Jiro Workflow Pipelines Documentation</h1>
+
+<p>This document describes all the automated workflows and CI/CD pipelines configured for the Jiro project. Each workflow serves a specific purpose in maintaining code quality, security, and deployment automation.</p>
+<h2 id="-overview">📋 Overview</h2>
+<p>The Jiro project utilizes multiple GitHub Actions workflows organized by responsibility to ensure code quality, security, and automated releases. The workflows are designed to work together to provide comprehensive coverage of the development lifecycle from PR creation to production deployment.</p>
+<h2 id="-pipeline-flow-pr--merge--deploy">🚀 Pipeline Flow: PR → Merge → Deploy</h2>
+<h3 id="phase-1-pull-request-validation"><strong>Phase 1: Pull Request Validation</strong></h3>
+<p>When a Pull Request is created, multiple validation workflows run in parallel:</p>
+<pre><code class="lang-mermaid">%%{init: {
+  &quot;theme&quot;: &quot;base&quot;,
+  &quot;themeVariables&quot;: {
+    &quot;background&quot;: &quot;#FFFFFF&quot;,
+    &quot;primaryColor&quot;: &quot;#2E7D32&quot;,
+    &quot;primaryTextColor&quot;: &quot;#000000&quot;,
+    &quot;primaryBorderColor&quot;: &quot;#1B5E20&quot;,
+    &quot;lineColor&quot;: &quot;#424242&quot;,
+    &quot;sectionBkgColor&quot;: &quot;#E8F5E9&quot;,
+    &quot;altSectionBkgColor&quot;: &quot;#C8E6C9&quot;, 
+    &quot;gridColor&quot;: &quot;#E0E0E0&quot;,
+    &quot;secondaryColor&quot;: &quot;#1976D2&quot;,
+    &quot;tertiaryColor&quot;: &quot;#7B1FA2&quot;,
+    &quot;cScale0&quot;: &quot;#FFFFFF&quot;,
+    &quot;cScale1&quot;: &quot;#F5F5F5&quot;,
+    &quot;cScale2&quot;: &quot;#E0E0E0&quot;,
+    &quot;cScale3&quot;: &quot;#9E9E9E&quot;,
+    &quot;cScale4&quot;: &quot;#000000&quot;,
+    &quot;clusterBkg&quot;: &quot;#F5F5F5&quot;,
+    &quot;clusterBorder&quot;: &quot;#757575&quot;
+  }
+}}%%
+graph TD
+    A[PR Created/Updated] --&gt; B[.NET CI]
+    A --&gt; C[Docker Build]
+    A --&gt; D[Markdown Lint]
+    A --&gt; E[Security Scan]
+    A --&gt; F[Release Validation]
+    
+    B --&gt; B1[✅ Build &amp; Test &amp; Quality Gate]
+    C --&gt; C1[✅ Container Build &amp; Security]
+    D --&gt; D1[✅ Documentation Quality]
+    E --&gt; E1[✅ CodeQL &amp; Security Audit]
+    F --&gt; F1[✅ Additional Validation]
+</code></pre>
+<h3 id="phase-2-post-merge-automation"><strong>Phase 2: Post-Merge Automation</strong></h3>
+<p>When PR is merged to main, production workflows execute:</p>
+<pre><code class="lang-mermaid">%%{init: {
+  &quot;theme&quot;: &quot;base&quot;,
+  &quot;themeVariables&quot;: {
+    &quot;background&quot;: &quot;#FFFFFF&quot;,
+    &quot;primaryColor&quot;: &quot;#2E7D32&quot;,
+    &quot;primaryTextColor&quot;: &quot;#000000&quot;,
+    &quot;primaryBorderColor&quot;: &quot;#1B5E20&quot;,
+    &quot;lineColor&quot;: &quot;#424242&quot;,
+    &quot;sectionBkgColor&quot;: &quot;#E8F5E9&quot;,
+    &quot;altSectionBkgColor&quot;: &quot;#C8E6C9&quot;, 
+    &quot;gridColor&quot;: &quot;#E0E0E0&quot;,
+    &quot;secondaryColor&quot;: &quot;#1976D2&quot;,
+    &quot;tertiaryColor&quot;: &quot;#7B1FA2&quot;,
+    &quot;cScale0&quot;: &quot;#FFFFFF&quot;,
+    &quot;cScale1&quot;: &quot;#F5F5F5&quot;,
+    &quot;cScale2&quot;: &quot;#E0E0E0&quot;,
+    &quot;cScale3&quot;: &quot;#9E9E9E&quot;,
+    &quot;cScale4&quot;: &quot;#000000&quot;,
+    &quot;clusterBkg&quot;: &quot;#F5F5F5&quot;,
+    &quot;clusterBorder&quot;: &quot;#757575&quot;
+  }
+}}%%
+graph TD
+    A[Merge to Main] --&gt; B[☁️ Auto-Versioning]
+    A --&gt; C[🐳 Docker Push]
+    A --&gt; D[📚 Documentation Deploy]
+    A --&gt; E[🔒 Security Monitoring]
+    
+    B --&gt; B1[Version Bump + GitHub Release]
+    C --&gt; C1[Container Registry Push]
+    D --&gt; D1[GitHub Pages Update]
+    E --&gt; E1[Continuous Security Scanning]
+</code></pre>
+<hr>
+<h2 id="-workflow-catalog">🏗️ Workflow Catalog</h2>
+<h3 id="-core-net-ci-jiro-kernel-ciyml"><strong>🔧 Core .NET CI</strong> (<code>jiro-kernel-ci.yml</code>)</h3>
+<p><strong>Triggers:</strong></p>
+<ul>
+<li>Push to <code>main</code> branch (<code>src/**</code> changes)</li>
+<li>Pull requests to <code>main</code>/<code>dev</code> (<code>src/**</code> changes)</li>
+</ul>
+<p><strong>Purpose:</strong> Core .NET build, test, and code quality validation</p>
+<h4 id="jobs"><strong>Jobs:</strong></h4>
+<h5 id="1-build-test--format-check-build-and-test">1. <strong>Build, Test &amp; Format Check</strong> (<code>build-and-test</code>)</h5>
+<ul>
+<li><strong>Environment:</strong> Ubuntu Latest</li>
+<li><strong>.NET Version:</strong> 9.0.x</li>
+<li><strong>Steps:</strong>
+<ul>
+<li>Checkout source code with GitHub token</li>
+<li>Setup .NET 9.0 SDK</li>
+<li>Prepare configuration files (<code>Configuration/appsettings.json</code>)</li>
+<li>Cache NuGet packages for performance</li>
+<li>Restore dependencies</li>
+<li>Build solution (Release configuration)</li>
+<li>Verify code formatting with <code>dotnet format</code></li>
+<li>Run unit tests with code coverage</li>
+<li>Upload test results and coverage to Codecov</li>
+</ul>
+</li>
+</ul>
+<h5 id="2-net-quality-gate-quality-gate">2. <strong>.NET Quality Gate</strong> (<code>quality-gate</code>)</h5>
+<ul>
+<li><strong>Purpose:</strong> Validate all .NET CI results</li>
+<li><strong>Dependencies:</strong> <code>build-and-test</code></li>
+<li><strong>Behavior:</strong>
+<ul>
+<li>✅ <strong>SUCCESS</strong>: All build, test, format checks pass</li>
+<li>❌ <strong>FAILURE</strong>: Any .NET CI component fails</li>
+<li>Provides detailed status reporting</li>
+</ul>
+</li>
+</ul>
+<hr>
+<h3 id="-auto-versioning--release-create-releaseyml"><strong>🚀 Auto-Versioning &amp; Release</strong> (<code>create-release.yml</code>)</h3>
+<p><strong>Triggers:</strong></p>
+<ul>
+<li>Push to <code>main</code> branch</li>
+<li>Pull requests to <code>main</code></li>
+</ul>
+<p><strong>Purpose:</strong> Automated versioning, tagging, and GitHub release creation</p>
+<h4 id="jobs-1"><strong>Jobs:</strong></h4>
+<h5 id="1-test-and-validate-pr-only">1. <strong>Test and Validate</strong> (PR Only)</h5>
+<ul>
+<li><strong>Condition:</strong> <code>github.event_name == 'pull_request'</code></li>
+<li><strong>Steps:</strong>
+<ul>
+<li>.NET build and test validation</li>
+<li>Code formatting checks</li>
+<li>Security scanning with CodeQL</li>
+</ul>
+</li>
+</ul>
+<h5 id="2-pull-request-validation-prs-only">2. <strong>Pull Request Validation</strong> (PRs Only)</h5>
+<ul>
+<li><strong>Condition:</strong> <code>github.event_name == 'pull_request'</code></li>
+<li><strong>Permissions:</strong> <code>contents: read</code></li>
+<li><strong>Steps:</strong>
+<ul>
+<li>.NET build and test validation</li>
+<li>Code formatting checks</li>
+<li>Security scanning with CodeQL</li>
+</ul>
+</li>
+</ul>
+<h5 id="3-release-artifact-build-manual-tag-triggered">3. <strong>Release Artifact Build</strong> (Manual Tag Triggered)</h5>
+<ul>
+<li><strong>Condition:</strong> <code>startsWith(github.ref, 'refs/tags/v')</code></li>
+<li><strong>Permissions:</strong> <code>contents: write</code></li>
+<li><strong>Steps:</strong>
+<ul>
+<li>Build release configuration</li>
+<li>Publish multi-platform binaries (Linux, Windows, macOS)</li>
+<li>Create release archives</li>
+<li>Generate release notes with changelog</li>
+<li>Create GitHub release with artifacts attached</li>
+</ul>
+</li>
+</ul>
+<p><strong>Manual Release Process:</strong></p>
+<ol>
+<li><strong>Developer manually creates git tag</strong>: <code>git tag -a v1.2.3 -m &quot;Release v1.2.3&quot;</code></li>
+<li><strong>Push tag to trigger build</strong>: <code>git push origin v1.2.3</code></li>
+<li><strong>Workflow builds multi-platform binaries</strong> automatically</li>
+<li><strong>GitHub release created</strong> with all artifacts attached</li>
+<li><strong>Full control over release timing</strong> and version numbers</li>
+</ol>
+<p><strong>Release Artifacts Generated:</strong></p>
+<ul>
+<li><code>jiro-kernel-vX.X.X-linux-x64.tar.gz</code> - Linux 64-bit self-contained binary</li>
+<li><code>jiro-kernel-vX.X.X-win-x64.zip</code> - Windows 64-bit self-contained binary</li>
+<li><code>jiro-kernel-vX.X.X-osx-x64.tar.gz</code> - macOS 64-bit self-contained binary</li>
+</ul>
+<hr>
+<h3 id="-container-build--security-docker-buildyml"><strong>🐳 Container Build &amp; Security</strong> (<code>docker-build.yml</code>)</h3>
+<p><strong>Triggers:</strong></p>
+<ul>
+<li>Push to <code>main</code> (<code>src/**</code>, <code>Dockerfile</code> changes)</li>
+<li>Pull requests (<code>src/**</code>, <code>Dockerfile</code> changes)</li>
+</ul>
+<p><strong>Purpose:</strong> Docker image building, testing, and security scanning</p>
+<h4 id="jobs-2"><strong>Jobs:</strong></h4>
+<h5 id="1-docker-build--verification-docker-build">1. <strong>Docker Build &amp; Verification</strong> (<code>docker-build</code>)</h5>
+<ul>
+<li><strong>Environment:</strong> Ubuntu Latest</li>
+<li><strong>Registry:</strong> GitHub Container Registry (<code>ghcr.io</code>)</li>
+<li><strong>Steps:</strong>
+<ul>
+<li>Setup Docker Buildx</li>
+<li>Login to GHCR (main branch only)</li>
+<li>Extract metadata and tags</li>
+<li>Build Docker image with caching</li>
+<li>Test container startup and health</li>
+<li>Run Trivy vulnerability scanner</li>
+<li>Upload security scan results</li>
+<li>Push to registry (main branch only)</li>
+</ul>
+</li>
+</ul>
+<p><strong>Image Tags Generated:</strong></p>
+<ul>
+<li><code>ghcr.io/huebyte/jiro-kernel:latest</code> (main branch)</li>
+<li><code>ghcr.io/huebyte/jiro-kernel:main</code> (main branch)</li>
+<li><code>ghcr.io/huebyte/jiro-kernel:pr-123</code> (pull requests)</li>
+<li><code>ghcr.io/huebyte/jiro-kernel:sha-abcd123</code> (commit SHA)</li>
+</ul>
+<hr>
+<h3 id="-security-scanning-jiro-kernel-securityyml"><strong>🔒 Security Scanning</strong> (<code>jiro-kernel-security.yml</code>)</h3>
+<p><strong>Triggers:</strong></p>
+<ul>
+<li>Weekly schedule (Mondays at 2 AM UTC)</li>
+<li>Manual workflow dispatch</li>
+<li>Push/PR to main (<code>src/**</code> changes)</li>
+</ul>
+<p><strong>Purpose:</strong> Comprehensive security vulnerability detection</p>
+<h4 id="jobs-3"><strong>Jobs:</strong></h4>
+<h5 id="1-security-vulnerability-scan">1. <strong>Security Vulnerability Scan</strong></h5>
+<ul>
+<li><strong>Environment:</strong> Ubuntu Latest</li>
+<li><strong>Permissions:</strong> <code>security-events: write</code></li>
+<li><strong>Steps:</strong>
+<ul>
+<li>.NET security audit (<code>dotnet list package --vulnerable</code>)</li>
+<li>Snyk security scanning (if token configured)</li>
+<li>CodeQL analysis with security-extended queries</li>
+<li>Upload security findings to GitHub Security tab</li>
+</ul>
+</li>
+</ul>
+<hr>
+<h3 id="-documentation-quality-markdown-lintyml"><strong>📝 Documentation Quality</strong> (<code>markdown-lint.yml</code>)</h3>
+<p><strong>Triggers:</strong></p>
+<ul>
+<li>Push to <code>main</code> (<code>**/*.md</code> changes)</li>
+<li>Pull requests (<code>**/*.md</code> changes)</li>
+</ul>
+<p><strong>Purpose:</strong> Documentation linting and quality assurance</p>
+<h4 id="jobs-4"><strong>Jobs:</strong></h4>
+<h5 id="1-markdown-linting">1. <strong>Markdown Linting</strong></h5>
+<ul>
+<li><strong>Environment:</strong> Ubuntu Latest</li>
+<li><strong>Node.js Version:</strong> 18</li>
+<li><strong>Steps:</strong>
+<ul>
+<li>Setup Node.js and markdownlint-cli</li>
+<li>Create default config if missing</li>
+<li>Run markdown linting on all <code>.md</code> files</li>
+<li>Ignore build directories and node_modules</li>
+</ul>
+</li>
+</ul>
+<hr>
+<h3 id="-documentation-deployment-deploy-docsyml"><strong>📚 Documentation Deployment</strong> (<code>deploy-docs.yml</code>)</h3>
+<p><strong>Triggers:</strong></p>
+<ul>
+<li>Push to <code>main</code> (docs/API changes)</li>
+<li>Manual workflow dispatch</li>
+</ul>
+<p><strong>Purpose:</strong> Build and deploy project documentation to GitHub Pages</p>
+<h4 id="jobs-5"><strong>Jobs:</strong></h4>
+<h5 id="1-publish-documentation">1. <strong>Publish Documentation</strong></h5>
+<ul>
+<li><strong>Environment:</strong> Ubuntu Latest</li>
+<li><strong>Target:</strong> GitHub Pages</li>
+<li><strong>Steps:</strong>
+<ul>
+<li>Setup .NET and DocFX</li>
+<li>Restore dependencies for API docs</li>
+<li>Build DocFX documentation</li>
+<li>Deploy to GitHub Pages</li>
+</ul>
+</li>
+</ul>
+<hr>
+<h2 id="-deployment-ready-artifacts">🎯 Deployment Ready Artifacts</h2>
+<p>After successful pipeline execution, the following artifacts are available:</p>
+<h3 id="-container-images"><strong>🐳 Container Images</strong></h3>
+<pre><code class="lang-bash"># Latest stable release
+docker pull ghcr.io/huebyte/jiro-kernel:latest
+
+# Specific version
+docker pull ghcr.io/huebyte/jiro-kernel:v0.1.3
+
+# Development builds
+docker pull ghcr.io/huebyte/jiro-kernel:main
+</code></pre>
+<h3 id="-github-releases"><strong>📦 GitHub Releases</strong></h3>
+<ul>
+<li>Semantic versioning with auto-incremented patch versions</li>
+<li>Comprehensive release notes with commit changelog</li>
+<li>Version metadata and build information</li>
+<li>Direct download links for assets</li>
+</ul>
+<h3 id="-live-documentation"><strong>📚 Live Documentation</strong></h3>
+<ul>
+<li><strong>GitHub Pages</strong>: Automatically updated API documentation</li>
+<li><strong>API Reference</strong>: Generated from XML comments</li>
+<li><strong>User Guides</strong>: Markdown-based documentation</li>
+</ul>
+<hr>
+<h2 id="-performance-optimizations">⚡ Performance Optimizations</h2>
+<h3 id="intelligent-triggers"><strong>Intelligent Triggers</strong></h3>
+<ul>
+<li><strong>Path-based filtering</strong>: Workflows only run when relevant files change</li>
+<li><strong>Parallel execution</strong>: Independent workflows run concurrently</li>
+<li><strong>Conditional jobs</strong>: Jobs run only when necessary (PR vs. main branch)</li>
+</ul>
+<h3 id="caching-strategies"><strong>Caching Strategies</strong></h3>
+<ul>
+<li><strong>NuGet packages</strong>: Cached across builds for faster dependency restoration</li>
+<li><strong>Docker layers</strong>: GitHub Actions cache for container builds</li>
+<li><strong>Build artifacts</strong>: Test results and coverage cached between jobs</li>
+</ul>
+<h3 id="resource-efficiency"><strong>Resource Efficiency</strong></h3>
+<ul>
+<li><strong>Targeted scans</strong>: Security scans run on schedule vs. every commit</li>
+<li><strong>Optimized Docker builds</strong>: Multi-stage builds with layer caching</li>
+<li><strong>Smart dependencies</strong>: Jobs run only after required dependencies complete</li>
+</ul>
+<hr>
+<h2 id="-security--compliance">🛡️ Security &amp; Compliance</h2>
+<h3 id="comprehensive-security-coverage"><strong>Comprehensive Security Coverage</strong></h3>
+<ul>
+<li><strong>Static Analysis</strong>: CodeQL for source code security</li>
+<li><strong>Dependency Scanning</strong>: Snyk and .NET audit for vulnerable packages</li>
+<li><strong>Container Security</strong>: Trivy scanner for Docker image vulnerabilities</li>
+<li><strong>Access Control</strong>: Proper GitHub token permissions and secrets management</li>
+</ul>
+<h3 id="quality-gates"><strong>Quality Gates</strong></h3>
+<ul>
+<li><strong>Automated Formatting</strong>: Enforced code style with <code>dotnet format</code></li>
+<li><strong>Test Coverage</strong>: Comprehensive unit test execution with coverage reporting</li>
+<li><strong>Documentation Quality</strong>: Markdown linting for documentation consistency</li>
+<li><strong>Build Verification</strong>: Multi-stage validation before release</li>
+</ul>
+<hr>
+<h2 id="-configuration-management">🔧 Configuration Management</h2>
+<h3 id="configuration-file-structure"><strong>Configuration File Structure</strong></h3>
+<p>Jiro uses an organized configuration structure with all settings centralized in the <code>Configuration</code> directory:</p>
+<pre><code>src/Jiro.Kernel/Jiro.App/Configuration/
+├── appsettings.json          # Main configuration (created from example)
+├── appsettings.example.json  # Configuration template
+├── appsettings.dev.json      # Development-specific overrides
+└── appsettings.backup.json   # Backup configuration
+</code></pre>
+<p><strong>Configuration File Hierarchy:</strong></p>
+<ol>
+<li><code>appsettings.json</code> - Base configuration</li>
+<li><code>appsettings.{environment}.json</code> - Environment-specific overrides</li>
+<li>Environment variables with <code>JIRO_</code> prefix - Runtime overrides</li>
+</ol>
+<p><strong>Workflow Integration:</strong></p>
+<ul>
+<li>CI/CD pipelines automatically copy <code>appsettings.example.json</code> to <code>appsettings.json</code></li>
+<li>The example file contains safe defaults for build and test environments</li>
+<li>Production deployments use environment variables for sensitive values</li>
+</ul>
+<h3 id="environment-variables"><strong>Environment Variables</strong></h3>
+<ul>
+<li><code>DOTNET_VERSION: &quot;9.0.x&quot;</code> - Consistent .NET version across all workflows</li>
+<li><code>SOLUTION_PATH: &quot;./src/Main.sln&quot;</code> - Central solution file reference</li>
+<li><code>REGISTRY: ghcr.io</code> - Container registry configuration</li>
+</ul>
+<h3 id="secrets-required"><strong>Secrets Required</strong></h3>
+<ul>
+<li><code>GITHUB_TOKEN</code> - Automatically provided, used for repository access</li>
+<li><code>SNYK_TOKEN</code> - Optional, for enhanced security scanning</li>
+<li><code>CODECOV_TOKEN</code> - Optional, for code coverage reporting</li>
+</ul>
+<h3 id="workflow-dependencies"><strong>Workflow Dependencies</strong></h3>
+<pre><code class="lang-mermaid">%%{init: {
+  &quot;theme&quot;: &quot;base&quot;,
+  &quot;themeVariables&quot;: {
+    &quot;background&quot;: &quot;#FFFFFF&quot;,
+    &quot;primaryColor&quot;: &quot;#2E7D32&quot;,
+    &quot;primaryTextColor&quot;: &quot;#000000&quot;,
+    &quot;primaryBorderColor&quot;: &quot;#1B5E20&quot;,
+    &quot;lineColor&quot;: &quot;#424242&quot;,
+    &quot;sectionBkgColor&quot;: &quot;#E8F5E9&quot;,
+    &quot;altSectionBkgColor&quot;: &quot;#C8E6C9&quot;, 
+    &quot;gridColor&quot;: &quot;#E0E0E0&quot;,
+    &quot;secondaryColor&quot;: &quot;#1976D2&quot;,
+    &quot;tertiaryColor&quot;: &quot;#7B1FA2&quot;,
+    &quot;cScale0&quot;: &quot;#FFFFFF&quot;,
+    &quot;cScale1&quot;: &quot;#F5F5F5&quot;,
+    &quot;cScale2&quot;: &quot;#E0E0E0&quot;,
+    &quot;cScale3&quot;: &quot;#9E9E9E&quot;,
+    &quot;cScale4&quot;: &quot;#000000&quot;,
+    &quot;clusterBkg&quot;: &quot;#F5F5F5&quot;,
+    &quot;clusterBorder&quot;: &quot;#757575&quot;
+  }
+}}%%
+graph LR
+    A[PR Created] --&gt; B[All Validation Workflows]
+    B --&gt; C[Merge Approved]
+    C --&gt; D[Auto-Versioning]
+    D --&gt; E[Container Build]
+    D --&gt; F[Documentation Deploy]
+    D --&gt; G[Security Monitoring]
+</code></pre>
+<hr>
+<h2 id="-monitoring--observability">📈 Monitoring &amp; Observability</h2>
+<h3 id="workflow-status"><strong>Workflow Status</strong></h3>
+<ul>
+<li><strong>Quality Gates</strong>: Clear pass/fail indicators for each pipeline stage</li>
+<li><strong>Artifact Tracking</strong>: Test results, coverage reports, and build outputs</li>
+<li><strong>Security Alerts</strong>: Automated vulnerability detection and reporting</li>
+</ul>
+<h3 id="performance-metrics"><strong>Performance Metrics</strong></h3>
+<ul>
+<li><strong>Build Times</strong>: Optimized with caching and parallel execution</li>
+<li><strong>Test Coverage</strong>: Tracked and reported via Codecov</li>
+<li><strong>Security Posture</strong>: Regular scanning with trend analysis</li>
+</ul>
+<p>This comprehensive pipeline ensures high code quality, security, and reliable deployment automation for the Jiro project.</p>
+<ul>
+<li>Setup Node.js environment</li>
+<li>Install markdownlint-cli globally</li>
+<li>Run markdownlint on all markdown files</li>
+<li>Create default configuration if not present</li>
+</ul>
+<p><strong>Key Features:</strong></p>
+<ul>
+<li><strong>Comprehensive Coverage:</strong> Lints all <code>*.md</code> files in the repository</li>
+<li><strong>Smart Exclusions:</strong> Ignores <code>node_modules</code>, <code>TestResults</code>, and <code>src/docs/build</code> directories</li>
+<li><strong>Configurable Rules:</strong> Uses <code>.markdownlint.json</code> for custom rule configuration</li>
+<li><strong>Non-blocking:</strong> Warnings are reported but don't fail the pipeline</li>
+<li><strong>Auto-configuration:</strong> Creates sensible defaults if no config exists</li>
+</ul>
+<p><strong>Default Rules:</strong></p>
+<ul>
+<li>MD013 (line length): Disabled for flexibility</li>
+<li>MD033 (inline HTML): Allowed for enhanced formatting</li>
+<li>MD041 (first line heading): Not enforced</li>
+<li>MD024 (duplicate headings): Allowed for structured documents</li>
+<li>MD029 (ordered list prefixes): Flexible numbering allowed</li>
+</ul>
+<h4 id="3-security-vulnerability-scanning-security-scan">3. <strong>Security Vulnerability Scanning</strong> (<code>security-scan</code>)</h4>
+<ul>
+<li><strong>Dependencies:</strong> Requires <code>build-and-test</code> to complete successfully</li>
+<li><strong>Steps:</strong>
+<ul>
+<li>Run .NET security audit for vulnerable packages</li>
+<li>Install and run Snyk CLI security scanning (if token is configured)</li>
+<li>Initialize and run CodeQL static analysis</li>
+<li>Perform comprehensive security analysis</li>
+</ul>
+</li>
+</ul>
+<p><strong>Security Tools:</strong></p>
+<ul>
+<li><strong>.NET Security Audit:</strong> Scans for vulnerable NuGet packages</li>
+<li><strong>Snyk:</strong> Third-party vulnerability scanning (optional)</li>
+<li><strong>CodeQL:</strong> GitHub's semantic code analysis engine</li>
+</ul>
+<h5 id="4-docker-build-and-verification-docker-build">4. <strong>Docker Build and Verification</strong> (<code>docker-build</code>)</h5>
+<ul>
+<li><strong>Dependencies:</strong> Requires <code>build-and-test</code> to complete successfully</li>
+<li><strong>Steps:</strong>
+<ul>
+<li>Setup Docker Buildx for advanced Docker features</li>
+<li>Login to GitHub Container Registry (for non-PR events)</li>
+<li>Extract Docker metadata and generate tags</li>
+<li>Build Docker image with caching</li>
+<li>Test Docker container functionality</li>
+<li>Run Trivy vulnerability scanner on the built image</li>
+<li>Push Docker image to registry (for non-PR events)</li>
+</ul>
+</li>
+</ul>
+<p><strong>Docker Features:</strong></p>
+<ul>
+<li><strong>Multi-platform Support:</strong> Uses Docker Buildx</li>
+<li><strong>Intelligent Tagging:</strong> Branch-based, PR-based, and SHA-based tags</li>
+<li><strong>Build Caching:</strong> GitHub Actions cache for faster builds</li>
+<li><strong>Container Testing:</strong> Automated health checks</li>
+<li><strong>Security Scanning:</strong> Trivy vulnerability assessment</li>
+<li><strong>Registry Integration:</strong> Automatic push to GitHub Container Registry</li>
+</ul>
+<h5 id="5-quality-gate-quality-gate">5. <strong>Quality Gate</strong> (<code>quality-gate</code>)</h5>
+<ul>
+<li><strong>Dependencies:</strong> Waits for all previous jobs to complete</li>
+<li><strong>Purpose:</strong> Final validation and reporting</li>
+<li><strong>Logic:</strong>
+<ul>
+<li>Fails if build-and-test fails</li>
+<li>Warns but doesn't fail for markdown linting failures</li>
+<li>Warns but doesn't fail for security scan failures</li>
+<li>Fails if Docker build fails</li>
+<li>Provides comprehensive status summary</li>
+</ul>
+</li>
+</ul>
+<h2 id="-release-automation">🚀 Release Automation</h2>
+<h3 id="create-release-on-main-branch-create-releaseyml"><strong>Create Release on Main Branch</strong> (<code>create-release.yml</code>)</h3>
+<p><strong>Triggers:</strong></p>
+<ul>
+<li>Direct push to <code>main</code> branch</li>
+<li>Pull request from <code>dev</code> to <code>main</code> branch (when merged)</li>
+</ul>
+<p><strong>Purpose:</strong> Automated release creation when code is pushed or merged to the main branch.</p>
+<h4 id="process"><strong>Process:</strong></h4>
+<ol>
+<li><p><strong>Version Detection:</strong></p>
+<ul>
+<li>Extracts version from <code>Jiro.App.csproj</code></li>
+<li>Falls back to date-based versioning if no version found</li>
+<li>Prefixes version with 'v' (e.g., <code>v1.0.0</code>)</li>
+</ul>
+</li>
+<li><p><strong>Tag Management:</strong></p>
+<ul>
+<li>Checks if the version tag already exists</li>
+<li>Skips release creation if tag exists</li>
+<li>Creates new Git tag if version is new</li>
+</ul>
+</li>
+<li><p><strong>Release Notes Generation:</strong></p>
+<ul>
+<li>Automatically generates commit history since last release</li>
+<li>Includes merged commits from dev to main</li>
+<li>Adds link to full changelog</li>
+</ul>
+</li>
+<li><p><strong>GitHub Release Creation:</strong></p>
+<ul>
+<li>Creates GitHub release with generated notes</li>
+<li>Links to the appropriate Git tag</li>
+<li>Provides downloadable assets</li>
+</ul>
+</li>
+</ol>
+<p><strong>Features:</strong></p>
+<ul>
+<li><strong>Intelligent Version Detection:</strong> Multiple fallback strategies</li>
+<li><strong>Duplicate Prevention:</strong> Prevents duplicate releases</li>
+<li><strong>Automated Documentation:</strong> Generated release notes</li>
+<li><strong>Branch-aware:</strong> Handles both direct pushes and PR merges</li>
+</ul>
+<h3 id="auto-release-on-main-push-auto-releaseyml"><strong>Auto Release on Main Push</strong> (<code>auto-release.yml</code>)</h3>
+<p><strong>Triggers:</strong></p>
+<ul>
+<li>Push to <code>main</code> branch</li>
+</ul>
+<p><strong>Purpose:</strong> Alternative release automation focused on immediate releases upon main branch updates.</p>
+<h4 id="key-differences-from-create-releaseyml"><strong>Key Differences from <code>create-release.yml</code>:</strong></h4>
+<ul>
+<li>Simplified version detection logic</li>
+<li>Searches multiple project files for version information</li>
+<li>More aggressive in creating releases</li>
+<li>Focuses on Main.sln structure compatibility</li>
+</ul>
+<h2 id="-documentation-deployment">📚 Documentation Deployment</h2>
+<h3 id="deploy-documentation-to-github-pages-deploy-docsyml"><strong>Deploy Documentation to GitHub Pages</strong> (<code>deploy-docs.yml</code>)</h3>
+<p><strong>Triggers:</strong></p>
+<ul>
+<li>Push to <code>main</code> branch (when changes are made to documentation files)</li>
+<li>Paths monitored:
+<ul>
+<li><code>docs/**</code> - Documentation content</li>
+<li><code>assets/**</code> - Images and assets</li>
+<li><code>docfx.json</code> - DocFX configuration</li>
+<li><code>index.md</code> - Main homepage</li>
+<li><code>toc.yml</code> - Table of contents</li>
+<li><code>src/**/*.cs</code> - Source code for API documentation</li>
+</ul>
+</li>
+<li>Manual trigger via workflow_dispatch</li>
+</ul>
+<p><strong>Purpose:</strong> Automatically builds and deploys the DocFX documentation site to GitHub Pages whenever documentation changes are pushed to the main branch.</p>
+<h4 id="build-process"><strong>Build Process:</strong></h4>
+<ol>
+<li><p><strong>Environment Setup</strong></p>
+<ul>
+<li>Ubuntu Latest runner</li>
+<li>.NET 9.x SDK installation</li>
+<li>DocFX tool installation (version 2.75.3)</li>
+</ul>
+</li>
+<li><p><strong>Project Preparation</strong></p>
+<ul>
+<li>Restore NuGet dependencies for API documentation</li>
+<li>Build .NET projects to generate XML documentation files</li>
+<li>Continue on build errors (API docs still generate)</li>
+</ul>
+</li>
+<li><p><strong>Documentation Generation</strong></p>
+<ul>
+<li>Run <code>docfx docfx.json</code> to build complete documentation</li>
+<li>Generate both documentation and API reference</li>
+<li>Create static website in <code>_site/</code> directory</li>
+</ul>
+</li>
+<li><p><strong>Deployment to GitHub Pages</strong></p>
+<ul>
+<li>Upload generated site as Pages artifact</li>
+<li>Deploy to GitHub Pages using official actions</li>
+<li>Provide deployment URL feedback</li>
+</ul>
+</li>
+</ol>
+<h4 id="generated-content"><strong>Generated Content:</strong></h4>
+<ul>
+<li><strong>Documentation Pages</strong> (<code>/docs/</code>): Project guides, architecture, user documentation</li>
+<li><strong>API Reference</strong> (<code>/api/</code>): Auto-generated .NET API documentation from XML comments</li>
+<li><strong>Assets</strong>: Images, logos, and styling assets</li>
+<li><strong>Navigation</strong>: Organized table of contents and cross-references</li>
+</ul>
+<h4 id="features"><strong>Features:</strong></h4>
+<ul>
+<li><strong>Automatic API Documentation:</strong> Generated from XML comments in source code</li>
+<li><strong>Asset Management:</strong> Proper handling of images and logos (including custom Jiro branding)</li>
+<li><strong>Clean URLs:</strong> Organized structure with <code>/docs/</code> and <code>/api/</code> sections</li>
+<li><strong>Modern Theme:</strong> DocFX modern template with custom branding</li>
+<li><strong>Error Resilience:</strong> Continues deployment even if some .NET projects fail to build</li>
+</ul>
+<h2 id="-security-workflows">🔒 Security Workflows</h2>
+<h3 id="jiro-security-scan-jiro-kernel-securityyml"><strong>Jiro Security Scan</strong> (<code>jiro-kernel-security.yml</code>)</h3>
+<p><strong>Triggers:</strong></p>
+<ul>
+<li><strong>Scheduled:</strong> Every Monday at 2 AM UTC</li>
+<li><strong>Manual:</strong> Via workflow dispatch</li>
+</ul>
+<p><strong>Purpose:</strong> Weekly comprehensive security audit of the codebase and dependencies.</p>
+<h4 id="security-checks"><strong>Security Checks:</strong></h4>
+<ol>
+<li><p><strong>Package Vulnerability Scanning:</strong></p>
+<ul>
+<li>Scans all NuGet packages for known vulnerabilities</li>
+<li>Includes transitive dependencies</li>
+<li>Generates detailed vulnerability reports</li>
+</ul>
+</li>
+<li><p><strong>Dependency Analysis:</strong></p>
+<ul>
+<li>Analyzes all project dependencies</li>
+<li>Reports security advisories</li>
+<li>Provides remediation suggestions</li>
+</ul>
+</li>
+<li><p><strong>Regular Monitoring:</strong></p>
+<ul>
+<li>Weekly automated execution</li>
+<li>Manual trigger capability for immediate scans</li>
+<li>GitHub Security tab integration</li>
+</ul>
+</li>
+</ol>
+<h3 id="codeql-integration-within-main-ci"><strong>CodeQL Integration</strong> (within main CI)</h3>
+<p><strong>Continuous Security Analysis:</strong></p>
+<ul>
+<li>Static code analysis during every build</li>
+<li>Semantic code understanding</li>
+<li>Security vulnerability detection</li>
+<li>Integration with GitHub Security Advisory Database</li>
+</ul>
+<h2 id="-performance-monitoring">⚡ Performance Monitoring</h2>
+<h3 id="jiro-performance-test-jiro-kernel-performanceyml"><strong>Jiro Performance Test</strong> (<code>jiro-kernel-performance.yml</code>)</h3>
+<p><strong>Triggers:</strong></p>
+<ul>
+<li><strong>Scheduled:</strong> Every Sunday at 3 AM UTC</li>
+<li><strong>Manual:</strong> Via workflow dispatch with optional benchmark filters</li>
+</ul>
+<p><strong>Purpose:</strong> Regular performance monitoring and benchmarking of the Jiro application.</p>
+<h4 id="performance-testing"><strong>Performance Testing:</strong></h4>
+<ol>
+<li><p><strong>Benchmark Execution:</strong></p>
+<ul>
+<li>Runs performance tests in Release configuration</li>
+<li>Supports filtered benchmark execution</li>
+<li>Measures execution time and resource usage</li>
+</ul>
+</li>
+<li><p><strong>Performance Regression Detection:</strong></p>
+<ul>
+<li>Compares results against previous runs</li>
+<li>Identifies performance degradations</li>
+<li>Provides detailed performance reports</li>
+</ul>
+</li>
+<li><p><strong>Resource Monitoring:</strong></p>
+<ul>
+<li>Memory usage analysis</li>
+<li>CPU utilization tracking</li>
+<li>Response time measurements</li>
+</ul>
+</li>
+</ol>
+<h2 id="-development-and-debugging">🛠️ Development and Debugging</h2>
+<h3 id="simple-push-test-simple-testyml"><strong>Simple Push Test</strong> (<code>simple-test.yml</code>)</h3>
+<p><strong>Triggers:</strong></p>
+<ul>
+<li>Push to <code>main</code> branch (excluding <code>src/**</code> changes to avoid overlap)</li>
+</ul>
+<p><strong>Purpose:</strong> Lightweight workflow for testing basic GitHub Actions functionality.</p>
+<h4 id="functionality"><strong>Functionality:</strong></h4>
+<ul>
+<li>Verifies workflow trigger mechanisms</li>
+<li>Lists repository contents</li>
+<li>Searches for version information in project files</li>
+<li>Provides basic repository health checks</li>
+</ul>
+<h3 id="debug-workflow-triggers-debug-triggersyml"><strong>Debug Workflow Triggers</strong> (<code>debug-triggers.yml</code>)</h3>
+<p><strong>Triggers:</strong></p>
+<ul>
+<li>Push to <code>main</code> branch</li>
+<li>Pull requests to <code>main</code> or <code>dev</code> branches</li>
+</ul>
+<p><strong>Purpose:</strong> Debugging and monitoring workflow trigger events.</p>
+<h4 id="debug-information"><strong>Debug Information:</strong></h4>
+<ul>
+<li><strong>Event Details:</strong> Captures all GitHub event information</li>
+<li><strong>Branch Information:</strong> Tracks branch changes and merges</li>
+<li><strong>Pull Request Analysis:</strong> Monitors PR lifecycle events</li>
+<li><strong>Commit Tracking:</strong> Logs commit SHAs and changes</li>
+</ul>
+<h2 id="-local-development-support">🔄 Local Development Support</h2>
+<h3 id="local-ci-testing-scripts"><strong>Local CI Testing Scripts</strong></h3>
+<p>The project includes scripts for local testing of CI/CD workflows:</p>
+<h4 id="local-ci-testsh-linuxmacos"><strong>local-ci-test.sh</strong> (Linux/macOS)</h4>
+<ul>
+<li>Mimics GitHub Actions workflows locally</li>
+<li>Supports building, testing, and Docker operations</li>
+<li>Provides colored output for better readability</li>
+<li>Validates changes before pushing to remote</li>
+</ul>
+<h3 id="development-automation-scripts"><strong>Development Automation Scripts</strong></h3>
+<p>The <code>scripts/</code> directory contains a comprehensive set of automation tools for developers and CI/CD workflows:</p>
+<h4 id="setup-and-onboarding-scripts"><strong>Setup and Onboarding Scripts</strong></h4>
+<h5 id="setup-devps1--setup-devsh"><strong>setup-dev.ps1 / setup-dev.sh</strong></h5>
+<ul>
+<li><strong>Purpose</strong>: Automated development environment setup for new contributors</li>
+<li><strong>Features</strong>: Tool validation, dependency installation, configuration file setup</li>
+<li><strong>Usage</strong>: First-time developer onboarding and environment validation</li>
+<li><strong>Integration</strong>: Used by CI/CD for environment preparation</li>
+</ul>
+<h4 id="documentation-scripts"><strong>Documentation Scripts</strong></h4>
+<h5 id="docfx-genps1--docfx-gensh"><strong>docfx-gen.ps1 / docfx-gen.sh</strong></h5>
+<ul>
+<li><strong>Purpose</strong>: Generate API documentation using DocFX</li>
+<li><strong>Features</strong>: Build and serve documentation locally</li>
+<li><strong>Integration</strong>: Used by <code>deploy-docs.yml</code> workflow for documentation deployment</li>
+</ul>
+<h5 id="markdown-lintps1--markdown-lintsh"><strong>markdown-lint.ps1 / markdown-lint.sh</strong></h5>
+<ul>
+<li><strong>Purpose</strong>: Ensure markdown quality and consistency</li>
+<li><strong>Features</strong>: Lint checking with auto-fix capabilities</li>
+<li><strong>Integration</strong>: Used by <code>markdown-lint.yml</code> workflow for documentation quality</li>
+</ul>
+<h5 id="generate-project-structureps1--generate-project-structuresh"><strong>generate-project-structure.ps1 / generate-project-structure.sh</strong></h5>
+<ul>
+<li><strong>Purpose</strong>: Generate project structure documentation</li>
+<li><strong>Features</strong>: Tree view generation with smart filtering</li>
+<li><strong>Integration</strong>: Keeps project documentation up-to-date automatically</li>
+</ul>
+<h4 id="testing-and-validation-scripts"><strong>Testing and Validation Scripts</strong></h4>
+<h5 id="local-ci-testps1--local-ci-testsh"><strong>local-ci-test.ps1 / local-ci-test.sh</strong></h5>
+<ul>
+<li><strong>Purpose</strong>: Run complete CI/CD pipeline locally</li>
+<li><strong>Features</strong>: Build, test, documentation, and linting validation</li>
+<li><strong>Benefits</strong>: Pre-push validation to catch issues early</li>
+<li><strong>Parallel to</strong>: All GitHub Actions workflows</li>
+</ul>
+<h4 id="release-management-scripts"><strong>Release Management Scripts</strong></h4>
+<h5 id="create-releaseps1--create-releasesh"><strong>create-release.ps1 / create-release.sh</strong></h5>
+<ul>
+<li><strong>Purpose</strong>: Automated release process</li>
+<li><strong>Features</strong>: Version management, tagging, and artifact preparation</li>
+<li><strong>Integration</strong>: Supports the <code>create-release.yml</code> workflow</li>
+</ul>
+<h4 id="cross-platform-compatibility"><strong>Cross-Platform Compatibility</strong></h4>
+<p>All scripts are available in both PowerShell (<code>.ps1</code>) and Bash (<code>.sh</code>) versions:</p>
+<ul>
+<li><strong>Windows</strong>: PowerShell scripts with Windows PowerShell or PowerShell Core</li>
+<li><strong>Linux/macOS</strong>: Bash scripts or PowerShell Core</li>
+<li><strong>CI/CD</strong>: Platform-appropriate scripts selected automatically</li>
+<li><strong>Developer Choice</strong>: Use preferred shell environment</li>
+</ul>
+<h4 id="script-integration-with-workflows"><strong>Script Integration with Workflows</strong></h4>
+<pre><code class="lang-mermaid">%%{init: {
+  &quot;theme&quot;: &quot;base&quot;,
+  &quot;themeVariables&quot;: {
+    &quot;background&quot;: &quot;#FFFFFF&quot;,
+    &quot;primaryColor&quot;: &quot;#2E7D32&quot;,
+    &quot;primaryTextColor&quot;: &quot;#000000&quot;,
+    &quot;primaryBorderColor&quot;: &quot;#1B5E20&quot;,
+    &quot;lineColor&quot;: &quot;#424242&quot;,
+    &quot;sectionBkgColor&quot;: &quot;#E8F5E9&quot;,
+    &quot;altSectionBkgColor&quot;: &quot;#C8E6C9&quot;, 
+    &quot;gridColor&quot;: &quot;#E0E0E0&quot;,
+    &quot;secondaryColor&quot;: &quot;#1976D2&quot;,
+    &quot;tertiaryColor&quot;: &quot;#7B1FA2&quot;,
+    &quot;cScale0&quot;: &quot;#FFFFFF&quot;,
+    &quot;cScale1&quot;: &quot;#F5F5F5&quot;,
+    &quot;cScale2&quot;: &quot;#E0E0E0&quot;,
+    &quot;cScale3&quot;: &quot;#9E9E9E&quot;,
+    &quot;cScale4&quot;: &quot;#000000&quot;,
+    &quot;clusterBkg&quot;: &quot;#F5F5F5&quot;,
+    &quot;clusterBorder&quot;: &quot;#757575&quot;
+  }
+}}%%
+graph TD
+    A[Developer Scripts] --&gt; B[Local Testing]
+    A --&gt; C[CI/CD Workflows]
+    
+    B --&gt; B1[setup-dev.ps1/sh]
+    B --&gt; B2[local-ci-test.ps1/sh]
+    B --&gt; B3[docfx-gen.ps1/sh]
+    B --&gt; B4[markdown-lint.ps1/sh]
+    
+    C --&gt; C1[deploy-docs.yml]
+    C --&gt; C2[markdown-lint.yml]
+    C --&gt; C3[jiro-kernel-ci.yml]
+    C --&gt; C4[create-release.yml]
+    
+    B1 --&gt; |Environment Setup| C3
+    B2 --&gt; |Local Validation| C3
+    B3 --&gt; |Documentation Build| C1
+    B4 --&gt; |Quality Check| C2
+</code></pre>
+<p>For detailed information about all available scripts, see <a href="scripts-reference.html">Scripts Reference</a>.</p>
+<h2 id="-workflow-integration-matrix">🔄 Workflow Integration Matrix</h2>
+<p>The following table shows how development scripts integrate with GitHub Actions workflows:</p>
+<table>
+<thead>
+<tr>
+<th>Script/Workflow</th>
+<th><code>jiro-kernel-ci.yml</code></th>
+<th><code>create-release.yml</code></th>
+<th><code>docker-build.yml</code></th>
+<th><code>jiro-kernel-security.yml</code></th>
+<th><code>markdown-lint.yml</code></th>
+<th><code>deploy-docs.yml</code></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>setup-dev.ps1</code> / <code>setup-dev.sh</code></td>
+<td>No</td>
+<td>No</td>
+<td>No</td>
+<td>No</td>
+<td>No</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>docfx-gen.ps1</code> / <code>docfx-gen.sh</code></td>
+<td>No</td>
+<td>No</td>
+<td>No</td>
+<td>No</td>
+<td>No</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td><code>markdown-lint.ps1</code> / <code>markdown-lint.sh</code></td>
+<td>No</td>
+<td>No</td>
+<td>No</td>
+<td>No</td>
+<td>Yes</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>generate-project-structure.ps1</code> / <code>generate-project-structure.sh</code></td>
+<td>No</td>
+<td>No</td>
+<td>No</td>
+<td>No</td>
+<td>No</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>local-ci-test.ps1</code> / <code>local-ci-test.sh</code></td>
+<td>Yes</td>
+<td>No</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td><code>create-release.ps1</code> / <code>create-release.sh</code></td>
+<td>No</td>
+<td>Yes</td>
+<td>No</td>
+<td>No</td>
+<td>No</td>
+<td>No</td>
+</tr>
+</tbody>
+</table>
+<p>This table summarizes the integration of development automation scripts with the various CI/CD workflows in the Jiro project. Scripts like <code>local-ci-test</code> are integral to multiple workflows for local testing, security scanning, and documentation generation. Other scripts, such as <code>create-release</code>, are specifically tied to release automation workflows. This modular approach allows for flexible and comprehensive automation coverage across the development lifecycle.</p>
+<table>
+<thead>
+<tr>
+<th>Script</th>
+<th>GitHub Workflow</th>
+<th>Purpose</th>
+<th>Integration Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>setup-dev.ps1/.sh</code></td>
+<td>Environment Setup</td>
+<td>Developer onboarding</td>
+<td>Manual/CI preparation</td>
+</tr>
+<tr>
+<td><code>local-ci-test.ps1/.sh</code></td>
+<td>All workflows</td>
+<td>Local validation</td>
+<td>Developer testing</td>
+</tr>
+<tr>
+<td><code>docfx-gen.ps1/.sh</code></td>
+<td><code>deploy-docs.yml</code></td>
+<td>Documentation build</td>
+<td>Automated deployment</td>
+</tr>
+<tr>
+<td><code>markdown-lint.ps1/.sh</code></td>
+<td><code>markdown-lint.yml</code></td>
+<td>Quality assurance</td>
+<td>Automated validation</td>
+</tr>
+<tr>
+<td><code>generate-project-structure.ps1/.sh</code></td>
+<td>Manual/Scheduled</td>
+<td>Documentation update</td>
+<td>Manual/Automated</td>
+</tr>
+<tr>
+<td><code>create-release.ps1/.sh</code></td>
+<td><code>create-release.yml</code></td>
+<td>Release management</td>
+<td>Manual/Triggered</td>
+</tr>
+</tbody>
+</table>
+
+</article>
+
+        <div class="contribution d-print-none">
+          <a href="https://github.com/HueByte/Jiro/blob/main/dev/#L1" class="edit-link">Edit this page</a>
+        </div>
+
+        <div class="next-article d-print-none border-top" id="nextArticle"></div>
+
+      </div>
+
+      <div class="affix">
+        <nav id="affix"></nav>
+      </div>
+    </main>
+
+    <div class="container-xxl search-results" id="search-results"></div>
+
+    <footer class="border-top text-secondary">
+      <div class="container-xxl">
+        <div class="flex-fill">
+          <div class="footer-custom"><div class="footer-inner d-flex justify-content-between align-items-center"><div class="footer-text">Made with <strong>💖</strong> By HueByte</div><div class="footer-links"><a href="https://github.com/HueByte/Jiro" class="footer-link" target="_blank"><i class="fab fa-github"></i>GitHub</a><a href="#" class="footer-link scroll-to-top" onclick="scrollToTop()"><i class="fas fa-arrow-up"></i>Top</a></div></div></div><script>function scrollToTop(){window.scrollTo({top:0,behavior:'smooth'});}</script>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>

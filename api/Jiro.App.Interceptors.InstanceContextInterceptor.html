@@ -1,0 +1,482 @@
+﻿<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+      <title>Class InstanceContextInterceptor | Jiro Documentation </title>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <meta name="title" content="Class InstanceContextInterceptor | Jiro Documentation ">
+      
+      <meta name="description" content="gRPC interceptor that sets the InstanceContext based on request metadata.">
+      <link rel="icon" href="../assets/Jiro-Icon.png">
+      <link rel="stylesheet" href="../public/docfx.min.css">
+      <link rel="stylesheet" href="../public/main.css">
+      <meta name="docfx:navrel" content="../toc.html">
+      <meta name="docfx:tocrel" content="toc.html">
+      
+      <meta name="docfx:rel" content="../">
+      
+      
+      <meta name="docfx:docurl" content="https://github.com/HueByte/Jiro/new/main/apiSpec/new?filename=Jiro_App_Interceptors_InstanceContextInterceptor.md&amp;value=---%0Auid%3A%20Jiro.App.Interceptors.InstanceContextInterceptor%0Asummary%3A%20&#39;*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax&#39;%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">
+      <meta name="loc:inThisArticle" content="In this article">
+      <meta name="loc:searchResultsCount" content="{count} results for &quot;{query}&quot;">
+      <meta name="loc:searchNoResults" content="No results for &quot;{query}&quot;">
+      <meta name="loc:tocFilter" content="Filter by title">
+      <meta name="loc:nextArticle" content="Next">
+      <meta name="loc:prevArticle" content="Previous">
+      <meta name="loc:themeLight" content="Light">
+      <meta name="loc:themeDark" content="Dark">
+      <meta name="loc:themeAuto" content="Auto">
+      <meta name="loc:changeTheme" content="Change theme">
+      <meta name="loc:copy" content="Copy">
+      <meta name="loc:downloadPdf" content="Download PDF">
+  </head>
+
+  <script type="module" src="./../public/docfx.min.js"></script>
+
+  <script>
+    const theme = localStorage.getItem('theme') || 'auto'
+    document.documentElement.setAttribute('data-bs-theme', theme === 'auto' ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : theme)
+  </script>
+
+
+  <body class="tex2jax_ignore" data-layout="" data-yaml-mime="ManagedReference">
+    <header class="bg-body border-bottom">
+      <nav id="autocollapse" class="navbar navbar-expand-md" role="navigation">
+        <div class="container-xxl flex-nowrap">
+          <a class="navbar-brand" href="../index.html">
+            <img id="logo" class="svg" src="../assets/Jiro-Icon.png" alt="Jiro - AI Assistant">
+            Jiro - AI Assistant
+          </a>
+          <button class="btn btn-lg d-md-none border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navpanel" aria-controls="navpanel" aria-expanded="false" aria-label="Toggle navigation">
+            <i class="bi bi-three-dots"></i>
+          </button>
+          <div class="collapse navbar-collapse" id="navpanel">
+            <div id="navbar">
+              <form class="search" role="search" id="search">
+                <i class="bi bi-search"></i>
+                <input class="form-control" id="search-query" type="search" disabled="" placeholder="Search" autocomplete="off" aria-label="Search">
+              </form>
+            </div>
+          </div>
+        </div>
+      </nav>
+    </header>
+
+    <main class="container-xxl">
+      <div class="toc-offcanvas">
+        <div class="offcanvas-md offcanvas-start" tabindex="-1" id="tocOffcanvas" aria-labelledby="tocOffcanvasLabel">
+          <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="tocOffcanvasLabel">Table of Contents</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#tocOffcanvas" aria-label="Close"></button>
+          </div>
+          <div class="offcanvas-body">
+            <nav class="toc" id="toc"></nav>
+          </div>
+        </div>
+      </div>
+
+      <div class="content">
+        <div class="actionbar">
+          <button class="btn btn-lg border-0 d-md-none" style="margin-top: -.65em; margin-left: -.8em" type="button" data-bs-toggle="offcanvas" data-bs-target="#tocOffcanvas" aria-controls="tocOffcanvas" aria-expanded="false" aria-label="Show table of contents">
+            <i class="bi bi-list"></i>
+          </button>
+
+          <nav id="breadcrumb"></nav>
+        </div>
+
+        <article data-uid="Jiro.App.Interceptors.InstanceContextInterceptor">
+
+
+
+  <h1 id="Jiro_App_Interceptors_InstanceContextInterceptor" data-uid="Jiro.App.Interceptors.InstanceContextInterceptor" class="text-break">
+Class InstanceContextInterceptor  <a class="header-action link-secondary" title="View source" href="https://github.com/HueByte/Jiro/blob/main/src/Jiro.Kernel/Jiro.App/Interceptors/InstanceContextInterceptor.cs/#L14"><i class="bi bi-code-slash"></i></a>
+  </h1>
+
+  <div class="facts text-secondary">
+    <dl><dt>Namespace</dt><dd><a class="xref" href="Jiro.html">Jiro</a>.<a class="xref" href="Jiro.App.html">App</a>.<a class="xref" href="Jiro.App.Interceptors.html">Interceptors</a></dd></dl>
+  <dl><dt>Assembly</dt><dd>Jiro.App.dll</dd></dl>
+  </div>
+
+  <div class="markdown summary"><p>gRPC interceptor that sets the InstanceContext based on request metadata.</p>
+</div>
+  <div class="markdown conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public class InstanceContextInterceptor : Interceptor</code></pre>
+  </div>
+
+
+
+
+  <dl class="typelist inheritance">
+    <dt>Inheritance</dt>
+    <dd>
+      <div><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object">object</a></div>
+      <div><a class="xref" href="https://github.com/grpc/grpc-dotnet/blob/main/src/Grpc.Core.Api/Interceptors/Interceptor.cs">Interceptor</a></div>
+      <div><span class="xref">InstanceContextInterceptor</span></div>
+    </dd>
+  </dl>
+
+
+
+  <dl class="typelist inheritedMembers">
+    <dt>Inherited Members</dt>
+    <dd>
+    <div>
+      <a class="xref" href="https://github.com/grpc/grpc-dotnet/blob/main/src/Grpc.Core.Api/Interceptors/Interceptor.cs">Interceptor.BlockingUnaryCall&lt;TRequest, TResponse&gt;(TRequest, ClientInterceptorContext&lt;TRequest, TResponse&gt;, Interceptor.BlockingUnaryCallContinuation&lt;TRequest, TResponse&gt;)</a>
+    </div>
+    <div>
+      <a class="xref" href="https://github.com/grpc/grpc-dotnet/blob/main/src/Grpc.Core.Api/Interceptors/Interceptor.cs">Interceptor.AsyncUnaryCall&lt;TRequest, TResponse&gt;(TRequest, ClientInterceptorContext&lt;TRequest, TResponse&gt;, Interceptor.AsyncUnaryCallContinuation&lt;TRequest, TResponse&gt;)</a>
+    </div>
+    <div>
+      <a class="xref" href="https://github.com/grpc/grpc-dotnet/blob/main/src/Grpc.Core.Api/Interceptors/Interceptor.cs">Interceptor.AsyncServerStreamingCall&lt;TRequest, TResponse&gt;(TRequest, ClientInterceptorContext&lt;TRequest, TResponse&gt;, Interceptor.AsyncServerStreamingCallContinuation&lt;TRequest, TResponse&gt;)</a>
+    </div>
+    <div>
+      <a class="xref" href="https://github.com/grpc/grpc-dotnet/blob/main/src/Grpc.Core.Api/Interceptors/Interceptor.cs">Interceptor.AsyncClientStreamingCall&lt;TRequest, TResponse&gt;(ClientInterceptorContext&lt;TRequest, TResponse&gt;, Interceptor.AsyncClientStreamingCallContinuation&lt;TRequest, TResponse&gt;)</a>
+    </div>
+    <div>
+      <a class="xref" href="https://github.com/grpc/grpc-dotnet/blob/main/src/Grpc.Core.Api/Interceptors/Interceptor.cs">Interceptor.AsyncDuplexStreamingCall&lt;TRequest, TResponse&gt;(ClientInterceptorContext&lt;TRequest, TResponse&gt;, Interceptor.AsyncDuplexStreamingCallContinuation&lt;TRequest, TResponse&gt;)</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)">object.Equals(object)</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)">object.Equals(object, object)</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.gethashcode">object.GetHashCode()</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.gettype">object.GetType()</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.memberwiseclone">object.MemberwiseClone()</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.referenceequals">object.ReferenceEquals(object, object)</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.tostring">object.ToString()</a>
+    </div>
+  </dd></dl>
+
+
+
+
+
+
+  <h2 class="section" id="constructors">Constructors
+</h2>
+
+
+  <a id="Jiro_App_Interceptors_InstanceContextInterceptor__ctor_" data-uid="Jiro.App.Interceptors.InstanceContextInterceptor.#ctor*"></a>
+
+  <h3 id="Jiro_App_Interceptors_InstanceContextInterceptor__ctor_System_IServiceProvider_Microsoft_Extensions_Logging_ILogger_Jiro_App_Interceptors_InstanceContextInterceptor__" data-uid="Jiro.App.Interceptors.InstanceContextInterceptor.#ctor(System.IServiceProvider,Microsoft.Extensions.Logging.ILogger{Jiro.App.Interceptors.InstanceContextInterceptor})">
+  InstanceContextInterceptor(IServiceProvider, ILogger&lt;InstanceContextInterceptor&gt;)
+  <a class="header-action link-secondary" title="View source" href="https://github.com/HueByte/Jiro/blob/main/src/Jiro.Kernel/Jiro.App/Interceptors/InstanceContextInterceptor.cs/#L19"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public InstanceContextInterceptor(IServiceProvider serviceProvider, ILogger&lt;InstanceContextInterceptor&gt; logger)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>serviceProvider</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.iserviceprovider">IServiceProvider</a></dt>
+    <dd></dd>
+    <dt><code>logger</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1">ILogger</a>&lt;<a class="xref" href="Jiro.App.Interceptors.InstanceContextInterceptor.html">InstanceContextInterceptor</a>&gt;</dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+
+  <h2 class="section" id="methods">Methods
+</h2>
+
+
+  <a id="Jiro_App_Interceptors_InstanceContextInterceptor_ClientStreamingServerHandler_" data-uid="Jiro.App.Interceptors.InstanceContextInterceptor.ClientStreamingServerHandler*"></a>
+
+  <h3 id="Jiro_App_Interceptors_InstanceContextInterceptor_ClientStreamingServerHandler__2_Grpc_Core_IAsyncStreamReader___0__Grpc_Core_ServerCallContext_Grpc_Core_ClientStreamingServerMethod___0___1__" data-uid="Jiro.App.Interceptors.InstanceContextInterceptor.ClientStreamingServerHandler``2(Grpc.Core.IAsyncStreamReader{``0},Grpc.Core.ServerCallContext,Grpc.Core.ClientStreamingServerMethod{``0,``1})">
+  ClientStreamingServerHandler&lt;TRequest, TResponse&gt;(IAsyncStreamReader&lt;TRequest&gt;, ServerCallContext, ClientStreamingServerMethod&lt;TRequest, TResponse&gt;)
+  <a class="header-action link-secondary" title="View source" href="https://github.com/HueByte/Jiro/blob/main/src/Jiro.Kernel/Jiro.App/Interceptors/InstanceContextInterceptor.cs/#L34"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Server-side handler for intercepting client streaming call.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public override Task&lt;TResponse&gt; ClientStreamingServerHandler&lt;TRequest, TResponse&gt;(IAsyncStreamReader&lt;TRequest&gt; requestStream, ServerCallContext context, ClientStreamingServerMethod&lt;TRequest, TResponse&gt; continuation) where TRequest : class where TResponse : class</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>requestStream</code> <a class="xref" href="https://github.com/grpc/grpc-dotnet/blob/main/src/Grpc.Core.Api/IAsyncStreamReader.cs">IAsyncStreamReader</a>&lt;TRequest&gt;</dt>
+    <dd><p>The request stream of the incoming invocation.</p>
+</dd>
+    <dt><code>context</code> <a class="xref" href="https://github.com/grpc/grpc-dotnet/blob/main/src/Grpc.Core.Api/ServerCallContext.cs">ServerCallContext</a></dt>
+    <dd><p>An instance of <a class="xref" href="https://github.com/grpc/grpc-dotnet/blob/main/src/Grpc.Core.Api/ServerCallContext.cs">ServerCallContext</a> representing
+the context of the invocation.</p>
+</dd>
+    <dt><code>continuation</code> <a class="xref" href="https://github.com/grpc/grpc-dotnet/blob/main/src/Grpc.Core.Api/ServerMethods.cs">ClientStreamingServerMethod</a>&lt;TRequest, TResponse&gt;</dt>
+    <dd><p>A delegate that asynchronously proceeds with the invocation, calling
+the next interceptor in the chain, or the service request handler,
+in case of the last interceptor and return the response value of
+the RPC. The interceptor can choose to call it zero or more times
+at its discretion.</p>
+</dd>
+  </dl>
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1">Task</a>&lt;TResponse&gt;</dt>
+    <dd><p>A future representing the response value of the RPC. The interceptor
+can simply return the return value from the continuation intact,
+or an arbitrary response value as it sees fit. The interceptor has
+the ability to wrap or substitute the request stream when calling
+the continuation.</p>
+</dd>
+  </dl>
+
+  <h4 class="section">Type Parameters</h4>
+  <dl class="parameters">
+    <dt><code>TRequest</code></dt>
+    <dd><p>Request message type for this method.</p>
+</dd>
+    <dt><code>TResponse</code></dt>
+    <dd><p>Response message type for this method.</p>
+</dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+  <a id="Jiro_App_Interceptors_InstanceContextInterceptor_DuplexStreamingServerHandler_" data-uid="Jiro.App.Interceptors.InstanceContextInterceptor.DuplexStreamingServerHandler*"></a>
+
+  <h3 id="Jiro_App_Interceptors_InstanceContextInterceptor_DuplexStreamingServerHandler__2_Grpc_Core_IAsyncStreamReader___0__Grpc_Core_IServerStreamWriter___1__Grpc_Core_ServerCallContext_Grpc_Core_DuplexStreamingServerMethod___0___1__" data-uid="Jiro.App.Interceptors.InstanceContextInterceptor.DuplexStreamingServerHandler``2(Grpc.Core.IAsyncStreamReader{``0},Grpc.Core.IServerStreamWriter{``1},Grpc.Core.ServerCallContext,Grpc.Core.DuplexStreamingServerMethod{``0,``1})">
+  DuplexStreamingServerHandler&lt;TRequest, TResponse&gt;(IAsyncStreamReader&lt;TRequest&gt;, IServerStreamWriter&lt;TResponse&gt;, ServerCallContext, DuplexStreamingServerMethod&lt;TRequest, TResponse&gt;)
+  <a class="header-action link-secondary" title="View source" href="https://github.com/HueByte/Jiro/blob/main/src/Jiro.Kernel/Jiro.App/Interceptors/InstanceContextInterceptor.cs/#L53"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Server-side handler for intercepting bidirectional streaming calls.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public override Task DuplexStreamingServerHandler&lt;TRequest, TResponse&gt;(IAsyncStreamReader&lt;TRequest&gt; requestStream, IServerStreamWriter&lt;TResponse&gt; responseStream, ServerCallContext context, DuplexStreamingServerMethod&lt;TRequest, TResponse&gt; continuation) where TRequest : class where TResponse : class</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>requestStream</code> <a class="xref" href="https://github.com/grpc/grpc-dotnet/blob/main/src/Grpc.Core.Api/IAsyncStreamReader.cs">IAsyncStreamReader</a>&lt;TRequest&gt;</dt>
+    <dd><p>The request stream of the incoming invocation.</p>
+</dd>
+    <dt><code>responseStream</code> <a class="xref" href="https://github.com/grpc/grpc-dotnet/blob/main/src/Grpc.Core.Api/IServerStreamWriter.cs">IServerStreamWriter</a>&lt;TResponse&gt;</dt>
+    <dd><p>The response stream of the incoming invocation.</p>
+</dd>
+    <dt><code>context</code> <a class="xref" href="https://github.com/grpc/grpc-dotnet/blob/main/src/Grpc.Core.Api/ServerCallContext.cs">ServerCallContext</a></dt>
+    <dd><p>An instance of <a class="xref" href="https://github.com/grpc/grpc-dotnet/blob/main/src/Grpc.Core.Api/ServerCallContext.cs">ServerCallContext</a> representing
+the context of the invocation.</p>
+</dd>
+    <dt><code>continuation</code> <a class="xref" href="https://github.com/grpc/grpc-dotnet/blob/main/src/Grpc.Core.Api/ServerMethods.cs">DuplexStreamingServerMethod</a>&lt;TRequest, TResponse&gt;</dt>
+    <dd><p>A delegate that asynchronously proceeds with the invocation, calling
+the next interceptor in the chain, or the service request handler,
+in case of the last interceptor and the interceptor can choose to
+call it zero or more times at its discretion. The interceptor has
+the ability to wrap or substitute the request and response streams
+when calling the continuation.</p>
+</dd>
+  </dl>
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.threading.tasks.task">Task</a></dt>
+    <dd></dd>
+  </dl>
+
+  <h4 class="section">Type Parameters</h4>
+  <dl class="parameters">
+    <dt><code>TRequest</code></dt>
+    <dd><p>Request message type for this method.</p>
+</dd>
+    <dt><code>TResponse</code></dt>
+    <dd><p>Response message type for this method.</p>
+</dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+  <a id="Jiro_App_Interceptors_InstanceContextInterceptor_ServerStreamingServerHandler_" data-uid="Jiro.App.Interceptors.InstanceContextInterceptor.ServerStreamingServerHandler*"></a>
+
+  <h3 id="Jiro_App_Interceptors_InstanceContextInterceptor_ServerStreamingServerHandler__2___0_Grpc_Core_IServerStreamWriter___1__Grpc_Core_ServerCallContext_Grpc_Core_ServerStreamingServerMethod___0___1__" data-uid="Jiro.App.Interceptors.InstanceContextInterceptor.ServerStreamingServerHandler``2(``0,Grpc.Core.IServerStreamWriter{``1},Grpc.Core.ServerCallContext,Grpc.Core.ServerStreamingServerMethod{``0,``1})">
+  ServerStreamingServerHandler&lt;TRequest, TResponse&gt;(TRequest, IServerStreamWriter&lt;TResponse&gt;, ServerCallContext, ServerStreamingServerMethod&lt;TRequest, TResponse&gt;)
+  <a class="header-action link-secondary" title="View source" href="https://github.com/HueByte/Jiro/blob/main/src/Jiro.Kernel/Jiro.App/Interceptors/InstanceContextInterceptor.cs/#L43"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Server-side handler for intercepting server streaming call.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public override Task ServerStreamingServerHandler&lt;TRequest, TResponse&gt;(TRequest request, IServerStreamWriter&lt;TResponse&gt; responseStream, ServerCallContext context, ServerStreamingServerMethod&lt;TRequest, TResponse&gt; continuation) where TRequest : class where TResponse : class</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>request</code> <span class="xref">TRequest</span></dt>
+    <dd><p>The request value of the incoming invocation.</p>
+</dd>
+    <dt><code>responseStream</code> <a class="xref" href="https://github.com/grpc/grpc-dotnet/blob/main/src/Grpc.Core.Api/IServerStreamWriter.cs">IServerStreamWriter</a>&lt;TResponse&gt;</dt>
+    <dd><p>The response stream of the incoming invocation.</p>
+</dd>
+    <dt><code>context</code> <a class="xref" href="https://github.com/grpc/grpc-dotnet/blob/main/src/Grpc.Core.Api/ServerCallContext.cs">ServerCallContext</a></dt>
+    <dd><p>An instance of <a class="xref" href="https://github.com/grpc/grpc-dotnet/blob/main/src/Grpc.Core.Api/ServerCallContext.cs">ServerCallContext</a> representing
+the context of the invocation.</p>
+</dd>
+    <dt><code>continuation</code> <a class="xref" href="https://github.com/grpc/grpc-dotnet/blob/main/src/Grpc.Core.Api/ServerMethods.cs">ServerStreamingServerMethod</a>&lt;TRequest, TResponse&gt;</dt>
+    <dd><p>A delegate that asynchronously proceeds with the invocation, calling
+the next interceptor in the chain, or the service request handler,
+in case of the last interceptor and the interceptor can choose to
+call it zero or more times at its discretion. The interceptor has
+the ability to wrap or substitute the request value and the response stream
+when calling the continuation.</p>
+</dd>
+  </dl>
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.threading.tasks.task">Task</a></dt>
+    <dd></dd>
+  </dl>
+
+  <h4 class="section">Type Parameters</h4>
+  <dl class="parameters">
+    <dt><code>TRequest</code></dt>
+    <dd><p>Request message type for this method.</p>
+</dd>
+    <dt><code>TResponse</code></dt>
+    <dd><p>Response message type for this method.</p>
+</dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+  <a id="Jiro_App_Interceptors_InstanceContextInterceptor_UnaryServerHandler_" data-uid="Jiro.App.Interceptors.InstanceContextInterceptor.UnaryServerHandler*"></a>
+
+  <h3 id="Jiro_App_Interceptors_InstanceContextInterceptor_UnaryServerHandler__2___0_Grpc_Core_ServerCallContext_Grpc_Core_UnaryServerMethod___0___1__" data-uid="Jiro.App.Interceptors.InstanceContextInterceptor.UnaryServerHandler``2(``0,Grpc.Core.ServerCallContext,Grpc.Core.UnaryServerMethod{``0,``1})">
+  UnaryServerHandler&lt;TRequest, TResponse&gt;(TRequest, ServerCallContext, UnaryServerMethod&lt;TRequest, TResponse&gt;)
+  <a class="header-action link-secondary" title="View source" href="https://github.com/HueByte/Jiro/blob/main/src/Jiro.Kernel/Jiro.App/Interceptors/InstanceContextInterceptor.cs/#L25"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Server-side handler for intercepting and incoming unary call.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public override Task&lt;TResponse&gt; UnaryServerHandler&lt;TRequest, TResponse&gt;(TRequest request, ServerCallContext context, UnaryServerMethod&lt;TRequest, TResponse&gt; continuation) where TRequest : class where TResponse : class</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>request</code> <span class="xref">TRequest</span></dt>
+    <dd><p>The request value of the incoming invocation.</p>
+</dd>
+    <dt><code>context</code> <a class="xref" href="https://github.com/grpc/grpc-dotnet/blob/main/src/Grpc.Core.Api/ServerCallContext.cs">ServerCallContext</a></dt>
+    <dd><p>An instance of <a class="xref" href="https://github.com/grpc/grpc-dotnet/blob/main/src/Grpc.Core.Api/ServerCallContext.cs">ServerCallContext</a> representing
+the context of the invocation.</p>
+</dd>
+    <dt><code>continuation</code> <a class="xref" href="https://github.com/grpc/grpc-dotnet/blob/main/src/Grpc.Core.Api/ServerMethods.cs">UnaryServerMethod</a>&lt;TRequest, TResponse&gt;</dt>
+    <dd><p>A delegate that asynchronously proceeds with the invocation, calling
+the next interceptor in the chain, or the service request handler,
+in case of the last interceptor and return the response value of
+the RPC. The interceptor can choose to call it zero or more times
+at its discretion.</p>
+</dd>
+  </dl>
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1">Task</a>&lt;TResponse&gt;</dt>
+    <dd><p>A future representing the response value of the RPC. The interceptor
+can simply return the return value from the continuation intact,
+or an arbitrary response value as it sees fit.</p>
+</dd>
+  </dl>
+
+  <h4 class="section">Type Parameters</h4>
+  <dl class="parameters">
+    <dt><code>TRequest</code></dt>
+    <dd><p>Request message type for this method.</p>
+</dd>
+    <dt><code>TResponse</code></dt>
+    <dd><p>Response message type for this method.</p>
+</dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+</article>
+
+        <div class="contribution d-print-none">
+          <a href="https://github.com/HueByte/Jiro/blob/main/src/Jiro.Kernel/Jiro.App/Interceptors/InstanceContextInterceptor.cs/#L14" class="edit-link">Edit this page</a>
+        </div>
+
+
+      </div>
+
+      <div class="affix">
+        <nav id="affix"></nav>
+      </div>
+    </main>
+
+    <div class="container-xxl search-results" id="search-results"></div>
+
+    <footer class="border-top text-secondary">
+      <div class="container-xxl">
+        <div class="flex-fill">
+          <div class="footer-custom"><div class="footer-inner d-flex justify-content-between align-items-center"><div class="footer-text">Made with <strong>💖</strong> By HueByte</div><div class="footer-links"><a href="https://github.com/HueByte/Jiro" class="footer-link" target="_blank"><i class="fab fa-github"></i>GitHub</a><a href="#" class="footer-link scroll-to-top" onclick="scrollToTop()"><i class="fas fa-arrow-up"></i>Top</a></div></div></div><script>function scrollToTop(){window.scrollTo({top:0,behavior:'smooth'});}</script>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>

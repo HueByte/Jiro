@@ -1,0 +1,2453 @@
+﻿<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+      <title>Class ColorScheme | Jiro Documentation </title>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <meta name="title" content="Class ColorScheme | Jiro Documentation ">
+      
+      <meta name="description" content="Represents a comprehensive color scheme configuration for theming the application interface.">
+      <link rel="icon" href="../assets/Jiro-Icon.png">
+      <link rel="stylesheet" href="../public/docfx.min.css">
+      <link rel="stylesheet" href="../public/main.css">
+      <meta name="docfx:navrel" content="../toc.html">
+      <meta name="docfx:tocrel" content="toc.html">
+      
+      <meta name="docfx:rel" content="../">
+      
+      
+      <meta name="docfx:docurl" content="https://github.com/HueByte/Jiro/new/main/apiSpec/new?filename=Jiro_Core_Services_System_Models_ColorScheme.md&amp;value=---%0Auid%3A%20Jiro.Core.Services.System.Models.ColorScheme%0Asummary%3A%20&#39;*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax&#39;%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">
+      <meta name="loc:inThisArticle" content="In this article">
+      <meta name="loc:searchResultsCount" content="{count} results for &quot;{query}&quot;">
+      <meta name="loc:searchNoResults" content="No results for &quot;{query}&quot;">
+      <meta name="loc:tocFilter" content="Filter by title">
+      <meta name="loc:nextArticle" content="Next">
+      <meta name="loc:prevArticle" content="Previous">
+      <meta name="loc:themeLight" content="Light">
+      <meta name="loc:themeDark" content="Dark">
+      <meta name="loc:themeAuto" content="Auto">
+      <meta name="loc:changeTheme" content="Change theme">
+      <meta name="loc:copy" content="Copy">
+      <meta name="loc:downloadPdf" content="Download PDF">
+  </head>
+
+  <script type="module" src="./../public/docfx.min.js"></script>
+
+  <script>
+    const theme = localStorage.getItem('theme') || 'auto'
+    document.documentElement.setAttribute('data-bs-theme', theme === 'auto' ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : theme)
+  </script>
+
+
+  <body class="tex2jax_ignore" data-layout="" data-yaml-mime="ManagedReference">
+    <header class="bg-body border-bottom">
+      <nav id="autocollapse" class="navbar navbar-expand-md" role="navigation">
+        <div class="container-xxl flex-nowrap">
+          <a class="navbar-brand" href="../index.html">
+            <img id="logo" class="svg" src="../assets/Jiro-Icon.png" alt="Jiro - AI Assistant">
+            Jiro - AI Assistant
+          </a>
+          <button class="btn btn-lg d-md-none border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navpanel" aria-controls="navpanel" aria-expanded="false" aria-label="Toggle navigation">
+            <i class="bi bi-three-dots"></i>
+          </button>
+          <div class="collapse navbar-collapse" id="navpanel">
+            <div id="navbar">
+              <form class="search" role="search" id="search">
+                <i class="bi bi-search"></i>
+                <input class="form-control" id="search-query" type="search" disabled="" placeholder="Search" autocomplete="off" aria-label="Search">
+              </form>
+            </div>
+          </div>
+        </div>
+      </nav>
+    </header>
+
+    <main class="container-xxl">
+      <div class="toc-offcanvas">
+        <div class="offcanvas-md offcanvas-start" tabindex="-1" id="tocOffcanvas" aria-labelledby="tocOffcanvasLabel">
+          <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="tocOffcanvasLabel">Table of Contents</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#tocOffcanvas" aria-label="Close"></button>
+          </div>
+          <div class="offcanvas-body">
+            <nav class="toc" id="toc"></nav>
+          </div>
+        </div>
+      </div>
+
+      <div class="content">
+        <div class="actionbar">
+          <button class="btn btn-lg border-0 d-md-none" style="margin-top: -.65em; margin-left: -.8em" type="button" data-bs-toggle="offcanvas" data-bs-target="#tocOffcanvas" aria-controls="tocOffcanvas" aria-expanded="false" aria-label="Show table of contents">
+            <i class="bi bi-list"></i>
+          </button>
+
+          <nav id="breadcrumb"></nav>
+        </div>
+
+        <article data-uid="Jiro.Core.Services.System.Models.ColorScheme">
+
+
+
+  <h1 id="Jiro_Core_Services_System_Models_ColorScheme" data-uid="Jiro.Core.Services.System.Models.ColorScheme" class="text-break">
+Class ColorScheme  <a class="header-action link-secondary" title="View source" href="https://github.com/HueByte/Jiro/blob/main/src/Jiro.Kernel/Jiro.Core/Services/System/Models/ColorScheme.cs/#L6"><i class="bi bi-code-slash"></i></a>
+  </h1>
+
+  <div class="facts text-secondary">
+    <dl><dt>Namespace</dt><dd><a class="xref" href="Jiro.html">Jiro</a>.<a class="xref" href="Jiro.Core.html">Core</a>.<a class="xref" href="Jiro.Core.Services.html">Services</a>.<a class="xref" href="Jiro.Core.Services.System.html">System</a>.<a class="xref" href="Jiro.Core.Services.System.Models.html">Models</a></dd></dl>
+  <dl><dt>Assembly</dt><dd>Jiro.Core.dll</dd></dl>
+  </div>
+
+  <div class="markdown summary"><p>Represents a comprehensive color scheme configuration for theming the application interface.</p>
+</div>
+  <div class="markdown conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public class ColorScheme</code></pre>
+  </div>
+
+
+
+
+  <dl class="typelist inheritance">
+    <dt>Inheritance</dt>
+    <dd>
+      <div><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object">object</a></div>
+      <div><span class="xref">ColorScheme</span></div>
+    </dd>
+  </dl>
+
+
+
+  <dl class="typelist inheritedMembers">
+    <dt>Inherited Members</dt>
+    <dd>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)">object.Equals(object)</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)">object.Equals(object, object)</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.gethashcode">object.GetHashCode()</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.gettype">object.GetType()</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.memberwiseclone">object.MemberwiseClone()</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.referenceequals">object.ReferenceEquals(object, object)</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.tostring">object.ToString()</a>
+    </div>
+  </dd></dl>
+
+
+
+
+
+
+  <h2 class="section" id="properties">Properties
+</h2>
+
+
+  <a id="Jiro_Core_Services_System_Models_ColorScheme_Accent_" data-uid="Jiro.Core.Services.System.Models.ColorScheme.Accent*"></a>
+
+  <h3 id="Jiro_Core_Services_System_Models_ColorScheme_Accent" data-uid="Jiro.Core.Services.System.Models.ColorScheme.Accent">
+  Accent
+  <a class="header-action link-secondary" title="View source" href="https://github.com/HueByte/Jiro/blob/main/src/Jiro.Kernel/Jiro.Core/Services/System/Models/ColorScheme.cs/#L260"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Gets or sets the accent color for highlights and special emphasis.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public string Accent { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="Jiro_Core_Services_System_Models_ColorScheme_AccentHover_" data-uid="Jiro.Core.Services.System.Models.ColorScheme.AccentHover*"></a>
+
+  <h3 id="Jiro_Core_Services_System_Models_ColorScheme_AccentHover" data-uid="Jiro.Core.Services.System.Models.ColorScheme.AccentHover">
+  AccentHover
+  <a class="header-action link-secondary" title="View source" href="https://github.com/HueByte/Jiro/blob/main/src/Jiro.Kernel/Jiro.Core/Services/System/Models/ColorScheme.cs/#L265"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Gets or sets the accent hover color for interactive accent elements.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public string AccentHover { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="Jiro_Core_Services_System_Models_ColorScheme_AccentLight_" data-uid="Jiro.Core.Services.System.Models.ColorScheme.AccentLight*"></a>
+
+  <h3 id="Jiro_Core_Services_System_Models_ColorScheme_AccentLight" data-uid="Jiro.Core.Services.System.Models.ColorScheme.AccentLight">
+  AccentLight
+  <a class="header-action link-secondary" title="View source" href="https://github.com/HueByte/Jiro/blob/main/src/Jiro.Kernel/Jiro.Core/Services/System/Models/ColorScheme.cs/#L270"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Gets or sets the light variant of the accent color for subtle emphasis.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public string AccentLight { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="Jiro_Core_Services_System_Models_ColorScheme_Background_" data-uid="Jiro.Core.Services.System.Models.ColorScheme.Background*"></a>
+
+  <h3 id="Jiro_Core_Services_System_Models_ColorScheme_Background" data-uid="Jiro.Core.Services.System.Models.ColorScheme.Background">
+  Background
+  <a class="header-action link-secondary" title="View source" href="https://github.com/HueByte/Jiro/blob/main/src/Jiro.Kernel/Jiro.Core/Services/System/Models/ColorScheme.cs/#L27"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Gets or sets the primary background color for the main application areas.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public string Background { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="Jiro_Core_Services_System_Models_ColorScheme_BackgroundElevated_" data-uid="Jiro.Core.Services.System.Models.ColorScheme.BackgroundElevated*"></a>
+
+  <h3 id="Jiro_Core_Services_System_Models_ColorScheme_BackgroundElevated" data-uid="Jiro.Core.Services.System.Models.ColorScheme.BackgroundElevated">
+  BackgroundElevated
+  <a class="header-action link-secondary" title="View source" href="https://github.com/HueByte/Jiro/blob/main/src/Jiro.Kernel/Jiro.Core/Services/System/Models/ColorScheme.cs/#L42"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Gets or sets the elevated background color for modals, dropdowns, and floating elements.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public string BackgroundElevated { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="Jiro_Core_Services_System_Models_ColorScheme_BackgroundSecondary_" data-uid="Jiro.Core.Services.System.Models.ColorScheme.BackgroundSecondary*"></a>
+
+  <h3 id="Jiro_Core_Services_System_Models_ColorScheme_BackgroundSecondary" data-uid="Jiro.Core.Services.System.Models.ColorScheme.BackgroundSecondary">
+  BackgroundSecondary
+  <a class="header-action link-secondary" title="View source" href="https://github.com/HueByte/Jiro/blob/main/src/Jiro.Kernel/Jiro.Core/Services/System/Models/ColorScheme.cs/#L32"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Gets or sets the secondary background color for content areas and sidebars.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public string BackgroundSecondary { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="Jiro_Core_Services_System_Models_ColorScheme_BackgroundTertiary_" data-uid="Jiro.Core.Services.System.Models.ColorScheme.BackgroundTertiary*"></a>
+
+  <h3 id="Jiro_Core_Services_System_Models_ColorScheme_BackgroundTertiary" data-uid="Jiro.Core.Services.System.Models.ColorScheme.BackgroundTertiary">
+  BackgroundTertiary
+  <a class="header-action link-secondary" title="View source" href="https://github.com/HueByte/Jiro/blob/main/src/Jiro.Kernel/Jiro.Core/Services/System/Models/ColorScheme.cs/#L37"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Gets or sets the tertiary background color for subtle sections and panels.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public string BackgroundTertiary { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="Jiro_Core_Services_System_Models_ColorScheme_Black_" data-uid="Jiro.Core.Services.System.Models.ColorScheme.Black*"></a>
+
+  <h3 id="Jiro_Core_Services_System_Models_ColorScheme_Black" data-uid="Jiro.Core.Services.System.Models.ColorScheme.Black">
+  Black
+  <a class="header-action link-secondary" title="View source" href="https://github.com/HueByte/Jiro/blob/main/src/Jiro.Kernel/Jiro.Core/Services/System/Models/ColorScheme.cs/#L21"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Gets or sets the black color value.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public string Black { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="Jiro_Core_Services_System_Models_ColorScheme_Border_" data-uid="Jiro.Core.Services.System.Models.ColorScheme.Border*"></a>
+
+  <h3 id="Jiro_Core_Services_System_Models_ColorScheme_Border" data-uid="Jiro.Core.Services.System.Models.ColorScheme.Border">
+  Border
+  <a class="header-action link-secondary" title="View source" href="https://github.com/HueByte/Jiro/blob/main/src/Jiro.Kernel/Jiro.Core/Services/System/Models/ColorScheme.cs/#L95"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Gets or sets the primary border color for form elements and dividers.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public string Border { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="Jiro_Core_Services_System_Models_ColorScheme_BorderFocus_" data-uid="Jiro.Core.Services.System.Models.ColorScheme.BorderFocus*"></a>
+
+  <h3 id="Jiro_Core_Services_System_Models_ColorScheme_BorderFocus" data-uid="Jiro.Core.Services.System.Models.ColorScheme.BorderFocus">
+  BorderFocus
+  <a class="header-action link-secondary" title="View source" href="https://github.com/HueByte/Jiro/blob/main/src/Jiro.Kernel/Jiro.Core/Services/System/Models/ColorScheme.cs/#L105"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Gets or sets the border focus color for focused form inputs and interactive elements.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public string BorderFocus { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="Jiro_Core_Services_System_Models_ColorScheme_BorderHover_" data-uid="Jiro.Core.Services.System.Models.ColorScheme.BorderHover*"></a>
+
+  <h3 id="Jiro_Core_Services_System_Models_ColorScheme_BorderHover" data-uid="Jiro.Core.Services.System.Models.ColorScheme.BorderHover">
+  BorderHover
+  <a class="header-action link-secondary" title="View source" href="https://github.com/HueByte/Jiro/blob/main/src/Jiro.Kernel/Jiro.Core/Services/System/Models/ColorScheme.cs/#L110"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Gets or sets the border hover color for interactive elements on hover.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public string BorderHover { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="Jiro_Core_Services_System_Models_ColorScheme_BorderSecondary_" data-uid="Jiro.Core.Services.System.Models.ColorScheme.BorderSecondary*"></a>
+
+  <h3 id="Jiro_Core_Services_System_Models_ColorScheme_BorderSecondary" data-uid="Jiro.Core.Services.System.Models.ColorScheme.BorderSecondary">
+  BorderSecondary
+  <a class="header-action link-secondary" title="View source" href="https://github.com/HueByte/Jiro/blob/main/src/Jiro.Kernel/Jiro.Core/Services/System/Models/ColorScheme.cs/#L100"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Gets or sets the secondary border color for subtle separators and outlines.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public string BorderSecondary { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="Jiro_Core_Services_System_Models_ColorScheme_ButtonDanger_" data-uid="Jiro.Core.Services.System.Models.ColorScheme.ButtonDanger*"></a>
+
+  <h3 id="Jiro_Core_Services_System_Models_ColorScheme_ButtonDanger" data-uid="Jiro.Core.Services.System.Models.ColorScheme.ButtonDanger">
+  ButtonDanger
+  <a class="header-action link-secondary" title="View source" href="https://github.com/HueByte/Jiro/blob/main/src/Jiro.Kernel/Jiro.Core/Services/System/Models/ColorScheme.cs/#L177"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Gets or sets the danger button color for destructive actions.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public string ButtonDanger { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="Jiro_Core_Services_System_Models_ColorScheme_ButtonDangerActive_" data-uid="Jiro.Core.Services.System.Models.ColorScheme.ButtonDangerActive*"></a>
+
+  <h3 id="Jiro_Core_Services_System_Models_ColorScheme_ButtonDangerActive" data-uid="Jiro.Core.Services.System.Models.ColorScheme.ButtonDangerActive">
+  ButtonDangerActive
+  <a class="header-action link-secondary" title="View source" href="https://github.com/HueByte/Jiro/blob/main/src/Jiro.Kernel/Jiro.Core/Services/System/Models/ColorScheme.cs/#L187"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Gets or sets the danger button active color for destructive action pressed state.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public string ButtonDangerActive { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="Jiro_Core_Services_System_Models_ColorScheme_ButtonDangerHover_" data-uid="Jiro.Core.Services.System.Models.ColorScheme.ButtonDangerHover*"></a>
+
+  <h3 id="Jiro_Core_Services_System_Models_ColorScheme_ButtonDangerHover" data-uid="Jiro.Core.Services.System.Models.ColorScheme.ButtonDangerHover">
+  ButtonDangerHover
+  <a class="header-action link-secondary" title="View source" href="https://github.com/HueByte/Jiro/blob/main/src/Jiro.Kernel/Jiro.Core/Services/System/Models/ColorScheme.cs/#L182"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Gets or sets the danger button hover color for destructive action feedback.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public string ButtonDangerHover { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="Jiro_Core_Services_System_Models_ColorScheme_ButtonPrimary_" data-uid="Jiro.Core.Services.System.Models.ColorScheme.ButtonPrimary*"></a>
+
+  <h3 id="Jiro_Core_Services_System_Models_ColorScheme_ButtonPrimary" data-uid="Jiro.Core.Services.System.Models.ColorScheme.ButtonPrimary">
+  ButtonPrimary
+  <a class="header-action link-secondary" title="View source" href="https://github.com/HueByte/Jiro/blob/main/src/Jiro.Kernel/Jiro.Core/Services/System/Models/ColorScheme.cs/#L147"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Gets or sets the primary button color for main action buttons.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public string ButtonPrimary { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="Jiro_Core_Services_System_Models_ColorScheme_ButtonPrimaryActive_" data-uid="Jiro.Core.Services.System.Models.ColorScheme.ButtonPrimaryActive*"></a>
+
+  <h3 id="Jiro_Core_Services_System_Models_ColorScheme_ButtonPrimaryActive" data-uid="Jiro.Core.Services.System.Models.ColorScheme.ButtonPrimaryActive">
+  ButtonPrimaryActive
+  <a class="header-action link-secondary" title="View source" href="https://github.com/HueByte/Jiro/blob/main/src/Jiro.Kernel/Jiro.Core/Services/System/Models/ColorScheme.cs/#L157"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Gets or sets the primary button active color for pressed state.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public string ButtonPrimaryActive { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="Jiro_Core_Services_System_Models_ColorScheme_ButtonPrimaryHover_" data-uid="Jiro.Core.Services.System.Models.ColorScheme.ButtonPrimaryHover*"></a>
+
+  <h3 id="Jiro_Core_Services_System_Models_ColorScheme_ButtonPrimaryHover" data-uid="Jiro.Core.Services.System.Models.ColorScheme.ButtonPrimaryHover">
+  ButtonPrimaryHover
+  <a class="header-action link-secondary" title="View source" href="https://github.com/HueByte/Jiro/blob/main/src/Jiro.Kernel/Jiro.Core/Services/System/Models/ColorScheme.cs/#L152"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Gets or sets the primary button hover color for interactive feedback.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public string ButtonPrimaryHover { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="Jiro_Core_Services_System_Models_ColorScheme_ButtonSecondary_" data-uid="Jiro.Core.Services.System.Models.ColorScheme.ButtonSecondary*"></a>
+
+  <h3 id="Jiro_Core_Services_System_Models_ColorScheme_ButtonSecondary" data-uid="Jiro.Core.Services.System.Models.ColorScheme.ButtonSecondary">
+  ButtonSecondary
+  <a class="header-action link-secondary" title="View source" href="https://github.com/HueByte/Jiro/blob/main/src/Jiro.Kernel/Jiro.Core/Services/System/Models/ColorScheme.cs/#L162"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Gets or sets the secondary button color for alternative actions.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public string ButtonSecondary { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="Jiro_Core_Services_System_Models_ColorScheme_ButtonSecondaryActive_" data-uid="Jiro.Core.Services.System.Models.ColorScheme.ButtonSecondaryActive*"></a>
+
+  <h3 id="Jiro_Core_Services_System_Models_ColorScheme_ButtonSecondaryActive" data-uid="Jiro.Core.Services.System.Models.ColorScheme.ButtonSecondaryActive">
+  ButtonSecondaryActive
+  <a class="header-action link-secondary" title="View source" href="https://github.com/HueByte/Jiro/blob/main/src/Jiro.Kernel/Jiro.Core/Services/System/Models/ColorScheme.cs/#L172"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Gets or sets the secondary button active color for pressed state.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public string ButtonSecondaryActive { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="Jiro_Core_Services_System_Models_ColorScheme_ButtonSecondaryHover_" data-uid="Jiro.Core.Services.System.Models.ColorScheme.ButtonSecondaryHover*"></a>
+
+  <h3 id="Jiro_Core_Services_System_Models_ColorScheme_ButtonSecondaryHover" data-uid="Jiro.Core.Services.System.Models.ColorScheme.ButtonSecondaryHover">
+  ButtonSecondaryHover
+  <a class="header-action link-secondary" title="View source" href="https://github.com/HueByte/Jiro/blob/main/src/Jiro.Kernel/Jiro.Core/Services/System/Models/ColorScheme.cs/#L167"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Gets or sets the secondary button hover color for interactive feedback.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public string ButtonSecondaryHover { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="Jiro_Core_Services_System_Models_ColorScheme_ButtonSuccess_" data-uid="Jiro.Core.Services.System.Models.ColorScheme.ButtonSuccess*"></a>
+
+  <h3 id="Jiro_Core_Services_System_Models_ColorScheme_ButtonSuccess" data-uid="Jiro.Core.Services.System.Models.ColorScheme.ButtonSuccess">
+  ButtonSuccess
+  <a class="header-action link-secondary" title="View source" href="https://github.com/HueByte/Jiro/blob/main/src/Jiro.Kernel/Jiro.Core/Services/System/Models/ColorScheme.cs/#L192"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Gets or sets the success button color for positive actions.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public string ButtonSuccess { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="Jiro_Core_Services_System_Models_ColorScheme_ButtonSuccessActive_" data-uid="Jiro.Core.Services.System.Models.ColorScheme.ButtonSuccessActive*"></a>
+
+  <h3 id="Jiro_Core_Services_System_Models_ColorScheme_ButtonSuccessActive" data-uid="Jiro.Core.Services.System.Models.ColorScheme.ButtonSuccessActive">
+  ButtonSuccessActive
+  <a class="header-action link-secondary" title="View source" href="https://github.com/HueByte/Jiro/blob/main/src/Jiro.Kernel/Jiro.Core/Services/System/Models/ColorScheme.cs/#L202"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Gets or sets the success button active color for positive action pressed state.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public string ButtonSuccessActive { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="Jiro_Core_Services_System_Models_ColorScheme_ButtonSuccessHover_" data-uid="Jiro.Core.Services.System.Models.ColorScheme.ButtonSuccessHover*"></a>
+
+  <h3 id="Jiro_Core_Services_System_Models_ColorScheme_ButtonSuccessHover" data-uid="Jiro.Core.Services.System.Models.ColorScheme.ButtonSuccessHover">
+  ButtonSuccessHover
+  <a class="header-action link-secondary" title="View source" href="https://github.com/HueByte/Jiro/blob/main/src/Jiro.Kernel/Jiro.Core/Services/System/Models/ColorScheme.cs/#L197"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Gets or sets the success button hover color for positive action feedback.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public string ButtonSuccessHover { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="Jiro_Core_Services_System_Models_ColorScheme_Container_" data-uid="Jiro.Core.Services.System.Models.ColorScheme.Container*"></a>
+
+  <h3 id="Jiro_Core_Services_System_Models_ColorScheme_Container" data-uid="Jiro.Core.Services.System.Models.ColorScheme.Container">
+  Container
+  <a class="header-action link-secondary" title="View source" href="https://github.com/HueByte/Jiro/blob/main/src/Jiro.Kernel/Jiro.Core/Services/System/Models/ColorScheme.cs/#L69"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Gets or sets the primary container color for main content wrappers.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public string Container { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="Jiro_Core_Services_System_Models_ColorScheme_ContainerActive_" data-uid="Jiro.Core.Services.System.Models.ColorScheme.ContainerActive*"></a>
+
+  <h3 id="Jiro_Core_Services_System_Models_ColorScheme_ContainerActive" data-uid="Jiro.Core.Services.System.Models.ColorScheme.ContainerActive">
+  ContainerActive
+  <a class="header-action link-secondary" title="View source" href="https://github.com/HueByte/Jiro/blob/main/src/Jiro.Kernel/Jiro.Core/Services/System/Models/ColorScheme.cs/#L84"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Gets or sets the container active color for selected or pressed containers.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public string ContainerActive { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="Jiro_Core_Services_System_Models_ColorScheme_ContainerElevated_" data-uid="Jiro.Core.Services.System.Models.ColorScheme.ContainerElevated*"></a>
+
+  <h3 id="Jiro_Core_Services_System_Models_ColorScheme_ContainerElevated" data-uid="Jiro.Core.Services.System.Models.ColorScheme.ContainerElevated">
+  ContainerElevated
+  <a class="header-action link-secondary" title="View source" href="https://github.com/HueByte/Jiro/blob/main/src/Jiro.Kernel/Jiro.Core/Services/System/Models/ColorScheme.cs/#L89"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Gets or sets the elevated container color for raised content sections.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public string ContainerElevated { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="Jiro_Core_Services_System_Models_ColorScheme_ContainerHover_" data-uid="Jiro.Core.Services.System.Models.ColorScheme.ContainerHover*"></a>
+
+  <h3 id="Jiro_Core_Services_System_Models_ColorScheme_ContainerHover" data-uid="Jiro.Core.Services.System.Models.ColorScheme.ContainerHover">
+  ContainerHover
+  <a class="header-action link-secondary" title="View source" href="https://github.com/HueByte/Jiro/blob/main/src/Jiro.Kernel/Jiro.Core/Services/System/Models/ColorScheme.cs/#L79"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Gets or sets the container hover color for interactive containers.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public string ContainerHover { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="Jiro_Core_Services_System_Models_ColorScheme_ContainerSecondary_" data-uid="Jiro.Core.Services.System.Models.ColorScheme.ContainerSecondary*"></a>
+
+  <h3 id="Jiro_Core_Services_System_Models_ColorScheme_ContainerSecondary" data-uid="Jiro.Core.Services.System.Models.ColorScheme.ContainerSecondary">
+  ContainerSecondary
+  <a class="header-action link-secondary" title="View source" href="https://github.com/HueByte/Jiro/blob/main/src/Jiro.Kernel/Jiro.Core/Services/System/Models/ColorScheme.cs/#L74"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Gets or sets the secondary container color for nested content areas.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public string ContainerSecondary { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="Jiro_Core_Services_System_Models_ColorScheme_Error_" data-uid="Jiro.Core.Services.System.Models.ColorScheme.Error*"></a>
+
+  <h3 id="Jiro_Core_Services_System_Models_ColorScheme_Error" data-uid="Jiro.Core.Services.System.Models.ColorScheme.Error">
+  Error
+  <a class="header-action link-secondary" title="View source" href="https://github.com/HueByte/Jiro/blob/main/src/Jiro.Kernel/Jiro.Core/Services/System/Models/ColorScheme.cs/#L306"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Gets or sets the error color for negative states and failures.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public string Error { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="Jiro_Core_Services_System_Models_ColorScheme_ErrorDark_" data-uid="Jiro.Core.Services.System.Models.ColorScheme.ErrorDark*"></a>
+
+  <h3 id="Jiro_Core_Services_System_Models_ColorScheme_ErrorDark" data-uid="Jiro.Core.Services.System.Models.ColorScheme.ErrorDark">
+  ErrorDark
+  <a class="header-action link-secondary" title="View source" href="https://github.com/HueByte/Jiro/blob/main/src/Jiro.Kernel/Jiro.Core/Services/System/Models/ColorScheme.cs/#L316"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Gets or sets the dark error color for prominent error states.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public string ErrorDark { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="Jiro_Core_Services_System_Models_ColorScheme_ErrorLight_" data-uid="Jiro.Core.Services.System.Models.ColorScheme.ErrorLight*"></a>
+
+  <h3 id="Jiro_Core_Services_System_Models_ColorScheme_ErrorLight" data-uid="Jiro.Core.Services.System.Models.ColorScheme.ErrorLight">
+  ErrorLight
+  <a class="header-action link-secondary" title="View source" href="https://github.com/HueByte/Jiro/blob/main/src/Jiro.Kernel/Jiro.Core/Services/System/Models/ColorScheme.cs/#L311"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Gets or sets the light error color for subtle error indicators.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public string ErrorLight { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="Jiro_Core_Services_System_Models_ColorScheme_Highlight_" data-uid="Jiro.Core.Services.System.Models.ColorScheme.Highlight*"></a>
+
+  <h3 id="Jiro_Core_Services_System_Models_ColorScheme_Highlight" data-uid="Jiro.Core.Services.System.Models.ColorScheme.Highlight">
+  Highlight
+  <a class="header-action link-secondary" title="View source" href="https://github.com/HueByte/Jiro/blob/main/src/Jiro.Kernel/Jiro.Core/Services/System/Models/ColorScheme.cs/#L368"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Gets or sets the highlight color for emphasized content and search results.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public string Highlight { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="Jiro_Core_Services_System_Models_ColorScheme_HighlightSecondary_" data-uid="Jiro.Core.Services.System.Models.ColorScheme.HighlightSecondary*"></a>
+
+  <h3 id="Jiro_Core_Services_System_Models_ColorScheme_HighlightSecondary" data-uid="Jiro.Core.Services.System.Models.ColorScheme.HighlightSecondary">
+  HighlightSecondary
+  <a class="header-action link-secondary" title="View source" href="https://github.com/HueByte/Jiro/blob/main/src/Jiro.Kernel/Jiro.Core/Services/System/Models/ColorScheme.cs/#L373"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Gets or sets the secondary highlight color for alternative emphasis.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public string HighlightSecondary { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="Jiro_Core_Services_System_Models_ColorScheme_Info_" data-uid="Jiro.Core.Services.System.Models.ColorScheme.Info*"></a>
+
+  <h3 id="Jiro_Core_Services_System_Models_ColorScheme_Info" data-uid="Jiro.Core.Services.System.Models.ColorScheme.Info">
+  Info
+  <a class="header-action link-secondary" title="View source" href="https://github.com/HueByte/Jiro/blob/main/src/Jiro.Kernel/Jiro.Core/Services/System/Models/ColorScheme.cs/#L321"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Gets or sets the info color for informational states and messages.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public string Info { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="Jiro_Core_Services_System_Models_ColorScheme_InfoDark_" data-uid="Jiro.Core.Services.System.Models.ColorScheme.InfoDark*"></a>
+
+  <h3 id="Jiro_Core_Services_System_Models_ColorScheme_InfoDark" data-uid="Jiro.Core.Services.System.Models.ColorScheme.InfoDark">
+  InfoDark
+  <a class="header-action link-secondary" title="View source" href="https://github.com/HueByte/Jiro/blob/main/src/Jiro.Kernel/Jiro.Core/Services/System/Models/ColorScheme.cs/#L331"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Gets or sets the dark info color for prominent informational states.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public string InfoDark { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="Jiro_Core_Services_System_Models_ColorScheme_InfoLight_" data-uid="Jiro.Core.Services.System.Models.ColorScheme.InfoLight*"></a>
+
+  <h3 id="Jiro_Core_Services_System_Models_ColorScheme_InfoLight" data-uid="Jiro.Core.Services.System.Models.ColorScheme.InfoLight">
+  InfoLight
+  <a class="header-action link-secondary" title="View source" href="https://github.com/HueByte/Jiro/blob/main/src/Jiro.Kernel/Jiro.Core/Services/System/Models/ColorScheme.cs/#L326"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Gets or sets the light info color for subtle informational indicators.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public string InfoLight { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="Jiro_Core_Services_System_Models_ColorScheme_Link_" data-uid="Jiro.Core.Services.System.Models.ColorScheme.Link*"></a>
+
+  <h3 id="Jiro_Core_Services_System_Models_ColorScheme_Link" data-uid="Jiro.Core.Services.System.Models.ColorScheme.Link">
+  Link
+  <a class="header-action link-secondary" title="View source" href="https://github.com/HueByte/Jiro/blob/main/src/Jiro.Kernel/Jiro.Core/Services/System/Models/ColorScheme.cs/#L337"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Gets or sets the link color for hyperlinks and navigation elements.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public string Link { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="Jiro_Core_Services_System_Models_ColorScheme_LinkActive_" data-uid="Jiro.Core.Services.System.Models.ColorScheme.LinkActive*"></a>
+
+  <h3 id="Jiro_Core_Services_System_Models_ColorScheme_LinkActive" data-uid="Jiro.Core.Services.System.Models.ColorScheme.LinkActive">
+  LinkActive
+  <a class="header-action link-secondary" title="View source" href="https://github.com/HueByte/Jiro/blob/main/src/Jiro.Kernel/Jiro.Core/Services/System/Models/ColorScheme.cs/#L352"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Gets or sets the active link color for currently pressed links.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public string LinkActive { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="Jiro_Core_Services_System_Models_ColorScheme_LinkHover_" data-uid="Jiro.Core.Services.System.Models.ColorScheme.LinkHover*"></a>
+
+  <h3 id="Jiro_Core_Services_System_Models_ColorScheme_LinkHover" data-uid="Jiro.Core.Services.System.Models.ColorScheme.LinkHover">
+  LinkHover
+  <a class="header-action link-secondary" title="View source" href="https://github.com/HueByte/Jiro/blob/main/src/Jiro.Kernel/Jiro.Core/Services/System/Models/ColorScheme.cs/#L342"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Gets or sets the link hover color for interactive link feedback.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public string LinkHover { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="Jiro_Core_Services_System_Models_ColorScheme_LinkVisited_" data-uid="Jiro.Core.Services.System.Models.ColorScheme.LinkVisited*"></a>
+
+  <h3 id="Jiro_Core_Services_System_Models_ColorScheme_LinkVisited" data-uid="Jiro.Core.Services.System.Models.ColorScheme.LinkVisited">
+  LinkVisited
+  <a class="header-action link-secondary" title="View source" href="https://github.com/HueByte/Jiro/blob/main/src/Jiro.Kernel/Jiro.Core/Services/System/Models/ColorScheme.cs/#L347"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Gets or sets the visited link color for previously accessed links.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public string LinkVisited { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="Jiro_Core_Services_System_Models_ColorScheme_Primary_" data-uid="Jiro.Core.Services.System.Models.ColorScheme.Primary*"></a>
+
+  <h3 id="Jiro_Core_Services_System_Models_ColorScheme_Primary" data-uid="Jiro.Core.Services.System.Models.ColorScheme.Primary">
+  Primary
+  <a class="header-action link-secondary" title="View source" href="https://github.com/HueByte/Jiro/blob/main/src/Jiro.Kernel/Jiro.Core/Services/System/Models/ColorScheme.cs/#L208"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Gets or sets the primary brand color for the application theme.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public string Primary { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="Jiro_Core_Services_System_Models_ColorScheme_PrimaryActive_" data-uid="Jiro.Core.Services.System.Models.ColorScheme.PrimaryActive*"></a>
+
+  <h3 id="Jiro_Core_Services_System_Models_ColorScheme_PrimaryActive" data-uid="Jiro.Core.Services.System.Models.ColorScheme.PrimaryActive">
+  PrimaryActive
+  <a class="header-action link-secondary" title="View source" href="https://github.com/HueByte/Jiro/blob/main/src/Jiro.Kernel/Jiro.Core/Services/System/Models/ColorScheme.cs/#L218"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Gets or sets the primary brand active color for pressed brand elements.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public string PrimaryActive { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="Jiro_Core_Services_System_Models_ColorScheme_PrimaryDark_" data-uid="Jiro.Core.Services.System.Models.ColorScheme.PrimaryDark*"></a>
+
+  <h3 id="Jiro_Core_Services_System_Models_ColorScheme_PrimaryDark" data-uid="Jiro.Core.Services.System.Models.ColorScheme.PrimaryDark">
+  PrimaryDark
+  <a class="header-action link-secondary" title="View source" href="https://github.com/HueByte/Jiro/blob/main/src/Jiro.Kernel/Jiro.Core/Services/System/Models/ColorScheme.cs/#L228"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Gets or sets the dark variant of the primary brand color.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public string PrimaryDark { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="Jiro_Core_Services_System_Models_ColorScheme_PrimaryHover_" data-uid="Jiro.Core.Services.System.Models.ColorScheme.PrimaryHover*"></a>
+
+  <h3 id="Jiro_Core_Services_System_Models_ColorScheme_PrimaryHover" data-uid="Jiro.Core.Services.System.Models.ColorScheme.PrimaryHover">
+  PrimaryHover
+  <a class="header-action link-secondary" title="View source" href="https://github.com/HueByte/Jiro/blob/main/src/Jiro.Kernel/Jiro.Core/Services/System/Models/ColorScheme.cs/#L213"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Gets or sets the primary brand hover color for interactive brand elements.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public string PrimaryHover { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="Jiro_Core_Services_System_Models_ColorScheme_PrimaryLight_" data-uid="Jiro.Core.Services.System.Models.ColorScheme.PrimaryLight*"></a>
+
+  <h3 id="Jiro_Core_Services_System_Models_ColorScheme_PrimaryLight" data-uid="Jiro.Core.Services.System.Models.ColorScheme.PrimaryLight">
+  PrimaryLight
+  <a class="header-action link-secondary" title="View source" href="https://github.com/HueByte/Jiro/blob/main/src/Jiro.Kernel/Jiro.Core/Services/System/Models/ColorScheme.cs/#L223"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Gets or sets the light variant of the primary brand color.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public string PrimaryLight { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="Jiro_Core_Services_System_Models_ColorScheme_Secondary_" data-uid="Jiro.Core.Services.System.Models.ColorScheme.Secondary*"></a>
+
+  <h3 id="Jiro_Core_Services_System_Models_ColorScheme_Secondary" data-uid="Jiro.Core.Services.System.Models.ColorScheme.Secondary">
+  Secondary
+  <a class="header-action link-secondary" title="View source" href="https://github.com/HueByte/Jiro/blob/main/src/Jiro.Kernel/Jiro.Core/Services/System/Models/ColorScheme.cs/#L234"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Gets or sets the secondary brand color for complementary design elements.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public string Secondary { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="Jiro_Core_Services_System_Models_ColorScheme_SecondaryActive_" data-uid="Jiro.Core.Services.System.Models.ColorScheme.SecondaryActive*"></a>
+
+  <h3 id="Jiro_Core_Services_System_Models_ColorScheme_SecondaryActive" data-uid="Jiro.Core.Services.System.Models.ColorScheme.SecondaryActive">
+  SecondaryActive
+  <a class="header-action link-secondary" title="View source" href="https://github.com/HueByte/Jiro/blob/main/src/Jiro.Kernel/Jiro.Core/Services/System/Models/ColorScheme.cs/#L244"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Gets or sets the secondary brand active color for pressed elements.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public string SecondaryActive { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="Jiro_Core_Services_System_Models_ColorScheme_SecondaryDark_" data-uid="Jiro.Core.Services.System.Models.ColorScheme.SecondaryDark*"></a>
+
+  <h3 id="Jiro_Core_Services_System_Models_ColorScheme_SecondaryDark" data-uid="Jiro.Core.Services.System.Models.ColorScheme.SecondaryDark">
+  SecondaryDark
+  <a class="header-action link-secondary" title="View source" href="https://github.com/HueByte/Jiro/blob/main/src/Jiro.Kernel/Jiro.Core/Services/System/Models/ColorScheme.cs/#L254"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Gets or sets the dark variant of the secondary brand color.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public string SecondaryDark { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="Jiro_Core_Services_System_Models_ColorScheme_SecondaryHover_" data-uid="Jiro.Core.Services.System.Models.ColorScheme.SecondaryHover*"></a>
+
+  <h3 id="Jiro_Core_Services_System_Models_ColorScheme_SecondaryHover" data-uid="Jiro.Core.Services.System.Models.ColorScheme.SecondaryHover">
+  SecondaryHover
+  <a class="header-action link-secondary" title="View source" href="https://github.com/HueByte/Jiro/blob/main/src/Jiro.Kernel/Jiro.Core/Services/System/Models/ColorScheme.cs/#L239"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Gets or sets the secondary brand hover color for interactive elements.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public string SecondaryHover { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="Jiro_Core_Services_System_Models_ColorScheme_SecondaryLight_" data-uid="Jiro.Core.Services.System.Models.ColorScheme.SecondaryLight*"></a>
+
+  <h3 id="Jiro_Core_Services_System_Models_ColorScheme_SecondaryLight" data-uid="Jiro.Core.Services.System.Models.ColorScheme.SecondaryLight">
+  SecondaryLight
+  <a class="header-action link-secondary" title="View source" href="https://github.com/HueByte/Jiro/blob/main/src/Jiro.Kernel/Jiro.Core/Services/System/Models/ColorScheme.cs/#L249"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Gets or sets the light variant of the secondary brand color.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public string SecondaryLight { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="Jiro_Core_Services_System_Models_ColorScheme_Selection_" data-uid="Jiro.Core.Services.System.Models.ColorScheme.Selection*"></a>
+
+  <h3 id="Jiro_Core_Services_System_Models_ColorScheme_Selection" data-uid="Jiro.Core.Services.System.Models.ColorScheme.Selection">
+  Selection
+  <a class="header-action link-secondary" title="View source" href="https://github.com/HueByte/Jiro/blob/main/src/Jiro.Kernel/Jiro.Core/Services/System/Models/ColorScheme.cs/#L358"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Gets or sets the selection color for selected items and text.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public string Selection { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="Jiro_Core_Services_System_Models_ColorScheme_SelectionHover_" data-uid="Jiro.Core.Services.System.Models.ColorScheme.SelectionHover*"></a>
+
+  <h3 id="Jiro_Core_Services_System_Models_ColorScheme_SelectionHover" data-uid="Jiro.Core.Services.System.Models.ColorScheme.SelectionHover">
+  SelectionHover
+  <a class="header-action link-secondary" title="View source" href="https://github.com/HueByte/Jiro/blob/main/src/Jiro.Kernel/Jiro.Core/Services/System/Models/ColorScheme.cs/#L363"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Gets or sets the selection hover color for hovering over selectable items.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public string SelectionHover { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="Jiro_Core_Services_System_Models_ColorScheme_Success_" data-uid="Jiro.Core.Services.System.Models.ColorScheme.Success*"></a>
+
+  <h3 id="Jiro_Core_Services_System_Models_ColorScheme_Success" data-uid="Jiro.Core.Services.System.Models.ColorScheme.Success">
+  Success
+  <a class="header-action link-secondary" title="View source" href="https://github.com/HueByte/Jiro/blob/main/src/Jiro.Kernel/Jiro.Core/Services/System/Models/ColorScheme.cs/#L276"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Gets or sets the success color for positive states and confirmations.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public string Success { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="Jiro_Core_Services_System_Models_ColorScheme_SuccessDark_" data-uid="Jiro.Core.Services.System.Models.ColorScheme.SuccessDark*"></a>
+
+  <h3 id="Jiro_Core_Services_System_Models_ColorScheme_SuccessDark" data-uid="Jiro.Core.Services.System.Models.ColorScheme.SuccessDark">
+  SuccessDark
+  <a class="header-action link-secondary" title="View source" href="https://github.com/HueByte/Jiro/blob/main/src/Jiro.Kernel/Jiro.Core/Services/System/Models/ColorScheme.cs/#L286"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Gets or sets the dark success color for prominent positive states.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public string SuccessDark { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="Jiro_Core_Services_System_Models_ColorScheme_SuccessLight_" data-uid="Jiro.Core.Services.System.Models.ColorScheme.SuccessLight*"></a>
+
+  <h3 id="Jiro_Core_Services_System_Models_ColorScheme_SuccessLight" data-uid="Jiro.Core.Services.System.Models.ColorScheme.SuccessLight">
+  SuccessLight
+  <a class="header-action link-secondary" title="View source" href="https://github.com/HueByte/Jiro/blob/main/src/Jiro.Kernel/Jiro.Core/Services/System/Models/ColorScheme.cs/#L281"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Gets or sets the light success color for subtle positive indicators.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public string SuccessLight { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="Jiro_Core_Services_System_Models_ColorScheme_Surface_" data-uid="Jiro.Core.Services.System.Models.ColorScheme.Surface*"></a>
+
+  <h3 id="Jiro_Core_Services_System_Models_ColorScheme_Surface" data-uid="Jiro.Core.Services.System.Models.ColorScheme.Surface">
+  Surface
+  <a class="header-action link-secondary" title="View source" href="https://github.com/HueByte/Jiro/blob/main/src/Jiro.Kernel/Jiro.Core/Services/System/Models/ColorScheme.cs/#L48"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Gets or sets the primary surface color for cards and content containers.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public string Surface { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="Jiro_Core_Services_System_Models_ColorScheme_SurfaceElevated_" data-uid="Jiro.Core.Services.System.Models.ColorScheme.SurfaceElevated*"></a>
+
+  <h3 id="Jiro_Core_Services_System_Models_ColorScheme_SurfaceElevated" data-uid="Jiro.Core.Services.System.Models.ColorScheme.SurfaceElevated">
+  SurfaceElevated
+  <a class="header-action link-secondary" title="View source" href="https://github.com/HueByte/Jiro/blob/main/src/Jiro.Kernel/Jiro.Core/Services/System/Models/ColorScheme.cs/#L63"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Gets or sets the elevated surface color for tooltips and overlays.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public string SurfaceElevated { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="Jiro_Core_Services_System_Models_ColorScheme_SurfaceHover_" data-uid="Jiro.Core.Services.System.Models.ColorScheme.SurfaceHover*"></a>
+
+  <h3 id="Jiro_Core_Services_System_Models_ColorScheme_SurfaceHover" data-uid="Jiro.Core.Services.System.Models.ColorScheme.SurfaceHover">
+  SurfaceHover
+  <a class="header-action link-secondary" title="View source" href="https://github.com/HueByte/Jiro/blob/main/src/Jiro.Kernel/Jiro.Core/Services/System/Models/ColorScheme.cs/#L58"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Gets or sets the surface hover color for interactive surface elements.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public string SurfaceHover { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="Jiro_Core_Services_System_Models_ColorScheme_SurfaceSecondary_" data-uid="Jiro.Core.Services.System.Models.ColorScheme.SurfaceSecondary*"></a>
+
+  <h3 id="Jiro_Core_Services_System_Models_ColorScheme_SurfaceSecondary" data-uid="Jiro.Core.Services.System.Models.ColorScheme.SurfaceSecondary">
+  SurfaceSecondary
+  <a class="header-action link-secondary" title="View source" href="https://github.com/HueByte/Jiro/blob/main/src/Jiro.Kernel/Jiro.Core/Services/System/Models/ColorScheme.cs/#L53"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Gets or sets the secondary surface color for nested elements and sub-containers.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public string SurfaceSecondary { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="Jiro_Core_Services_System_Models_ColorScheme_TextDisabled_" data-uid="Jiro.Core.Services.System.Models.ColorScheme.TextDisabled*"></a>
+
+  <h3 id="Jiro_Core_Services_System_Models_ColorScheme_TextDisabled" data-uid="Jiro.Core.Services.System.Models.ColorScheme.TextDisabled">
+  TextDisabled
+  <a class="header-action link-secondary" title="View source" href="https://github.com/HueByte/Jiro/blob/main/src/Jiro.Kernel/Jiro.Core/Services/System/Models/ColorScheme.cs/#L131"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Gets or sets the disabled text color for inactive or unavailable content.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public string TextDisabled { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="Jiro_Core_Services_System_Models_ColorScheme_TextInverse_" data-uid="Jiro.Core.Services.System.Models.ColorScheme.TextInverse*"></a>
+
+  <h3 id="Jiro_Core_Services_System_Models_ColorScheme_TextInverse" data-uid="Jiro.Core.Services.System.Models.ColorScheme.TextInverse">
+  TextInverse
+  <a class="header-action link-secondary" title="View source" href="https://github.com/HueByte/Jiro/blob/main/src/Jiro.Kernel/Jiro.Core/Services/System/Models/ColorScheme.cs/#L136"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Gets or sets the inverse text color for text on dark backgrounds.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public string TextInverse { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="Jiro_Core_Services_System_Models_ColorScheme_TextMuted_" data-uid="Jiro.Core.Services.System.Models.ColorScheme.TextMuted*"></a>
+
+  <h3 id="Jiro_Core_Services_System_Models_ColorScheme_TextMuted" data-uid="Jiro.Core.Services.System.Models.ColorScheme.TextMuted">
+  TextMuted
+  <a class="header-action link-secondary" title="View source" href="https://github.com/HueByte/Jiro/blob/main/src/Jiro.Kernel/Jiro.Core/Services/System/Models/ColorScheme.cs/#L141"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Gets or sets the muted text color for placeholders and helper text.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public string TextMuted { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="Jiro_Core_Services_System_Models_ColorScheme_TextPrimary_" data-uid="Jiro.Core.Services.System.Models.ColorScheme.TextPrimary*"></a>
+
+  <h3 id="Jiro_Core_Services_System_Models_ColorScheme_TextPrimary" data-uid="Jiro.Core.Services.System.Models.ColorScheme.TextPrimary">
+  TextPrimary
+  <a class="header-action link-secondary" title="View source" href="https://github.com/HueByte/Jiro/blob/main/src/Jiro.Kernel/Jiro.Core/Services/System/Models/ColorScheme.cs/#L116"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Gets or sets the primary text color for main content and headings.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public string TextPrimary { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="Jiro_Core_Services_System_Models_ColorScheme_TextSecondary_" data-uid="Jiro.Core.Services.System.Models.ColorScheme.TextSecondary*"></a>
+
+  <h3 id="Jiro_Core_Services_System_Models_ColorScheme_TextSecondary" data-uid="Jiro.Core.Services.System.Models.ColorScheme.TextSecondary">
+  TextSecondary
+  <a class="header-action link-secondary" title="View source" href="https://github.com/HueByte/Jiro/blob/main/src/Jiro.Kernel/Jiro.Core/Services/System/Models/ColorScheme.cs/#L121"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Gets or sets the secondary text color for supporting content and descriptions.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public string TextSecondary { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="Jiro_Core_Services_System_Models_ColorScheme_TextTertiary_" data-uid="Jiro.Core.Services.System.Models.ColorScheme.TextTertiary*"></a>
+
+  <h3 id="Jiro_Core_Services_System_Models_ColorScheme_TextTertiary" data-uid="Jiro.Core.Services.System.Models.ColorScheme.TextTertiary">
+  TextTertiary
+  <a class="header-action link-secondary" title="View source" href="https://github.com/HueByte/Jiro/blob/main/src/Jiro.Kernel/Jiro.Core/Services/System/Models/ColorScheme.cs/#L126"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Gets or sets the tertiary text color for subtle hints and metadata.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public string TextTertiary { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="Jiro_Core_Services_System_Models_ColorScheme_Transparent_" data-uid="Jiro.Core.Services.System.Models.ColorScheme.Transparent*"></a>
+
+  <h3 id="Jiro_Core_Services_System_Models_ColorScheme_Transparent" data-uid="Jiro.Core.Services.System.Models.ColorScheme.Transparent">
+  Transparent
+  <a class="header-action link-secondary" title="View source" href="https://github.com/HueByte/Jiro/blob/main/src/Jiro.Kernel/Jiro.Core/Services/System/Models/ColorScheme.cs/#L11"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Gets or sets the transparent color value.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public string Transparent { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="Jiro_Core_Services_System_Models_ColorScheme_Warning_" data-uid="Jiro.Core.Services.System.Models.ColorScheme.Warning*"></a>
+
+  <h3 id="Jiro_Core_Services_System_Models_ColorScheme_Warning" data-uid="Jiro.Core.Services.System.Models.ColorScheme.Warning">
+  Warning
+  <a class="header-action link-secondary" title="View source" href="https://github.com/HueByte/Jiro/blob/main/src/Jiro.Kernel/Jiro.Core/Services/System/Models/ColorScheme.cs/#L291"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Gets or sets the warning color for cautionary states and alerts.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public string Warning { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="Jiro_Core_Services_System_Models_ColorScheme_WarningDark_" data-uid="Jiro.Core.Services.System.Models.ColorScheme.WarningDark*"></a>
+
+  <h3 id="Jiro_Core_Services_System_Models_ColorScheme_WarningDark" data-uid="Jiro.Core.Services.System.Models.ColorScheme.WarningDark">
+  WarningDark
+  <a class="header-action link-secondary" title="View source" href="https://github.com/HueByte/Jiro/blob/main/src/Jiro.Kernel/Jiro.Core/Services/System/Models/ColorScheme.cs/#L301"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Gets or sets the dark warning color for prominent warning states.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public string WarningDark { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="Jiro_Core_Services_System_Models_ColorScheme_WarningLight_" data-uid="Jiro.Core.Services.System.Models.ColorScheme.WarningLight*"></a>
+
+  <h3 id="Jiro_Core_Services_System_Models_ColorScheme_WarningLight" data-uid="Jiro.Core.Services.System.Models.ColorScheme.WarningLight">
+  WarningLight
+  <a class="header-action link-secondary" title="View source" href="https://github.com/HueByte/Jiro/blob/main/src/Jiro.Kernel/Jiro.Core/Services/System/Models/ColorScheme.cs/#L296"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Gets or sets the light warning color for subtle cautionary indicators.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public string WarningLight { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="Jiro_Core_Services_System_Models_ColorScheme_White_" data-uid="Jiro.Core.Services.System.Models.ColorScheme.White*"></a>
+
+  <h3 id="Jiro_Core_Services_System_Models_ColorScheme_White" data-uid="Jiro.Core.Services.System.Models.ColorScheme.White">
+  White
+  <a class="header-action link-secondary" title="View source" href="https://github.com/HueByte/Jiro/blob/main/src/Jiro.Kernel/Jiro.Core/Services/System/Models/ColorScheme.cs/#L16"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Gets or sets the white color value.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public string White { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+</article>
+
+        <div class="contribution d-print-none">
+          <a href="https://github.com/HueByte/Jiro/blob/main/src/Jiro.Kernel/Jiro.Core/Services/System/Models/ColorScheme.cs/#L6" class="edit-link">Edit this page</a>
+        </div>
+
+
+      </div>
+
+      <div class="affix">
+        <nav id="affix"></nav>
+      </div>
+    </main>
+
+    <div class="container-xxl search-results" id="search-results"></div>
+
+    <footer class="border-top text-secondary">
+      <div class="container-xxl">
+        <div class="flex-fill">
+          <div class="footer-custom"><div class="footer-inner d-flex justify-content-between align-items-center"><div class="footer-text">Made with <strong>💖</strong> By HueByte</div><div class="footer-links"><a href="https://github.com/HueByte/Jiro" class="footer-link" target="_blank"><i class="fab fa-github"></i>GitHub</a><a href="#" class="footer-link scroll-to-top" onclick="scrollToTop()"><i class="fas fa-arrow-up"></i>Top</a></div></div></div><script>function scrollToTop(){window.scrollTo({top:0,behavior:'smooth'});}</script>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>

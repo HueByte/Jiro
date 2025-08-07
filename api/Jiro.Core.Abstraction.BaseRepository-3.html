@@ -1,0 +1,656 @@
+﻿<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+      <title>Class BaseRepository&lt;TKeyType, TEntity, TContext&gt; | Jiro Documentation </title>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <meta name="title" content="Class BaseRepository&lt;TKeyType, TEntity, TContext&gt; | Jiro Documentation ">
+      
+      <meta name="description" content="Base repository implementation providing common data access operations.">
+      <link rel="icon" href="../assets/Jiro-Icon.png">
+      <link rel="stylesheet" href="../public/docfx.min.css">
+      <link rel="stylesheet" href="../public/main.css">
+      <meta name="docfx:navrel" content="../toc.html">
+      <meta name="docfx:tocrel" content="toc.html">
+      
+      <meta name="docfx:rel" content="../">
+      
+      
+      <meta name="docfx:docurl" content="https://github.com/HueByte/Jiro/new/main/apiSpec/new?filename=Jiro_Core_Abstraction_BaseRepository_3.md&amp;value=---%0Auid%3A%20Jiro.Core.Abstraction.BaseRepository%603%0Asummary%3A%20&#39;*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax&#39;%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">
+      <meta name="loc:inThisArticle" content="In this article">
+      <meta name="loc:searchResultsCount" content="{count} results for &quot;{query}&quot;">
+      <meta name="loc:searchNoResults" content="No results for &quot;{query}&quot;">
+      <meta name="loc:tocFilter" content="Filter by title">
+      <meta name="loc:nextArticle" content="Next">
+      <meta name="loc:prevArticle" content="Previous">
+      <meta name="loc:themeLight" content="Light">
+      <meta name="loc:themeDark" content="Dark">
+      <meta name="loc:themeAuto" content="Auto">
+      <meta name="loc:changeTheme" content="Change theme">
+      <meta name="loc:copy" content="Copy">
+      <meta name="loc:downloadPdf" content="Download PDF">
+  </head>
+
+  <script type="module" src="./../public/docfx.min.js"></script>
+
+  <script>
+    const theme = localStorage.getItem('theme') || 'auto'
+    document.documentElement.setAttribute('data-bs-theme', theme === 'auto' ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : theme)
+  </script>
+
+
+  <body class="tex2jax_ignore" data-layout="" data-yaml-mime="ManagedReference">
+    <header class="bg-body border-bottom">
+      <nav id="autocollapse" class="navbar navbar-expand-md" role="navigation">
+        <div class="container-xxl flex-nowrap">
+          <a class="navbar-brand" href="../index.html">
+            <img id="logo" class="svg" src="../assets/Jiro-Icon.png" alt="Jiro - AI Assistant">
+            Jiro - AI Assistant
+          </a>
+          <button class="btn btn-lg d-md-none border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navpanel" aria-controls="navpanel" aria-expanded="false" aria-label="Toggle navigation">
+            <i class="bi bi-three-dots"></i>
+          </button>
+          <div class="collapse navbar-collapse" id="navpanel">
+            <div id="navbar">
+              <form class="search" role="search" id="search">
+                <i class="bi bi-search"></i>
+                <input class="form-control" id="search-query" type="search" disabled="" placeholder="Search" autocomplete="off" aria-label="Search">
+              </form>
+            </div>
+          </div>
+        </div>
+      </nav>
+    </header>
+
+    <main class="container-xxl">
+      <div class="toc-offcanvas">
+        <div class="offcanvas-md offcanvas-start" tabindex="-1" id="tocOffcanvas" aria-labelledby="tocOffcanvasLabel">
+          <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="tocOffcanvasLabel">Table of Contents</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#tocOffcanvas" aria-label="Close"></button>
+          </div>
+          <div class="offcanvas-body">
+            <nav class="toc" id="toc"></nav>
+          </div>
+        </div>
+      </div>
+
+      <div class="content">
+        <div class="actionbar">
+          <button class="btn btn-lg border-0 d-md-none" style="margin-top: -.65em; margin-left: -.8em" type="button" data-bs-toggle="offcanvas" data-bs-target="#tocOffcanvas" aria-controls="tocOffcanvas" aria-expanded="false" aria-label="Show table of contents">
+            <i class="bi bi-list"></i>
+          </button>
+
+          <nav id="breadcrumb"></nav>
+        </div>
+
+        <article data-uid="Jiro.Core.Abstraction.BaseRepository`3">
+
+
+
+  <h1 id="Jiro_Core_Abstraction_BaseRepository_3" data-uid="Jiro.Core.Abstraction.BaseRepository`3" class="text-break">
+Class BaseRepository&lt;TKeyType, TEntity, TContext&gt;  <a class="header-action link-secondary" title="View source" href="https://github.com/HueByte/Jiro/blob/main/src/Jiro.Kernel/Jiro.Core/Abstraction/BaseRepository.cs/#L11"><i class="bi bi-code-slash"></i></a>
+  </h1>
+
+  <div class="facts text-secondary">
+    <dl><dt>Namespace</dt><dd><a class="xref" href="Jiro.html">Jiro</a>.<a class="xref" href="Jiro.Core.html">Core</a>.<a class="xref" href="Jiro.Core.Abstraction.html">Abstraction</a></dd></dl>
+  <dl><dt>Assembly</dt><dd>Jiro.Core.dll</dd></dl>
+  </div>
+
+  <div class="markdown summary"><p>Base repository implementation providing common data access operations.</p>
+</div>
+  <div class="markdown conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public class BaseRepository&lt;TKeyType, TEntity, TContext&gt; : IRepository&lt;TKeyType, TEntity&gt; where TKeyType : IConvertible where TEntity : DbModel&lt;TKeyType&gt;, new() where TContext : DbContext, new()</code></pre>
+  </div>
+
+
+
+  <h4 class="section">Type Parameters</h4>
+  <dl class="parameters">
+    <dt><code>TKeyType</code></dt>
+    <dd><p>The type of the entity's primary key.</p>
+</dd>
+    <dt><code>TEntity</code></dt>
+    <dd><p>The type of the entity.</p>
+</dd>
+    <dt><code>TContext</code></dt>
+    <dd><p>The type of the database context.</p>
+</dd>
+  </dl>
+
+  <dl class="typelist inheritance">
+    <dt>Inheritance</dt>
+    <dd>
+      <div><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object">object</a></div>
+      <div><span class="xref">BaseRepository&lt;TKeyType, TEntity, TContext&gt;</span></div>
+    </dd>
+  </dl>
+
+  <dl class="typelist implements">
+    <dt>Implements</dt>
+    <dd>
+      <div><a class="xref" href="Jiro.Core.Abstraction.IRepository-2.html">IRepository</a>&lt;TKeyType, TEntity&gt;</div>
+    </dd>
+  </dl>
+
+  <dl class="typelist derived">
+    <dt>Derived</dt>
+    <dd>
+      <div><a class="xref" href="Jiro.Infrastructure.Repositories.ChatSessionRepository.html">ChatSessionRepository</a></div>
+      <div><a class="xref" href="Jiro.Infrastructure.Repositories.MessageRepository.html">MessageRepository</a></div>
+    </dd>
+  </dl>
+
+  <dl class="typelist inheritedMembers">
+    <dt>Inherited Members</dt>
+    <dd>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)">object.Equals(object)</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)">object.Equals(object, object)</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.gethashcode">object.GetHashCode()</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.gettype">object.GetType()</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.memberwiseclone">object.MemberwiseClone()</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.referenceequals">object.ReferenceEquals(object, object)</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.tostring">object.ToString()</a>
+    </div>
+  </dd></dl>
+
+
+
+
+
+
+  <h2 class="section" id="constructors">Constructors
+</h2>
+
+
+  <a id="Jiro_Core_Abstraction_BaseRepository_3__ctor_" data-uid="Jiro.Core.Abstraction.BaseRepository`3.#ctor*"></a>
+
+  <h3 id="Jiro_Core_Abstraction_BaseRepository_3__ctor__2_" data-uid="Jiro.Core.Abstraction.BaseRepository`3.#ctor(`2)">
+  BaseRepository(TContext)
+  <a class="header-action link-secondary" title="View source" href="https://github.com/HueByte/Jiro/blob/main/src/Jiro.Kernel/Jiro.Core/Abstraction/BaseRepository.cs/#L25"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Initializes a new instance of the <a class="xref" href="Jiro.Core.Abstraction.BaseRepository-3.html">BaseRepository&lt;TKeyType, TEntity, TContext&gt;</a> class.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public BaseRepository(TContext context)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>context</code> <span class="xref">TContext</span></dt>
+    <dd><p>The database context.</p>
+</dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+
+  <h2 class="section" id="fields">Fields
+</h2>
+
+
+
+  <h3 id="Jiro_Core_Abstraction_BaseRepository_3__context" data-uid="Jiro.Core.Abstraction.BaseRepository`3._context">
+  _context
+  <a class="header-action link-secondary" title="View source" href="https://github.com/HueByte/Jiro/blob/main/src/Jiro.Kernel/Jiro.Core/Abstraction/BaseRepository.cs/#L19"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>The database context used for data access.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">protected readonly TContext _context</code></pre>
+  </div>
+
+
+
+
+  <h4 class="section">Field Value</h4>
+  <dl class="parameters">
+    <dt><span class="xref">TContext</span></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+  <h2 class="section" id="methods">Methods
+</h2>
+
+
+  <a id="Jiro_Core_Abstraction_BaseRepository_3_AddAsync_" data-uid="Jiro.Core.Abstraction.BaseRepository`3.AddAsync*"></a>
+
+  <h3 id="Jiro_Core_Abstraction_BaseRepository_3_AddAsync__1_" data-uid="Jiro.Core.Abstraction.BaseRepository`3.AddAsync(`1)">
+  AddAsync(TEntity?)
+  <a class="header-action link-secondary" title="View source" href="https://github.com/HueByte/Jiro/blob/main/src/Jiro.Kernel/Jiro.Core/Abstraction/BaseRepository.cs/#L35"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Adds a new entity to the repository.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public virtual Task&lt;bool&gt; AddAsync(TEntity? entity)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>entity</code> <span class="xref">TEntity</span></dt>
+    <dd><p>The entity to add.</p>
+</dd>
+  </dl>
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1">Task</a>&lt;<a class="xref" href="https://learn.microsoft.com/dotnet/api/system.boolean">bool</a>&gt;</dt>
+    <dd><p>True if the entity was added successfully, false otherwise.</p>
+</dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+  <a id="Jiro_Core_Abstraction_BaseRepository_3_AddRangeAsync_" data-uid="Jiro.Core.Abstraction.BaseRepository`3.AddRangeAsync*"></a>
+
+  <h3 id="Jiro_Core_Abstraction_BaseRepository_3_AddRangeAsync_System_Collections_Generic_IEnumerable__1__" data-uid="Jiro.Core.Abstraction.BaseRepository`3.AddRangeAsync(System.Collections.Generic.IEnumerable{`1})">
+  AddRangeAsync(IEnumerable&lt;TEntity&gt;)
+  <a class="header-action link-secondary" title="View source" href="https://github.com/HueByte/Jiro/blob/main/src/Jiro.Kernel/Jiro.Core/Abstraction/BaseRepository.cs/#L59"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Adds a collection of entities to the repository.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public virtual Task&lt;bool&gt; AddRangeAsync(IEnumerable&lt;TEntity&gt; entities)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>entities</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.collections.generic.ienumerable-1">IEnumerable</a>&lt;TEntity&gt;</dt>
+    <dd><p>The entities to add.</p>
+</dd>
+  </dl>
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1">Task</a>&lt;<a class="xref" href="https://learn.microsoft.com/dotnet/api/system.boolean">bool</a>&gt;</dt>
+    <dd><p>True if the entities were added successfully, false otherwise.</p>
+</dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+  <a id="Jiro_Core_Abstraction_BaseRepository_3_AsQueryable_" data-uid="Jiro.Core.Abstraction.BaseRepository`3.AsQueryable*"></a>
+
+  <h3 id="Jiro_Core_Abstraction_BaseRepository_3_AsQueryable" data-uid="Jiro.Core.Abstraction.BaseRepository`3.AsQueryable">
+  AsQueryable()
+  <a class="header-action link-secondary" title="View source" href="https://github.com/HueByte/Jiro/blob/main/src/Jiro.Kernel/Jiro.Core/Abstraction/BaseRepository.cs/#L75"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Gets an IQueryable for the entity set.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public virtual IQueryable&lt;TEntity&gt; AsQueryable()</code></pre>
+  </div>
+
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.linq.iqueryable-1">IQueryable</a>&lt;TEntity&gt;</dt>
+    <dd><p>An IQueryable of entities.</p>
+</dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+  <a id="Jiro_Core_Abstraction_BaseRepository_3_GetAsync_" data-uid="Jiro.Core.Abstraction.BaseRepository`3.GetAsync*"></a>
+
+  <h3 id="Jiro_Core_Abstraction_BaseRepository_3_GetAsync__0_" data-uid="Jiro.Core.Abstraction.BaseRepository`3.GetAsync(`0)">
+  GetAsync(TKeyType)
+  <a class="header-action link-secondary" title="View source" href="https://github.com/HueByte/Jiro/blob/main/src/Jiro.Kernel/Jiro.Core/Abstraction/BaseRepository.cs/#L85"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Gets an entity by its primary key.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public virtual Task&lt;TEntity?&gt; GetAsync(TKeyType id)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>id</code> <span class="xref">TKeyType</span></dt>
+    <dd><p>The primary key value.</p>
+</dd>
+  </dl>
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1">Task</a>&lt;TEntity&gt;</dt>
+    <dd><p>The entity if found, null otherwise.</p>
+</dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+  <a id="Jiro_Core_Abstraction_BaseRepository_3_RemoveAsync_" data-uid="Jiro.Core.Abstraction.BaseRepository`3.RemoveAsync*"></a>
+
+  <h3 id="Jiro_Core_Abstraction_BaseRepository_3_RemoveAsync__0_" data-uid="Jiro.Core.Abstraction.BaseRepository`3.RemoveAsync(`0)">
+  RemoveAsync(TKeyType)
+  <a class="header-action link-secondary" title="View source" href="https://github.com/HueByte/Jiro/blob/main/src/Jiro.Kernel/Jiro.Core/Abstraction/BaseRepository.cs/#L97"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Removes an entity by its primary key.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public virtual Task&lt;bool&gt; RemoveAsync(TKeyType id)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>id</code> <span class="xref">TKeyType</span></dt>
+    <dd><p>The primary key value.</p>
+</dd>
+  </dl>
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1">Task</a>&lt;<a class="xref" href="https://learn.microsoft.com/dotnet/api/system.boolean">bool</a>&gt;</dt>
+    <dd><p>True if the entity was removed successfully, false otherwise.</p>
+</dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+  <a id="Jiro_Core_Abstraction_BaseRepository_3_RemoveAsync_" data-uid="Jiro.Core.Abstraction.BaseRepository`3.RemoveAsync*"></a>
+
+  <h3 id="Jiro_Core_Abstraction_BaseRepository_3_RemoveAsync__1_" data-uid="Jiro.Core.Abstraction.BaseRepository`3.RemoveAsync(`1)">
+  RemoveAsync(TEntity?)
+  <a class="header-action link-secondary" title="View source" href="https://github.com/HueByte/Jiro/blob/main/src/Jiro.Kernel/Jiro.Core/Abstraction/BaseRepository.cs/#L123"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Removes an entity from the repository.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public virtual Task&lt;bool&gt; RemoveAsync(TEntity? entity)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>entity</code> <span class="xref">TEntity</span></dt>
+    <dd><p>The entity to remove.</p>
+</dd>
+  </dl>
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1">Task</a>&lt;<a class="xref" href="https://learn.microsoft.com/dotnet/api/system.boolean">bool</a>&gt;</dt>
+    <dd><p>True if the entity was removed successfully, false otherwise.</p>
+</dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+  <a id="Jiro_Core_Abstraction_BaseRepository_3_RemoveRangeAsync_" data-uid="Jiro.Core.Abstraction.BaseRepository`3.RemoveRangeAsync*"></a>
+
+  <h3 id="Jiro_Core_Abstraction_BaseRepository_3_RemoveRangeAsync_System_Collections_Generic_IEnumerable__1__" data-uid="Jiro.Core.Abstraction.BaseRepository`3.RemoveRangeAsync(System.Collections.Generic.IEnumerable{`1})">
+  RemoveRangeAsync(IEnumerable&lt;TEntity&gt;)
+  <a class="header-action link-secondary" title="View source" href="https://github.com/HueByte/Jiro/blob/main/src/Jiro.Kernel/Jiro.Core/Abstraction/BaseRepository.cs/#L187"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Removes a collection of entities from the repository.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public Task&lt;bool&gt; RemoveRangeAsync(IEnumerable&lt;TEntity&gt; entity)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>entity</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.collections.generic.ienumerable-1">IEnumerable</a>&lt;TEntity&gt;</dt>
+    <dd><p>The entities to remove.</p>
+</dd>
+  </dl>
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1">Task</a>&lt;<a class="xref" href="https://learn.microsoft.com/dotnet/api/system.boolean">bool</a>&gt;</dt>
+    <dd><p>True if the entities were removed successfully, false otherwise.</p>
+</dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+  <a id="Jiro_Core_Abstraction_BaseRepository_3_SaveChangesAsync_" data-uid="Jiro.Core.Abstraction.BaseRepository`3.SaveChangesAsync*"></a>
+
+  <h3 id="Jiro_Core_Abstraction_BaseRepository_3_SaveChangesAsync" data-uid="Jiro.Core.Abstraction.BaseRepository`3.SaveChangesAsync">
+  SaveChangesAsync()
+  <a class="header-action link-secondary" title="View source" href="https://github.com/HueByte/Jiro/blob/main/src/Jiro.Kernel/Jiro.Core/Abstraction/BaseRepository.cs/#L177"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Saves all pending changes to the database.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public virtual Task SaveChangesAsync()</code></pre>
+  </div>
+
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.threading.tasks.task">Task</a></dt>
+    <dd><p>A task representing the asynchronous save operation.</p>
+</dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+  <a id="Jiro_Core_Abstraction_BaseRepository_3_UpdateAsync_" data-uid="Jiro.Core.Abstraction.BaseRepository`3.UpdateAsync*"></a>
+
+  <h3 id="Jiro_Core_Abstraction_BaseRepository_3_UpdateAsync__1_" data-uid="Jiro.Core.Abstraction.BaseRepository`3.UpdateAsync(`1)">
+  UpdateAsync(TEntity?)
+  <a class="header-action link-secondary" title="View source" href="https://github.com/HueByte/Jiro/blob/main/src/Jiro.Kernel/Jiro.Core/Abstraction/BaseRepository.cs/#L147"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Updates an existing entity in the repository.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public virtual Task UpdateAsync(TEntity? entity)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>entity</code> <span class="xref">TEntity</span></dt>
+    <dd><p>The entity to update.</p>
+</dd>
+  </dl>
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.threading.tasks.task">Task</a></dt>
+    <dd><p>A task representing the asynchronous operation.</p>
+</dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+  <a id="Jiro_Core_Abstraction_BaseRepository_3_UpdateRange_" data-uid="Jiro.Core.Abstraction.BaseRepository`3.UpdateRange*"></a>
+
+  <h3 id="Jiro_Core_Abstraction_BaseRepository_3_UpdateRange_System_Collections_Generic_IEnumerable__1__" data-uid="Jiro.Core.Abstraction.BaseRepository`3.UpdateRange(System.Collections.Generic.IEnumerable{`1})">
+  UpdateRange(IEnumerable&lt;TEntity&gt;)
+  <a class="header-action link-secondary" title="View source" href="https://github.com/HueByte/Jiro/blob/main/src/Jiro.Kernel/Jiro.Core/Abstraction/BaseRepository.cs/#L164"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Updates a collection of entities in the repository.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public virtual Task UpdateRange(IEnumerable&lt;TEntity&gt; entities)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>entities</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.collections.generic.ienumerable-1">IEnumerable</a>&lt;TEntity&gt;</dt>
+    <dd><p>The entities to update.</p>
+</dd>
+  </dl>
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.threading.tasks.task">Task</a></dt>
+    <dd><p>A task representing the asynchronous operation.</p>
+</dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+
+</article>
+
+        <div class="contribution d-print-none">
+          <a href="https://github.com/HueByte/Jiro/blob/main/src/Jiro.Kernel/Jiro.Core/Abstraction/BaseRepository.cs/#L11" class="edit-link">Edit this page</a>
+        </div>
+
+
+      </div>
+
+      <div class="affix">
+        <nav id="affix"></nav>
+      </div>
+    </main>
+
+    <div class="container-xxl search-results" id="search-results"></div>
+
+    <footer class="border-top text-secondary">
+      <div class="container-xxl">
+        <div class="flex-fill">
+          <div class="footer-custom"><div class="footer-inner d-flex justify-content-between align-items-center"><div class="footer-text">Made with <strong>💖</strong> By HueByte</div><div class="footer-links"><a href="https://github.com/HueByte/Jiro" class="footer-link" target="_blank"><i class="fab fa-github"></i>GitHub</a><a href="#" class="footer-link scroll-to-top" onclick="scrollToTop()"><i class="fas fa-arrow-up"></i>Top</a></div></div></div><script>function scrollToTop(){window.scrollTo({top:0,behavior:'smooth'});}</script>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>

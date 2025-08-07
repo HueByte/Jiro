@@ -1,0 +1,278 @@
+﻿<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+      <title>&#128218; Jiro Documentation | Jiro Documentation </title>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <meta name="title" content="&#128218; Jiro Documentation | Jiro Documentation ">
+      
+      
+      <link rel="icon" href="../assets/Jiro-Icon.png">
+      <link rel="stylesheet" href="../public/docfx.min.css">
+      <link rel="stylesheet" href="../public/main.css">
+      <meta name="docfx:navrel" content="../toc.html">
+      <meta name="docfx:tocrel" content="toc.html">
+      
+      <meta name="docfx:rel" content="../">
+      
+      
+      <meta name="docfx:docurl" content="https://github.com/HueByte/Jiro/blob/main/dev/#L1">
+      <meta name="loc:inThisArticle" content="In this article">
+      <meta name="loc:searchResultsCount" content="{count} results for &quot;{query}&quot;">
+      <meta name="loc:searchNoResults" content="No results for &quot;{query}&quot;">
+      <meta name="loc:tocFilter" content="Filter by title">
+      <meta name="loc:nextArticle" content="Next">
+      <meta name="loc:prevArticle" content="Previous">
+      <meta name="loc:themeLight" content="Light">
+      <meta name="loc:themeDark" content="Dark">
+      <meta name="loc:themeAuto" content="Auto">
+      <meta name="loc:changeTheme" content="Change theme">
+      <meta name="loc:copy" content="Copy">
+      <meta name="loc:downloadPdf" content="Download PDF">
+  </head>
+
+  <script type="module" src="./../public/docfx.min.js"></script>
+
+  <script>
+    const theme = localStorage.getItem('theme') || 'auto'
+    document.documentElement.setAttribute('data-bs-theme', theme === 'auto' ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : theme)
+  </script>
+
+
+  <body class="tex2jax_ignore" data-layout="" data-yaml-mime="">
+    <header class="bg-body border-bottom">
+      <nav id="autocollapse" class="navbar navbar-expand-md" role="navigation">
+        <div class="container-xxl flex-nowrap">
+          <a class="navbar-brand" href="../index.html">
+            <img id="logo" class="svg" src="../assets/Jiro-Icon.png" alt="Jiro - AI Assistant">
+            Jiro - AI Assistant
+          </a>
+          <button class="btn btn-lg d-md-none border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navpanel" aria-controls="navpanel" aria-expanded="false" aria-label="Toggle navigation">
+            <i class="bi bi-three-dots"></i>
+          </button>
+          <div class="collapse navbar-collapse" id="navpanel">
+            <div id="navbar">
+              <form class="search" role="search" id="search">
+                <i class="bi bi-search"></i>
+                <input class="form-control" id="search-query" type="search" disabled="" placeholder="Search" autocomplete="off" aria-label="Search">
+              </form>
+            </div>
+          </div>
+        </div>
+      </nav>
+    </header>
+
+    <main class="container-xxl">
+      <div class="toc-offcanvas">
+        <div class="offcanvas-md offcanvas-start" tabindex="-1" id="tocOffcanvas" aria-labelledby="tocOffcanvasLabel">
+          <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="tocOffcanvasLabel">Table of Contents</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#tocOffcanvas" aria-label="Close"></button>
+          </div>
+          <div class="offcanvas-body">
+            <nav class="toc" id="toc"></nav>
+          </div>
+        </div>
+      </div>
+
+      <div class="content">
+        <div class="actionbar">
+          <button class="btn btn-lg border-0 d-md-none" style="margin-top: -.65em; margin-left: -.8em" type="button" data-bs-toggle="offcanvas" data-bs-target="#tocOffcanvas" aria-controls="tocOffcanvas" aria-expanded="false" aria-label="Show table of contents">
+            <i class="bi bi-list"></i>
+          </button>
+
+          <nav id="breadcrumb"></nav>
+        </div>
+
+        <article data-uid="">
+<h1 id="-jiro-documentation">📚 Jiro Documentation</h1>
+
+<p>Welcome to the Jiro AI Assistant documentation. This is the official documentation for <strong>v1.0.0-beta &quot;Kakushin&quot;</strong> - a production-ready AI-powered personal assistant with real-time cloud integration, extensible plugin system, and enterprise-grade deployment capabilities.</p>
+<blockquote>
+<p><strong>Latest Release</strong>: v1.0.0-beta (2025-01-08) - <a href="changelog/v1.0.0-beta.html">View Changelog</a></p>
+</blockquote>
+<h2 id="-structure">🏗️ Structure</h2>
+<pre><code class="lang-text">/
+├── docs/                    # Documentation content
+│   ├── api-index.md        # API documentation index
+│   ├── project-description.md  # Project overview
+│   ├── project-structure.md   # Auto-generated project structure
+│   ├── user-guide.md       # End-user documentation
+│   ├── workflow-pipelines.md  # CI/CD workflows
+│   └── index.md           # This file
+├── _site/                  # Generated documentation (after build)
+│   ├── docs/               # Documentation output
+│   ├── api/                # API reference output
+│   └── assets/             # Static assets (images, CSS, etc.)
+├── assets/                 # Source assets (logos, images)
+├── docfx.json              # DocFX configuration
+├── toc.yml                 # Main navigation structure
+└── filterConfig.yml        # API documentation filter
+</code></pre>
+<h2 id="-building-documentation-locally">🚀 Building Documentation Locally</h2>
+<h3 id="prerequisites">Prerequisites</h3>
+<ul>
+<li><a href="https://dotnet.microsoft.com/download/dotnet/9.0">.NET 9.0 SDK</a></li>
+<li>DocFX tool</li>
+</ul>
+<h3 id="setup">Setup</h3>
+<ol>
+<li><p><strong>Install DocFX:</strong></p>
+<pre><code class="lang-bash">dotnet tool install -g docfx
+</code></pre>
+</li>
+<li><p><strong>Navigate to the repository root:</strong></p>
+<pre><code class="lang-bash">cd /path/to/Jiro
+</code></pre>
+</li>
+<li><p><strong>Build the documentation:</strong></p>
+<pre><code class="lang-bash">docfx docfx.json
+</code></pre>
+</li>
+<li><p><strong>Serve locally (optional):</strong></p>
+<pre><code class="lang-bash">docfx docfx.json --serve
+</code></pre>
+<p>The documentation will be available at <code>http://localhost:8080</code></p>
+</li>
+</ol>
+<h2 id="-automatic-deployment">🌐 Automatic Deployment</h2>
+<p>The documentation is automatically deployed to GitHub Pages when changes are pushed to the <code>main</code> branch. The deployment is handled by the GitHub Actions workflow at <code>.github/workflows/deploy-docs.yml</code>.</p>
+<h3 id="deployment-triggers">Deployment Triggers</h3>
+<p>The documentation deployment is triggered by:</p>
+<ul>
+<li><strong>Push to main branch</strong> with changes to:
+<ul>
+<li><code>docs/**</code> (any documentation files)</li>
+<li><code>docfx.json</code> (DocFX configuration)</li>
+<li><code>.github/workflows/deploy-docs.yml</code> (workflow file)</li>
+</ul>
+</li>
+<li><strong>Manual workflow dispatch</strong> (can be triggered manually from GitHub Actions)</li>
+</ul>
+<h3 id="deployment-process">Deployment Process</h3>
+<ol>
+<li><strong>Checkout</strong> - Retrieves the latest code</li>
+<li><strong>Setup .NET</strong> - Installs .NET 9.x SDK</li>
+<li><strong>Install DocFX</strong> - Installs the latest DocFX tool</li>
+<li><strong>Restore Dependencies</strong> - Restores .NET project dependencies for API docs</li>
+<li><strong>Build Documentation</strong> - Generates the static site using DocFX</li>
+<li><strong>Deploy to GitHub Pages</strong> - Publishes to GitHub Pages</li>
+</ol>
+<h2 id="-content-guidelines">📝 Content Guidelines</h2>
+<h3 id="adding-new-documentation">Adding New Documentation</h3>
+<ol>
+<li><strong>Create your markdown file</strong> in the <code>docs/</code> directory</li>
+<li><strong>Add entry to toc.yml</strong> to include it in the navigation</li>
+<li><strong>Use proper markdown formatting</strong> with headings, lists, and links</li>
+<li><strong>Include emojis</strong> for visual appeal (following the existing style)</li>
+<li><strong>Test locally</strong> before committing</li>
+</ol>
+<h3 id="markdown-style-guide">Markdown Style Guide</h3>
+<ul>
+<li>Use descriptive headings with appropriate levels</li>
+<li>Include blank lines around headings and lists</li>
+<li>Use code blocks for commands and configuration</li>
+<li>Include links to related documentation</li>
+<li>Add emojis to section headers for visual organization</li>
+</ul>
+<h3 id="api-documentation">API Documentation</h3>
+<p>API documentation is automatically generated from XML comments in the .NET code. To improve API docs:</p>
+<ol>
+<li><strong>Add XML documentation</strong> to all public classes, methods, and properties</li>
+<li><strong>Use <code>&lt;summary&gt;</code>, <code>&lt;param&gt;</code>, <code>&lt;returns&gt;</code></strong> tags appropriately</li>
+<li><strong>Include <code>&lt;example&gt;</code> blocks</strong> for complex methods</li>
+<li><strong>Document exceptions</strong> with <code>&lt;exception&gt;</code> tags</li>
+</ol>
+<h2 id="-configuration">🔧 Configuration</h2>
+<h3 id="docfx-configuration-docfxjson">DocFX Configuration (<code>docfx.json</code>)</h3>
+<p>Key configuration options:</p>
+<ul>
+<li><strong>metadata.src</strong>: Source code paths for API documentation generation</li>
+<li><strong>build.content</strong>: Documentation content files to include</li>
+<li><strong>build.resource</strong>: Static resources (images, assets)</li>
+<li><strong>build.output</strong>: Output directory for generated site</li>
+<li><strong>globalMetadata</strong>: Site-wide settings and branding</li>
+</ul>
+<h3 id="customization">Customization</h3>
+<p>To customize the documentation:</p>
+<ol>
+<li><strong>Modify <code>docfx.json</code></strong> for build configuration</li>
+<li><strong>Update <code>globalMetadata</code></strong> for site information</li>
+<li><strong>Add custom templates</strong> in the <code>template</code> directory (if needed)</li>
+<li><strong>Include custom CSS/JS</strong> in the <code>resource</code> files</li>
+</ol>
+<h2 id="-best-practices">🎯 Best Practices</h2>
+<h3 id="documentation-writing">Documentation Writing</h3>
+<ul>
+<li><strong>Clear and Concise</strong> - Write for your audience</li>
+<li><strong>Up-to-date</strong> - Keep documentation current with code changes</li>
+<li><strong>Well-structured</strong> - Use consistent formatting and organization</li>
+<li><strong>Searchable</strong> - Include relevant keywords and cross-references</li>
+</ul>
+<h3 id="maintenance">Maintenance</h3>
+<ul>
+<li><strong>Regular Updates</strong> - Review and update documentation regularly</li>
+<li><strong>Link Validation</strong> - Ensure all links work correctly</li>
+<li><strong>Accessibility</strong> - Use proper heading structure and alt text</li>
+<li><strong>Performance</strong> - Optimize images and keep pages reasonably sized</li>
+</ul>
+<h2 id="-troubleshooting">🐛 Troubleshooting</h2>
+<h3 id="common-issues">Common Issues</h3>
+<ol>
+<li><p><strong>DocFX build fails</strong></p>
+<ul>
+<li>Check that all referenced files exist</li>
+<li>Validate JSON syntax in <code>docfx.json</code></li>
+<li>Ensure .NET projects can be restored</li>
+</ul>
+</li>
+<li><p><strong>Missing API documentation</strong></p>
+<ul>
+<li>Verify XML documentation is enabled in project files</li>
+<li>Check that projects build successfully</li>
+<li>Confirm correct paths in <code>docfx.json</code></li>
+</ul>
+</li>
+<li><p><strong>Deployment fails</strong></p>
+<ul>
+<li>Check GitHub Actions logs for specific errors</li>
+<li>Verify repository settings allow GitHub Pages</li>
+<li>Ensure workflow has necessary permissions</li>
+</ul>
+</li>
+</ol>
+<h3 id="getting-help">Getting Help</h3>
+<ul>
+<li>Check the <a href="https://dotnet.github.io/docfx/">DocFX documentation</a></li>
+<li>Review GitHub Actions workflow logs</li>
+<li>Examine the generated <code>_site</code> directory for build issues</li>
+</ul>
+<h2 id="-support">📞 Support</h2>
+<p>This documentation is part of an engineering thesis project. For questions about the documentation system or technical details, please refer to the main project documentation or open an issue in the repository.</p>
+
+</article>
+
+        <div class="contribution d-print-none">
+          <a href="https://github.com/HueByte/Jiro/blob/main/dev/#L1" class="edit-link">Edit this page</a>
+        </div>
+
+        <div class="next-article d-print-none border-top" id="nextArticle"></div>
+
+      </div>
+
+      <div class="affix">
+        <nav id="affix"></nav>
+      </div>
+    </main>
+
+    <div class="container-xxl search-results" id="search-results"></div>
+
+    <footer class="border-top text-secondary">
+      <div class="container-xxl">
+        <div class="flex-fill">
+          <div class="footer-custom"><div class="footer-inner d-flex justify-content-between align-items-center"><div class="footer-text">Made with <strong>💖</strong> By HueByte</div><div class="footer-links"><a href="https://github.com/HueByte/Jiro" class="footer-link" target="_blank"><i class="fab fa-github"></i>GitHub</a><a href="#" class="footer-link scroll-to-top" onclick="scrollToTop()"><i class="fas fa-arrow-up"></i>Top</a></div></div></div><script>function scrollToTop(){window.scrollTo({top:0,behavior:'smooth'});}</script>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>

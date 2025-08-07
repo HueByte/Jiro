@@ -1,0 +1,742 @@
+﻿<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+      <title>WebSocket Communication Architecture | Jiro Documentation </title>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <meta name="title" content="WebSocket Communication Architecture | Jiro Documentation ">
+      
+      
+      <link rel="icon" href="../assets/Jiro-Icon.png">
+      <link rel="stylesheet" href="../public/docfx.min.css">
+      <link rel="stylesheet" href="../public/main.css">
+      <meta name="docfx:navrel" content="../toc.html">
+      <meta name="docfx:tocrel" content="toc.html">
+      
+      <meta name="docfx:rel" content="../">
+      
+      
+      <meta name="docfx:docurl" content="https://github.com/HueByte/Jiro/blob/main/dev/#L1">
+      <meta name="loc:inThisArticle" content="In this article">
+      <meta name="loc:searchResultsCount" content="{count} results for &quot;{query}&quot;">
+      <meta name="loc:searchNoResults" content="No results for &quot;{query}&quot;">
+      <meta name="loc:tocFilter" content="Filter by title">
+      <meta name="loc:nextArticle" content="Next">
+      <meta name="loc:prevArticle" content="Previous">
+      <meta name="loc:themeLight" content="Light">
+      <meta name="loc:themeDark" content="Dark">
+      <meta name="loc:themeAuto" content="Auto">
+      <meta name="loc:changeTheme" content="Change theme">
+      <meta name="loc:copy" content="Copy">
+      <meta name="loc:downloadPdf" content="Download PDF">
+  </head>
+
+  <script type="module" src="./../public/docfx.min.js"></script>
+
+  <script>
+    const theme = localStorage.getItem('theme') || 'auto'
+    document.documentElement.setAttribute('data-bs-theme', theme === 'auto' ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : theme)
+  </script>
+
+
+  <body class="tex2jax_ignore" data-layout="" data-yaml-mime="">
+    <header class="bg-body border-bottom">
+      <nav id="autocollapse" class="navbar navbar-expand-md" role="navigation">
+        <div class="container-xxl flex-nowrap">
+          <a class="navbar-brand" href="../index.html">
+            <img id="logo" class="svg" src="../assets/Jiro-Icon.png" alt="Jiro - AI Assistant">
+            Jiro - AI Assistant
+          </a>
+          <button class="btn btn-lg d-md-none border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navpanel" aria-controls="navpanel" aria-expanded="false" aria-label="Toggle navigation">
+            <i class="bi bi-three-dots"></i>
+          </button>
+          <div class="collapse navbar-collapse" id="navpanel">
+            <div id="navbar">
+              <form class="search" role="search" id="search">
+                <i class="bi bi-search"></i>
+                <input class="form-control" id="search-query" type="search" disabled="" placeholder="Search" autocomplete="off" aria-label="Search">
+              </form>
+            </div>
+          </div>
+        </div>
+      </nav>
+    </header>
+
+    <main class="container-xxl">
+      <div class="toc-offcanvas">
+        <div class="offcanvas-md offcanvas-start" tabindex="-1" id="tocOffcanvas" aria-labelledby="tocOffcanvasLabel">
+          <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="tocOffcanvasLabel">Table of Contents</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#tocOffcanvas" aria-label="Close"></button>
+          </div>
+          <div class="offcanvas-body">
+            <nav class="toc" id="toc"></nav>
+          </div>
+        </div>
+      </div>
+
+      <div class="content">
+        <div class="actionbar">
+          <button class="btn btn-lg border-0 d-md-none" style="margin-top: -.65em; margin-left: -.8em" type="button" data-bs-toggle="offcanvas" data-bs-target="#tocOffcanvas" aria-controls="tocOffcanvas" aria-expanded="false" aria-label="Show table of contents">
+            <i class="bi bi-list"></i>
+          </button>
+
+          <nav id="breadcrumb"></nav>
+        </div>
+
+        <article data-uid="">
+<h1 id="websocket-communication-architecture">WebSocket Communication Architecture</h1>
+
+<h2 id="overview">Overview</h2>
+<p>Jiro implements a hybrid communication architecture that combines WebSocket connections for real-time bidirectional communication and gRPC for reliable service interactions. This design provides real-time command reception, live log streaming, and session management through SignalR WebSockets while ensuring reliable command result delivery via gRPC with retry mechanisms.</p>
+<h3 id="key-features-v100-beta">Key Features (v1.0.0-beta)</h3>
+<ul>
+<li><strong>Real-time log streaming</strong> via <code>StreamLogsAsync</code> and <code>StreamLogBatchesAsync</code></li>
+<li><strong>Enhanced session management</strong> with client-side session ID generation</li>
+<li><strong>Improved WebSocket contracts</strong> using <code>IJiroInstance</code> interface</li>
+<li><strong>Bidirectional streaming</strong> for logs, sessions, and configuration updates</li>
+</ul>
+<h2 id="architecture-components">Architecture Components</h2>
+<h3 id="core-services">Core Services</h3>
+<ul>
+<li><strong><code>JiroWebSocketService</code></strong>: Main orchestration service managing the entire communication lifecycle</li>
+<li><strong><code>WebSocketConnection</code></strong>: Enhanced WebSocket implementation using SignalR for real-time bidirectional communication</li>
+<li><strong><code>JiroGrpcService</code></strong>: gRPC client service for sending command results back to the server</li>
+<li><strong><code>ICommandQueueMonitor</code></strong>: Interface for monitoring command execution metrics</li>
+<li><strong><code>LogsProviderService</code></strong>: Real-time log streaming with continuous monitoring</li>
+<li><strong><code>SessionManager</code></strong>: Enhanced session lifecycle management with caching</li>
+<li><strong><code>MessageCacheService</code></strong>: Optimized message operations and caching</li>
+</ul>
+<h2 id="communication-flow">Communication Flow</h2>
+<pre><code class="lang-mermaid">%%{init: {
+  &quot;theme&quot;: &quot;base&quot;,
+  &quot;themeVariables&quot;: {
+    &quot;background&quot;: &quot;#FFFFFF&quot;,
+    &quot;primaryColor&quot;: &quot;#2E7D32&quot;,
+    &quot;primaryTextColor&quot;: &quot;#000000&quot;,
+    &quot;primaryBorderColor&quot;: &quot;#1B5E20&quot;,
+    &quot;lineColor&quot;: &quot;#424242&quot;,
+    &quot;sectionBkgColor&quot;: &quot;#E8F5E9&quot;,
+    &quot;altSectionBkgColor&quot;: &quot;#C8E6C9&quot;,
+    &quot;gridColor&quot;: &quot;#E0E0E0&quot;,
+    &quot;secondaryColor&quot;: &quot;#1976D2&quot;,
+    &quot;tertiaryColor&quot;: &quot;#7B1FA2&quot;,
+    &quot;actorBkg&quot;: &quot;#E3F2FD&quot;,
+    &quot;actorBorder&quot;: &quot;#1565C0&quot;,
+    &quot;actorTextColor&quot;: &quot;#000000&quot;,
+    &quot;activationBkgColor&quot;: &quot;#FFF3E0&quot;,
+    &quot;activationBorderColor&quot;: &quot;#E65100&quot;,
+    &quot;noteBkgColor&quot;: &quot;#FFFDE7&quot;,
+    &quot;noteBorderColor&quot;: &quot;#F57C00&quot;,
+    &quot;noteTextColor&quot;: &quot;#000000&quot;,
+    &quot;altColor&quot;: &quot;#4CAF50&quot;
+  }
+}}%%
+sequenceDiagram
+    participant Server as Jiro Server
+    participant WS as SignalR WebSocket
+    participant WSService as JiroWebSocketService
+    participant CmdHandler as Command Handler
+    participant GrpcService as JiroGrpcService
+    participant GrpcClient as gRPC Client
+
+    Note over Server, GrpcClient: Command Execution Flow
+
+    Server-&gt;&gt;WS: Send Command (JSON)
+    WS-&gt;&gt;WSService: ReceiveCommand Event
+    WSService-&gt;&gt;WSService: Create Scope
+    WSService-&gt;&gt;CmdHandler: Execute Command
+    CmdHandler-&gt;&gt;WSService: Command Result
+    WSService-&gt;&gt;GrpcService: Send Result
+    GrpcService-&gt;&gt;GrpcClient: gRPC Call (with retry)
+    GrpcClient-&gt;&gt;Server: Command Response
+    
+    Note over WSService: Error Handling
+    alt Command Execution Error
+        CmdHandler--&gt;&gt;WSService: Exception
+        WSService-&gt;&gt;GrpcService: Send Error
+        GrpcService-&gt;&gt;GrpcClient: Error Response
+    end
+</code></pre>
+<h2 id="service-architecture">Service Architecture</h2>
+<pre><code class="lang-mermaid">%%{init: {
+  &quot;theme&quot;: &quot;base&quot;,
+  &quot;themeVariables&quot;: {
+    &quot;background&quot;: &quot;#1C1E26&quot;,
+    &quot;primaryColor&quot;: &quot;#FCD4B8&quot;,
+    &quot;primaryTextColor&quot;: &quot;#D5D8DA&quot;,
+    &quot;primaryBorderColor&quot;: &quot;#E95378&quot;,
+    &quot;lineColor&quot;: &quot;#6C6F93&quot;,
+    &quot;sectionBkgColor&quot;: &quot;#232530&quot;,
+    &quot;altSectionBkgColor&quot;: &quot;#2E303E&quot;,
+    &quot;gridColor&quot;: &quot;#16161C&quot;,
+    &quot;secondaryColor&quot;: &quot;#26BBD9&quot;,
+    &quot;tertiaryColor&quot;: &quot;#27D797&quot;,
+    &quot;cScale0&quot;: &quot;#FFFFFF&quot;,
+    &quot;cScale1&quot;: &quot;#F5F5F5&quot;,
+    &quot;cScale2&quot;: &quot;#E0E0E0&quot;,
+    &quot;cScale3&quot;: &quot;#9E9E9E&quot;,
+    &quot;cScale4&quot;: &quot;#000000&quot;
+  }
+}}%%
+graph TB
+    subgraph &quot;Application Layer&quot;
+        App[Jiro Application]
+        HSvc[Hosted Services]
+    end
+    
+    subgraph &quot;Communication Services&quot;
+        WSService[JiroWebSocketService&lt;br/&gt;Background Service]
+        WSConn[SignalRWebSocketConnection&lt;br/&gt;IWebSocketConnection]
+        GrpcSvc[JiroGrpcService&lt;br/&gt;IJiroGrpcService]
+        Monitor[ICommandQueueMonitor]
+    end
+    
+    subgraph &quot;Core Services&quot;
+        CmdHandler[ICommandHandlerService]
+        CmdContext[ICommandContext]
+        ScopeFactory[IServiceScopeFactory]
+    end
+    
+    subgraph &quot;External Communication&quot;
+        SignalR[SignalR Hub&lt;br/&gt;WebSocket Server]
+        GrpcServer[gRPC Server&lt;br/&gt;JiroHubProto]
+    end
+    
+    App --&gt; HSvc
+    HSvc --&gt; WSService
+    WSService --&gt; WSConn
+    WSService --&gt; GrpcSvc
+    WSService --&gt; CmdHandler
+    WSService --&gt; ScopeFactory
+    WSService -.-&gt; Monitor
+    
+    WSConn &lt;--&gt; SignalR
+    GrpcSvc --&gt; GrpcServer
+    
+    %% High Contrast Styling
+    classDef wsService fill:#2196F3,stroke:#0D47A1,stroke-width:2px,color:#FFFFFF
+    classDef grpcService fill:#FF9800,stroke:#E65100,stroke-width:2px,color:#000000
+    classDef wsConn fill:#4CAF50,stroke:#1B5E20,stroke-width:2px,color:#FFFFFF
+    
+    class WSService wsService
+    class GrpcSvc grpcService
+    class WSConn wsConn
+</code></pre>
+<h2 id="dependency-injection-and-scoping">Dependency Injection and Scoping</h2>
+<pre><code class="lang-mermaid">%%{init: {
+  &quot;theme&quot;: &quot;base&quot;,
+  &quot;themeVariables&quot;: {
+    &quot;background&quot;: &quot;#1C1E26&quot;,
+    &quot;primaryColor&quot;: &quot;#FCD4B8&quot;,
+    &quot;primaryTextColor&quot;: &quot;#D5D8DA&quot;,
+    &quot;primaryBorderColor&quot;: &quot;#E95378&quot;,
+    &quot;lineColor&quot;: &quot;#6C6F93&quot;,
+    &quot;sectionBkgColor&quot;: &quot;#232530&quot;,
+    &quot;altSectionBkgColor&quot;: &quot;#2E303E&quot;,
+    &quot;gridColor&quot;: &quot;#16161C&quot;,
+    &quot;secondaryColor&quot;: &quot;#26BBD9&quot;,
+    &quot;tertiaryColor&quot;: &quot;#27D797&quot;,
+    &quot;cScale0&quot;: &quot;#FFFFFF&quot;,
+    &quot;cScale1&quot;: &quot;#F5F5F5&quot;,
+    &quot;cScale2&quot;: &quot;#E0E0E0&quot;,
+    &quot;cScale3&quot;: &quot;#9E9E9E&quot;,
+    &quot;cScale4&quot;: &quot;#000000&quot;,
+    &quot;clusterBkg&quot;: &quot;#F5F5F5&quot;,
+    &quot;clusterBorder&quot;: &quot;#757575&quot;
+  }
+}}%%
+graph LR
+    subgraph &quot;Singleton Services&quot;
+        WSService[JiroWebSocketService]
+        WSConn[SignalR Connection]
+        Monitor[Command Queue Monitor]
+    end
+    
+    subgraph &quot;Scoped Services (Per Command)&quot;
+        GrpcSvc[JiroGrpcService]
+        CmdContext[ICommandContext]
+        GrpcClient[gRPC Client]
+    end
+    
+    subgraph &quot;Service Resolution&quot;
+        ScopeFactory[IServiceScopeFactory]
+        Scope[AsyncServiceScope]
+    end
+    
+    WSService --&gt; ScopeFactory
+    ScopeFactory --&gt; Scope
+    Scope --&gt; GrpcSvc
+    Scope --&gt; CmdContext
+    GrpcSvc --&gt; GrpcClient
+    
+    WSService -.-&gt; Monitor
+    WSService --&gt; WSConn
+    
+    %% High Contrast Styling
+    classDef scopeStyle fill:#2196F3,stroke:#0D47A1,stroke-width:2px,color:#FFFFFF
+    classDef grpcStyle fill:#4CAF50,stroke:#1B5E20,stroke-width:2px,color:#FFFFFF
+    classDef wsStyle fill:#FF9800,stroke:#E65100,stroke-width:2px,color:#000000
+    
+    class Scope scopeStyle
+    class GrpcSvc grpcStyle
+    class WSService wsStyle
+</code></pre>
+<h2 id="message-flow-and-data-structures">Message Flow and Data Structures</h2>
+<h3 id="command-message-structure">Command Message Structure</h3>
+<pre><code class="lang-json">{
+  &quot;instanceId&quot;: &quot;user-123&quot;,
+  &quot;command&quot;: &quot;chat Hello Jiro&quot;,
+  &quot;commandSyncId&quot;: &quot;cmd-456-789&quot;,
+  &quot;sessionId&quot;: &quot;session-abc&quot;,  // Now generated client-side
+  &quot;parameters&quot;: {
+    &quot;key1&quot;: &quot;value1&quot;,
+    &quot;key2&quot;: &quot;value2&quot;
+  }
+}
+</code></pre>
+<h3 id="command-response-structure-grpc">Command Response Structure (gRPC)</h3>
+<pre><code class="lang-protobuf">message ClientMessage {
+    string commandName = 1;
+    CommandType commandType = 2;
+    oneof result {
+        TextResult textResult = 3;
+        GraphResult graphResult = 4;
+    }
+    bool isSuccess = 5;
+    string commandSyncId = 6;
+}
+</code></pre>
+<h2 id="connection-management">Connection Management</h2>
+<pre><code class="lang-mermaid">%%{init: {
+  &quot;theme&quot;: &quot;base&quot;,
+  &quot;themeVariables&quot;: {
+    &quot;background&quot;: &quot;#1C1E26&quot;,
+    &quot;primaryColor&quot;: &quot;#FCD4B8&quot;,
+    &quot;primaryTextColor&quot;: &quot;#D5D8DA&quot;,
+    &quot;primaryBorderColor&quot;: &quot;#E95378&quot;,
+    &quot;lineColor&quot;: &quot;#6C6F93&quot;,
+    &quot;sectionBkgColor&quot;: &quot;#232530&quot;,
+    &quot;altSectionBkgColor&quot;: &quot;#2E303E&quot;,
+    &quot;gridColor&quot;: &quot;#16161C&quot;,
+    &quot;secondaryColor&quot;: &quot;#26BBD9&quot;,
+    &quot;tertiaryColor&quot;: &quot;#27D797&quot;,
+    &quot;cScale0&quot;: &quot;#FFFFFF&quot;,
+    &quot;cScale1&quot;: &quot;#F5F5F5&quot;,
+    &quot;cScale2&quot;: &quot;#E0E0E0&quot;,
+    &quot;cScale3&quot;: &quot;#9E9E9E&quot;,
+    &quot;cScale4&quot;: &quot;#000000&quot;,
+    &quot;stateLabelColor&quot;: &quot;#000000&quot;
+  }
+}}%%
+stateDiagram-v2
+    [*] --&gt; Disconnected
+    
+    Disconnected --&gt; Connecting: StartAsync()
+    Connecting --&gt; Connected: Connection Successful
+    Connecting --&gt; Failed: Connection Failed
+    
+    Connected --&gt; Reconnecting: Connection Lost
+    Connected --&gt; Disconnecting: StopAsync()
+    
+    Reconnecting --&gt; Connected: Reconnection Successful
+    Reconnecting --&gt; Failed: Max Retries Exceeded
+    
+    Failed --&gt; Connecting: Retry Attempt
+    Disconnecting --&gt; Disconnected: Stop Complete
+    
+    note right of Connected
+        - Receiving Commands
+        - Sending Results
+        - Monitoring Queue
+    end note
+    
+    note right of Reconnecting
+        - Exponential Backoff
+        - Clear Active Commands
+        - Event Notifications
+    end note
+</code></pre>
+<h2 id="error-handling-and-retry-logic">Error Handling and Retry Logic</h2>
+<h3 id="websocket-connection-retry">WebSocket Connection Retry</h3>
+<pre><code class="lang-mermaid">%%{init: {
+  &quot;theme&quot;: &quot;base&quot;,
+  &quot;themeVariables&quot;: {
+    &quot;background&quot;: &quot;#1C1E26&quot;,
+    &quot;primaryColor&quot;: &quot;#FCD4B8&quot;,
+    &quot;primaryTextColor&quot;: &quot;#D5D8DA&quot;,
+    &quot;primaryBorderColor&quot;: &quot;#E95378&quot;,
+    &quot;lineColor&quot;: &quot;#6C6F93&quot;,
+    &quot;sectionBkgColor&quot;: &quot;#232530&quot;,
+    &quot;altSectionBkgColor&quot;: &quot;#2E303E&quot;,
+    &quot;gridColor&quot;: &quot;#16161C&quot;,
+    &quot;secondaryColor&quot;: &quot;#26BBD9&quot;,
+    &quot;tertiaryColor&quot;: &quot;#27D797&quot;,
+    &quot;cScale0&quot;: &quot;#FFFFFF&quot;,
+    &quot;cScale1&quot;: &quot;#F5F5F5&quot;,
+    &quot;cScale2&quot;: &quot;#E0E0E0&quot;,
+    &quot;cScale3&quot;: &quot;#9E9E9E&quot;,
+    &quot;cScale4&quot;: &quot;#000000&quot;,
+    &quot;clusterBkg&quot;: &quot;#F5F5F5&quot;,
+    &quot;clusterBorder&quot;: &quot;#757575&quot;
+  }
+}}%%
+flowchart TD
+    Start[Connection Attempt] --&gt; Try[Connect to Hub]
+    Try --&gt; Success{Connected?}
+    Success --&gt;|Yes| Monitor[Monitor Connection]
+    Success --&gt;|No| Retry{Max Retries?}
+    Retry --&gt;|No| Wait[Exponential Backoff]
+    Wait --&gt; Try
+    Retry --&gt;|Yes| Fail[Connection Failed]
+    
+    Monitor --&gt; Lost{Connection Lost?}
+    Lost --&gt;|Yes| Auto[Auto Reconnect]
+    Lost --&gt;|No| Monitor
+    Auto --&gt; Try
+    
+    %% High Contrast Styling
+    classDef successStyle fill:#4CAF50,stroke:#1B5E20,stroke-width:2px,color:#FFFFFF
+    classDef failStyle fill:#F44336,stroke:#B71C1C,stroke-width:2px,color:#FFFFFF
+    classDef waitStyle fill:#FFC107,stroke:#F57C00,stroke-width:2px,color:#000000
+    
+    class Success successStyle
+    class Fail failStyle
+    class Wait waitStyle
+</code></pre>
+<h3 id="grpc-result-sending-retry">gRPC Result Sending Retry</h3>
+<pre><code class="lang-mermaid">%%{init: {
+  &quot;theme&quot;: &quot;base&quot;,
+  &quot;themeVariables&quot;: {
+    &quot;background&quot;: &quot;#1C1E26&quot;,
+    &quot;primaryColor&quot;: &quot;#FCD4B8&quot;,
+    &quot;primaryTextColor&quot;: &quot;#D5D8DA&quot;,
+    &quot;primaryBorderColor&quot;: &quot;#E95378&quot;,
+    &quot;lineColor&quot;: &quot;#6C6F93&quot;,
+    &quot;sectionBkgColor&quot;: &quot;#232530&quot;,
+    &quot;altSectionBkgColor&quot;: &quot;#2E303E&quot;,
+    &quot;gridColor&quot;: &quot;#16161C&quot;,
+    &quot;secondaryColor&quot;: &quot;#26BBD9&quot;,
+    &quot;tertiaryColor&quot;: &quot;#27D797&quot;,
+    &quot;cScale0&quot;: &quot;#FFFFFF&quot;,
+    &quot;cScale1&quot;: &quot;#F5F5F5&quot;,
+    &quot;cScale2&quot;: &quot;#E0E0E0&quot;,
+    &quot;cScale3&quot;: &quot;#9E9E9E&quot;,
+    &quot;cScale4&quot;: &quot;#000000&quot;,
+    &quot;clusterBkg&quot;: &quot;#F5F5F5&quot;,
+    &quot;clusterBorder&quot;: &quot;#757575&quot;
+  }
+}}%%
+flowchart TD
+    Send[Send gRPC Message] --&gt; Attempt[gRPC Call]
+    Attempt --&gt; Response{Successful?}
+    Response --&gt;|Yes| Complete[Operation Complete]
+    Response --&gt;|No| RetryCheck{Retries Left?}
+    RetryCheck --&gt;|Yes| Backoff[Exponential Backoff]
+    RetryCheck --&gt;|No| Error[Throw Exception]
+    Backoff --&gt; Attempt
+    
+    %% High Contrast Styling
+    classDef completeStyle fill:#4CAF50,stroke:#1B5E20,stroke-width:2px,color:#FFFFFF
+    classDef errorStyle fill:#F44336,stroke:#B71C1C,stroke-width:2px,color:#FFFFFF
+    classDef backoffStyle fill:#FFC107,stroke:#F57C00,stroke-width:2px,color:#000000
+    
+    class Complete completeStyle
+    class Error errorStyle
+    class Backoff backoffStyle
+</code></pre>
+<h2 id="configuration">Configuration</h2>
+<h3 id="websocket-configuration">WebSocket Configuration</h3>
+<pre><code class="lang-json">{
+  &quot;WebSocket&quot;: {
+    &quot;HubUrl&quot;: &quot;https://localhost:5001/instanceHub&quot;,
+    &quot;ReconnectionDelayMs&quot;: 5000,
+    &quot;MaxReconnectionAttempts&quot;: 5,
+    &quot;HandshakeTimeoutMs&quot;: 15000,
+    &quot;KeepAliveIntervalMs&quot;: 15000,
+    &quot;ServerTimeoutMs&quot;: 30000,
+    &quot;AccessToken&quot;: null,
+    &quot;Headers&quot;: {
+      &quot;User-Agent&quot;: &quot;Jiro-Bot/1.0&quot;
+    }
+  }
+}
+</code></pre>
+<h3 id="grpc-configuration">gRPC Configuration</h3>
+<pre><code class="lang-json">{
+  &quot;Grpc&quot;: {
+    &quot;ServerUrl&quot;: &quot;https://localhost:5001&quot;,
+    &quot;TimeoutMs&quot;: 30000,
+    &quot;MaxRetries&quot;: 3
+  }
+}
+</code></pre>
+<h2 id="service-registration">Service Registration</h2>
+<p>The communication services are registered in the DI container as follows:</p>
+<pre><code class="lang-csharp">// Configure options
+services.Configure&lt;WebSocketOptions&gt;(configuration.GetSection(&quot;WebSocket&quot;));
+services.Configure&lt;GrpcOptions&gt;(configuration.GetSection(&quot;Grpc&quot;));
+
+// Register scoped gRPC service (per command execution)
+services.AddScoped&lt;IJiroGrpcService, JiroGrpcService&gt;();
+
+// Register singleton WebSocket connection
+services.AddSingleton&lt;IWebSocketConnection, SignalRWebSocketConnection&gt;();
+
+// Register main orchestration service as hosted service
+services.AddHostedService&lt;JiroWebSocketService&gt;();
+
+// Register command queue monitoring interface
+services.AddSingleton&lt;ICommandQueueMonitor, JiroWebSocketService&gt;();
+</code></pre>
+<h2 id="command-execution-lifecycle">Command Execution Lifecycle</h2>
+<pre><code class="lang-mermaid">%%{init: {
+  &quot;theme&quot;: &quot;base&quot;,
+  &quot;themeVariables&quot;: {
+    &quot;background&quot;: &quot;#1C1E26&quot;,
+    &quot;primaryColor&quot;: &quot;#FCD4B8&quot;,
+    &quot;primaryTextColor&quot;: &quot;#D5D8DA&quot;,
+    &quot;primaryBorderColor&quot;: &quot;#E95378&quot;,
+    &quot;lineColor&quot;: &quot;#6C6F93&quot;,
+    &quot;sectionBkgColor&quot;: &quot;#232530&quot;,
+    &quot;altSectionBkgColor&quot;: &quot;#2E303E&quot;,
+    &quot;gridColor&quot;: &quot;#16161C&quot;,
+    &quot;secondaryColor&quot;: &quot;#26BBD9&quot;,
+    &quot;tertiaryColor&quot;: &quot;#27D797&quot;,
+    &quot;cScale0&quot;: &quot;#FFFFFF&quot;,
+    &quot;cScale1&quot;: &quot;#F5F5F5&quot;,
+    &quot;cScale2&quot;: &quot;#E0E0E0&quot;,
+    &quot;cScale3&quot;: &quot;#9E9E9E&quot;,
+    &quot;cScale4&quot;: &quot;#000000&quot;,
+    &quot;actorBkg&quot;: &quot;#2E303E&quot;,
+    &quot;actorBorder&quot;: &quot;#6C6F93&quot;,
+    &quot;actorTextColor&quot;: &quot;#D5D8DA&quot;,
+    &quot;activationBkgColor&quot;: &quot;#FCD4B8&quot;,
+    &quot;activationBorderColor&quot;: &quot;#E29A6B&quot;,
+    &quot;noteBkgColor&quot;: &quot;#26BBD9&quot;,
+    &quot;noteBorderColor&quot;: &quot;#1A9CB8&quot;,
+    &quot;noteTextColor&quot;: &quot;#1C1E26&quot;
+  }
+}}%%
+sequenceDiagram
+    participant WS as WebSocket
+    participant Service as JiroWebSocketService
+    participant Scope as Service Scope
+    participant Context as Command Context
+    participant Handler as Command Handler
+    participant gRPC as gRPC Service
+
+    WS-&gt;&gt;Service: Command Received
+    Service-&gt;&gt;Service: Add to Active Commands
+    Service-&gt;&gt;Scope: Create Async Scope
+    Scope-&gt;&gt;Context: Resolve ICommandContext
+    Scope-&gt;&gt;gRPC: Resolve IJiroGrpcService
+    
+    Service-&gt;&gt;Context: Set Instance/Session Data
+    Service-&gt;&gt;Handler: Execute Command
+    Handler--&gt;&gt;Service: Command Result
+    
+    Service-&gt;&gt;gRPC: Send Result
+    gRPC--&gt;&gt;Service: Result Sent
+    Service-&gt;&gt;Service: Remove from Active Commands
+    Service-&gt;&gt;Service: Update Metrics
+    
+    Note over Scope: Scope Disposed&lt;br/&gt;Resources Cleaned Up
+</code></pre>
+<h2 id="command-queue-monitoring">Command Queue Monitoring</h2>
+<p>The <code>ICommandQueueMonitor</code> interface provides real-time insights into command execution:</p>
+<h3 id="monitoring-metrics">Monitoring Metrics</h3>
+<ul>
+<li><strong>Active Command Count</strong>: Number of currently executing commands</li>
+<li><strong>Active Command IDs</strong>: List of command synchronization IDs being processed</li>
+<li><strong>Total Commands Processed</strong>: Lifetime count of processed commands</li>
+<li><strong>Successful Commands</strong>: Count of successfully completed commands</li>
+<li><strong>Failed Commands</strong>: Count of commands that resulted in errors</li>
+</ul>
+<h3 id="usage-example">Usage Example</h3>
+<pre><code class="lang-csharp">public class MonitoringController : ControllerBase
+{
+    private readonly ICommandQueueMonitor _monitor;
+    
+    [HttpGet(&quot;status&quot;)]
+    public IActionResult GetStatus()
+    {
+        return Ok(new
+        {
+            ActiveCommands = _monitor.ActiveCommandCount,
+            TotalProcessed = _monitor.TotalCommandsProcessed,
+            SuccessRate = _monitor.SuccessfulCommands / (double)_monitor.TotalCommandsProcessed
+        });
+    }
+}
+</code></pre>
+<h2 id="key-benefits">Key Benefits</h2>
+<h3 id="architecture-advantages">Architecture Advantages</h3>
+<ol>
+<li><strong>Real-time Communication</strong>: WebSocket provides instant command delivery</li>
+<li><strong>Reliable Result Delivery</strong>: gRPC ensures command results reach the server</li>
+<li><strong>Automatic Reconnection</strong>: Built-in reconnection logic for WebSocket connections</li>
+<li><strong>Retry Mechanisms</strong>: Exponential backoff for both WebSocket and gRPC operations</li>
+<li><strong>Proper Resource Management</strong>: Scoped services ensure proper cleanup per command</li>
+<li><strong>Monitoring and Observability</strong>: Built-in command queue monitoring</li>
+<li><strong>Error Resilience</strong>: Comprehensive error handling at all levels</li>
+</ol>
+<h3 id="performance-characteristics">Performance Characteristics</h3>
+<ul>
+<li><strong>Low Latency</strong>: Direct WebSocket connection for command reception</li>
+<li><strong>High Reliability</strong>: gRPC with retry logic for result delivery</li>
+<li><strong>Resource Efficient</strong>: Scoped dependency injection prevents resource leaks</li>
+<li><strong>Concurrent Processing</strong>: Multiple commands can be processed simultaneously</li>
+<li><strong>Graceful Degradation</strong>: System continues operating during temporary network issues</li>
+</ul>
+<h2 id="real-time-log-streaming-v100-beta">Real-Time Log Streaming (v1.0.0-beta)</h2>
+<h3 id="log-streaming-architecture">Log Streaming Architecture</h3>
+<p>The enhanced logging system provides real-time log streaming capabilities through WebSocket connections:</p>
+<pre><code class="lang-mermaid">%%{init: {
+  &quot;theme&quot;: &quot;base&quot;,
+  &quot;themeVariables&quot;: {
+    &quot;background&quot;: &quot;#FFFFFF&quot;,
+    &quot;primaryColor&quot;: &quot;#2E7D32&quot;,
+    &quot;primaryTextColor&quot;: &quot;#000000&quot;,
+    &quot;primaryBorderColor&quot;: &quot;#1B5E20&quot;,
+    &quot;lineColor&quot;: &quot;#424242&quot;,
+    &quot;sectionBkgColor&quot;: &quot;#E8F5E9&quot;,
+    &quot;altSectionBkgColor&quot;: &quot;#C8E6C9&quot;,
+    &quot;gridColor&quot;: &quot;#E0E0E0&quot;,
+    &quot;secondaryColor&quot;: &quot;#1976D2&quot;,
+    &quot;tertiaryColor&quot;: &quot;#7B1FA2&quot;,
+    &quot;cScale0&quot;: &quot;#FFFFFF&quot;,
+    &quot;cScale1&quot;: &quot;#F5F5F5&quot;,
+    &quot;cScale2&quot;: &quot;#E0E0E0&quot;,
+    &quot;cScale3&quot;: &quot;#9E9E9E&quot;,
+    &quot;cScale4&quot;: &quot;#000000&quot;
+  }
+}}%%
+flowchart TD
+    subgraph &quot;Log Streaming Pipeline&quot;
+        Client[WebSocket Client] --&gt;|Request Logs| Hub[SignalR Hub]
+        Hub --&gt; LogService[LogsProviderService]
+        
+        LogService --&gt; Stream{Streaming Mode}
+        Stream --&gt;|Continuous| Async[StreamLogsAsync]
+        Stream --&gt;|Batch| Batch[StreamLogBatchesAsync]
+        
+        Async --&gt; Monitor[File Monitor]
+        Batch --&gt; BatchProc[Batch Processor]
+        
+        Monitor --&gt;|New Entries| Parser[Log Parser]
+        BatchProc --&gt;|Batch Ready| Parser
+        
+        Parser --&gt;|Structured Logs| Client
+    end
+    
+    %% High Contrast Styling
+    classDef clientStyle fill:#2196F3,stroke:#0D47A1,stroke-width:2px,color:#FFFFFF
+    classDef serviceStyle fill:#4CAF50,stroke:#1B5E20,stroke-width:2px,color:#FFFFFF
+    classDef processStyle fill:#FF9800,stroke:#E65100,stroke-width:2px,color:#000000
+    
+    class Client clientStyle
+    class LogService serviceStyle
+    class Parser processStyle
+</code></pre>
+<h3 id="streaming-methods">Streaming Methods</h3>
+<h4 id="continuous-log-streaming">Continuous Log Streaming</h4>
+<pre><code class="lang-csharp">public async IAsyncEnumerable&lt;LogEntry&gt; StreamLogsAsync(
+    string? level = null, 
+    int initialLimit = 50,
+    [EnumeratorCancellation] CancellationToken cancellationToken = default)
+{
+    // Returns existing logs first
+    // Then continuously monitors for new entries
+    // Real-time delivery as logs are written
+}
+</code></pre>
+<h4 id="batch-log-streaming">Batch Log Streaming</h4>
+<pre><code class="lang-csharp">public async IAsyncEnumerable&lt;IEnumerable&lt;LogEntry&gt;&gt; StreamLogBatchesAsync(
+    string? level = null, 
+    int initialLimit = 50, 
+    int batchSize = 10,
+    [EnumeratorCancellation] CancellationToken cancellationToken = default)
+{
+    // Delivers logs in configurable batches
+    // Optimized for high-volume scenarios
+    // Reduces network overhead
+}
+</code></pre>
+<h3 id="enhanced-log-parsing">Enhanced Log Parsing</h3>
+<p>The log parser now supports:</p>
+<ul>
+<li><strong>Timezone-aware timestamps</strong>: Handles logs with timezone offsets (e.g., <code>+00:00</code>)</li>
+<li><strong>Multi-line log entries</strong>: Correctly groups stack traces and multi-line messages</li>
+<li><strong>Regex pattern matching</strong>: Intelligent parsing of various log formats</li>
+<li><strong>Level filtering</strong>: Real-time filtering by log level (INFO, WARN, ERROR, etc.)</li>
+</ul>
+<h3 id="websocket-events-for-logging">WebSocket Events for Logging</h3>
+<pre><code class="lang-csharp">// Request continuous log stream
+connection.On&lt;GetLogsRequest&gt;(&quot;LogsStreamRequested&quot;, async (request) =&gt;
+{
+    await foreach (var log in logsProvider.StreamLogsAsync(request.Level))
+    {
+        await connection.SendAsync(&quot;LogEntry&quot;, log);
+    }
+});
+
+// Request batch log stream
+connection.On&lt;GetLogsRequest&gt;(&quot;LogBatchesRequested&quot;, async (request) =&gt;
+{
+    await foreach (var batch in logsProvider.StreamLogBatchesAsync(
+        request.Level, 
+        request.InitialLimit, 
+        request.BatchSize))
+    {
+        await connection.SendAsync(&quot;LogBatch&quot;, batch);
+    }
+});
+</code></pre>
+<h2 id="integration-points">Integration Points</h2>
+<h3 id="server-side-integration">Server-Side Integration</h3>
+<p>The server must implement:</p>
+<ul>
+<li>SignalR Hub with <code>ReceiveCommand</code> method</li>
+<li>gRPC service implementing <code>JiroHubProto</code> service</li>
+<li>Proper authentication and authorization mechanisms</li>
+</ul>
+<h3 id="client-command-processing">Client Command Processing</h3>
+<p>Commands flow through the following pipeline:</p>
+<ol>
+<li>WebSocket reception via SignalR</li>
+<li>JSON deserialization to <code>CommandMessage</code></li>
+<li>Service scope creation for dependency injection</li>
+<li>Command context setup with instance and session data</li>
+<li>Command execution via <code>ICommandHandlerService</code></li>
+<li>Result serialization and gRPC transmission</li>
+<li>Resource cleanup and metrics updating</li>
+</ol>
+<p>This architecture provides a robust, scalable, and maintainable communication layer for the Jiro application.</p>
+
+</article>
+
+        <div class="contribution d-print-none">
+          <a href="https://github.com/HueByte/Jiro/blob/main/dev/#L1" class="edit-link">Edit this page</a>
+        </div>
+
+        <div class="next-article d-print-none border-top" id="nextArticle"></div>
+
+      </div>
+
+      <div class="affix">
+        <nav id="affix"></nav>
+      </div>
+    </main>
+
+    <div class="container-xxl search-results" id="search-results"></div>
+
+    <footer class="border-top text-secondary">
+      <div class="container-xxl">
+        <div class="flex-fill">
+          <div class="footer-custom"><div class="footer-inner d-flex justify-content-between align-items-center"><div class="footer-text">Made with <strong>💖</strong> By HueByte</div><div class="footer-links"><a href="https://github.com/HueByte/Jiro" class="footer-link" target="_blank"><i class="fab fa-github"></i>GitHub</a><a href="#" class="footer-link scroll-to-top" onclick="scrollToTop()"><i class="fas fa-arrow-up"></i>Top</a></div></div></div><script>function scrollToTop(){window.scrollTo({top:0,behavior:'smooth'});}</script>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>

@@ -1,0 +1,404 @@
+﻿<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+      <title>&#128272; Client-Side Authentication Guide | Jiro Documentation </title>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <meta name="title" content="&#128272; Client-Side Authentication Guide | Jiro Documentation ">
+      
+      
+      <link rel="icon" href="../assets/Jiro-Icon.png">
+      <link rel="stylesheet" href="../public/docfx.min.css">
+      <link rel="stylesheet" href="../public/main.css">
+      <meta name="docfx:navrel" content="../toc.html">
+      <meta name="docfx:tocrel" content="toc.html">
+      
+      <meta name="docfx:rel" content="../">
+      
+      
+      <meta name="docfx:docurl" content="https://github.com/HueByte/Jiro/blob/main/dev/#L1">
+      <meta name="loc:inThisArticle" content="In this article">
+      <meta name="loc:searchResultsCount" content="{count} results for &quot;{query}&quot;">
+      <meta name="loc:searchNoResults" content="No results for &quot;{query}&quot;">
+      <meta name="loc:tocFilter" content="Filter by title">
+      <meta name="loc:nextArticle" content="Next">
+      <meta name="loc:prevArticle" content="Previous">
+      <meta name="loc:themeLight" content="Light">
+      <meta name="loc:themeDark" content="Dark">
+      <meta name="loc:themeAuto" content="Auto">
+      <meta name="loc:changeTheme" content="Change theme">
+      <meta name="loc:copy" content="Copy">
+      <meta name="loc:downloadPdf" content="Download PDF">
+  </head>
+
+  <script type="module" src="./../public/docfx.min.js"></script>
+
+  <script>
+    const theme = localStorage.getItem('theme') || 'auto'
+    document.documentElement.setAttribute('data-bs-theme', theme === 'auto' ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : theme)
+  </script>
+
+
+  <body class="tex2jax_ignore" data-layout="" data-yaml-mime="">
+    <header class="bg-body border-bottom">
+      <nav id="autocollapse" class="navbar navbar-expand-md" role="navigation">
+        <div class="container-xxl flex-nowrap">
+          <a class="navbar-brand" href="../index.html">
+            <img id="logo" class="svg" src="../assets/Jiro-Icon.png" alt="Jiro - AI Assistant">
+            Jiro - AI Assistant
+          </a>
+          <button class="btn btn-lg d-md-none border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navpanel" aria-controls="navpanel" aria-expanded="false" aria-label="Toggle navigation">
+            <i class="bi bi-three-dots"></i>
+          </button>
+          <div class="collapse navbar-collapse" id="navpanel">
+            <div id="navbar">
+              <form class="search" role="search" id="search">
+                <i class="bi bi-search"></i>
+                <input class="form-control" id="search-query" type="search" disabled="" placeholder="Search" autocomplete="off" aria-label="Search">
+              </form>
+            </div>
+          </div>
+        </div>
+      </nav>
+    </header>
+
+    <main class="container-xxl">
+      <div class="toc-offcanvas">
+        <div class="offcanvas-md offcanvas-start" tabindex="-1" id="tocOffcanvas" aria-labelledby="tocOffcanvasLabel">
+          <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="tocOffcanvasLabel">Table of Contents</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#tocOffcanvas" aria-label="Close"></button>
+          </div>
+          <div class="offcanvas-body">
+            <nav class="toc" id="toc"></nav>
+          </div>
+        </div>
+      </div>
+
+      <div class="content">
+        <div class="actionbar">
+          <button class="btn btn-lg border-0 d-md-none" style="margin-top: -.65em; margin-left: -.8em" type="button" data-bs-toggle="offcanvas" data-bs-target="#tocOffcanvas" aria-controls="tocOffcanvas" aria-expanded="false" aria-label="Show table of contents">
+            <i class="bi bi-list"></i>
+          </button>
+
+          <nav id="breadcrumb"></nav>
+        </div>
+
+        <article data-uid="">
+<h1 id="-client-side-authentication-guide">🔐 Client-Side Authentication Guide</h1>
+
+<p>This document explains how the Jiro client authenticates with JiroCloud API through both gRPC and WebSocket connections using a <strong>single API key</strong>.</p>
+<h2 id="-implementation-overview">🏗️ Implementation Overview</h2>
+<p>The Jiro client uses <strong>unified API key authentication</strong> for both communication channels:</p>
+<h3 id="-grpc-client-authentication">🚀 gRPC Client Authentication</h3>
+<p><strong>Location</strong>: <code>src/Jiro.Kernel/Jiro.App/Program.cs</code> (lines 75-82)</p>
+<pre><code class="lang-csharp">services.AddGrpcClient&lt;JiroHubProto.JiroHubProtoClient&gt;(&quot;JiroClient&quot;, options =&gt;
+{
+    options.Address = new Uri(apiUrl);
+})
+.AddCallCredentials((context, metadata) =&gt;
+{
+    metadata.Add(&quot;X-Api-Key&quot;, apiKey);
+    return Task.CompletedTask;
+})
+</code></pre>
+<p><strong>Features</strong>:</p>
+<ul>
+<li>✅ Automatically attaches <code>X-Api-Key</code> header to all gRPC requests</li>
+<li>✅ Uses global API key from configuration</li>
+<li>✅ Supports both test mode and production authentication</li>
+</ul>
+<h3 id="-websocket-signalr-authentication">📡 WebSocket (SignalR) Authentication</h3>
+<p><strong>Location</strong>: <code>src/Jiro.Kernel/Jiro.App/Services/SignalRWebSocketConnection.cs</code> (lines 78-86)</p>
+<pre><code class="lang-csharp">// Ensure API key is provided for authentication
+if (string.IsNullOrEmpty(_options.ApiKey))
+{
+    throw new InvalidOperationException(&quot;API key is required for WebSocket authentication. Please configure 'WebSocket:ApiKey' or 'API_KEY' in your settings.&quot;);
+}
+
+// Build the hub URL with API key query parameter
+string hubUrl = _options.HubUrl;
+var separator = hubUrl.Contains('?') ? &quot;&amp;&quot; : &quot;?&quot;;
+hubUrl = $&quot;{hubUrl}{separator}api_key={Uri.EscapeDataString(_options.ApiKey)}&quot;;
+</code></pre>
+<p><strong>Features</strong>:</p>
+<ul>
+<li>✅ <strong>Required</strong> API key authentication via <code>api_key</code> query parameter</li>
+<li>✅ Automatic fallback to global <code>API_KEY</code> configuration</li>
+<li>✅ Allows custom headers for additional configuration</li>
+<li>✅ Automatic reconnection with authentication persistence</li>
+<li>✅ Fail-fast validation if API key is missing</li>
+</ul>
+<h2 id="-configuration">⚙️ Configuration</h2>
+<h3 id="unified-configuration-file">Unified Configuration File</h3>
+<p><strong><code>appsettings.example.json</code></strong> - Single configuration file for all settings:</p>
+<pre><code class="lang-json">{
+  &quot;TokenizerUrl&quot;: &quot;http://localhost:8000&quot;,
+  &quot;ConnectionStrings&quot;: {
+    &quot;JiroContext&quot;: &quot;&quot;
+  },
+  &quot;Whitelist&quot;: true,
+  &quot;Gpt&quot;: {
+    &quot;Enable&quot;: true,
+    &quot;BaseUrl&quot;: &quot;https://api.openai.com/v1/&quot;,
+    &quot;AuthToken&quot;: &quot;YourOpenAiToken&quot;,
+    &quot;Organization&quot;: &quot;&quot;,
+    &quot;FineTune&quot;: false,
+    &quot;UseChatGpt&quot;: true,
+    &quot;ChatGpt&quot;: {
+      &quot;SystemMessage&quot;: &quot;I want you to act as personal assistant called Jiro. You are friendly, funny and sarcastic. You can ask me anything you want and engage in conversation.&quot;
+    },
+    &quot;SingleGpt&quot;: {
+      &quot;TokenLimit&quot;: 500,
+      &quot;ContextMessage&quot;: &quot;User$ &quot;,
+      &quot;Stop&quot;: &quot;Jiro$ &quot;,
+      &quot;Model&quot;: &quot;text-davinci-003&quot;
+    }
+  },
+  &quot;Modules&quot;: {},
+  &quot;RequiredModules&quot;: {},
+  &quot;ApiKey&quot;: &quot;your-api-key-here&quot;,
+  &quot;JiroApi&quot;: &quot;https://localhost:18092&quot;,
+  &quot;WebSocket&quot;: {
+    &quot;HubUrl&quot;: &quot;https://localhost:5001/instanceHub&quot;,
+    &quot;ReconnectionDelayMs&quot;: 5000,
+    &quot;MaxReconnectionAttempts&quot;: 5,
+    &quot;HandshakeTimeoutMs&quot;: 15000,
+    &quot;KeepAliveIntervalMs&quot;: 15000,
+    &quot;ServerTimeoutMs&quot;: 30000,
+    &quot;ApiKey&quot;: &quot;your-api-key-here&quot;,
+    &quot;Headers&quot;: {
+      &quot;User-Agent&quot;: &quot;Jiro-Bot/1.0&quot;
+    }
+  },
+  &quot;Grpc&quot;: {
+    &quot;ServerUrl&quot;: &quot;https://localhost:5001&quot;,
+    &quot;TimeoutMs&quot;: 30000,
+    &quot;MaxRetries&quot;: 3
+  }
+}
+</code></pre>
+<h3 id="environment-variables">Environment Variables</h3>
+<p>The system reads authentication credentials from:</p>
+<ol>
+<li><strong>API_KEY</strong>: Used for both gRPC and WebSocket authentication</li>
+<li><strong>JIRO_API</strong>: Base URL for the JiroCloud API</li>
+</ol>
+<h3 id="configuration-priority">Configuration Priority</h3>
+<ol>
+<li><strong>WebSocket:ApiKey</strong> (if specified in WebSocket section)</li>
+<li><strong>API_KEY</strong> (global fallback)</li>
+<li><strong>Validation error</strong> (if neither is provided)</li>
+</ol>
+<h2 id="-authentication-flow">🔄 Authentication Flow</h2>
+<h3 id="1-application-startup">1. Application Startup</h3>
+<pre><code class="lang-mermaid">%%{init: {
+  &quot;theme&quot;: &quot;base&quot;,
+  &quot;themeVariables&quot;: {
+    &quot;background&quot;: &quot;#FFFFFF&quot;,
+    &quot;primaryColor&quot;: &quot;#2E7D32&quot;,
+    &quot;primaryTextColor&quot;: &quot;#000000&quot;,
+    &quot;primaryBorderColor&quot;: &quot;#1B5E20&quot;,
+    &quot;lineColor&quot;: &quot;#424242&quot;,
+    &quot;sectionBkgColor&quot;: &quot;#E8F5E9&quot;,
+    &quot;altSectionBkgColor&quot;: &quot;#C8E6C9&quot;,
+    &quot;gridColor&quot;: &quot;#E0E0E0&quot;,
+    &quot;secondaryColor&quot;: &quot;#1976D2&quot;,
+    &quot;tertiaryColor&quot;: &quot;#7B1FA2&quot;,
+    &quot;actorBkg&quot;: &quot;#E3F2FD&quot;,
+    &quot;actorBorder&quot;: &quot;#1565C0&quot;,
+    &quot;actorTextColor&quot;: &quot;#000000&quot;,
+    &quot;activationBkgColor&quot;: &quot;#FFF3E0&quot;,
+    &quot;activationBorderColor&quot;: &quot;#E65100&quot;,
+    &quot;noteBkgColor&quot;: &quot;#FFFDE7&quot;,
+    &quot;noteBorderColor&quot;: &quot;#F57C00&quot;,
+    &quot;noteTextColor&quot;: &quot;#000000&quot;
+  }
+}}%%
+sequenceDiagram
+    participant App as Jiro App
+    participant Config as Configuration
+    participant gRPC as gRPC Client
+    participant WS as WebSocket Client
+
+    App-&gt;&gt;Config: Load API_KEY &amp; JIRO_API
+    App-&gt;&gt;Config: Validate API_KEY is present
+    
+    App-&gt;&gt;gRPC: Configure with API key
+    gRPC-&gt;&gt;gRPC: Add X-Api-Key to all requests
+    
+    App-&gt;&gt;WS: Configure with API key
+    WS-&gt;&gt;WS: Validate API key is present
+    WS-&gt;&gt;WS: Add api_key query parameter
+    
+    Note over App: Authentication ready for both channels
+</code></pre>
+<h3 id="2-request-authentication">2. Request Authentication</h3>
+<h4 id="grpc-requests">gRPC Requests</h4>
+<pre><code class="lang-mermaid">%%{init: {
+  &quot;theme&quot;: &quot;base&quot;,
+  &quot;themeVariables&quot;: {
+    &quot;background&quot;: &quot;#FFFFFF&quot;,
+    &quot;primaryColor&quot;: &quot;#2E7D32&quot;,
+    &quot;primaryTextColor&quot;: &quot;#000000&quot;,
+    &quot;primaryBorderColor&quot;: &quot;#1B5E20&quot;,
+    &quot;lineColor&quot;: &quot;#424242&quot;,
+    &quot;sectionBkgColor&quot;: &quot;#E8F5E9&quot;,
+    &quot;altSectionBkgColor&quot;: &quot;#C8E6C9&quot;,
+    &quot;gridColor&quot;: &quot;#E0E0E0&quot;,
+    &quot;secondaryColor&quot;: &quot;#1976D2&quot;,
+    &quot;tertiaryColor&quot;: &quot;#7B1FA2&quot;,
+    &quot;actorBkg&quot;: &quot;#E3F2FD&quot;,
+    &quot;actorBorder&quot;: &quot;#1565C0&quot;,
+    &quot;actorTextColor&quot;: &quot;#000000&quot;,
+    &quot;activationBkgColor&quot;: &quot;#FFF3E0&quot;,
+    &quot;activationBorderColor&quot;: &quot;#E65100&quot;,
+    &quot;noteBkgColor&quot;: &quot;#FFFDE7&quot;,
+    &quot;noteBorderColor&quot;: &quot;#F57C00&quot;,
+    &quot;noteTextColor&quot;: &quot;#000000&quot;
+  }
+}}%%
+sequenceDiagram
+    participant Client as Jiro Client
+    participant gRPC as gRPC Service
+    participant Server as JiroCloud
+
+    Client-&gt;&gt;gRPC: SendCommandResult()
+    gRPC-&gt;&gt;gRPC: Add X-Api-Key header
+    gRPC-&gt;&gt;Server: gRPC call with authentication
+    Server-&gt;&gt;Server: Validate API key
+    Server-&gt;&gt;gRPC: Response
+    gRPC-&gt;&gt;Client: Result
+</code></pre>
+<h4 id="websocket-connection">WebSocket Connection</h4>
+<pre><code class="lang-mermaid">%%{init: {
+  &quot;theme&quot;: &quot;base&quot;,
+  &quot;themeVariables&quot;: {
+    &quot;background&quot;: &quot;#FFFFFF&quot;,
+    &quot;primaryColor&quot;: &quot;#2E7D32&quot;,
+    &quot;primaryTextColor&quot;: &quot;#000000&quot;,
+    &quot;primaryBorderColor&quot;: &quot;#1B5E20&quot;,
+    &quot;lineColor&quot;: &quot;#424242&quot;,
+    &quot;sectionBkgColor&quot;: &quot;#E8F5E9&quot;,
+    &quot;altSectionBkgColor&quot;: &quot;#C8E6C9&quot;,
+    &quot;gridColor&quot;: &quot;#E0E0E0&quot;,
+    &quot;secondaryColor&quot;: &quot;#1976D2&quot;,
+    &quot;tertiaryColor&quot;: &quot;#7B1FA2&quot;,
+    &quot;actorBkg&quot;: &quot;#E3F2FD&quot;,
+    &quot;actorBorder&quot;: &quot;#1565C0&quot;,
+    &quot;actorTextColor&quot;: &quot;#000000&quot;,
+    &quot;activationBkgColor&quot;: &quot;#FFF3E0&quot;,
+    &quot;activationBorderColor&quot;: &quot;#E65100&quot;,
+    &quot;noteBkgColor&quot;: &quot;#FFFDE7&quot;,
+    &quot;noteBorderColor&quot;: &quot;#F57C00&quot;,
+    &quot;noteTextColor&quot;: &quot;#000000&quot;,
+    &quot;loopTextColor&quot;: &quot;#D5D8DA&quot;
+  }
+}}%%
+sequenceDiagram
+    participant Client as Jiro Client  
+    participant WS as SignalR Client
+    participant Hub as SignalR Hub
+
+    Client-&gt;&gt;WS: StartAsync()
+    WS-&gt;&gt;WS: Validate API key is present
+    WS-&gt;&gt;WS: Add api_key to connection URL
+    WS-&gt;&gt;Hub: Connect with API key parameter
+    Hub-&gt;&gt;Hub: Validate API key
+    Hub-&gt;&gt;WS: Connection established
+    
+    loop Command Processing
+        Hub-&gt;&gt;WS: ReceiveCommand
+        WS-&gt;&gt;Client: Process command
+        Client-&gt;&gt;gRPC: Send result (with API key)
+    end
+</code></pre>
+<h2 id="-security-best-practices">🛡️ Security Best Practices</h2>
+<h3 id="-already-implemented">✅ Already Implemented</h3>
+<ol>
+<li><strong>Unified Authentication</strong>: Single API key for both gRPC and WebSocket channels</li>
+<li><strong>Required Validation</strong>: Application fails fast if API key is missing</li>
+<li><strong>Environment Support</strong>: Supports both development and production credentials</li>
+<li><strong>Git Exclusion</strong>: Sensitive configuration files excluded from version control</li>
+<li><strong>Connection Security</strong>: HTTP/2 with keep-alive for efficient secure connections</li>
+<li><strong>Automatic Retry</strong>: Built-in retry mechanisms with authentication persistence</li>
+</ol>
+<h3 id="-configuration-security">🔧 Configuration Security</h3>
+<ol>
+<li><p><strong>Use Environment Variables</strong> in production:</p>
+<pre><code class="lang-bash">export API_KEY=&quot;your-production-api-key&quot;
+export JIRO_API=&quot;https://production-jiro-cloud.com&quot;
+</code></pre>
+</li>
+<li><p><strong>Secure API Key Storage</strong>:</p>
+<pre><code class="lang-json">{
+  &quot;ApiKey&quot;: &quot;$(JIRO_API_KEY)&quot;
+}
+</code></pre>
+</li>
+<li><p><strong>Rotate Credentials Regularly</strong>: Update API keys periodically</p>
+</li>
+</ol>
+<h2 id="-troubleshooting">🚨 Troubleshooting</h2>
+<h3 id="authentication-failures">Authentication Failures</h3>
+<ol>
+<li><p><strong>Missing API Key</strong>:</p>
+<pre><code class="lang-text">Error: &quot;Please provide API_KEY&quot; 
+Error: &quot;API key is required for WebSocket authentication&quot;
+</code></pre>
+<p><strong>Solution</strong>: Set <code>API_KEY</code> environment variable or add it to <code>appsettings.json</code></p>
+</li>
+<li><p><strong>Invalid API Key</strong>:</p>
+<pre><code class="lang-text">Error: gRPC authentication failed
+Error: WebSocket connection failed with 401 Unauthorized
+</code></pre>
+<p><strong>Solution</strong>: Verify your API key is correct and has proper permissions</p>
+</li>
+<li><p><strong>Configuration Not Found</strong>:</p>
+<pre><code class="lang-text">Error: &quot;Couldn't connect to API&quot;
+</code></pre>
+<p><strong>Solution</strong>: Ensure <code>JIRO_API</code> environment variable is set</p>
+</li>
+</ol>
+<h3 id="testing-authentication">Testing Authentication</h3>
+<p>Use the test mode to verify authentication setup:</p>
+<pre><code class="lang-bash">dotnet run --test-mode
+</code></pre>
+<p>This will use dummy credentials for testing the authentication flow.</p>
+<h2 id="-quick-setup">📝 Quick Setup</h2>
+<p>To set up authentication for your Jiro client:</p>
+<ol>
+<li>✅ <strong>Get your API key</strong> from JiroCloud dashboard</li>
+<li>✅ <strong>Set environment variable</strong>: <code>API_KEY=&quot;your-api-key-here&quot;</code></li>
+<li>✅ <strong>Set API URL</strong>: <code>JIRO_API=&quot;https://your-jiro-cloud.com&quot;</code></li>
+<li>✅ <strong>Run the application</strong> - authentication will work automatically</li>
+</ol>
+<p><strong>Alternative</strong>: Copy <code>appsettings.example.json</code> to <code>appsettings.json</code> and fill in your API key.</p>
+<p>The system handles all the complexity of attaching credentials to requests, managing connections, and handling authentication failures with retries. <strong>No separate token or additional configuration files needed!</strong></p>
+
+</article>
+
+        <div class="contribution d-print-none">
+          <a href="https://github.com/HueByte/Jiro/blob/main/dev/#L1" class="edit-link">Edit this page</a>
+        </div>
+
+        <div class="next-article d-print-none border-top" id="nextArticle"></div>
+
+      </div>
+
+      <div class="affix">
+        <nav id="affix"></nav>
+      </div>
+    </main>
+
+    <div class="container-xxl search-results" id="search-results"></div>
+
+    <footer class="border-top text-secondary">
+      <div class="container-xxl">
+        <div class="flex-fill">
+          <div class="footer-custom"><div class="footer-inner d-flex justify-content-between align-items-center"><div class="footer-text">Made with <strong>💖</strong> By HueByte</div><div class="footer-links"><a href="https://github.com/HueByte/Jiro" class="footer-link" target="_blank"><i class="fab fa-github"></i>GitHub</a><a href="#" class="footer-link scroll-to-top" onclick="scrollToTop()"><i class="fas fa-arrow-up"></i>Top</a></div></div></div><script>function scrollToTop(){window.scrollTo({top:0,behavior:'smooth'});}</script>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>
