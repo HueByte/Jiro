@@ -5,6 +5,7 @@
 Jiro implements a sophisticated command execution pipeline that handles command processing from reception through completion. This document details the complete command flow, from initial WebSocket reception through gRPC result transmission, including all intermediate processing steps and error handling mechanisms.
 
 ### Key Updates (v1.0.0-beta)
+
 - **Client-side session ID generation**: Sessions are now created on the client side
 - **Enhanced error handling**: Improved command synchronization and error recovery
 - **Service separation**: SessionManager and MessageCacheService now handle session/message operations

@@ -5,6 +5,7 @@
 Jiro implements a hybrid communication architecture that combines WebSocket connections for real-time bidirectional communication and gRPC for reliable service interactions. This design provides real-time command reception, live log streaming, and session management through SignalR WebSockets while ensuring reliable command result delivery via gRPC with retry mechanisms.
 
 ### Key Features (v1.0.0-beta)
+
 - **Real-time log streaming** via `StreamLogsAsync` and `StreamLogBatchesAsync`
 - **Enhanced session management** with client-side session ID generation
 - **Improved WebSocket contracts** using `IJiroInstance` interface
@@ -608,6 +609,7 @@ flowchart TD
 ### Streaming Methods
 
 #### Continuous Log Streaming
+
 ```csharp
 public async IAsyncEnumerable<LogEntry> StreamLogsAsync(
     string? level = null, 
@@ -621,6 +623,7 @@ public async IAsyncEnumerable<LogEntry> StreamLogsAsync(
 ```
 
 #### Batch Log Streaming
+
 ```csharp
 public async IAsyncEnumerable<IEnumerable<LogEntry>> StreamLogBatchesAsync(
     string? level = null, 
@@ -637,6 +640,7 @@ public async IAsyncEnumerable<IEnumerable<LogEntry>> StreamLogBatchesAsync(
 ### Enhanced Log Parsing
 
 The log parser now supports:
+
 - **Timezone-aware timestamps**: Handles logs with timezone offsets (e.g., `+00:00`)
 - **Multi-line log entries**: Correctly groups stack traces and multi-line messages
 - **Regex pattern matching**: Intelligent parsing of various log formats
