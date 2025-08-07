@@ -98,13 +98,7 @@ Jiro: "🌐 Pinging google.com... Response time: 23ms ✅"
    ./scripts/setup-project.sh --non-interactive # Linux/macOS
    ```
 
-3. **Run database migrations**
-
-   ```bash
-   dotnet ef database update -p src/Jiro.Kernel/Jiro.Infrastructure -s src/Jiro.Kernel/Jiro.App
-   ```
-
-4. **Start Jiro**
+3. **Start Jiro**
 
    ```bash
    # Option 1: Docker (includes database)
@@ -115,7 +109,7 @@ Jiro: "🌐 Pinging google.com... Response time: 23ms ✅"
    dotnet run
    ```
 
-5. **Open your browser** and navigate to `https://localhost:5001` 🎉
+4. **Open your browser** and navigate to `https://jiro.huebytes.com/` 🎉
 
 ### 🔧 Manual Setup (Alternative)
 
