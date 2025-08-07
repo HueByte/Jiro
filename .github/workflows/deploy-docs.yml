@@ -96,7 +96,7 @@ jobs:
           find dev/_site -type f -name "*.html" | head -10
 
       - name: Deploy to web branch
-        uses: peaceiris/actions-gh-pages@v3
+        uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./dev/_site
