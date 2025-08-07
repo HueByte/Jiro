@@ -92,12 +92,14 @@ For detailed information about changes, new features, and breaking changes, see 
 - **Cleanup** ([`9422153`](https://github.com/huebyte/Jiro/commit/9422153)) by @HueByte on 2025-08-07
 - **Merge pull request #31 from HueByte/dev** ([`55ff85e`](https://github.com/huebyte/Jiro/commit/55ff85e)) by @Hue on 2025-08-07
 - **Version bump** ([`3d92647`](https://github.com/huebyte/Jiro/commit/3d92647)) by @HueByte on 2025-08-07
+- **chore: format code and lint markdown for release v1.0.0-beta** ([`bf19e58`](https://github.com/huebyte/Jiro/commit/bf19e58)) by @HueByte on 2025-08-07
+- **Workflow fix** ([`983b448`](https://github.com/huebyte/Jiro/commit/983b448)) by @HueByte on 2025-08-07
 
 ### ℹ️ Release Information
 
 - **Version**: v1.0.0-beta
 - **Branch**: main  
-- **Generated on**: 2025-08-07 16:59:00 UTC
+- **Generated on**: 2025-08-07 17:06:07 UTC
 - **Changelog**: [https://huebyte.github.io/Jiro/documentation/changelog/v1.0.0-beta.html](https://huebyte.github.io/Jiro/documentation/changelog/v1.0.0-beta.html)
 
 **Full Changelog**: <https://github.com/huebyte/Jiro/compare/v0.1.1-beta...v1.0.0-beta>
