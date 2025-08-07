@@ -258,7 +258,7 @@ public class LogsProviderService : ILogsProviderService
 		{
 			if (cancellationToken.IsCancellationRequested)
 				yield break;
-			
+
 			yield return existingEntry;
 		}
 
@@ -267,7 +267,7 @@ public class LogsProviderService : ILogsProviderService
 		{
 			if (cancellationToken.IsCancellationRequested)
 				yield break;
-			
+
 			yield return newEntry;
 		}
 	}
@@ -294,9 +294,9 @@ public class LogsProviderService : ILogsProviderService
 		{
 			if (cancellationToken.IsCancellationRequested)
 				yield break;
-			
+
 			currentBatch.Add(existingEntry);
-			
+
 			if (currentBatch.Count >= batchSize)
 			{
 				yield return currentBatch.ToList();
@@ -319,18 +319,18 @@ public class LogsProviderService : ILogsProviderService
 		{
 			if (cancellationToken.IsCancellationRequested)
 				yield break;
-			
+
 			currentBatch.Add(newEntry);
-			
+
 			// Send batch if it's full OR if 5 seconds have passed since last batch
 			var now = DateTime.UtcNow;
 			var timeSinceLastBatch = (now - lastBatchTime).TotalMilliseconds;
-			
+
 			if (currentBatch.Count >= batchSize || timeSinceLastBatch >= batchTimeoutMs)
 			{
 				if (currentBatch.Count > 0)
 				{
-					_logger.LogDebug("Sending batch of {Count} entries (timeout: {TimedOut})", 
+					_logger.LogDebug("Sending batch of {Count} entries (timeout: {TimedOut})",
 						currentBatch.Count, timeSinceLastBatch >= batchTimeoutMs);
 					yield return currentBatch.ToList();
 					currentBatch.Clear();
@@ -502,13 +502,13 @@ public class LogsProviderService : ILogsProviderService
 					.Replace("{hour}", "*")  // lowercase variant
 					.Replace("_{", "_*")     // Handle patterns like jiro_{date}.log -> jiro_*.log
 					.Replace("}", "");       // Remove remaining braces
-				
+
 				// Special handling for Serilog rolling file pattern like "jiro-.log"
 				if (pattern.Contains("-."))
 				{
 					pattern = pattern.Replace("-.", "-*.");
 				}
-				
+
 				return pattern;
 			})
 			.ToArray();
@@ -781,11 +781,11 @@ public class LogsProviderService : ILogsProviderService
 	/// <summary>
 	/// Gets recent log entries from existing log files for initial streaming
 	/// </summary>
-	private async IAsyncEnumerable<LogEntry> GetRecentLogEntriesAsync(string logsDirectory, string[] logPatterns, 
+	private async IAsyncEnumerable<LogEntry> GetRecentLogEntriesAsync(string logsDirectory, string[] logPatterns,
 		string? level, int limit, [EnumeratorCancellation] CancellationToken cancellationToken)
 	{
 		IEnumerable<LogEntry> recentEntries;
-		
+
 		try
 		{
 			recentEntries = await GetRecentLogEntriesInternalAsync(logsDirectory, logPatterns, level, limit, cancellationToken);
@@ -808,11 +808,11 @@ public class LogsProviderService : ILogsProviderService
 	/// <summary>
 	/// Internal method to get recent log entries without yield in try-catch
 	/// </summary>
-	private async Task<List<LogEntry>> GetRecentLogEntriesInternalAsync(string logsDirectory, string[] logPatterns, 
+	private async Task<List<LogEntry>> GetRecentLogEntriesInternalAsync(string logsDirectory, string[] logPatterns,
 		string? level, int limit, CancellationToken cancellationToken)
 	{
 		var recentEntries = new List<LogEntry>();
-		
+
 		// Get the most recent log file
 		var logFiles = logPatterns
 			.SelectMany(pattern => Directory.EnumerateFiles(logsDirectory, pattern))
@@ -828,26 +828,26 @@ public class LogsProviderService : ILogsProviderService
 			{
 				using var fileStream = new FileStream(logFile, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
 				using var reader = new StreamReader(fileStream);
-				
+
 				var entries = (await ParseLogEntriesAsync(reader)).ToList();
 				var fileName = Path.GetFileName(logFile);
-				
+
 				// Add file name and filter by level
 				foreach (var entry in entries)
 				{
 					entry.File = fileName;
 				}
-				
+
 				// Take the last entries and filter by level
 				var filteredEntries = entries
-					.Where(e => string.IsNullOrEmpty(level) || 
+					.Where(e => string.IsNullOrEmpty(level) ||
 							level.Equals("all", StringComparison.OrdinalIgnoreCase) ||
 							IsLogLevelMatch(e.Level, level))
 					.TakeLast(limit)
 					.ToList();
-				
+
 				recentEntries.AddRange(filteredEntries);
-				
+
 				// If we have enough entries, break
 				if (recentEntries.Count >= limit)
 					break;
@@ -857,25 +857,25 @@ public class LogsProviderService : ILogsProviderService
 				_logger.LogWarning(ex, "Error reading recent entries from log file: {LogFile}", logFile);
 			}
 		}
-		
+
 		return recentEntries.TakeLast(limit).ToList();
 	}
 
 	/// <summary>
 	/// Polls log files for changes and streams new entries as they appear
 	/// </summary>
-	private async IAsyncEnumerable<LogEntry> PollLogFilesAsync(string logsDirectory, string[] logPatterns, 
+	private async IAsyncEnumerable<LogEntry> PollLogFilesAsync(string logsDirectory, string[] logPatterns,
 		string? level, [EnumeratorCancellation] CancellationToken cancellationToken)
 	{
 		var filePositions = new Dictionary<string, long>();
 		var pendingLines = new Dictionary<string, List<string>>();
-		
+
 		_logger.LogInformation("Starting log file polling for patterns: {Patterns}", string.Join(", ", logPatterns));
 
 		// Initialize positions for existing files
 		var existingFiles = logPatterns
 			.SelectMany(pattern => Directory.EnumerateFiles(logsDirectory, pattern));
-			
+
 		foreach (var file in existingFiles)
 		{
 			try
@@ -895,7 +895,7 @@ public class LogsProviderService : ILogsProviderService
 		while (!cancellationToken.IsCancellationRequested)
 		{
 			var hasNewEntries = false;
-			
+
 			// Check all monitored files for changes
 			foreach (var filePath in filePositions.Keys.ToList())
 			{
@@ -914,14 +914,14 @@ public class LogsProviderService : ILogsProviderService
 				long currentSize = 0;
 				long lastPosition = 0;
 				bool hasFileGrown = false;
-				
+
 				try
 				{
 					var currentFileInfo = new FileInfo(filePath);
 					currentSize = currentFileInfo.Length;
 					lastPosition = filePositions[filePath];
 					hasFileGrown = currentSize > lastPosition;
-					
+
 					if (currentSize < lastPosition)
 					{
 						// File was truncated or rotated, reset position
@@ -944,7 +944,7 @@ public class LogsProviderService : ILogsProviderService
 						hasNewEntries = true;
 						yield return entry;
 					}
-					
+
 					filePositions[filePath] = currentSize;
 				}
 			}
@@ -975,18 +975,18 @@ public class LogsProviderService : ILogsProviderService
 				await Task.Delay(500, cancellationToken); // Check every 500ms
 			}
 		}
-		
+
 		_logger.LogInformation("Log file polling stopped");
 	}
 
 	/// <summary>
 	/// Reads new content from a log file since the last position
 	/// </summary>
-	private async IAsyncEnumerable<LogEntry> ReadNewLogContentAsync(string filePath, long fromPosition, 
+	private async IAsyncEnumerable<LogEntry> ReadNewLogContentAsync(string filePath, long fromPosition,
 		string? level, List<string> pendingLines, [EnumeratorCancellation] CancellationToken cancellationToken)
 	{
 		IEnumerable<LogEntry> entries;
-		
+
 		try
 		{
 			entries = await ReadNewLogContentInternalAsync(filePath, fromPosition, level, pendingLines, cancellationToken);
@@ -1009,22 +1009,22 @@ public class LogsProviderService : ILogsProviderService
 	/// <summary>
 	/// Internal method to read new log content without yield in try-catch
 	/// </summary>
-	private async Task<List<LogEntry>> ReadNewLogContentInternalAsync(string filePath, long fromPosition, 
+	private async Task<List<LogEntry>> ReadNewLogContentInternalAsync(string filePath, long fromPosition,
 		string? level, List<string> pendingLines, CancellationToken cancellationToken)
 	{
 		using var fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
 		fileStream.Seek(fromPosition, SeekOrigin.Begin);
-		
+
 		using var reader = new StreamReader(fileStream);
 		var fileName = Path.GetFileName(filePath);
 		var newLines = new List<string>();
-		
+
 		string? line;
 		while ((line = await reader.ReadLineAsync()) != null)
 		{
 			if (cancellationToken.IsCancellationRequested)
 				break;
-			
+
 			newLines.Add(line);
 		}
 
@@ -1038,7 +1038,7 @@ public class LogsProviderService : ILogsProviderService
 
 		// Parse complete log entries
 		var entries = ParseLogEntriesFromLines(allLines, fileName);
-		
+
 		// The last entry might be incomplete if the line doesn't end with a newline
 		// Keep the last incomplete entry for next read
 		if (entries.Count > 0)
@@ -1073,7 +1073,7 @@ public class LogsProviderService : ILogsProviderService
 				break;
 
 			// Apply level filter
-			if (string.IsNullOrEmpty(level) || 
+			if (string.IsNullOrEmpty(level) ||
 				level.Equals("all", StringComparison.OrdinalIgnoreCase) ||
 				IsLogLevelMatch(entry.Level, level))
 			{

@@ -800,7 +800,7 @@ public class WebSocketConnection : JiroInstanceBase, IDisposable
 				SingleReader = true,
 				SingleWriter = true
 			});
-			
+
 			var writer = channel.Writer;
 			var reader = channel.Reader;
 			var cts = new CancellationTokenSource();
@@ -873,7 +873,7 @@ public class WebSocketConnection : JiroInstanceBase, IDisposable
 		IServiceScope? scope = null;
 		var entryCount = 0;
 		var batchSize = Math.Min(request.Limit ?? 50, 20); // Max batch size of 20
-		
+
 		try
 		{
 			scope = _scopeFactory.CreateScope();

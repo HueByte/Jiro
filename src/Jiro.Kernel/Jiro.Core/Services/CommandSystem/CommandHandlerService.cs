@@ -155,7 +155,7 @@ public partial class CommandHandlerService : ICommandHandlerService
 	private async Task EnsureSessionIdAsync(IServiceProvider scopedProvider)
 	{
 		var commandContext = scopedProvider.GetRequiredService<ICommandContext>();
-		
+
 		// If no sessionId provided, generate a new one
 		if (string.IsNullOrEmpty(commandContext.SessionId))
 		{
@@ -164,7 +164,7 @@ public partial class CommandHandlerService : ICommandHandlerService
 
 			// Store sessionId in context data for response
 			commandContext.Data["generatedSessionId"] = sessionId;
-			
+
 			_logger.LogInformation("Generated new SessionId: '{NewSessionId}' for command execution", sessionId);
 		}
 		else

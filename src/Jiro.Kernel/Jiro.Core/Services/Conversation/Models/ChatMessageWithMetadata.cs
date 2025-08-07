@@ -1,4 +1,5 @@
 using Jiro.Core.Models;
+
 using OpenAI.Chat;
 
 namespace Jiro.Core.Services.Conversation.Models;

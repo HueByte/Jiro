@@ -375,11 +375,13 @@ src/Jiro.Kernel/Jiro.App/Configuration/
 ```
 
 **Configuration File Hierarchy:**
+
 1. `appsettings.json` - Base configuration
 2. `appsettings.{environment}.json` - Environment-specific overrides
 3. Environment variables with `JIRO_` prefix - Runtime overrides
 
 **Workflow Integration:**
+
 - CI/CD pipelines automatically copy `appsettings.example.json` to `appsettings.json`
 - The example file contains safe defaults for build and test environments
 - Production deployments use environment variables for sensitive values

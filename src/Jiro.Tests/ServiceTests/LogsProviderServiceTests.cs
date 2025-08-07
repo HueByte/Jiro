@@ -383,7 +383,7 @@ public class LogsProviderServiceTests : IDisposable
 				var batchList = batch.ToList();
 				Assert.True(batchList.Count <= batchSize);
 				Assert.All(batchList, entry => Assert.NotNull(entry.Message));
-				
+
 				totalEntries += batchList.Count;
 				batchCount++;
 
@@ -420,7 +420,7 @@ public class LogsProviderServiceTests : IDisposable
 				Assert.NotNull(batch);
 				var batchList = batch.ToList();
 				Assert.All(batchList, entry => Assert.Equal(level, entry.Level));
-				
+
 				batchCount++;
 
 				// Stop after a few batches
@@ -456,7 +456,7 @@ public class LogsProviderServiceTests : IDisposable
 				var batchList = batch.ToList();
 				Assert.True(batchList.Count > 0);
 				Assert.All(batchList, entry => Assert.NotNull(entry.Message));
-				
+
 				totalEntries += batchList.Count;
 				batchCount++;
 

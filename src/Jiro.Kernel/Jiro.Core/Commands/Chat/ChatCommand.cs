@@ -66,7 +66,7 @@ public class ChatCommand : ICommandBase
 	public async Task<ICommandResult> Chat(string prompt)
 	{
 		var sessionId = _commandContext.SessionId;
-		_logger.LogInformation("Chat command started with SessionId: '{SessionId}' (IsEmpty: {IsEmpty})", 
+		_logger.LogInformation("Chat command started with SessionId: '{SessionId}' (IsEmpty: {IsEmpty})",
 			sessionId ?? "null", string.IsNullOrEmpty(sessionId));
 
 		// Session ID is now guaranteed to be available from CommandHandler
