@@ -1,9 +1,10 @@
+using Jiro.Core.Services.Context;
+
 namespace Jiro.Core.Services.CommandContext;
 
-public class CommandContext : ICommandContext
+public class CommandContext : InstanceContext, ICommandContext
 {
-	public string InstanceId { get; private set; } = string.Empty;
-	public string SessionId { get; private set; } = string.Empty;
+	// InstanceId and SessionId are inherited from InstanceContext
 	public Dictionary<string, object> Data { get; } = [];
 
 	public void SetData(IEnumerable<KeyValuePair<string, object>> data)
@@ -25,9 +26,7 @@ public class CommandContext : ICommandContext
 
 	public void SetSessionId(string sessionId)
 	{
-		if (string.IsNullOrEmpty(sessionId))
-			throw new JiroException(new ArgumentException(null, nameof(sessionId)), "Something went wrong with parsing session", "Try to relogin");
-
+		// Allow empty sessionId - it will trigger new session creation
 		SessionId = sessionId;
 	}
 }

@@ -5,6 +5,10 @@ publish/
 ##
 ## Get latest from https://github.com/github/gitignore/blob/master/VisualStudio.gitignore
 
+nul
+claude*
+.claude/
+
 # DocFX generated files
 generated/
 dev/_site/
@@ -388,3 +392,6 @@ MigrationBackup/
 
 # Ionide (cross platform F# VS Code tools) working folder
 .ionide/
+src/Jiro.Kernel/Jiro.App/Configuration/appsettings.dev.json
+src/Jiro.Kernel/Jiro.App/Configuration/appsettings.backup.json
+.env.backup

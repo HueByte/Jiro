@@ -28,7 +28,7 @@ public class PersonaServiceTests
 		_semaphoreManagerMock = new Mock<ISemaphoreManager>();
 
 		// Setup semaphore to return a real SemaphoreSlim instead of mocking it
-		_semaphoreManagerMock.Setup(x => x.GetOrCreateInstanceSemaphore(It.IsAny<string>()))
+		_semaphoreManagerMock.Setup(static x => x.GetOrCreateInstanceSemaphore(It.IsAny<string>()))
 			.Returns(new SemaphoreSlim(1, 1));
 
 		_personaService = new PersonaService(
@@ -45,7 +45,7 @@ public class PersonaServiceTests
 		// Arrange
 		const string expectedPersona = "Default persona message";
 
-		_messageManagerMock.Setup(x => x.GetPersonaCoreMessageAsync())
+		_messageManagerMock.Setup(static x => x.GetPersonaCoreMessageAsync())
 			.ReturnsAsync(expectedPersona);
 
 		// Act
@@ -53,14 +53,14 @@ public class PersonaServiceTests
 
 		// Assert
 		Assert.Equal(expectedPersona, result);
-		_messageManagerMock.Verify(x => x.GetPersonaCoreMessageAsync(), Times.Once);
+		_messageManagerMock.Verify(static x => x.GetPersonaCoreMessageAsync(), Times.Once);
 
 		// Verify warning was logged
 		_loggerMock.Verify(
-			x => x.Log(
+			static x => x.Log(
 				LogLevel.Warning,
 				It.IsAny<EventId>(),
-				It.Is<It.IsAnyType>((v, t) => v.ToString()!.Contains("Instance ID is empty")),
+				It.Is<It.IsAnyType>(static (v, t) => v.ToString()!.Contains("Instance ID is empty")),
 				It.IsAny<Exception>(),
 				It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
 			Times.Once);
@@ -73,7 +73,7 @@ public class PersonaServiceTests
 		const string instanceId = "test-instance";
 		const string expectedPersona = "Instance persona message";
 
-		_messageManagerMock.Setup(x => x.GetPersonaCoreMessageAsync())
+		_messageManagerMock.Setup(static x => x.GetPersonaCoreMessageAsync())
 			.ReturnsAsync(expectedPersona);
 
 		// Act
@@ -81,8 +81,8 @@ public class PersonaServiceTests
 
 		// Assert
 		Assert.Equal(expectedPersona, result);
-		_semaphoreManagerMock.Verify(x => x.GetOrCreateInstanceSemaphore(instanceId), Times.Once);
-		_messageManagerMock.Verify(x => x.GetPersonaCoreMessageAsync(), Times.Once);
+		_semaphoreManagerMock.Verify(static x => x.GetOrCreateInstanceSemaphore(instanceId), Times.Once);
+		_messageManagerMock.Verify(static x => x.GetPersonaCoreMessageAsync(), Times.Once);
 
 		// Verify the persona was cached using the correct constant
 		Assert.True(_memoryCache.TryGetValue(Jiro.Core.Constants.CacheKeys.ComputedPersonaMessageKey, out var cachedValue));
@@ -139,10 +139,10 @@ public class PersonaServiceTests
 
 		// Verify info was logged
 		_loggerMock.Verify(
-			x => x.Log(
+			static x => x.Log(
 				LogLevel.Information,
 				It.IsAny<EventId>(),
-				It.Is<It.IsAnyType>((v, t) => v.ToString()!.Contains("Persona summary updated")),
+				It.Is<It.IsAnyType>(static (v, t) => v.ToString()!.Contains("Persona summary updated")),
 				It.IsAny<Exception>(),
 				It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
 			Times.Once);
@@ -157,14 +157,14 @@ public class PersonaServiceTests
 		const string expectedUpdatedPersona = $"{personaFromSource}\nThis is your summary of recent conversations: {updateMessage}";
 
 		// Don't put anything in cache, so it will load from source
-		_messageManagerMock.Setup(x => x.GetPersonaCoreMessageAsync())
+		_messageManagerMock.Setup(static x => x.GetPersonaCoreMessageAsync())
 			.ReturnsAsync(personaFromSource);
 
 		// Act
 		await _personaService.AddSummaryAsync(updateMessage);
 
 		// Assert
-		_messageManagerMock.Verify(x => x.GetPersonaCoreMessageAsync(), Times.Once);
+		_messageManagerMock.Verify(static x => x.GetPersonaCoreMessageAsync(), Times.Once);
 
 		// Verify the cache was updated with the combined message
 		Assert.True(_memoryCache.TryGetValue(Jiro.Core.Constants.CacheKeys.ComputedPersonaMessageKey, out var updatedValue));
@@ -172,19 +172,19 @@ public class PersonaServiceTests
 
 		// Verify both info logs
 		_loggerMock.Verify(
-			x => x.Log(
+			static x => x.Log(
 				LogLevel.Information,
 				It.IsAny<EventId>(),
-				It.Is<It.IsAnyType>((v, t) => v.ToString()!.Contains("Persona message cache miss")),
+				It.Is<It.IsAnyType>(static (v, t) => v.ToString()!.Contains("Persona message cache miss")),
 				It.IsAny<Exception>(),
 				It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
 			Times.Once);
 
 		_loggerMock.Verify(
-			x => x.Log(
+			static x => x.Log(
 				LogLevel.Information,
 				It.IsAny<EventId>(),
-				It.Is<It.IsAnyType>((v, t) => v.ToString()!.Contains("Persona summary updated")),
+				It.Is<It.IsAnyType>(static (v, t) => v.ToString()!.Contains("Persona summary updated")),
 				It.IsAny<Exception>(),
 				It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
 			Times.Once);

@@ -1,0 +1,11 @@
+# Data Directory
+
+This directory contains all Jiro application data organized into subdirectories:
+
+- **Database/**: SQLite database files
+- **Logs/**: Application logs (structured by Serilog)
+- **Plugins/**: Plugin assemblies and configurations
+- **Themes/**: Custom UI themes and styling
+- **Messages/**: Markdown files for chat messages and content
+
+All paths are configurable via the DataPaths section in appsettings.json.

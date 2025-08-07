@@ -320,7 +320,6 @@ Jiro utilizes **ASP.NET Core Identity** for user management combined with custom
 - **AspNetUsers**: User accounts with extended properties (`AccountCreatedDate`)
 - **AspNetRoles**: System roles and permissions
 - **AspNetUserRoles**: Many-to-many user-role relationships
-- **RefreshTokens**: JWT refresh token management with IP tracking
 
 ##### **Conversation System**  
 
@@ -591,4 +590,4 @@ For detailed setup instructions, refer to the main project README.
 
 ---
 
-**Jiro** represents a modern approach to AI assistant development, combining cutting-edge technologies with robust engineering practices to deliver a scalable, intelligent, and extensible platform for AI-powered assistance.
+**Jiro** represents a modern approach to AI assistant development as part of an engineering thesis project. It combines cutting-edge technologies with robust engineering practices to deliver a scalable, intelligent, and extensible platform for AI-powered assistance, demonstrating the practical application of clean architecture patterns and modern software development methodologies.

@@ -1,4 +1,4 @@
-using Jiro.App.Configurator;
+using Jiro.App.Setup;
 using Jiro.Core;
 using Jiro.Core.Constants;
 using Jiro.Core.IRepositories;
@@ -6,12 +6,14 @@ using Jiro.Core.Options;
 using Jiro.Core.Services.CommandContext;
 using Jiro.Core.Services.CommandHandler;
 using Jiro.Core.Services.CommandSystem;
+using Jiro.Core.Services.Context;
 using Jiro.Core.Services.Conversation;
 using Jiro.Core.Services.Geolocation;
 using Jiro.Core.Services.MessageCache;
 using Jiro.Core.Services.Persona;
 using Jiro.Core.Services.Semaphore;
 using Jiro.Core.Services.StaticMessage;
+using Jiro.Core.Services.System;
 using Jiro.Core.Services.Weather;
 using Jiro.Infrastructure.Repositories;
 
@@ -53,14 +55,24 @@ public static class Configurator
 		});
 
 		services.AddScoped<IWeatherService, WeatherService>();
+		services.AddScoped<IInstanceContext, InstanceContext>();
+		services.AddScoped<IInstanceMetadataAccessor, InstanceMetadataAccessor>();
 		services.AddScoped<ICommandContext, CommandContext>();
 		services.AddScoped<IGeolocationService, GeolocationService>();
 		services.AddScoped<IConversationCoreService, ConversationCoreService>();
 		services.AddScoped<IHistoryOptimizerService, HistoryOptimizerService>();
 		services.AddScoped<IStaticMessageService, StaticMessageService>();
-		services.AddScoped<IMessageManager, MessageManager>();
+		services.AddScoped<ISessionManager, SessionManager>();
+		services.AddScoped<IMessageCacheService, MessageCacheService>();
+		services.AddScoped<IMessageManager, CompositeMessageManager>();
 		services.AddScoped<IPersonaService, PersonaService>();
 		services.AddScoped<IPersonalizedConversationService, PersonalizedConversationService>();
+
+		// System services
+		services.AddScoped<ILogsProviderService, LogsProviderService>();
+		services.AddScoped<IConfigProviderService, ConfigProviderService>();
+		services.AddScoped<IThemeService, ThemeService>();
+		services.AddSingleton<IVersionService, VersionService>();
 		services.AddScoped<ChatClient>((services) =>
 		{
 			var configManager = services.GetRequiredService<IConfiguration>();
@@ -88,6 +100,9 @@ public static class Configurator
 		services.AddOptions();
 		services.Configure<ChatOptions>(configuration.GetSection(ChatOptions.Chat));
 		services.Configure<LogOptions>(configuration.GetSection(LogOptions.Log));
+		services.Configure<DataPathsOptions>(configuration.GetSection(DataPathsOptions.DataPaths));
+		services.Configure<JiroCloudOptions>(configuration.GetSection(JiroCloudOptions.JiroCloud));
+		services.Configure<ApplicationOptions>(configuration);
 
 		return services;
 	}
@@ -100,18 +115,74 @@ public static class Configurator
 	/// <returns>The service collection with configured HTTP clients for method chaining.</returns>
 	public static IServiceCollection AddHttpClients(this IServiceCollection services, IConfiguration configuration)
 	{
-		services.AddHttpClient(HttpClients.WEATHER_CLIENT, httpClient =>
+		services.AddHttpClient(HttpClients.WEATHER_CLIENT, static httpClient =>
 		{
 			httpClient.BaseAddress = new Uri("https://api.open-meteo.com/v1/");
 		});
 
-		services.AddHttpClient(HttpClients.GEOLOCATION_CLIENT, httpClient =>
+		services.AddHttpClient(HttpClients.GEOLOCATION_CLIENT, static httpClient =>
 		{
 			httpClient.BaseAddress = new Uri("https://nominatim.openstreetmap.org/");
 			httpClient.DefaultRequestHeaders.Add("User-Agent", "JiroBot");
 		});
 
-		services.AddHttpClient(HttpClients.JIRO);
+		services.AddHttpClient(HttpClients.JIRO, (serviceProvider, httpClient) =>
+		{
+			var jiroCloudOptions = serviceProvider.GetRequiredService<IOptions<JiroCloudOptions>>().Value;
+			if (string.IsNullOrEmpty(jiroCloudOptions.ApiKey))
+			{
+				throw new InvalidOperationException("JiroCloud:ApiKey is required in configuration");
+			}
+			if (string.IsNullOrEmpty(jiroCloudOptions.ApiUrl))
+			{
+				throw new InvalidOperationException("JiroCloud:ApiUrl is required in configuration");
+			}
+			var baseUri = jiroCloudOptions.ApiUrl;
+			httpClient.BaseAddress = new Uri(baseUri);
+			httpClient.DefaultRequestHeaders.Add("X-Api-Key", jiroCloudOptions.ApiKey);
+			httpClient.DefaultRequestVersion = new Version(2, 0);
+			httpClient.DefaultVersionPolicy = HttpVersionPolicy.RequestVersionOrHigher;
+		});
+
+		services.AddHttpClient(HttpClients.JIRO_GRPC, (serviceProvider, httpClient) =>
+		{
+			var jiroCloudOptions = serviceProvider.GetRequiredService<IOptions<JiroCloudOptions>>().Value;
+			if (string.IsNullOrEmpty(jiroCloudOptions.Grpc.ServerUrl))
+			{
+				throw new InvalidOperationException("JiroCloud:Grpc:ServerUrl is required in configuration");
+			}
+			// Use the gRPC server URL from configuration for HTTP client base address
+			// This assumes the gRPC server URL can also serve HTTP requests
+			httpClient.BaseAddress = new Uri(jiroCloudOptions.Grpc.ServerUrl);
+			httpClient.DefaultRequestVersion = new Version(2, 0);
+			httpClient.DefaultVersionPolicy = HttpVersionPolicy.RequestVersionOrHigher;
+		})
+		.ConfigurePrimaryHttpMessageHandler((serviceProvider) =>
+		{
+			var jiroCloudOptions = serviceProvider.GetRequiredService<IOptions<JiroCloudOptions>>().Value;
+			if (string.IsNullOrEmpty(jiroCloudOptions.Grpc.ServerUrl))
+			{
+				throw new InvalidOperationException("JiroCloud:Grpc:ServerUrl is required in configuration");
+			}
+
+			var handler = new SocketsHttpHandler
+			{
+				PooledConnectionIdleTimeout = Timeout.InfiniteTimeSpan,
+				KeepAlivePingDelay = TimeSpan.FromSeconds(60),
+				KeepAlivePingTimeout = TimeSpan.FromSeconds(30),
+				EnableMultipleHttp2Connections = true
+			};
+
+			// For localhost development, skip TLS certificate validation
+			var uri = new Uri(jiroCloudOptions.Grpc.ServerUrl);
+			if (uri.Host == "localhost" || uri.Host == "127.0.0.1")
+			{
+				handler.SslOptions.RemoteCertificateValidationCallback =
+					(sender, certificate, chain, sslPolicyErrors) => true;
+			}
+
+			return handler;
+		});
 
 
 

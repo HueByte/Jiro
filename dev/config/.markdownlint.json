@@ -7,5 +7,7 @@
 	"MD007": { "indent": 2 },
 	"MD004": { "style": "dash" },
 	"MD026": false,
+	"MD036": false,
+	"MD040": false,
 	"MD046": false
 }

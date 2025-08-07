@@ -34,7 +34,7 @@ public class GeolocationServiceTests
 
 		// client factory
 		_httpClientFactory = new Mock<IHttpClientFactory>();
-		_httpClientFactory.Setup(_ => _.CreateClient(HttpClients.GEOLOCATION_CLIENT)).Returns(geoClient);
+		_httpClientFactory.Setup(static _ => _.CreateClient(HttpClients.GEOLOCATION_CLIENT)).Returns(geoClient);
 
 		_geolocationService = new GeolocationService(_httpClientFactory.Object);
 	}

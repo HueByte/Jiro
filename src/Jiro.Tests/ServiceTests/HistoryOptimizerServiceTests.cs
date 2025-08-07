@@ -57,14 +57,14 @@ public class HistoryOptimizerServiceTests
 
 		var messages = new List<ChatMessage>
 		{
-			ChatMessage.CreateDeveloperMessage("You are Jiro"), // Persona message
+			ChatMessage.CreateSystemMessage("You are Jiro"), // Persona message
 			ChatMessage.CreateUserMessage("Hello"),
 			ChatMessage.CreateAssistantMessage("Hi there!"),
 			ChatMessage.CreateUserMessage("How are you?"),
 			ChatMessage.CreateAssistantMessage("I'm doing well!")
 		};
 
-		var personaMessage = ChatMessage.CreateDeveloperMessage("You are Jiro");
+		var personaMessage = ChatMessage.CreateSystemMessage("You are Jiro");
 
 		_chatCoreServiceMock
 			.Setup(x => x.ExchangeMessageAsync(It.IsAny<string>(), personaMessage, It.IsAny<int>()))
@@ -90,7 +90,7 @@ public class HistoryOptimizerServiceTests
 		const string summaryResponse = "No messages to summarize";
 
 		var messages = new List<ChatMessage>();
-		var personaMessage = ChatMessage.CreateDeveloperMessage("You are Jiro");
+		var personaMessage = ChatMessage.CreateSystemMessage("You are Jiro");
 
 		_chatCoreServiceMock
 			.Setup(x => x.ExchangeMessageAsync(It.IsAny<string>(), personaMessage, It.IsAny<int>()))
@@ -118,7 +118,7 @@ public class HistoryOptimizerServiceTests
 			ChatMessage.CreateAssistantMessage("Hi there!")
 		};
 
-		var personaMessage = ChatMessage.CreateDeveloperMessage("You are Jiro");
+		var personaMessage = ChatMessage.CreateSystemMessage("You are Jiro");
 
 		_chatCoreServiceMock
 			.Setup(x => x.ExchangeMessageAsync(It.IsAny<string>(), personaMessage, It.IsAny<int>()))
@@ -143,7 +143,7 @@ public class HistoryOptimizerServiceTests
 			ChatMessage.CreateAssistantMessage("Hi there!")
 		};
 
-		var personaMessage = ChatMessage.CreateDeveloperMessage("You are Jiro");
+		var personaMessage = ChatMessage.CreateSystemMessage("You are Jiro");
 
 		_chatCoreServiceMock
 			.Setup(x => x.ExchangeMessageAsync(It.IsAny<string>(), personaMessage, It.IsAny<int>()))
@@ -168,7 +168,7 @@ public class HistoryOptimizerServiceTests
 			ChatMessage.CreateAssistantMessage("Hi there!")
 		};
 
-		var personaMessage = ChatMessage.CreateDeveloperMessage("You are Jiro");
+		var personaMessage = ChatMessage.CreateSystemMessage("You are Jiro");
 		var expectedException = new Exception("Chat service error");
 
 		_chatCoreServiceMock
@@ -196,7 +196,7 @@ public class HistoryOptimizerServiceTests
 			ChatMessage.CreateUserMessage("Test message")
 		};
 
-		var personaMessage = ChatMessage.CreateDeveloperMessage("You are Jiro");
+		var personaMessage = ChatMessage.CreateSystemMessage("You are Jiro");
 
 		_chatCoreServiceMock
 			.Setup(x => x.ExchangeMessageAsync(It.IsAny<string>(), personaMessage, It.IsAny<int>()))

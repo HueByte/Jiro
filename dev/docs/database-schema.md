@@ -11,7 +11,6 @@ Jiro uses Entity Framework Core with a relational database to store conversation
 - **AppUser** - User accounts and profile information
 - **AppRole** - User roles and permissions
 - **AppUserRole** - Many-to-many relationship between users and roles
-- **RefreshToken** - JWT refresh tokens for authentication
 
 ### Conversation Management
 

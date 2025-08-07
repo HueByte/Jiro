@@ -1,0 +1,4 @@
+# Database Directory
+
+SQLite database files are stored here.
+Default: jiro.db

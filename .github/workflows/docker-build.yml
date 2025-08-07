@@ -78,9 +78,22 @@ jobs:
           IMAGE_TAG=$(echo "${{ steps.meta.outputs.tags }}" | head -n1)
           echo "Testing Docker image: $IMAGE_TAG"
 
+          # Define CI environment variables
+          CI_ENV_VARS=(
+            "-e" "JIRO_TEST_MODE=true"
+            "-e" "JIRO_ApiKey=test-api-key-ci"
+            "-e" "JIRO_JiroApi=https://localhost:18092"
+            "-e" "JIRO_TokenizerUrl=http://localhost:8000"
+            "-e" "JIRO_Gpt__AuthToken=test-openai-token"
+            "-e" "JIRO_WebSocket__ApiKey=test-api-key-ci"
+            "-e" "JIRO_WebSocket__HubUrl=https://localhost:5001/instanceHub"
+            "-e" "JIRO_Grpc__ServerUrl=https://localhost:5001"
+            "-e" "JIRO_Whitelist=true"
+          )
+
           # Test 1: Basic startup validation in test mode
           echo "🧪 Running startup validation test..."
-          if docker run --rm --name jiro-kernel-startup-test -e JIRO_TEST_MODE=true $IMAGE_TAG --test-mode; then
+          if docker run --rm --name jiro-kernel-startup-test "${CI_ENV_VARS[@]}" $IMAGE_TAG --test-mode; then
             echo "✅ Startup validation test passed"
           else
             echo "❌ Startup validation test failed"
@@ -89,7 +102,7 @@ jobs:
 
           # Test 2: Container starts and basic health check
           echo "🏥 Running container health test..."
-          if docker run -d --name jiro-kernel-health-test -e JIRO_TEST_MODE=true $IMAGE_TAG; then
+          if docker run -d --name jiro-kernel-health-test "${CI_ENV_VARS[@]}" $IMAGE_TAG; then
             echo "✅ Container started successfully"
             sleep 5
             

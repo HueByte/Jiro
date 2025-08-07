@@ -1,6 +1,7 @@
+using Jiro.Core.Constants;
 using Jiro.Core.IRepositories;
 using Jiro.Core.Models;
-using Jiro.Core.Services.CommandContext;
+using Jiro.Core.Services.Context;
 using Jiro.Core.Services.Conversation.Models;
 using Jiro.Core.Services.MessageCache;
 using Jiro.Core.Services.StaticMessage;
@@ -20,19 +21,22 @@ namespace Jiro.Tests.ServiceTests;
 
 public class MessageManagerTests : IDisposable
 {
-	private readonly Mock<ILogger<MessageManager>> _loggerMock;
+	private readonly Mock<ILogger<SessionManager>> _sessionLoggerMock;
+	private readonly Mock<ILogger<MessageCacheService>> _cacheLoggerMock;
 	private readonly IMemoryCache _memoryCache;
 	private readonly IMessageRepository _messageRepository;
 	private readonly IChatSessionRepository _chatSessionRepository;
 	private readonly IConfiguration _configuration;
-	private readonly Mock<ICommandContext> _commandContextMock;
+	private readonly Mock<IInstanceContext> _instanceContextMock;
 	private readonly Mock<IStaticMessageService> _staticMessageServiceMock;
+	private readonly Mock<IInstanceMetadataAccessor> _instanceMetadataAccessorMock;
 	private readonly IMessageManager _messageManager;
 	private readonly JiroContext _dbContext;
 
 	public MessageManagerTests()
 	{
-		_loggerMock = new Mock<ILogger<MessageManager>>();
+		_sessionLoggerMock = new Mock<ILogger<SessionManager>>();
+		_cacheLoggerMock = new Mock<ILogger<MessageCacheService>>();
 		_memoryCache = new MemoryCache(new MemoryCacheOptions());
 
 		// Setup in-memory database
@@ -52,8 +56,15 @@ public class MessageManagerTests : IDisposable
 			.AddInMemoryCollection(configData)
 			.Build();
 
-		_commandContextMock = new Mock<ICommandContext>();
+		_instanceContextMock = new Mock<IInstanceContext>();
 		_staticMessageServiceMock = new Mock<IStaticMessageService>();
+		_instanceMetadataAccessorMock = new Mock<IInstanceMetadataAccessor>();
+
+		// Setup default return value for instance metadata accessor
+		_instanceMetadataAccessorMock.Setup(x => x.GetInstanceIdAsync(It.IsAny<string>()))
+			.ReturnsAsync("test-instance");
+		_instanceMetadataAccessorMock.Setup(x => x.GetCurrentInstanceId())
+			.Returns("test-instance");
 
 		// Setup static message service mock to use the same memory cache for testing
 		_staticMessageServiceMock.Setup(x => x.ClearStaticMessageCache())
@@ -74,14 +85,23 @@ public class MessageManagerTests : IDisposable
 				_memoryCache.Set(key, message, cacheEntryOptions);
 			});
 
-		_messageManager = new MessageManager(
-			_loggerMock.Object,
+		// Create separated services
+		var sessionManager = new SessionManager(
+			_sessionLoggerMock.Object,
+			_memoryCache,
+			_chatSessionRepository,
+			_instanceMetadataAccessorMock.Object);
+
+		var messageCacheService = new MessageCacheService(
+			_cacheLoggerMock.Object,
 			_memoryCache,
 			_messageRepository,
 			_chatSessionRepository,
-			_configuration,
-			_commandContextMock.Object,
-			_staticMessageServiceMock.Object);
+			_staticMessageServiceMock.Object,
+			_instanceMetadataAccessorMock.Object);
+
+		// Create composite manager
+		_messageManager = new CompositeMessageManager(sessionManager, messageCacheService);
 	}
 
 	public void Dispose()
@@ -91,26 +111,18 @@ public class MessageManagerTests : IDisposable
 	}
 
 	[Fact]
-	public void Constructor_WithNullCommandContext_ShouldThrowArgumentNullException()
+	public void Constructor_WithNullSessionManager_ShouldThrowArgumentNullException()
 	{
-		// Arrange
-		var configData = new Dictionary<string, string?>
-		{
-			["JIRO_MESSAGE_FETCH_COUNT"] = "40"
-		};
-		var configuration = new ConfigurationBuilder()
-			.AddInMemoryCollection(configData)
-			.Build();
-
-		// Act & Assert
-		Assert.Throws<ArgumentNullException>(() => new MessageManager(
-			_loggerMock.Object,
-			_memoryCache,
-			_messageRepository,
-			_chatSessionRepository,
-			configuration,
+		// Arrange & Act & Assert
+		Assert.Throws<ArgumentNullException>(() => new CompositeMessageManager(
 			null!,
-			_staticMessageServiceMock.Object));
+			new MessageCacheService(
+				_cacheLoggerMock.Object,
+				_memoryCache,
+				_messageRepository,
+				_chatSessionRepository,
+				_staticMessageServiceMock.Object,
+				_instanceMetadataAccessorMock.Object)));
 	}
 
 	[Fact]
@@ -148,7 +160,7 @@ public class MessageManagerTests : IDisposable
 		// Assert
 		Assert.NotNull(result);
 		Assert.Equal(2, result.Count);
-		Assert.All(result, session => Assert.NotNull(session.Id));
+		Assert.All(result, static session => Assert.NotNull(session.Id));
 	}
 
 	[Fact]
@@ -217,10 +229,10 @@ public class MessageManagerTests : IDisposable
 		const string sessionId = "new-session";
 		const string instanceId = "test-instance";
 
-		_commandContextMock.Setup(x => x.InstanceId)
+		_instanceContextMock.Setup(static x => x.InstanceId)
 			.Returns(instanceId);
-		_commandContextMock.Setup(x => x.SessionId)
-			.Returns(sessionId);
+		_instanceMetadataAccessorMock.Setup(x => x.GetInstanceIdAsync(It.IsAny<string>()))
+			.ReturnsAsync(instanceId);
 
 		// Act
 		var result = await _messageManager.GetOrCreateChatSessionAsync(sessionId);
@@ -259,16 +271,17 @@ public class MessageManagerTests : IDisposable
 			new() { Id = "msg2", Content = "Test response 1", SessionId = sessionId, InstanceId = instanceId, CreatedAt = DateTime.UtcNow }
 		};
 
-		_commandContextMock.Setup(x => x.SessionId).Returns(sessionId);
-		_commandContextMock.Setup(x => x.InstanceId).Returns(instanceId);
+		_instanceContextMock.Setup(static x => x.InstanceId).Returns(instanceId);
+		_instanceMetadataAccessorMock.Setup(x => x.GetInstanceIdAsync(It.IsAny<string>()))
+			.ReturnsAsync(instanceId);
 
 		// Act
 		await _messageManager.AddChatExchangeAsync(sessionId, chatMessages, modelMessages);
 
 		// Assert - Check that messages were added to database
-		var addedMessages = _dbContext.Messages.Where(m => m.SessionId == sessionId).ToList();
+		var addedMessages = _dbContext.Messages.Where(static m => m.SessionId == sessionId).ToList();
 		Assert.Equal(2, addedMessages.Count);
-		Assert.All(addedMessages, m => Assert.Equal(sessionId, m.SessionId));
+		Assert.All(addedMessages, static m => Assert.Equal(sessionId, m.SessionId));
 
 		// Also check that cache is updated
 		var cachedSession = await _messageManager.GetSessionAsync(sessionId, includeMessages: true);
@@ -328,7 +341,7 @@ public class MessageManagerTests : IDisposable
 				Messages = messages
 			};
 
-			_memoryCache.Set($"{sessionId}_with_messages", session);
+			_memoryCache.Set($"{CacheKeys.SessionKey}::{sessionId}", session);
 		}
 
 		// Act
@@ -395,7 +408,9 @@ public class MessageManagerTests : IDisposable
 		const string sessionId = "session-with-messages";
 		const string instanceId = "test-instance";
 
-		_commandContextMock.Setup(x => x.InstanceId).Returns(instanceId);
+		_instanceContextMock.Setup(static x => x.InstanceId).Returns(instanceId);
+		_instanceMetadataAccessorMock.Setup(x => x.GetInstanceIdAsync(It.IsAny<string>()))
+			.ReturnsAsync(instanceId);
 
 		// Create a session with messages
 		var session = new ChatSession

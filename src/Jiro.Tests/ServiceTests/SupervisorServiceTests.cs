@@ -25,7 +25,7 @@ public class SupervisorServiceTests
 	public void OnConnected_ShouldAllowEventSubscription()
 	{
 		// Arrange
-		Func<Task> handler = () => Task.CompletedTask;
+		Func<Task> handler = static () => Task.CompletedTask;
 
 		// Act - Events should allow subscription without throwing
 		_supervisorService.OnConnected += handler;
@@ -41,7 +41,7 @@ public class SupervisorServiceTests
 	public void OnDisconnected_ShouldAllowEventSubscription()
 	{
 		// Arrange
-		Func<Task> handler = () => Task.CompletedTask;
+		Func<Task> handler = static () => Task.CompletedTask;
 
 		// Act - Events should allow subscription without throwing
 		_supervisorService.OnDisconnected += handler;
@@ -57,7 +57,7 @@ public class SupervisorServiceTests
 	public void OnMessageReceived_ShouldAllowEventSubscription()
 	{
 		// Arrange
-		Func<string, Task> handler = (message) => Task.CompletedTask;
+		Func<string, Task> handler = static (message) => Task.CompletedTask;
 
 		// Act - Events should allow subscription without throwing
 		_supervisorService.OnMessageReceived += handler;
@@ -73,7 +73,7 @@ public class SupervisorServiceTests
 	public void OnMessageSent_ShouldAllowEventSubscription()
 	{
 		// Arrange
-		Func<string, Task> handler = (message) => Task.CompletedTask;
+		Func<string, Task> handler = static (message) => Task.CompletedTask;
 
 		// Act - Events should allow subscription without throwing
 		_supervisorService.OnMessageSent += handler;

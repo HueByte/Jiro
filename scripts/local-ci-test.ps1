@@ -67,8 +67,8 @@ function Test-Prerequisites {
     }
     
     # Prepare configuration files
-    $appSettingsPath = "./src/Jiro.Kernel/Jiro.App/appsettings.json"
-    $appSettingsExamplePath = "./src/Jiro.Kernel/Jiro.App/appsettings.example.json"
+    $appSettingsPath = "./src/Jiro.Kernel/Jiro.App/Configuration/appsettings.json"
+    $appSettingsExamplePath = "./src/Jiro.Kernel/Jiro.App/Configuration/appsettings.example.json"
     
     if (!(Test-Path $appSettingsPath) -and (Test-Path $appSettingsExamplePath)) {
         Copy-Item $appSettingsExamplePath $appSettingsPath

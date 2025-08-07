@@ -28,7 +28,7 @@ public class ConversationCoreServiceTests
 		_semaphoreMock = new Mock<SemaphoreSlim>(1, 1);
 
 		_semaphoreManagerMock
-			.Setup(x => x.GetOrCreateInstanceSemaphore(It.IsAny<string>()))
+			.Setup(static x => x.GetOrCreateInstanceSemaphore(It.IsAny<string>()))
 			.Returns(_semaphoreMock.Object);
 
 		_conversationCoreService = new ConversationCoreService(
@@ -68,7 +68,7 @@ public class ConversationCoreServiceTests
 		Assert.NotNull(_conversationCoreService);
 
 		// Verify semaphore manager is called when getting instance semaphore
-		_semaphoreManagerMock.Setup(x => x.GetOrCreateInstanceSemaphore("test"))
+		_semaphoreManagerMock.Setup(static x => x.GetOrCreateInstanceSemaphore("test"))
 			.Returns(_semaphoreMock.Object);
 
 		var semaphore = _semaphoreManagerMock.Object.GetOrCreateInstanceSemaphore("test");
@@ -89,7 +89,7 @@ public class ConversationCoreServiceTests
 		var corePersonaMessage = "Test persona";
 
 		_messageCacheServiceMock
-			.Setup(x => x.GetPersonaCoreMessageAsync())
+			.Setup(static x => x.GetPersonaCoreMessageAsync())
 			.ReturnsAsync(corePersonaMessage);
 
 		// Act & Assert - Verify semaphore is requested
@@ -103,6 +103,6 @@ public class ConversationCoreServiceTests
 			// Expected due to mocking limitations
 		}
 
-		_semaphoreManagerMock.Verify(x => x.GetOrCreateInstanceSemaphore(instanceId), Times.Once);
+		_semaphoreManagerMock.Verify(static x => x.GetOrCreateInstanceSemaphore(instanceId), Times.Once);
 	}
 }

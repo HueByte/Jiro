@@ -149,6 +149,8 @@ try {
     $markdownlintArgs += "bin"
     $markdownlintArgs += "--ignore"
     $markdownlintArgs += "obj"
+    $markdownlintArgs += "--ignore"
+    $markdownlintArgs += "dev-local"
     
     # Add configuration file if present
     if ($configFile) {

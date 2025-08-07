@@ -72,10 +72,9 @@ Jiro: "🌐 Pinging google.com... Response time: 23ms ✅"
 
 - [.NET 9 SDK](https://dotnet.microsoft.com/download)
 - [Node.js](https://nodejs.org/) (for the web interface)
-- [Python 3.8+](https://python.org/) (for tokenizer service)
-- OpenAI API Key (optional, for chat features)
+- OpenAI API Key (optional, for AI chat features)
 
-### 🏃‍♂️ Get Running in 5 Minutes
+### 🏃‍♂️ Get Running in 2 Minutes (Automated Setup)
 
 1. **Clone the repository**
 
@@ -84,47 +83,100 @@ Jiro: "🌐 Pinging google.com... Response time: 23ms ✅"
    cd Jiro
    ```
 
-2. **Set up configuration**
+2. **Run the setup script** ⚡
 
    ```bash
-   # Navigate to the app directory
-   cd src/Jiro.Kernel/Jiro.App
+   # Interactive setup (recommended) - prompts for API keys
+   ./scripts/setup-project.ps1 -Default         # Windows
+   ./scripts/setup-project.sh --default         # Linux/macOS
    
-   # Copy example configs
+   # OR Non-interactive setup - secure defaults only
+   ./scripts/setup-project.ps1 -NonInteractive  # Windows
+   ./scripts/setup-project.sh --non-interactive # Linux/macOS
+   ```
+
+3. **Run database migrations**
+
+   ```bash
+   dotnet ef database update -p src/Jiro.Kernel/Jiro.Infrastructure -s src/Jiro.Kernel/Jiro.App
+   ```
+
+4. **Start Jiro**
+
+   ```bash
+   # Option 1: Docker (includes database)
+   docker-compose up -d
+   
+   # Option 2: Direct run
+   cd src/Jiro.Kernel/Jiro.App
+   dotnet run
+   ```
+
+5. **Open your browser** and navigate to `https://localhost:5001` 🎉
+
+### 🔧 Manual Setup (Alternative)
+
+If you prefer manual configuration:
+
+<details>
+<summary>Click to expand manual setup steps</summary>
+
+1. **Clone and navigate**
+
+   ```bash
+   git clone https://github.com/HueByte/Jiro.git
+   cd Jiro
+   ```
+
+2. **Set up configuration files**
+
+   ```bash
+   # Copy environment template for Docker
+   cp .env.example .env
+   
+   # Copy application settings
+   cd src/Jiro.Kernel/Jiro.App
    cp appsettings.example.json appsettings.json
+   
+   # Copy client app settings
    cd clientapp
    cp envExamples/.env.example .env
    cp envExamples/.env.development.example .env.development
    ```
 
-3. **Configure your OpenAI key** (optional)
+3. **Configure your settings**
+
+   Edit `.env` file:
+
+   ```bash
+   # Required for AI features
+   OPENAI_API_KEY=sk-your-openai-api-key
+   
+   # Database configuration
+   MYSQL_ROOT_PASSWORD=your-root-password
+   MYSQL_PASSWORD=your-mysql-password
+   ```
+
+   Edit `appsettings.json`:
 
    ```json
-   // In appsettings.json
    {
      "Gpt": {
        "AuthToken": "your-openai-api-key-here"
-     }
+     },
    }
    ```
 
-4. **Run Jiro**
+4. **Build and run**
 
    ```bash
    cd ../  # Back to Jiro.App directory
-   dotnet tool restore
+   dotnet restore src/Main.sln
+   dotnet build src/Main.sln
    dotnet run
    ```
 
-5. **Start the tokenizer** (in a new terminal)
-
-   ```bash
-   cd src/Jiro.TokenApi
-   pip install -r requirements.txt
-   python main.py
-   ```
-
-6. **Open your browser** and navigate to `https://localhost:5001` 🎉
+</details>
 
 ## 🔌 Plugin Development
 
@@ -142,13 +194,33 @@ public class HelloCommand : BaseCommand
 }
 ```
 
-📚 **Learn More**: Check out our [Plugin Development Guide](https://github.com/HueByte/Jiro.Libs) and [NuGet Package](https://www.nuget.org/packages/Jiro.Commands/)
+📚 **Learn More**: This project demonstrates plugin architecture patterns and extensible command system design
 
 ## 🏗️ Architecture Overview
 
 Jiro is built as a modular, self-contained AI assistant that can run locally while optionally connecting to external services. The architecture follows clean separation of concerns with a focus on extensibility and performance:
 
 ```mermaid
+%%{init: {
+  "theme": "base",
+  "themeVariables": {
+    "background": "#1C1E26",
+    "primaryColor": "#FCD4B8",
+    "primaryTextColor": "#D5D8DA",
+    "primaryBorderColor": "#E95378",
+    "lineColor": "#6C6F93",
+    "sectionBkgColor": "#232530",
+    "altSectionBkgColor": "#2E303E",
+    "gridColor": "#16161C",
+    "secondaryColor": "#26BBD9",
+    "tertiaryColor": "#27D797",
+    "cScale0": "#1C1E26",
+    "cScale1": "#232530",
+    "cScale2": "#2E303E",
+    "cScale3": "#6C6F93",
+    "cScale4": "#D5D8DA"
+  }
+}}%%
 graph TB
     subgraph "🌐 External Services"
         JiroCloud[🚀 JiroCloud<br/>Optional Remote Commands]
@@ -225,14 +297,14 @@ graph TB
     EFCore --> SQLite
     EFCore -.->|Docker| MySQL
 
-    %% Styling
-    classDef external fill:#FFE6CC,stroke:#D79B00,stroke-width:2px
-    classDef client fill:#E1F5FE,stroke:#0277BD,stroke-width:2px
-    classDef app fill:#F3E5F5,stroke:#7B1FA2,stroke-width:2px
-    classDef core fill:#E8F5E8,stroke:#2E7D32,stroke-width:2px
-    classDef infra fill:#FFF3E0,stroke:#F57C00,stroke-width:2px
-    classDef storage fill:#ECEFF1,stroke:#455A64,stroke-width:2px
-    classDef plugins fill:#FCE4EC,stroke:#C2185B,stroke-width:2px
+    %% Horizon Theme Styling
+    classDef external fill:#FAB795,stroke:#E6A66A,stroke-width:2px,color:#06060C
+    classDef client fill:#26BBD9,stroke:#1A9CB8,stroke-width:2px,color:#06060C
+    classDef app fill:#FCD4B8,stroke:#E29A6B,stroke-width:2px,color:#06060C
+    classDef core fill:#27D797,stroke:#21BFC2,stroke-width:2px,color:#06060C
+    classDef infra fill:#6C6F93,stroke:#2E303E,stroke-width:2px,color:#D5D8DA
+    classDef storage fill:#2E303E,stroke:#6C6F93,stroke-width:2px,color:#D5D8DA
+    classDef plugins fill:#E95378,stroke:#F43E5C,stroke-width:2px,color:#06060C
 
     class JiroCloud,OpenAI,WeatherAPI external
     class PythonCLI,WebClient client
@@ -299,37 +371,132 @@ cd dev
 docfx docfx.json --serve
 ```
 
-## 🤝 Contributing
+## 🐳 Docker Development
 
-We love contributions! Here's how you can help make Jiro even better:
+### Quick Start with Docker
 
-1. 🍴 **Fork the repository**
-2. 🌿 **Create a feature branch** (`git checkout -b feature/amazing-feature`)
-3. ✨ **Make your changes**
-4. ✅ **Add tests** (if applicable)
-5. 📝 **Commit your changes** (`git commit -m 'Add amazing feature'`)
-6. 📤 **Push to the branch** (`git push origin feature/amazing-feature`)
-7. 🎉 **Open a Pull Request**
+The setup script automatically creates Docker configuration:
 
-### Areas We'd Love Help With
+```bash
+# 1. Run the setup script to create .env and config files
+./scripts/setup-project.ps1 -Default         # Windows
+./scripts/setup-project.sh --default         # Linux/macOS
 
-- 🔌 New plugin ideas and implementations
-- 🌍 Internationalization and localization
-- 📱 Mobile app development
-- 🎨 UI/UX improvements
-- 📚 Documentation and tutorials
-- 🐛 Bug fixes and performance improvements
+# 2. Start with Docker Compose (includes MySQL + Jiro Kernel)
+docker-compose up -d
+
+# 3. View logs
+docker-compose logs -f jiro-kernel
+
+# 4. Stop services
+docker-compose down
+```
+
+### Environment Configuration
+
+The setup script creates a complete `.env` file with secure defaults:
+
+```bash
+# Database Configuration (auto-generated)
+MYSQL_ROOT_PASSWORD=secure-generated-password
+MYSQL_DATABASE=jiro
+MYSQL_USER=jiro
+MYSQL_PASSWORD=secure-generated-password
+DB_SERVER=mysql
+
+# Application Configuration (auto-generated)
+JIRO_ApiKey=secure-generated-api-key
+JIRO_JiroApi=https://localhost:5001
+
+# AI Features (configure manually)
+OPENAI_API_KEY=your-openai-api-key-here
+
+
+# Port Configuration
+JIRO_HTTP_PORT=8080
+JIRO_HTTPS_PORT=8443
+JIRO_ADDITIONAL_PORT=18090
+MYSQL_PORT=3306
+
+# Data Paths Configuration (optional)
+JIRO_DataPaths__Logs=Data/Logs
+JIRO_DataPaths__Plugins=Data/Plugins
+JIRO_DataPaths__Themes=Data/Themes
+JIRO_DataPaths__Messages=Data/Messages
+```
+
+> **💡 Pro Tip**: Use the `-Default` flag for interactive setup that prompts for your OpenAI API key!
+
+### Data Organization
+
+Jiro uses an organized Data folder structure for all application data:
+
+```sh
+Data/
+├── Database/     # SQLite database files
+├── Logs/         # Application logs (managed by Serilog)
+├── Plugins/      # Plugin assemblies and configurations
+├── Themes/       # Custom UI themes and styling
+└── Messages/     # Markdown files for chat messages
+```
+
+**Docker Volumes**: Each Data subfolder has its own persistent volume:
+
+- `jiro_database` → `/home/app/jiro/Data/Database`
+- `jiro_logs` → `/home/app/jiro/Data/Logs`
+- `jiro_plugins` → `/home/app/jiro/Data/Plugins`
+- `jiro_themes` → `/home/app/jiro/Data/Themes`
+- `jiro_messages` → `/home/app/jiro/Data/Messages`
+
+**Path Customization**: All paths are configurable via environment variables using the `JIRO_DataPaths__` prefix.
+
+### Production Deployment
+
+- Use `docker-compose.yml` with proper `.env` configuration
+- Environment variables override `.env` values for secrets management
+- Persistent volumes for all data directories included
+- Health checks and proper networking configured
+- Organized data structure with separate volumes for each data type
+
+## 🎓 Engineering Thesis Project
+
+This project is developed as part of an engineering thesis focused on building a modern AI assistant platform. The project demonstrates the integration of AI technologies with clean architecture patterns and modern software engineering practices.
 
 ## 🛠️ Configuration Reference
 
+> **💡 Note**: The setup script automatically configures most settings. This reference is for manual customization.
+
+### Setup Script Options
+
+| Flag | Description | Best For |
+|------|-------------|----------|
+| `-Default` / `--default` | Interactive setup with prompts | **Most users** - prompts for API keys |
+| `-NonInteractive` / `--non-interactive` | Secure defaults only | **CI/CD** - shows what needs manual config |
+
 ### Core API Settings
 
-| Setting | Description | Default |
-|---------|-------------|---------|
-| `urls` | Hosting URLs | `http://localhost:18090;https://localhost:18091` |
-| `TokenizerUrl` | Tokenizer API endpoint | `http://localhost:8000` |
-| `Gpt:AuthToken` | OpenAI API key | *Required for chat features* |
-| `JWT:Secret` | JWT signing key | *Change in production!* |
+| Setting | Description | Default | Auto-Generated |
+|---------|-------------|---------|----------------|
+| `urls` | Hosting URLs | `http://localhost:18090;https://localhost:18091` | ❌ |
+| `Gpt:AuthToken` | OpenAI API key | *Required for chat features* | ❌ |
+
+### Data Paths Settings
+
+| Setting | Description | Default | Auto-Generated |
+|---------|-------------|---------|----------------|
+| `DataPaths:Logs` | Application logs directory | `Data/Logs` | ❌ |
+| `DataPaths:Plugins` | Plugin assemblies directory | `Data/Plugins` | ❌ |
+| `DataPaths:Themes` | UI themes directory | `Data/Themes` | ❌ |
+| `DataPaths:Messages` | Markdown messages directory | `Data/Messages` | ❌ |
+
+### Docker Environment Variables
+
+| Variable | Description | Auto-Generated |
+|----------|-------------|----------------|
+| `OPENAI_API_KEY` | OpenAI API key for AI features | ❌ (prompted in `-Default` mode) |
+| `MYSQL_ROOT_PASSWORD` | MySQL root password | ✅ |
+| `MYSQL_PASSWORD` | MySQL user password | ✅ |
+| `JIRO_ApiKey` | Jiro API authentication key | ✅ |
 
 ### Web Client Settings  
 
@@ -337,6 +504,67 @@ We love contributions! Here's how you can help make Jiro even better:
 |---------|-------------|---------|
 | `PORT` | Development server port | `3000` |
 | `JIRO_API` | API proxy target | `https://localhost:18091` |
+
+## ⚡ Common Issues & Solutions
+
+### Setup Issues
+
+**Q: Setup script fails with permission error**
+
+```bash
+# Windows
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+
+# Linux/macOS  
+chmod +x scripts/setup-project.sh
+```
+
+**Q: OpenAI API key not working**
+
+- Ensure your API key starts with `sk-`
+- Check your OpenAI account has sufficient credits
+- Verify the key is set in both `.env` and `appsettings.json`
+
+**Q: Database migration fails**
+
+```bash
+# Reset database
+dotnet ef database drop -p src/Jiro.Kernel/Jiro.Infrastructure -s src/Jiro.Kernel/Jiro.App --force
+dotnet ef database update -p src/Jiro.Kernel/Jiro.Infrastructure -s src/Jiro.Kernel/Jiro.App
+```
+
+### Docker Issues
+
+**Q: Docker containers won't start**
+
+```bash
+# Check if ports are available
+docker-compose down
+docker system prune -f
+docker-compose up -d
+```
+
+**Q: Can't connect to MySQL in Docker**
+
+- Ensure `.env` file has correct MySQL credentials
+- Wait for MySQL container to fully initialize (30-60 seconds)
+
+### Development Commands
+
+```bash
+# Quick setup for development
+./scripts/setup-project.ps1 -Default         # Windows
+./scripts/setup-project.sh --default         # Linux/macOS
+
+# Run tests
+dotnet test src/Main.sln
+
+# Format code
+dotnet format src/Main.sln
+
+# Clean and rebuild
+dotnet clean src/Main.sln && dotnet build src/Main.sln
+```
 
 ## 🎯 Roadmap
 
@@ -350,12 +578,94 @@ We love contributions! Here's how you can help make Jiro even better:
 
 ## 💖 Support the Project
 
-If Jiro has helped you or you think it's awesome, consider:
+If you find this engineering thesis project interesting:
 
-- ⭐ **Starring this repository**
-- 🐛 **Reporting bugs** and suggesting features
-- 💬 **Sharing it** with friends and colleagues
-- 🔌 **Creating plugins** for the community
+- ⭐ **Star this repository** to show your support
+- 🐛 **Report issues** if you find any bugs
+- 💬 **Share feedback** on the implementation approach
+- 📚 **Check out the documentation** in the `dev/docs/` folder
+
+## 📋 Complete Configuration Reference
+
+This table shows all available configuration variables, where they're stored, and their requirements:
+
+| Variable Name (Section) | Stored In | Required | Description |
+|------------------------|-----------|----------|-------------|
+| **Main Application** | | | |
+| `ApiKey` | appsettings.json | ✅ | Main Jiro instance API key |
+| `JIRO_ApiKey` | .env | ✅ | Main Jiro instance API key (env override) |
+| **Chat Configuration** | | | |
+| `Chat:AuthToken` | appsettings.json | ❌ | OpenAI API key for chat features |
+| `Chat:SystemMessage` | appsettings.json | ❌ | AI assistant personality prompt |
+| `Chat:TokenLimit` | appsettings.json | ❌ | Maximum tokens per chat response |
+| `Chat:Enabled` | appsettings.json | ❌ | Enable/disable chat functionality |
+| `JIRO_Chat__AuthToken` | .env | ❌ | OpenAI API key (env override) |
+| `JIRO_Chat__SystemMessage` | .env | ❌ | System message (env override) |
+| `JIRO_Chat__TokenLimit` | .env | ❌ | Token limit (env override) |
+| `JIRO_Chat__Enabled` | .env | ❌ | Chat enabled flag (env override) |
+| **Database Configuration** | | | |
+| `ConnectionStrings:JiroContext` | appsettings.json | ✅ | SQLite connection string |
+| **Data Paths** | | | |
+| `DataPaths:Logs` | appsettings.json | ❌ | Application logs directory |
+| `DataPaths:Messages` | appsettings.json | ❌ | Chat messages storage directory |
+| `DataPaths:Plugins` | appsettings.json | ❌ | Plugin assemblies directory |
+| `DataPaths:Themes` | appsettings.json | ❌ | UI themes directory |
+| `JIRO_DataPaths__Logs` | .env | ❌ | Logs path (env override) |
+| `JIRO_DataPaths__Messages` | .env | ❌ | Messages path (env override) |
+| `JIRO_DataPaths__Plugins` | .env | ❌ | Plugins path (env override) |
+| `JIRO_DataPaths__Themes` | .env | ❌ | Themes path (env override) |
+| **JiroCloud Configuration** | | | |
+| `JiroCloud:ApiKey` | appsettings.json | ✅ | JiroCloud API key for cloud services |
+| `JIRO_JiroCloud__ApiKey` | .env | ✅ | JiroCloud API key (env override) |
+| **JiroCloud gRPC** | | | |
+| `JiroCloud:Grpc:ServerUrl` | appsettings.json | ✅ | JiroCloud gRPC server URL |
+| `JiroCloud:Grpc:MaxRetries` | appsettings.json | ❌ | Maximum gRPC retry attempts |
+| `JiroCloud:Grpc:TimeoutMs` | appsettings.json | ❌ | gRPC timeout in milliseconds |
+| `JIRO_JiroCloud__Grpc__ServerUrl` | .env | ✅ | gRPC server URL (env override) |
+| `JIRO_JiroCloud__Grpc__MaxRetries` | .env | ❌ | Max retries (env override) |
+| `JIRO_JiroCloud__Grpc__TimeoutMs` | .env | ❌ | Timeout (env override) |
+| **JiroCloud WebSocket** | | | |
+| `JiroCloud:WebSocket:HubUrl` | appsettings.json | ✅ | SignalR hub URL |
+| `JiroCloud:WebSocket:HandshakeTimeoutMs` | appsettings.json | ❌ | WebSocket handshake timeout |
+| `JiroCloud:WebSocket:KeepAliveIntervalMs` | appsettings.json | ❌ | Keep-alive interval |
+| `JiroCloud:WebSocket:ReconnectionAttempts` | appsettings.json | ❌ | Max reconnection attempts |
+| `JiroCloud:WebSocket:ReconnectionDelayMs` | appsettings.json | ❌ | Delay between reconnections |
+| `JiroCloud:WebSocket:ServerTimeoutMs` | appsettings.json | ❌ | Server timeout |
+| `JIRO_JiroCloud__WebSocket__HubUrl` | .env | ✅ | Hub URL (env override) |
+| `JIRO_JiroCloud__WebSocket__HandshakeTimeoutMs` | .env | ❌ | Handshake timeout (env override) |
+| `JIRO_JiroCloud__WebSocket__KeepAliveIntervalMs` | .env | ❌ | Keep-alive interval (env override) |
+| `JIRO_JiroCloud__WebSocket__ReconnectionAttempts` | .env | ❌ | Reconnection attempts (env override) |
+| `JIRO_JiroCloud__WebSocket__ReconnectionDelayMs` | .env | ❌ | Reconnection delay (env override) |
+| `JIRO_JiroCloud__WebSocket__ServerTimeoutMs` | .env | ❌ | Server timeout (env override) |
+
+### Configuration Notes
+
+- **✅ Required**: Must be configured for the application to function properly
+- **❌ Optional**: Has sensible defaults or is optional functionality
+- **Auto-generated**: The setup script automatically generates secure values for API keys
+- **JIRO_ Prefix**: All environment variables use the `JIRO_` prefix with `__` for nested sections
+- **Environment Override**: Environment variables take precedence over `appsettings.json` values
+
+### Environment Variable Hierarchy
+
+1. **Environment Variables** (highest priority) - `JIRO_` prefixed with `__` for sections
+2. **appsettings.json** (fallback) - Standard JSON configuration
+
+### Configuration Examples
+
+```bash
+# Environment variables override appsettings.json
+JIRO_Chat__AuthToken=sk-your-openai-key
+JIRO_JiroCloud__ApiKey=your-jirocloud-api-key
+JIRO_JiroCloud__Grpc__ServerUrl=https://api.jirocloud.com
+JIRO_DataPaths__Logs=/custom/logs/path
+```
+
+### Setup Script Benefits
+
+- **Secure Generation**: Auto-generates cryptographically secure API keys
+- **Consistent Structure**: Ensures both `.env` and `appsettings.json` are synchronized
+- **Environment Ready**: Creates proper JIRO_ prefixed environment variables
 
 ## 📄 License
 
@@ -365,7 +675,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 - 🤖 **OpenAI** for the powerful GPT models
 - 🚀 **Microsoft** for the amazing .NET ecosystem
-- 🌟 **All contributors** who help make Jiro better
 - ❤️ **The open-source community** for inspiration and support
 
 ---

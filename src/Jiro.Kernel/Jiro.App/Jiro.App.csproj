@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
 		<OutputType>Exe</OutputType>
@@ -12,21 +12,18 @@
     <TrimmerDefaultAction>link</TrimmerDefaultAction>
 	</PropertyGroup>
 
-	<ItemGroup>
-		<None Remove="Proto\jiroHub.proto" />
-	</ItemGroup>
 
 	<ItemGroup>
-		<None Update="appsettings.example.json">
+		<None Update="Configuration\appsettings.example.json">
 			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</None>
-		<None Update="appsettings.json">
+		<None Update="Configuration\appsettings.json">
 			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</None>
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="AutoMapper" Version="14.0.0" />
+		<PackageReference Include="AutoMapper" Version="15.0.1" />
 		<PackageReference Include="Google.Protobuf" Version="3.31.1" />
 		<PackageReference Include="Grpc.Net.Client" Version="2.71.0" />
 		<PackageReference Include="Grpc.Net.ClientFactory" Version="2.71.0" />
@@ -34,13 +31,14 @@
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
-		<PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="9.0.7" />
-		<PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.6" />
+		<PackageReference Include="Jiro.Shared" Version="1.4.4" />
+		<PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="9.0.8" />
+		<PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.8" />
 		<PackageReference Include="Serilog.AspNetCore" Version="9.0.0" />
-		<PackageReference Include="Serilog.Extensions.Logging" Version="9.0.3-dev-02320" />
-		<PackageReference Include="Serilog.Settings.Configuration" Version="9.0.1-dev-02317" />
+		<PackageReference Include="Serilog.Extensions.Logging" Version="9.0.2" />
+		<PackageReference Include="Serilog.Settings.Configuration" Version="9.0.0" />
 		<PackageReference Include="Serilog.Sinks.Async" Version="2.1.0" />
-		<PackageReference Include="Serilog.Sinks.Console" Version="6.0.1-dev-00953" />
+		<PackageReference Include="Serilog.Sinks.Console" Version="6.0.0" />
 		<PackageReference Include="Serilog.Sinks.File" Version="7.0.0" />
 	</ItemGroup>
 
@@ -56,14 +54,24 @@
 		<ProjectReference Include="..\Jiro.Infrastructure\Jiro.Infrastructure.csproj" />
 	</ItemGroup>
 
-	<ItemGroup>
-		<Protobuf Include="Proto\jiroHub.proto" GrpcServices="Client" />
-	</ItemGroup>
 
 	<ItemGroup>
-		<None Include="Messages\**\*">
+		<None Include="Data\**\*">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Include="themes\**\*">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
 	</ItemGroup>
+
+  <!-- Exclude .proto files to prevent compilation conflicts with Jiro.Shared package -->
+  <Target Name="ExcludeJiroSharedProtoFiles" BeforeTargets="BeforeCompile">
+    <ItemGroup>
+      <!-- Remove any .proto files that might be included by content packages -->
+      <Compile Remove="@(Compile)" Condition="%(Compile.Identity) != '' and $([System.String]::new('%(Compile.Identity)').EndsWith('.proto'))" />
+      <Content Remove="@(Content)" Condition="%(Content.Identity) != '' and $([System.String]::new('%(Content.Identity)').EndsWith('.proto'))" />
+      <None Remove="@(None)" Condition="%(None.Identity) != '' and $([System.String]::new('%(None.Identity)').EndsWith('.proto'))" />
+    </ItemGroup>
+  </Target>
 
 </Project>

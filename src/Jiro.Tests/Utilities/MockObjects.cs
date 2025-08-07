@@ -7,7 +7,6 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 using MockQueryable;
-using MockQueryable.Moq;
 
 using Moq;
 
@@ -47,7 +46,7 @@ public static class MockObjects
 		var mock = new Mock<TRepository>();
 
 		entries ??= new List<TEntity>();
-		mock.Setup(repo => repo.AsQueryable()).Returns(entries.BuildMock());
+		mock.Setup(static repo => repo.AsQueryable()).Returns(entries.BuildMock());
 
 		return mock;
 	}
@@ -66,6 +65,14 @@ public static class MockObjects
 
 	public static Mock<DbSet<T>> GetMockDbSet<T>(IEnumerable<T> data) where T : class
 	{
-		return data.AsQueryable().BuildMockDbSet();
+		var queryable = data.AsQueryable();
+		var mockSet = new Mock<DbSet<T>>();
+
+		mockSet.As<IQueryable<T>>().Setup(m => m.Provider).Returns(queryable.Provider);
+		mockSet.As<IQueryable<T>>().Setup(m => m.Expression).Returns(queryable.Expression);
+		mockSet.As<IQueryable<T>>().Setup(m => m.ElementType).Returns(queryable.ElementType);
+		mockSet.As<IQueryable<T>>().Setup(m => m.GetEnumerator()).Returns(() => queryable.GetEnumerator());
+
+		return mockSet;
 	}
 }

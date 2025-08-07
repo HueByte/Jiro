@@ -10,7 +10,7 @@ Jiro is a comprehensive application framework with the following main components
 
 - **[Jiro.Core](Jiro.Core.yml)** - Core functionality and base classes
 - **[Jiro.Infrastructure](Jiro.Infrastructure.yml)** - Data access and infrastructure services
-- **[Jiro.App](Jiro.App.yml)** - Application configuration and setup
+- **[Jiro.App](Jiro.App.Configurator.yml)** - Application configuration and setup
 
 ### Key Features
 
@@ -50,7 +50,7 @@ Jiro is a comprehensive application framework with the following main components
 
 ## Getting Started
 
-For implementation examples and usage guides, visit the [Documentation](../docs/) section.
+For implementation examples and usage guides, visit the [Documentation](../documentation/index.html) section.
 
 ## API Browser
 

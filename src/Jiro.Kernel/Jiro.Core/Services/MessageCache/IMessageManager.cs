@@ -4,7 +4,8 @@ using Jiro.Core.Services.Conversation.Models;
 namespace Jiro.Core.Services.MessageCache;
 
 /// <summary>
-/// Defines the contract for managing chat messages, sessions, and message caching operations.
+/// Composite interface that combines session management and message caching operations.
+/// This interface bridges the separated services for backward compatibility while consumers migrate.
 /// </summary>
 public interface IMessageManager
 {
@@ -13,8 +14,9 @@ public interface IMessageManager
 	/// </summary>
 	/// <param name="sessionId">The unique identifier of the session.</param>
 	/// <param name="includeMessages">Whether to include messages in the result.</param>
+	/// <param name="instanceId">The unique identifier of the instance. If null, will be fetched from database.</param>
 	/// <returns>A task that represents the asynchronous operation. The task result contains the session or null if not found.</returns>
-	Task<Session?> GetSessionAsync(string sessionId, bool includeMessages = false);
+	Task<Session?> GetSessionAsync(string sessionId, bool includeMessages = false, string? instanceId = null);
 
 	/// <summary>
 	/// Retrieves an existing chat session or creates a new one if it doesn't exist.
@@ -42,14 +44,12 @@ public interface IMessageManager
 
 	/// <summary>
 	/// Clears all cached data for a specific session.
-	/// Useful when the session needs to be completely refreshed from the database.
 	/// </summary>
 	/// <param name="sessionId">The unique identifier of the session.</param>
 	void InvalidateSessionCache(string sessionId);
 
 	/// <summary>
 	/// Clears all cached sessions for a specific instance.
-	/// Useful when a complete cache refresh is needed.
 	/// </summary>
 	/// <param name="instanceId">The unique identifier of the instance.</param>
 	void InvalidateInstanceSessionsCache(string instanceId);
@@ -68,12 +68,12 @@ public interface IMessageManager
 	Task<List<ChatSession>> GetChatSessionsAsync(string instanceId);
 
 	/// <summary>
-	/// Clears all message cache entries. Legacy method for compatibility.
+	/// Clears all message cache entries. Legacy method.
 	/// </summary>
 	void ClearMessageCache();
 
 	/// <summary>
-	/// Modifies a message in the cache with the specified key and expiration. Legacy method for compatibility.
+	/// Modifies a message in the cache with the specified key and expiration. Legacy method.
 	/// </summary>
 	/// <param name="key">The cache key.</param>
 	/// <param name="message">The message content.</param>
@@ -81,9 +81,25 @@ public interface IMessageManager
 	void ModifyMessage(string key, string message, int minutes);
 
 	/// <summary>
-	/// Gets the count of messages in a specific session from cache. Legacy method for compatibility.
+	/// Gets the count of messages in a specific session from cache.
 	/// </summary>
 	/// <param name="sessionId">The session identifier.</param>
 	/// <returns>The number of messages in the session.</returns>
 	int GetChatMessageCount(string sessionId);
+
+	/// <summary>
+	/// Removes a chat session and all its messages from both the database and cache.
+	/// </summary>
+	/// <param name="sessionId">The unique identifier of the session to remove.</param>
+	/// <returns>A task that represents the asynchronous operation. Returns true if the session was found and removed, false otherwise.</returns>
+	Task<bool> RemoveSessionAsync(string sessionId);
+
+	/// <summary>
+	/// Updates a chat session's metadata (name and description) in both the database and cache.
+	/// </summary>
+	/// <param name="sessionId">The unique identifier of the session to update.</param>
+	/// <param name="name">The new name for the session. If null, the name will not be updated.</param>
+	/// <param name="description">The new description for the session. If null, the description will not be updated.</param>
+	/// <returns>A task that represents the asynchronous operation. Returns true if the session was found and updated, false otherwise.</returns>
+	Task<bool> UpdateSessionAsync(string sessionId, string? name = null, string? description = null);
 }

@@ -12,14 +12,16 @@ public interface IJiroGrpcService
 	/// </summary>
 	/// <param name="commandSyncId">The command synchronization ID</param>
 	/// <param name="commandResult">The command execution result</param>
+	/// <param name="sessionId">Session ID (possibly newly generated)</param>
 	/// <returns>A task representing the async operation</returns>
-	Task SendCommandResultAsync(string commandSyncId, CommandResponse commandResult);
+	Task SendCommandResultAsync(string commandSyncId, CommandResponse commandResult, string sessionId);
 
 	/// <summary>
 	/// Sends an error result to the server
 	/// </summary>
 	/// <param name="commandSyncId">The command synchronization ID</param>
 	/// <param name="errorMessage">The error message</param>
+	/// <param name="sessionId">Session ID</param>
 	/// <returns>A task representing the async operation</returns>
-	Task SendCommandErrorAsync(string commandSyncId, string errorMessage);
+	Task SendCommandErrorAsync(string commandSyncId, string errorMessage, string sessionId);
 }

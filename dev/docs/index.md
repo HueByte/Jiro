@@ -172,4 +172,4 @@ To customize the documentation:
 
 ## 📞 Support
 
-For questions about the documentation system or contributing to the docs, please refer to the main project documentation or open an issue in the repository.
+This documentation is part of an engineering thesis project. For questions about the documentation system or technical details, please refer to the main project documentation or open an issue in the repository.

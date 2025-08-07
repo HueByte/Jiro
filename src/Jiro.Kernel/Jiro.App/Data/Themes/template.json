@@ -1,0 +1,89 @@
+{
+  "name": "Theme Template",
+  "description": "Template file containing all available theme variables",
+  "colorScheme": {
+    "transparent": "transparent",
+    "white": "#ffffff",
+    "black": "#000000",
+    
+    "background": "#f8f9fa",
+    "backgroundSecondary": "#e9ecef",
+    "backgroundTertiary": "#dee2e6",
+    "backgroundElevated": "#ffffff",
+    
+    "surface": "#ffffff",
+    "surfaceSecondary": "#f8f9fa",
+    "surfaceHover": "#e9ecef",
+    "surfaceElevated": "#ffffff",
+    
+    "container": "#ffffff",
+    "containerSecondary": "#f8f9fa",
+    "containerHover": "#e9ecef",
+    "containerActive": "#dee2e6",
+    "containerElevated": "#ffffff",
+    
+    "border": "#dee2e6",
+    "borderSecondary": "#ced4da",
+    "borderFocus": "#0d6efd",
+    "borderHover": "#adb5bd",
+    
+    "textPrimary": "#212529",
+    "textSecondary": "#6c757d",
+    "textTertiary": "#adb5bd",
+    "textDisabled": "#ced4da",
+    "textInverse": "#ffffff",
+    "textMuted": "#6c757d",
+    
+    "buttonPrimary": "#0d6efd",
+    "buttonPrimaryHover": "#0b5ed7",
+    "buttonPrimaryActive": "#0a58ca",
+    "buttonSecondary": "#6c757d",
+    "buttonSecondaryHover": "#5c636a",
+    "buttonSecondaryActive": "#565e64",
+    "buttonDanger": "#dc3545",
+    "buttonDangerHover": "#c82333",
+    "buttonDangerActive": "#bd2130",
+    "buttonSuccess": "#198754",
+    "buttonSuccessHover": "#157347",
+    "buttonSuccessActive": "#146c43",
+    
+    "primary": "#0d6efd",
+    "primaryHover": "#0b5ed7",
+    "primaryActive": "#0a58ca",
+    "primaryLight": "#cfe2ff",
+    "primaryDark": "#084298",
+    
+    "secondary": "#6c757d",
+    "secondaryHover": "#5c636a",
+    "secondaryActive": "#565e64",
+    "secondaryLight": "#e2e3e5",
+    "secondaryDark": "#41464b",
+    
+    "accent": "#6f42c1",
+    "accentHover": "#5a36a6",
+    "accentLight": "#e2d9f3",
+    
+    "success": "#198754",
+    "successLight": "#d1e7dd",
+    "successDark": "#146c43",
+    "warning": "#ffc107",
+    "warningLight": "#fff3cd",
+    "warningDark": "#997404",
+    "error": "#dc3545",
+    "errorLight": "#f8d7da",
+    "errorDark": "#842029",
+    "info": "#0dcaf0",
+    "infoLight": "#d1ecf1",
+    "infoDark": "#055160",
+    
+    "link": "#0d6efd",
+    "linkHover": "#0b5ed7",
+    "linkVisited": "#6f42c1",
+    "linkActive": "#0a58ca",
+    
+    "selection": "#b3d4fc",
+    "selectionHover": "#a0c4ff",
+    "highlight": "#fff3cd",
+    "highlightSecondary": "#e2d9f3"
+  }
+}

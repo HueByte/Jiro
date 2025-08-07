@@ -9,23 +9,30 @@
 
   <ItemGroup>
     <PackageReference Include="Jiro.Commands" Version="3.0.4" />
-    <PackageReference Include="JWT" Version="11.0.0" />
-    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.6" />
+    <PackageReference Include="Jiro.Shared" Version="1.4.4" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Abstractions" Version="2.3.0" />
-    <PackageReference Include="Microsoft.Extensions.AI.OpenAI" Version="9.6.0-preview.1.25310.2" />
-    <PackageReference Include="Microsoft.Extensions.Configuration" Version="9.0.6" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="9.0.6" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.6" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="9.0.6" />
-    <PackageReference Include="Microsoft.Extensions.Http" Version="9.0.6" />
-    <PackageReference Include="Microsoft.Extensions.Logging" Version="9.0.6" />
-    <PackageReference Include="Microsoft.Extensions.Options" Version="9.0.6" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="9.0.6" />
-    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="9.0.6" />
-    <PackageReference Include="Microsoft.IdentityModel.Tokens" Version="8.12.0" />
-    <PackageReference Include="OpenAI" Version="2.2.0-beta.4" />
-    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.12.0" />
+    <PackageReference Include="Microsoft.Extensions.AI.OpenAI" Version="9.7.1-preview.1.25365.4" />
+    <PackageReference Include="Microsoft.Extensions.Configuration" Version="9.0.8" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="9.0.8" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.8" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="9.0.8" />
+    <PackageReference Include="Microsoft.Extensions.Http" Version="9.0.8" />
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="9.0.8" />
+    <PackageReference Include="Microsoft.Extensions.Options" Version="9.0.8" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="9.0.8" />
+    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="9.0.8" />
+    <PackageReference Include="OpenAI" Version="2.3.0" />
     <PackageReference Include="TiktokenSharp" Version="1.1.7" />
   </ItemGroup>
+
+  <!-- Exclude .proto files to prevent compilation conflicts with Jiro.Shared package -->
+  <Target Name="ExcludeJiroSharedProtoFiles" BeforeTargets="BeforeCompile">
+    <ItemGroup>
+      <!-- Remove any .proto files that might be included by content packages -->
+      <Compile Remove="@(Compile)" Condition="%(Compile.Identity) != '' and $([System.String]::new('%(Compile.Identity)').EndsWith('.proto'))" />
+      <Content Remove="@(Content)" Condition="%(Content.Identity) != '' and $([System.String]::new('%(Content.Identity)').EndsWith('.proto'))" />
+      <None Remove="@(None)" Condition="%(None.Identity) != '' and $([System.String]::new('%(None.Identity)').EndsWith('.proto'))" />
+    </ItemGroup>
+  </Target>
 
 </Project>

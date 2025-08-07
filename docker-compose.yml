@@ -1,67 +1,73 @@
-version: "3.8"
-
 services:
   jiro-kernel:
     container_name: jiro-kernel
     build:
       context: ./src/Jiro.Kernel
       dockerfile: Dockerfile
-    ports:
-      - "${JIRO_HTTP_PORT}:8080"
-      - "${JIRO_HTTPS_PORT}:8443"
-      - "${JIRO_ADDITIONAL_PORT}:18090"
     environment:
-      - ConnectionStrings__DefaultConnection=Server=${DB_SERVER};Database=${MYSQL_DATABASE};Uid=${MYSQL_USER};Pwd=${MYSQL_PASSWORD};
+      # Core application configuration
+      - JIRO_ApiKey=${JIRO_ApiKey}
+      
+      # OpenAI configuration
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - JIRO_Chat__AuthToken=${JIRO_Chat__AuthToken:-${OPENAI_API_KEY}}
+      - JIRO_Chat__SystemMessage=${JIRO_Chat__SystemMessage:-I want you to act as personal assistant called Jiro. You are friendly, funny and sarcastic. You can ask me anything you want and engage in conversation.}
+      - JIRO_Chat__TokenLimit=${JIRO_Chat__TokenLimit:-2000}
+      - JIRO_Chat__Enabled=${JIRO_Chat__Enabled:-true}
+      
+      # JiroCloud service configuration
+      - JIRO_JiroCloud__ApiKey=${JIRO_JiroCloud__ApiKey:-${JIRO_ApiKey}}
+      - JIRO_JiroCloud__ApiUrl=${JIRO_JiroCloud__ApiUrl:-https://jiro.huebytes.com/api}
+      - JIRO_JiroCloud__Grpc__ServerUrl=${JIRO_JiroCloud__Grpc__ServerUrl:-https://jiro.huebytes.com/grpc}
+      - JIRO_JiroCloud__Grpc__MaxRetries=${JIRO_JiroCloud__Grpc__MaxRetries:-3}
+      - JIRO_JiroCloud__Grpc__TimeoutMs=${JIRO_JiroCloud__Grpc__TimeoutMs:-30000}
+      - JIRO_JiroCloud__WebSocket__HubUrl=${JIRO_JiroCloud__WebSocket__HubUrl:-https://jiro.huebytes.com/hubs/instanceHub}
+      - JIRO_JiroCloud__WebSocket__HandshakeTimeoutMs=${JIRO_JiroCloud__WebSocket__HandshakeTimeoutMs:-15000}
+      - JIRO_JiroCloud__WebSocket__KeepAliveIntervalMs=${JIRO_JiroCloud__WebSocket__KeepAliveIntervalMs:-15000}
+      - JIRO_JiroCloud__WebSocket__ReconnectionAttempts=${JIRO_JiroCloud__WebSocket__ReconnectionAttempts:-5}
+      - JIRO_JiroCloud__WebSocket__ReconnectionDelayMs=${JIRO_JiroCloud__WebSocket__ReconnectionDelayMs:-5000}
+      - JIRO_JiroCloud__WebSocket__ServerTimeoutMs=${JIRO_JiroCloud__WebSocket__ServerTimeoutMs:-30000}
+      - JIRO_JiroCloud__WebSocket__Headers__User-Agent=${JIRO_JiroCloud__WebSocket__Headers__User-Agent:-Jiro-Bot/1.0}
+      
+      # Database configuration (SQLite default)
+      - JIRO_ConnectionStrings__JiroContext=${JIRO_ConnectionStrings__JiroContext:-Data Source=Data/Database/jiro.db}
+      
+      # Data Paths configuration
+      - JIRO_DataPaths__Logs=${JIRO_DataPaths__Logs:-Data/Logs}
+      - JIRO_DataPaths__Messages=${JIRO_DataPaths__Messages:-Data/Messages}
+      - JIRO_DataPaths__Plugins=${JIRO_DataPaths__Plugins:-Data/Plugins}
+      - JIRO_DataPaths__Themes=${JIRO_DataPaths__Themes:-Data/Themes}
+      
+      # Serilog configuration
+      - JIRO_Serilog__MinimumLevel__Default=${JIRO_Serilog__MinimumLevel__Default:-Information}
+      - JIRO_Serilog__MinimumLevel__Override__System=${JIRO_Serilog__MinimumLevel__Override__System:-Warning}
+      - JIRO_Serilog__MinimumLevel__Override__Microsoft=${JIRO_Serilog__MinimumLevel__Override__Microsoft:-Warning}
+      - JIRO_Serilog__MinimumLevel__Override__Microsoft.AspNetCore=${JIRO_Serilog__MinimumLevel__Override__Microsoft_AspNetCore:-Warning}
+      - JIRO_Serilog__MinimumLevel__Override__Microsoft.EntityFrameworkCore.Database.Command=${JIRO_Serilog__MinimumLevel__Override__Microsoft_EntityFrameworkCore_Database_Command:-Warning}
+      - JIRO_Serilog__WriteTo__1__Args__path=${JIRO_Serilog__WriteTo__1__Args__path:-Data/Logs/jiro-.log}
+      - JIRO_Serilog__WriteTo__1__Args__rollingInterval=${JIRO_Serilog__WriteTo__1__Args__rollingInterval:-Day}
+      - JIRO_Serilog__WriteTo__1__Args__retainedFileCountLimit=${JIRO_Serilog__WriteTo__1__Args__retainedFileCountLimit:-7}
+      - JIRO_Serilog__Properties__Application=${JIRO_Serilog__Properties__Application:-Jiro}
     volumes:
-      - jiro_shared:/home/app/jiro/Data/Shared
-      - jiro_logs:/home/app/jiro/Data/Logs
-    depends_on:
-      mysql:
-        condition: service_healthy
+      - jiro_data:/home/app/jiro/Data
     networks:
       - jiro-network
     restart: unless-stopped
 
-  mysql:
-    container_name: jiro-mysql
-    image: mysql:8.0
-    environment:
-      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
-      - MYSQL_DATABASE=${MYSQL_DATABASE}
-      - MYSQL_USER=${MYSQL_USER}
-      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+  jiro-docs:
+    container_name: jiro-docs
+    profiles: ["docs", "full"]
+    build:
+      context: .
+      dockerfile: dev/Dockerfile
     ports:
-      - "${MYSQL_PORT}:3306"
-    volumes:
-      - mysql_data:/var/lib/mysql
-      - mysql_config:/etc/mysql/conf.d
+      - "${JIRO_DOCS_PORT:-8081}:80"
     networks:
       - jiro-network
     restart: unless-stopped
-    healthcheck:
-      test:
-        [
-          "CMD",
-          "mysqladmin",
-          "ping",
-          "-h",
-          "localhost",
-          "-u${MYSQL_USER}",
-          "-p${MYSQL_PASSWORD}",
-        ]
-      interval: ${MYSQL_HEALTH_CHECK_INTERVAL}
-      timeout: ${MYSQL_HEALTH_CHECK_TIMEOUT}
-      retries: ${MYSQL_HEALTH_CHECK_RETRIES}
-      start_period: ${MYSQL_HEALTH_CHECK_START_PERIOD}
 
 volumes:
-  jiro_shared:
-    driver: local
-  jiro_logs:
-    driver: local
-  mysql_data:
-    driver: local
-  mysql_config:
+  jiro_data:
     driver: local
 
 networks:

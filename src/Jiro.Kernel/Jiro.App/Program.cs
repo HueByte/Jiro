@@ -1,13 +1,13 @@
 using Jiro.App;
-using Jiro.App.Configurator;
 using Jiro.App.Extensions;
+using Jiro.App.Setup;
+using Jiro.App.Validation;
 using Jiro.Commands.Base;
 using Jiro.Commands.Models;
 using Jiro.Core.Commands.Chat;
+using Jiro.Core.Options;
 using Jiro.Core.Utils;
 using Jiro.Infrastructure;
-
-using JiroCloud.Api.Proto;
 
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -18,18 +18,32 @@ using Serilog.Extensions.Logging;
 
 AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
 
+// Ensure working directory matches the application's base directory
+Directory.SetCurrentDirectory(AppContext.BaseDirectory);
+
 // Check for test mode
 bool isTestMode = args.Contains("--test-mode") || Environment.GetEnvironmentVariable("JIRO_TEST_MODE") == "true";
 
-var host = Host.CreateDefaultBuilder(args);
+var host = Host.CreateDefaultBuilder(args)
+	.UseContentRoot(AppContext.BaseDirectory)
+	.ConfigureHostConfiguration(config =>
+	{
+		config.SetBasePath(AppContext.BaseDirectory);
+		config.AddJsonFile("Configuration/appsettings.json", optional: false, reloadOnChange: true);
+		config.AddEnvironmentVariables();
+		config.AddEnvironmentVariables("JIRO_");
+		config.AddCommandLine(args);
+	});
 
 ConfigurationManager configManager = new();
-configManager.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
-	.AddEnvironmentVariables();
+
+
+configManager.AddJsonFile("Configuration/appsettings.json", optional: false, reloadOnChange: true)
+	.AddEnvironmentVariables()
+	.AddEnvironmentVariables("JIRO_");
 
 EnvironmentConfigurator environmentConfigurator = new EnvironmentConfigurator(configManager)
 	.PrepareDefaultFolders()
-	.PrepareConfigFiles()
 	.PrepareLogsFolder();
 
 Log.Logger = new LoggerConfiguration()
@@ -39,8 +53,19 @@ Log.Logger = new LoggerConfiguration()
 var logger = new SerilogLoggerProvider(Log.Logger)
 	.CreateLogger(nameof(Program));
 
+// Validate configuration before proceeding
+Log.Information("🔍 Validating configuration...");
+var validationErrors = ConfigurationValidator.ValidateSettings(configManager, isTestMode);
+ConfigurationValidator.PrintValidationResults(validationErrors, isTestMode);
+
+if (validationErrors.Count > 0)
+{
+	Log.Fatal("Configuration validation failed - application cannot start");
+	Environment.Exit(1);
+}
+
 host.UseSerilog((context, services, configuration) => configuration
-		.ReadFrom.Configuration(configManager)
+		.ReadFrom.Configuration(context.Configuration)
 		.ReadFrom.Services(services));
 
 var modulePaths = configManager.GetSection("Modules").Get<string[]>();
@@ -53,57 +78,81 @@ host.ConfigureAppConfiguration(options =>
 
 host.ConfigureServices(services =>
 {
-	string? apiKey = configManager.GetValue<string>("API_KEY");
-	string? apiUrl = configManager.GetValue<string>("JIRO_API");
+	// Configure options first so they can be used by other services
+	services.AddOptions(configManager);
+
+	// Get application and JiroCloud options to configure services
+	var appOptions = new ApplicationOptions();
+	configManager.Bind(appOptions);
+
+	var jiroCloudOptions = new JiroCloudOptions();
+	configManager.GetSection(JiroCloudOptions.JiroCloud).Bind(jiroCloudOptions);
 
 	// In test mode, use dummy values if not provided
 	if (isTestMode)
 	{
-		apiKey ??= "test-api-key";
-		apiUrl ??= "https://localhost:18092";
+		jiroCloudOptions.ApiKey = string.IsNullOrWhiteSpace(jiroCloudOptions.ApiKey) ? "test-api-key" : jiroCloudOptions.ApiKey;
+		appOptions.JiroApi = string.IsNullOrWhiteSpace(appOptions.JiroApi) ? "https://localhost:18092" : appOptions.JiroApi;
 	}
 
-	// todo
-	// add link to guide
-	if (string.IsNullOrWhiteSpace(apiKey))
-		throw new Exception("Please provide API_KEY");
-
-	if (string.IsNullOrWhiteSpace(apiUrl))
-		throw new Exception("Couldn't connect to API");
-
-	services.AddGrpcClient<JiroHubProto.JiroHubProtoClient>("JiroClient", options =>
+	services.AddGrpcClient<Jiro.Shared.Grpc.JiroHubProto.JiroHubProtoClient>("JiroClient", (serviceProvider, options) =>
 		{
-			options.Address = new Uri(apiUrl);
+			if (!isTestMode)
+			{
+				if (string.IsNullOrEmpty(jiroCloudOptions.Grpc.ServerUrl))
+				{
+					throw new InvalidOperationException("JiroCloud:Grpc:ServerUrl is required in configuration");
+				}
+			}
+			options.Address = new Uri(jiroCloudOptions.Grpc.ServerUrl ?? "https://localhost:8088");
 		})
 		.AddCallCredentials((context, metadata) =>
 		{
-			metadata.Add("X-Api-Key", apiKey);
+			metadata.Add("X-Api-Key", jiroCloudOptions.ApiKey);
 
 			return Task.CompletedTask;
 		})
+		.AddInterceptor<Jiro.App.Services.GrpcExceptionInterceptor>()
+		.AddInterceptor<Jiro.App.Interceptors.InstanceContextInterceptor>()
 		.ConfigureChannel(options =>
 		{
-			options.HttpHandler = new SocketsHttpHandler
+			var socketsHandler = new SocketsHttpHandler
 			{
 				PooledConnectionIdleTimeout = Timeout.InfiniteTimeSpan,
 				KeepAlivePingDelay = TimeSpan.FromSeconds(60),
 				KeepAlivePingTimeout = TimeSpan.FromSeconds(30),
 				EnableMultipleHttp2Connections = true
 			};
+
+			// For localhost development, skip TLS certificate validation
+			if (!string.IsNullOrEmpty(jiroCloudOptions.Grpc.ServerUrl))
+			{
+				var uri = new Uri(jiroCloudOptions.Grpc.ServerUrl);
+				if (uri.Host == "localhost" || uri.Host == "127.0.0.1")
+				{
+					socketsHandler.SslOptions.RemoteCertificateValidationCallback =
+						(sender, certificate, chain, sslPolicyErrors) => true;
+				}
+			}
+
+			options.HttpHandler = socketsHandler;
+			options.HttpVersion = new Version(2, 0);
+			options.HttpVersionPolicy = HttpVersionPolicy.RequestVersionExact;
 		});
 
 	pluginManager = new(services, configManager, logger);
 
-	string? connString = configManager.GetValue<string>("JIRO_DB_CONN");
-	if (string.IsNullOrEmpty(connString))
-		connString = configManager.GetConnectionString("JiroContext");
-
-	services.AddJiroSQLiteContext(string.IsNullOrEmpty(connString) ? Path.Join(AppContext.BaseDirectory, "save", "jiro.db") : connString);
+	// Configure database using connection string
+	var connString = configManager.GetConnectionString("JiroContext");
+	if (string.IsNullOrEmpty(connString) && !isTestMode)
+	{
+		throw new InvalidOperationException("ConnectionStrings:JiroContext is required in configuration");
+	}
+	services.AddJiroSQLiteContext(connString);
 	services.AddMemoryCache();
 	services.AddServices(configManager);
 	services.RegisterCommands(nameof(ChatCommand.Chat));
 	services.AddHttpClients(configManager);
-	services.AddOptions(configManager);
 
 	// Add the new communication services (WebSocket for receiving, gRPC for sending)
 	services.AddJiroCommunication(configManager);
@@ -148,6 +197,26 @@ if (isTestMode)
 // Log loaded modules
 var commandContainer = app.Services.GetRequiredService<CommandsContext>();
 foreach (var module in commandContainer.CommandModules.Keys) Log.Information("Module {Module} loaded", module);
+
+// Initialize instance ID from API
+using (var scope = app.Services.CreateScope())
+{
+	var instanceMetadataAccessor = scope.ServiceProvider.GetRequiredService<Jiro.Core.Services.Context.IInstanceMetadataAccessor>();
+	var jiroCloudOptions = scope.ServiceProvider.GetRequiredService<Microsoft.Extensions.Options.IOptions<Jiro.Core.Options.JiroCloudOptions>>().Value;
+
+	Log.Information("Initializing instance ID from Jiro API...");
+	var instanceId = await instanceMetadataAccessor.InitializeInstanceIdAsync(jiroCloudOptions.ApiKey);
+
+	if (!string.IsNullOrWhiteSpace(instanceId))
+	{
+		Log.Information("✅ Instance ID initialized successfully: {InstanceId}", instanceId);
+	}
+	else
+	{
+		Log.Fatal("❌ Failed to initialize instance ID from API - application cannot start without valid instance metadata");
+		Environment.Exit(1);
+	}
+}
 
 var appConf = new AppConfigurator(app)
 	  .Migrate();

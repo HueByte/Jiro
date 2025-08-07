@@ -1,0 +1,89 @@
+{
+  "name": "Dark Theme",
+  "description": "A dark theme for low light environments",
+  "colorScheme": {
+    "transparent": "transparent",
+    "white": "#ffffff",
+    "black": "#000000",
+    
+    "background": "#121212",
+    "backgroundSecondary": "#1e1e1e",
+    "backgroundTertiary": "#2d2d2d",
+    "backgroundElevated": "#1e1e1e",
+    
+    "surface": "#1e1e1e",
+    "surfaceSecondary": "#2d2d2d",
+    "surfaceHover": "#3d3d3d",
+    "surfaceElevated": "#2d2d2d",
+    
+    "container": "#1e1e1e",
+    "containerSecondary": "#2d2d2d",
+    "containerHover": "#3d3d3d",
+    "containerActive": "#4d4d4d",
+    "containerElevated": "#2d2d2d",
+    
+    "border": "#404040",
+    "borderSecondary": "#505050",
+    "borderFocus": "#bb86fc",
+    "borderHover": "#606060",
+    
+    "textPrimary": "#ffffff",
+    "textSecondary": "#b3b3b3",
+    "textTertiary": "#808080",
+    "textDisabled": "#666666",
+    "textInverse": "#000000",
+    "textMuted": "#999999",
+    
+    "buttonPrimary": "#bb86fc",
+    "buttonPrimaryHover": "#a970ff",
+    "buttonPrimaryActive": "#9c5aff",
+    "buttonSecondary": "#404040",
+    "buttonSecondaryHover": "#505050",
+    "buttonSecondaryActive": "#606060",
+    "buttonDanger": "#cf6679",
+    "buttonDangerHover": "#b85566",
+    "buttonDangerActive": "#a74455",
+    "buttonSuccess": "#03dac6",
+    "buttonSuccessHover": "#02c4b0",
+    "buttonSuccessActive": "#02ae9b",
+    
+    "primary": "#bb86fc",
+    "primaryHover": "#a970ff",
+    "primaryActive": "#9c5aff",
+    "primaryLight": "#d7c4ff",
+    "primaryDark": "#7c39ed",
+    
+    "secondary": "#03dac6",
+    "secondaryHover": "#02c4b0",
+    "secondaryActive": "#02ae9b",
+    "secondaryLight": "#b2f5f0",
+    "secondaryDark": "#018786",
+    
+    "accent": "#ff6b6b",
+    "accentHover": "#ff5252",
+    "accentLight": "#ffcdd2",
+    
+    "success": "#03dac6",
+    "successLight": "#b2f5f0",
+    "successDark": "#018786",
+    "warning": "#ffb74d",
+    "warningLight": "#ffe0b2",
+    "warningDark": "#f57c00",
+    "error": "#cf6679",
+    "errorLight": "#f8bbd9",
+    "errorDark": "#b00020",
+    "info": "#81d4fa",
+    "infoLight": "#e1f5fe",
+    "infoDark": "#0277bd",
+    
+    "link": "#bb86fc",
+    "linkHover": "#a970ff",
+    "linkVisited": "#d7c4ff",
+    "linkActive": "#9c5aff",
+    
+    "selection": "#bb86fc33",
+    "selectionHover": "#bb86fc55",
+    "highlight": "#ffb74d33",
+    "highlightSecondary": "#ff6b6b33"
+  }
+}

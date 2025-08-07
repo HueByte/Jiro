@@ -13,6 +13,28 @@ The Jiro project utilizes multiple GitHub Actions workflows organized by respons
 When a Pull Request is created, multiple validation workflows run in parallel:
 
 ```mermaid
+%%{init: {
+  "theme": "base",
+  "themeVariables": {
+    "background": "#1C1E26",
+    "primaryColor": "#FCD4B8",
+    "primaryTextColor": "#D5D8DA",
+    "primaryBorderColor": "#E95378",
+    "lineColor": "#6C6F93",
+    "sectionBkgColor": "#232530",
+    "altSectionBkgColor": "#2E303E", 
+    "gridColor": "#16161C",
+    "secondaryColor": "#26BBD9",
+    "tertiaryColor": "#27D797",
+    "cScale0": "#1C1E26",
+    "cScale1": "#232530",
+    "cScale2": "#2E303E",
+    "cScale3": "#6C6F93",
+    "cScale4": "#D5D8DA",
+    "clusterBkg": "#232530",
+    "clusterBorder": "#6C6F93"
+  }
+}}%%
 graph TD
     A[PR Created/Updated] --> B[.NET CI]
     A --> C[Docker Build]
@@ -32,6 +54,28 @@ graph TD
 When PR is merged to main, production workflows execute:
 
 ```mermaid
+%%{init: {
+  "theme": "base",
+  "themeVariables": {
+    "background": "#1C1E26",
+    "primaryColor": "#FCD4B8",
+    "primaryTextColor": "#D5D8DA",
+    "primaryBorderColor": "#E95378",
+    "lineColor": "#6C6F93",
+    "sectionBkgColor": "#232530",
+    "altSectionBkgColor": "#2E303E", 
+    "gridColor": "#16161C",
+    "secondaryColor": "#26BBD9",
+    "tertiaryColor": "#27D797",
+    "cScale0": "#1C1E26",
+    "cScale1": "#232530",
+    "cScale2": "#2E303E",
+    "cScale3": "#6C6F93",
+    "cScale4": "#D5D8DA",
+    "clusterBkg": "#232530",
+    "clusterBorder": "#6C6F93"
+  }
+}}%%
 graph TD
     A[Merge to Main] --> B[☁️ Auto-Versioning]
     A --> C[🐳 Docker Push]
@@ -66,7 +110,7 @@ graph TD
 - **Steps:**
   - Checkout source code with GitHub token
   - Setup .NET 9.0 SDK
-  - Prepare configuration files (`appsettings.json`)
+  - Prepare configuration files (`Configuration/appsettings.json`)
   - Cache NuGet packages for performance
   - Restore dependencies
   - Build solution (Release configuration)
@@ -318,6 +362,30 @@ docker pull ghcr.io/huebyte/jiro-kernel:main
 
 ## 🔧 Configuration Management
 
+### **Configuration File Structure**
+
+Jiro uses an organized configuration structure with all settings centralized in the `Configuration` directory:
+
+```
+src/Jiro.Kernel/Jiro.App/Configuration/
+├── appsettings.json          # Main configuration (created from example)
+├── appsettings.example.json  # Configuration template
+├── appsettings.dev.json      # Development-specific overrides
+└── appsettings.backup.json   # Backup configuration
+```
+
+**Configuration File Hierarchy:**
+
+1. `appsettings.json` - Base configuration
+2. `appsettings.{environment}.json` - Environment-specific overrides
+3. Environment variables with `JIRO_` prefix - Runtime overrides
+
+**Workflow Integration:**
+
+- CI/CD pipelines automatically copy `appsettings.example.json` to `appsettings.json`
+- The example file contains safe defaults for build and test environments
+- Production deployments use environment variables for sensitive values
+
 ### **Environment Variables**
 
 - `DOTNET_VERSION: "9.0.x"` - Consistent .NET version across all workflows
@@ -333,6 +401,28 @@ docker pull ghcr.io/huebyte/jiro-kernel:main
 ### **Workflow Dependencies**
 
 ```mermaid
+%%{init: {
+  "theme": "base",
+  "themeVariables": {
+    "background": "#1C1E26",
+    "primaryColor": "#FCD4B8",
+    "primaryTextColor": "#D5D8DA",
+    "primaryBorderColor": "#E95378",
+    "lineColor": "#6C6F93",
+    "sectionBkgColor": "#232530",
+    "altSectionBkgColor": "#2E303E", 
+    "gridColor": "#16161C",
+    "secondaryColor": "#26BBD9",
+    "tertiaryColor": "#27D797",
+    "cScale0": "#1C1E26",
+    "cScale1": "#232530",
+    "cScale2": "#2E303E",
+    "cScale3": "#6C6F93",
+    "cScale4": "#D5D8DA",
+    "clusterBkg": "#232530",
+    "clusterBorder": "#6C6F93"
+  }
+}}%%
 graph LR
     A[PR Created] --> B[All Validation Workflows]
     B --> C[Merge Approved]
@@ -711,6 +801,28 @@ All scripts are available in both PowerShell (`.ps1`) and Bash (`.sh`) versions:
 #### **Script Integration with Workflows**
 
 ```mermaid
+%%{init: {
+  "theme": "base",
+  "themeVariables": {
+    "background": "#1C1E26",
+    "primaryColor": "#FCD4B8",
+    "primaryTextColor": "#D5D8DA",
+    "primaryBorderColor": "#E95378",
+    "lineColor": "#6C6F93",
+    "sectionBkgColor": "#232530",
+    "altSectionBkgColor": "#2E303E", 
+    "gridColor": "#16161C",
+    "secondaryColor": "#26BBD9",
+    "tertiaryColor": "#27D797",
+    "cScale0": "#1C1E26",
+    "cScale1": "#232530",
+    "cScale2": "#2E303E",
+    "cScale3": "#6C6F93",
+    "cScale4": "#D5D8DA",
+    "clusterBkg": "#232530",
+    "clusterBorder": "#6C6F93"
+  }
+}}%%
 graph TD
     A[Developer Scripts] --> B[Local Testing]
     A --> C[CI/CD Workflows]

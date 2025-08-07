@@ -30,11 +30,11 @@ runs:
       if: inputs.prepare-config == 'true'
       shell: bash
       run: |
-        if [ ! -f ./src/Jiro.Kernel/Jiro.App/appsettings.json ]; then
-          cp ./src/Jiro.Kernel/Jiro.App/appsettings.example.json ./src/Jiro.Kernel/Jiro.App/appsettings.json
-          echo "✅ Copied appsettings.example.json to appsettings.json"
+        if [ ! -f ./src/Jiro.Kernel/Jiro.App/Configuration/appsettings.json ]; then
+          cp ./src/Jiro.Kernel/Jiro.App/Configuration/appsettings.example.json ./src/Jiro.Kernel/Jiro.App/Configuration/appsettings.json
+          echo "✅ Copied Configuration/appsettings.example.json to Configuration/appsettings.json"
         else
-          echo "✅ appsettings.json already exists"
+          echo "✅ Configuration/appsettings.json already exists"
         fi
         # Ensure dev/tags directory exists for release notes
         mkdir -p dev/tags

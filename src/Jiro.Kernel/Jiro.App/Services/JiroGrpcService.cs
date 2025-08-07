@@ -1,19 +1,15 @@
 using System.Text;
-using System.Text.RegularExpressions;
 
 using Google.Protobuf;
 
 using Grpc.Net.ClientFactory;
 
-using Jiro.App.Options;
 using Jiro.Commands.Models;
-
-using JiroCloud.Api.Proto;
+using Jiro.Core.Options;
+using Jiro.Shared.Grpc;
 
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-
-using static JiroCloud.Api.Proto.JiroHubProto;
 
 namespace Jiro.App.Services;
 
@@ -22,37 +18,37 @@ namespace Jiro.App.Services;
 /// </summary>
 internal class JiroGrpcService : IJiroGrpcService
 {
-	private readonly JiroHubProtoClient _client;
+	private readonly JiroHubProto.JiroHubProtoClient _client;
 	private readonly ILogger<JiroGrpcService> _logger;
-	private readonly GrpcOptions _options;
+	private readonly JiroCloudOptions _jiroCloudOptions;
 
 	public JiroGrpcService(
 		GrpcClientFactory clientFactory,
 		ILogger<JiroGrpcService> logger,
-		IOptions<GrpcOptions> options)
+		IOptions<JiroCloudOptions> jiroCloudOptions)
 	{
-		_client = clientFactory.CreateClient<JiroHubProtoClient>("JiroClient");
+		_client = clientFactory.CreateClient<JiroHubProto.JiroHubProtoClient>("JiroClient");
 		_logger = logger;
-		_options = options.Value;
+		_jiroCloudOptions = jiroCloudOptions.Value;
 	}
 
-	public async Task SendCommandResultAsync(string commandSyncId, CommandResponse commandResult)
+	public async Task SendCommandResultAsync(string commandSyncId, CommandResponse commandResult, string sessionId)
 	{
 		try
 		{
-			var clientMessage = CreateMessage(commandSyncId, commandResult);
+			var clientMessage = CreateMessage(commandSyncId, commandResult, sessionId);
 			await SendMessageWithRetryAsync(clientMessage);
 
 			_logger.LogInformation("Command result sent successfully [{syncId}]", commandSyncId);
 		}
 		catch (Exception ex)
 		{
-			_logger.LogError(ex, "Failed to send command result [{syncId}]", commandSyncId);
+			_logger.LogWarning("Failed to send command result [{syncId}]: {Message}", commandSyncId, ex.Message);
 			throw;
 		}
 	}
 
-	public async Task SendCommandErrorAsync(string commandSyncId, string errorMessage)
+	public async Task SendCommandErrorAsync(string commandSyncId, string errorMessage, string sessionId)
 	{
 		try
 		{
@@ -64,14 +60,14 @@ internal class JiroGrpcService : IJiroGrpcService
 				Result = Jiro.Commands.Results.TextResult.Create(errorMessage)
 			};
 
-			var clientMessage = CreateMessage(commandSyncId, errorResult);
+			var clientMessage = CreateMessage(commandSyncId, errorResult, sessionId);
 			await SendMessageWithRetryAsync(clientMessage);
 
 			_logger.LogInformation("Command error sent successfully [{syncId}]", commandSyncId);
 		}
 		catch (Exception ex)
 		{
-			_logger.LogError(ex, "Failed to send command error [{syncId}]", commandSyncId);
+			_logger.LogWarning("Failed to send command error [{syncId}]: {Message}", commandSyncId, ex.Message);
 			throw;
 		}
 	}
@@ -81,36 +77,36 @@ internal class JiroGrpcService : IJiroGrpcService
 		var retryCount = 0;
 		Exception? lastException = null;
 
-		while (retryCount <= _options.MaxRetries)
+		while (retryCount <= _jiroCloudOptions.Grpc.MaxRetries)
 		{
 			try
 			{
-				using var cancellationTokenSource = new CancellationTokenSource(_options.TimeoutMs);
+				using var cancellationTokenSource = new CancellationTokenSource(_jiroCloudOptions.Grpc.TimeoutMs);
 
 				var response = await _client.SendCommandResultAsync(message,
 					cancellationToken: cancellationTokenSource.Token);
 
 				if (response.Success)
 				{
-					return; // Success
+					return;
 				}
 
 				throw new InvalidOperationException($"Server returned unsuccessful response: {response.Message}");
 			}
-			catch (Exception ex) when (retryCount < _options.MaxRetries)
+			catch (Exception ex) when (retryCount < _jiroCloudOptions.Grpc.MaxRetries)
 			{
 				lastException = ex;
 				retryCount++;
 
 				var delay = TimeSpan.FromMilliseconds(1000 * Math.Pow(2, retryCount - 1)); // Exponential backoff
-				_logger.LogWarning(ex, "Failed to send message, retrying in {delay}ms (attempt {attempt}/{max})",
-					delay.TotalMilliseconds, retryCount, _options.MaxRetries);
+				_logger.LogWarning("Failed to send message, retrying in {delay}ms (attempt {attempt}/{max}): {Message}",
+					delay.TotalMilliseconds, retryCount, _jiroCloudOptions.Grpc.MaxRetries, ex.Message);
 
 				await Task.Delay(delay);
 			}
 		}
 
-		throw new InvalidOperationException($"Failed to send message after {_options.MaxRetries} retries", lastException);
+		throw new InvalidOperationException($"Failed to send message after {_jiroCloudOptions.Grpc.MaxRetries} retries", lastException);
 	}
 
 	/// <summary>
@@ -119,32 +115,33 @@ internal class JiroGrpcService : IJiroGrpcService
 	/// <param name="syncId">The synchronization ID for the command.</param>
 	/// <param name="commandResult">The command execution result to serialize.</param>
 	/// <returns>A protobuf client message ready for transmission.</returns>
-	private ClientMessage CreateMessage(string syncId, CommandResponse commandResult)
+	private ClientMessage CreateMessage(string syncId, CommandResponse commandResult, string sessionId)
 	{
 		var dataType = commandResult.CommandType switch
 		{
-			Jiro.Commands.CommandType.Text => JiroCloud.Api.Proto.DataType.Text,
-			Jiro.Commands.CommandType.Graph => JiroCloud.Api.Proto.DataType.Graph,
-			_ => JiroCloud.Api.Proto.DataType.Text
+			Jiro.Commands.CommandType.Text => Jiro.Shared.Grpc.DataType.Text,
+			Jiro.Commands.CommandType.Graph => Jiro.Shared.Grpc.DataType.Graph,
+			_ => Jiro.Shared.Grpc.DataType.Text
 		};
 
 		ClientMessage response = new()
 		{
-			CommandSyncId = syncId,
+			RequestId = syncId,
 			CommandName = commandResult.CommandName,
 			DataType = dataType,
-			IsSuccess = commandResult.IsSuccess
+			IsSuccess = commandResult.IsSuccess,
+			SessionId = sessionId
 		};
 
 		try
 		{
 			switch (dataType)
 			{
-				case JiroCloud.Api.Proto.DataType.Text:
+				case Jiro.Shared.Grpc.DataType.Text:
 					var responseMessage = commandResult.Result?.Message ?? "";
 					var textType = commandResult.Result switch
 					{
-						Jiro.Commands.Results.JsonResult => JiroCloud.Api.Proto.TextType.Json,
+						Jiro.Commands.Results.JsonResult => Jiro.Shared.Grpc.TextType.Json,
 						Jiro.Commands.Results.TextResult => DetectTextType(responseMessage),
 						_ => DetectTextType(responseMessage)
 					};
@@ -156,7 +153,7 @@ internal class JiroGrpcService : IJiroGrpcService
 					};
 					break;
 
-				case JiroCloud.Api.Proto.DataType.Graph:
+				case Jiro.Shared.Grpc.DataType.Graph:
 					if (commandResult.Result is Jiro.Commands.Results.GraphResult graph)
 					{
 						response.GraphResult = new()
@@ -175,13 +172,13 @@ internal class JiroGrpcService : IJiroGrpcService
 		}
 		catch (Exception ex)
 		{
-			_logger.LogError(ex, "Error while creating message.");
+			_logger.LogError(ex, "Error while creating message for command: {CommandName}", commandResult.CommandName);
 			response.IsSuccess = false;
-			response.DataType = JiroCloud.Api.Proto.DataType.Text;
+			response.DataType = Jiro.Shared.Grpc.DataType.Text;
 			response.TextResult = new()
 			{
 				Response = "Error while creating message. Look at logs for more information.",
-				TextType = JiroCloud.Api.Proto.TextType.Plain
+				TextType = Jiro.Shared.Grpc.TextType.Plain
 			};
 		}
 
@@ -193,37 +190,37 @@ internal class JiroGrpcService : IJiroGrpcService
 	/// </summary>
 	/// <param name="content">The text content to analyze.</param>
 	/// <returns>The detected text type.</returns>
-	private static JiroCloud.Api.Proto.TextType DetectTextType(string content)
+	private static Jiro.Shared.Grpc.TextType DetectTextType(string content)
 	{
 		if (string.IsNullOrEmpty(content))
-			return JiroCloud.Api.Proto.TextType.Plain;
+			return Jiro.Shared.Grpc.TextType.Plain;
 
 		// Check for JSON
 		if (content.TrimStart().StartsWith('{') && content.TrimEnd().EndsWith('}') ||
 			content.TrimStart().StartsWith('[') && content.TrimEnd().EndsWith(']'))
 		{
-			return JiroCloud.Api.Proto.TextType.Json;
+			return Jiro.Shared.Grpc.TextType.Json;
 		}
 
 		// Check for Base64 (basic heuristic)
 		if (content.Length % 4 == 0 && System.Text.RegularExpressions.Regex.IsMatch(content, @"^[A-Za-z0-9+/]*={0,2}$"))
 		{
-			return JiroCloud.Api.Proto.TextType.Base64;
+			return Jiro.Shared.Grpc.TextType.Base64;
 		}
 
 		// Check for Markdown
 		if (content.Contains("```") || content.Contains("# ") || content.Contains("## ") ||
 			content.Contains("**") || content.Contains("*") || content.Contains("[") && content.Contains("]("))
 		{
-			return JiroCloud.Api.Proto.TextType.Markdown;
+			return Jiro.Shared.Grpc.TextType.Markdown;
 		}
 
 		// Check for HTML
 		if (content.Contains("<") && content.Contains(">"))
 		{
-			return JiroCloud.Api.Proto.TextType.Html;
+			return Jiro.Shared.Grpc.TextType.Html;
 		}
 
-		return JiroCloud.Api.Proto.TextType.Plain;
+		return Jiro.Shared.Grpc.TextType.Plain;
 	}
 }

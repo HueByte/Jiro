@@ -45,27 +45,27 @@ public class JiroContext : IdentityDbContext<AppUser, AppRole, string,
 		base.OnModelCreating(builder);
 
 		builder.Entity<AppUser>()
-			   .HasMany(e => e.UserRoles)
-			   .WithOne(e => e.User)
-			   .HasForeignKey(e => e.UserId)
+			   .HasMany(static e => e.UserRoles)
+			   .WithOne(static e => e.User)
+			   .HasForeignKey(static e => e.UserId)
 			   .IsRequired();
 
 		builder.Entity<AppRole>()
-			   .HasMany(e => e.UserRoles)
-			   .WithOne(e => e.Role)
-			   .HasForeignKey(e => e.RoleId)
+			   .HasMany(static e => e.UserRoles)
+			   .WithOne(static e => e.Role)
+			   .HasForeignKey(static e => e.RoleId)
 			   .IsRequired();
 
 		// Configure ChatSession -> Messages relationship
 		builder.Entity<ChatSession>()
-			   .HasMany(e => e.Messages)
+			   .HasMany(static e => e.Messages)
 			   .WithOne()
-			   .HasForeignKey(m => m.SessionId)
+			   .HasForeignKey(static m => m.SessionId)
 			   .IsRequired();
 
 		// Configure Message entity
 		builder.Entity<Message>()
-			   .Property(e => e.Id)
+			   .Property(static e => e.Id)
 			   .ValueGeneratedNever(); // We handle ID generation ourselves
 	}
 
