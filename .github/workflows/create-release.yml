@@ -69,7 +69,7 @@ jobs:
         id: release_notes
         run: |
           echo "RELEASE_NOTES<<EOF" >> $GITHUB_OUTPUT
-          cat dev/tags/${{ steps.get_version.outputs.version }} >> $GITHUB_OUTPUT
+          cat dev/tags/release_notes_v${{ steps.get_version.outputs.version }}.md >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
 
       - name: Create GitHub Release
