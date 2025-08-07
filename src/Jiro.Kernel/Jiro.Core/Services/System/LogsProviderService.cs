@@ -17,18 +17,18 @@ public class LogsProviderService : ILogsProviderService
 	private readonly IConfiguration _configuration;
 
 	private static readonly Lazy<Regex> DefaultTimestampRegex = new(() =>
-		new Regex(@"^\[?(?<timestamp>(?:\d{4}-\d{2}-\d{2} )?\d{2}:\d{2}:\d{2}(?:\.\d{3})?)\s+(?<level>[A-Z]+)\]", RegexOptions.IgnoreCase | RegexOptions.Compiled));
+		new Regex(@"^\[(?<timestamp>\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}(?:\.\d{3})?(?: [+-]\d{2}:\d{2})?)\]\s*\[(?<level>[A-Z]+)\]", RegexOptions.IgnoreCase | RegexOptions.Compiled));
 
 	private static readonly Lazy<Regex> DefaultLogLevelRegex = new(() =>
-		new Regex(@"^\[?(?:\d{4}-\d{2}-\d{2} )?\d{2}:\d{2}:\d{2}(?:\.\d{3})?\s+(?<level>[A-Z]+)\]", RegexOptions.IgnoreCase | RegexOptions.Compiled));
+		new Regex(@"^\[\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}(?:\.\d{3})?(?: [+-]\d{2}:\d{2})?\]\s*\[(?<level>[A-Z]+)\]", RegexOptions.IgnoreCase | RegexOptions.Compiled));
 
-	// Regex to detect the start of a new log entry
+	// Regex to detect the start of a new log entry - handles new format with timezone
 	private static readonly Lazy<Regex> LogEntryStartRegex = new(() =>
-		new Regex(@"^\[?(?:\d{4}-\d{2}-\d{2} )?\d{2}:\d{2}:\d{2}(?:\.\d{3})?\s+[A-Z]+\]", RegexOptions.IgnoreCase | RegexOptions.Compiled));
+		new Regex(@"^\[\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}(?:\.\d{3})?(?: [+-]\d{2}:\d{2})?\]\s*\[[A-Z]+\]", RegexOptions.IgnoreCase | RegexOptions.Compiled));
 
-	// Regex to extract the message content without the log pattern
+	// Regex to extract the message content without the log pattern - handles extra brackets
 	private static readonly Lazy<Regex> MessageExtractRegex = new(() =>
-		new Regex(@"^\[?(?:\d{4}-\d{2}-\d{2} )?\d{2}:\d{2}:\d{2}(?:\.\d{3})?\s+[A-Z]+\]\s*(?<message>.*)", RegexOptions.IgnoreCase | RegexOptions.Compiled | RegexOptions.Singleline));
+		new Regex(@"^\[\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}(?:\.\d{3})?(?: [+-]\d{2}:\d{2})?\]\s*\[[A-Z]+\]\s*(?:\[[^\]]*\])?\s*(?<message>.*)", RegexOptions.IgnoreCase | RegexOptions.Compiled | RegexOptions.Singleline));
 
 	// Maximum number of lines to combine for a single log entry
 	private const int MaxLinesPerLogEntry = 100;
@@ -239,7 +239,7 @@ public class LogsProviderService : ILogsProviderService
 	}
 
 	/// <inheritdoc/>
-	public async IAsyncEnumerable<LogEntry> StreamLogsAsync(string? level = null,
+	public async IAsyncEnumerable<LogEntry> StreamLogsAsync(string? level = null, int initialLimit = 50,
 		[EnumeratorCancellation] CancellationToken cancellationToken = default)
 	{
 		var (logsDirectory, logPatterns) = GetLogPathsFromSerilogConfig();
@@ -250,11 +250,11 @@ public class LogsProviderService : ILogsProviderService
 			yield break;
 		}
 
-		_logger.LogInformation("Starting real-time log streaming for directory: {LogsDirectory} with level: {Level}",
-			logsDirectory, level ?? "all");
+		_logger.LogInformation("Starting continuous log streaming for directory: {LogsDirectory} with level: {Level}, initialLimit: {InitialLimit}",
+			logsDirectory, level ?? "all", initialLimit);
 
-		// First, yield existing recent log entries (last 50 entries)
-		await foreach (var existingEntry in GetRecentLogEntriesAsync(logsDirectory, logPatterns, level, 50, cancellationToken))
+		// First, yield existing recent log entries
+		await foreach (var existingEntry in GetRecentLogEntriesAsync(logsDirectory, logPatterns, level, initialLimit, cancellationToken))
 		{
 			if (cancellationToken.IsCancellationRequested)
 				yield break;
@@ -262,7 +262,7 @@ public class LogsProviderService : ILogsProviderService
 			yield return existingEntry;
 		}
 
-		// Then start simple polling-based monitoring for new log entries
+		// Then start continuous monitoring for new log entries
 		await foreach (var newEntry in PollLogFilesAsync(logsDirectory, logPatterns, level, cancellationToken))
 		{
 			if (cancellationToken.IsCancellationRequested)
@@ -273,13 +273,9 @@ public class LogsProviderService : ILogsProviderService
 	}
 
 	/// <inheritdoc/>
-	public async IAsyncEnumerable<LogEntry> StreamLimitedLogsAsync(string? level = null, int limit = 100, int offset = 0,
-		DateTime? fromDate = null, DateTime? toDate = null, string? searchTerm = null,
+	public async IAsyncEnumerable<IEnumerable<LogEntry>> StreamLogBatchesAsync(string? level = null, int initialLimit = 50, int batchSize = 10,
 		[EnumeratorCancellation] CancellationToken cancellationToken = default)
 	{
-		_logger.LogInformation("Starting limited logs stream with level: {Level}, limit: {Limit}, offset: {Offset}, searchTerm: {SearchTerm}",
-			level ?? "all", limit, offset, searchTerm ?? "none");
-
 		var (logsDirectory, logPatterns) = GetLogPathsFromSerilogConfig();
 
 		if (!Directory.Exists(logsDirectory))
@@ -288,254 +284,70 @@ public class LogsProviderService : ILogsProviderService
 			yield break;
 		}
 
-		var streamedCount = 0;
-		var skippedCount = 0;
+		_logger.LogInformation("Starting batch log streaming for directory: {LogsDirectory} with level: {Level}, initialLimit: {InitialLimit}, batchSize: {BatchSize}",
+			logsDirectory, level ?? "all", initialLimit, batchSize);
 
-		// Process files in reverse chronological order (newest first)
-		var logFiles = logPatterns
-			.SelectMany(pattern =>
-			{
-				try
-				{
-					return Directory.EnumerateFiles(logsDirectory, pattern);
-				}
-				catch (Exception ex)
-				{
-					_logger.LogWarning(ex, "Failed to enumerate files with pattern {Pattern} in {Directory}", pattern, logsDirectory);
-					return Enumerable.Empty<string>();
-				}
-			})
-			.OrderByDescending(f =>
-			{
-				try
-				{
-					return File.GetLastWriteTime(f);
-				}
-				catch (Exception ex)
-				{
-					_logger.LogWarning(ex, "Failed to get last write time for file {File}", f);
-					return DateTime.MinValue;
-				}
-			});
+		var currentBatch = new List<LogEntry>();
 
-		foreach (var logFile in logFiles)
-		{
-			if (cancellationToken.IsCancellationRequested || streamedCount >= limit)
-				yield break;
-
-			var fileResult = new StreamLimitResult { StreamedCount = streamedCount, SkippedCount = skippedCount };
-
-			await foreach (var logEntry in StreamLogFileWithLimitsAsync(logFile, level, fromDate, toDate, searchTerm,
-				fileResult, limit, offset, cancellationToken))
-			{
-				if (cancellationToken.IsCancellationRequested || fileResult.StreamedCount >= limit)
-					yield break;
-
-				yield return logEntry;
-			}
-
-			streamedCount = fileResult.StreamedCount;
-			skippedCount = fileResult.SkippedCount;
-		}
-
-		_logger.LogInformation("Completed limited logs stream with {StreamedCount} entries", streamedCount);
-	}
-
-	/// <summary>
-	/// Helper class to track streaming state without using ref parameters
-	/// </summary>
-	private class StreamLimitResult
-	{
-		public int StreamedCount { get; set; }
-		public int SkippedCount { get; set; }
-	}
-
-	/// <summary>
-	/// Streams log entries from a single file with limits and filtering
-	/// </summary>
-	private async IAsyncEnumerable<LogEntry> StreamLogFileWithLimitsAsync(string logFile, string? level,
-		DateTime? fromDate, DateTime? toDate, string? searchTerm,
-		StreamLimitResult result, int limit, int offset,
-		[EnumeratorCancellation] CancellationToken cancellationToken = default)
-	{
-		if (!File.Exists(logFile))
-		{
-			_logger.LogWarning("Log file does not exist: {LogFile}", logFile);
-			yield break;
-		}
-
-		IAsyncEnumerable<LogEntry>? entries = null;
-
-		try
-		{
-			entries = StreamLogFileWithLimitsInternalAsync(logFile, level, fromDate, toDate, searchTerm, result, limit, offset, cancellationToken);
-		}
-		catch (Exception ex)
-		{
-			_logger.LogWarning(ex, "Error opening log file for streaming: {LogFile}", logFile);
-			yield break;
-		}
-
-		await foreach (var entry in entries.WithCancellation(cancellationToken))
-		{
-			yield return entry;
-		}
-	}
-
-	/// <summary>
-	/// Internal method to handle the actual file streaming without try-catch around yield
-	/// </summary>
-	private async IAsyncEnumerable<LogEntry> StreamLogFileWithLimitsInternalAsync(string logFile, string? level,
-		DateTime? fromDate, DateTime? toDate, string? searchTerm,
-		StreamLimitResult result, int limit, int offset,
-		[EnumeratorCancellation] CancellationToken cancellationToken = default)
-	{
-		await using var fileStream = new FileStream(logFile, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
-		using var reader = new StreamReader(fileStream);
-
-		var fileName = Path.GetFileName(logFile);
-
-		// Use streaming approach instead of loading all lines into memory
-		var lines = new List<string>();
-		string? line;
-
-		// Read lines in chunks to avoid memory issues with very large files
-		while ((line = await reader.ReadLineAsync().ConfigureAwait(false)) != null)
+		// First, yield existing recent log entries in batches
+		await foreach (var existingEntry in GetRecentLogEntriesAsync(logsDirectory, logPatterns, level, initialLimit, cancellationToken))
 		{
 			if (cancellationToken.IsCancellationRequested)
 				yield break;
-
-			lines.Add(line);
-
-			// Process in batches to prevent excessive memory usage
-			if (lines.Count >= 1000)
+			
+			currentBatch.Add(existingEntry);
+			
+			if (currentBatch.Count >= batchSize)
 			{
-				await foreach (var entry in ProcessLinesBatch(lines, fileName, level, fromDate, toDate, searchTerm, result, limit, offset, cancellationToken))
-				{
-					if (cancellationToken.IsCancellationRequested || result.StreamedCount >= limit)
-						yield break;
-					yield return entry;
-				}
-				lines.Clear();
+				yield return currentBatch.ToList();
+				currentBatch.Clear();
 			}
 		}
 
-		// Process remaining lines
-		if (lines.Count > 0 && result.StreamedCount < limit)
+		// Yield any remaining entries from initial load
+		if (currentBatch.Count > 0)
 		{
-			await foreach (var entry in ProcessLinesBatch(lines, fileName, level, fromDate, toDate, searchTerm, result, limit, offset, cancellationToken))
-			{
-				if (cancellationToken.IsCancellationRequested || result.StreamedCount >= limit)
-					yield break;
-				yield return entry;
-			}
+			yield return currentBatch.ToList();
+			currentBatch.Clear();
 		}
-	}
 
-	/// <summary>
-	/// Processes a batch of lines for streaming
-	/// </summary>
-	private async IAsyncEnumerable<LogEntry> ProcessLinesBatch(List<string> lines, string fileName,
-		string? level, DateTime? fromDate, DateTime? toDate, string? searchTerm,
-		StreamLimitResult result, int limit, int offset,
-		[EnumeratorCancellation] CancellationToken cancellationToken = default)
-	{
-		// Parse log entries from lines (handles multi-line logs)
-		var logEntries = ParseLogEntriesFromLines(lines, fileName);
+		// Then start continuous monitoring for new log entries with timeout-based batching
+		var lastBatchTime = DateTime.UtcNow;
+		const int batchTimeoutMs = 5000; // 5 seconds timeout
 
-		// Process entries in reverse order (newest first)
-		for (int i = logEntries.Count - 1; i >= 0; i--)
+		await foreach (var newEntry in PollLogFilesAsync(logsDirectory, logPatterns, level, cancellationToken))
 		{
-			if (cancellationToken.IsCancellationRequested || result.StreamedCount >= limit)
+			if (cancellationToken.IsCancellationRequested)
 				yield break;
-
-			var logEntry = logEntries[i];
-
-			// Parse timestamp for filtering
-			var parsedTimestamp = TryParseTimestamp(logEntry.Timestamp);
-
-			// Apply filters
-			if (!PassesFilters(logEntry, parsedTimestamp, level, fromDate, toDate, searchTerm))
-				continue;
-
-			// Handle offset - skip entries until we reach the desired offset
-			if (result.SkippedCount < offset)
+			
+			currentBatch.Add(newEntry);
+			
+			// Send batch if it's full OR if 5 seconds have passed since last batch
+			var now = DateTime.UtcNow;
+			var timeSinceLastBatch = (now - lastBatchTime).TotalMilliseconds;
+			
+			if (currentBatch.Count >= batchSize || timeSinceLastBatch >= batchTimeoutMs)
 			{
-				result.SkippedCount++;
-				continue;
-			}
-
-			// Stream the entry and increment counter
-			result.StreamedCount++;
-			yield return logEntry;
-
-			// Add a small delay every 10 entries to prevent overwhelming the client
-			if (result.StreamedCount % 10 == 0)
-			{
-				await Task.Delay(1, cancellationToken).ConfigureAwait(false);
-			}
-		}
-	}
-
-	/// <summary>
-	/// Streams log entries from a single file
-	/// </summary>
-	private async IAsyncEnumerable<LogEntry> StreamLogFileAsync(string logFile, string? level, [EnumeratorCancellation] CancellationToken cancellationToken = default)
-	{
-		FileStream? fileStream = null;
-		StreamReader? reader = null;
-
-		// Check if file can be opened first
-		try
-		{
-			fileStream = new FileStream(logFile, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
-			reader = new StreamReader(fileStream);
-		}
-		catch (Exception ex)
-		{
-			_logger.LogWarning(ex, "Failed to open log file for streaming: {LogFile}", logFile);
-			fileStream?.Dispose();
-			reader?.Dispose();
-			yield break;
-		}
-
-		try
-		{
-			var fileName = Path.GetFileName(logFile);
-			var lineCount = 0;
-
-			// Parse log entries (handles multi-line logs)
-			var logEntries = await ParseLogEntriesAsync(reader);
-
-			foreach (var logEntry in logEntries)
-			{
-				if (cancellationToken.IsCancellationRequested)
-					yield break;
-
-				lineCount++;
-				logEntry.File = fileName;
-
-				// Filter by level if specified - skip filtering if level is "all"
-				if (!string.IsNullOrEmpty(level) &&
-					!level.Equals("all", StringComparison.OrdinalIgnoreCase) &&
-					!IsLogLevelMatch(logEntry.Level, level))
-					continue;
-
-				yield return logEntry;
-
-				// Add a small delay every 10 entries to prevent overwhelming the client
-				if (lineCount % 10 == 0)
+				if (currentBatch.Count > 0)
 				{
-					await Task.Delay(1, cancellationToken);
+					_logger.LogDebug("Sending batch of {Count} entries (timeout: {TimedOut})", 
+						currentBatch.Count, timeSinceLastBatch >= batchTimeoutMs);
+					yield return currentBatch.ToList();
+					currentBatch.Clear();
+					lastBatchTime = now;
 				}
 			}
 		}
-		finally
+
+		// Send any remaining entries in the final batch
+		if (currentBatch.Count > 0)
 		{
-			reader?.Dispose();
-			fileStream?.Dispose();
+			_logger.LogDebug("Sending final batch of {Count} entries", currentBatch.Count);
+			yield return currentBatch.ToList();
 		}
 	}
+
+
 
 	private static string ExtractTimestamp(string logLine)
 	{
@@ -585,11 +397,12 @@ public class LogsProviderService : ILogsProviderService
 		// Try various timestamp formats
 		var formats = new[]
 		{
+			"yyyy-MM-dd HH:mm:ss.fff zzz",   // New Serilog format with timezone
+			"yyyy-MM-dd HH:mm:ss.fff",       // Without timezone
 			"HH:mm:ss",                      // Time only (test format)
 			"HH:mm:ss.fff",                  // Time with milliseconds
 			"yyyy-MM-dd HH:mm:ss",
 			"yyyy-MM-ddTHH:mm:ss",
-			"yyyy-MM-dd HH:mm:ss.fff",
 			"yyyy-MM-ddTHH:mm:ss.fff",
 			"yyyy-MM-ddTHH:mm:ss.fffffffZ",
 			"yyyy-MM-ddTHH:mm:ss.fffZ",
@@ -676,10 +489,11 @@ public class LogsProviderService : ILogsProviderService
 			.Select(fileName =>
 			{
 				// Convert Serilog rolling patterns and common date patterns:
+				// "jiro-.log" -> "jiro-*.log" (handles date rolling)
 				// "jiro-detailed_.txt" -> "jiro-detailed_*.txt"
 				// "jiro_{Date}.log" -> "jiro_*.log"
 				// "{Date}" -> "*", "{Hour}" -> "*", etc.
-				return fileName!
+				var pattern = fileName!
 					.Replace("_.", "_*.")
 					.Replace("{Date}", "*")
 					.Replace("{Hour}", "*")
@@ -688,6 +502,14 @@ public class LogsProviderService : ILogsProviderService
 					.Replace("{hour}", "*")  // lowercase variant
 					.Replace("_{", "_*")     // Handle patterns like jiro_{date}.log -> jiro_*.log
 					.Replace("}", "");       // Remove remaining braces
+				
+				// Special handling for Serilog rolling file pattern like "jiro-.log"
+				if (pattern.Contains("-."))
+				{
+					pattern = pattern.Replace("-.", "-*.");
+				}
+				
+				return pattern;
 			})
 			.ToArray();
 
@@ -697,11 +519,6 @@ public class LogsProviderService : ILogsProviderService
 			patterns = new[] { "jiro-detailed_*.log", "jiro-errors_*.log", "jiro_*.log", "jiro_*.txt" };
 		}
 
-		_logger.LogDebug("AppContext.BaseDirectory: {BaseDirectory}", AppContext.BaseDirectory);
-		_logger.LogDebug("Environment.CurrentDirectory: {CurrentDirectory}", Environment.CurrentDirectory);
-		_logger.LogDebug("First log path from config: {FirstLogPath}", firstLogPath);
-		_logger.LogDebug("Extracted directory: {Directory}", directory);
-		_logger.LogDebug("Path.IsPathRooted(directory): {IsRooted}", Path.IsPathRooted(directory ?? ""));
 		_logger.LogDebug("Resolved logs directory: {LogsDirectory}, patterns: {Patterns}",
 			logsDirectory, string.Join(", ", patterns));
 

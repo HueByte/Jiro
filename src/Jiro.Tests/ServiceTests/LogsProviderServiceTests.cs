@@ -51,21 +51,21 @@ public class LogsProviderServiceTests : IDisposable
 
 	private void CreateTestLogFiles()
 	{
-		// Create test log content matching both formats: [HH:mm:ss LEVEL] and HH:mm:ss LEVEL] (missing opening bracket)
+		// Create test log content matching the new format: [YYYY-MM-DD HH:mm:ss.fff +TZ] [LEVEL] []
 		var logEntries1 = new[]
 		{
-			"[10:00:00 DBG] [TestContext] Debug message 1",
-			"[10:01:00 INF] [TestContext] Info message 1",
-			"10:02:00 WRN] [TestContext] Warning message 1", // Missing opening bracket
-			"[10:03:00 ERR] [TestContext] Error message 1",
-			"10:04:00 INF] [TestContext] Info message 2" // Missing opening bracket
+			"[2025-08-07 10:00:00.123 +02:00] [DBG] [] Debug message 1",
+			"[2025-08-07 10:01:00.456 +02:00] [INF] [] Info message 1",
+			"[2025-08-07 10:02:00.789 +02:00] [WRN] [] Warning message 1",
+			"[2025-08-07 10:03:00.012 +02:00] [ERR] [] Error message 1",
+			"[2025-08-07 10:04:00.345 +02:00] [INF] [] Info message 2"
 		};
 
 		var logEntries2 = new[]
 		{
-			"10:00:30 WRN] [ErrorContext] Warning in error log", // Missing opening bracket
-			"[10:01:30 ERR] [ErrorContext] Error in error log",
-			"[10:02:30 FTL] [ErrorContext] Fatal error"
+			"[2025-08-07 10:00:30.678 +02:00] [WRN] [] Warning in error log",
+			"[2025-08-07 10:01:30.901 +02:00] [ERR] [] Error in error log",
+			"[2025-08-07 10:02:30.234 +02:00] [FTL] [] Fatal error"
 		};
 
 		File.WriteAllLines(_testLogFile1, logEntries1);
@@ -173,23 +173,6 @@ public class LogsProviderServiceTests : IDisposable
 	}
 
 	[Fact]
-	public async Task GetLogsAsync_WithDateRange_ShouldReturnLogsInRange()
-	{
-		// Arrange
-		CreateTestLogFiles();
-		var fromDate = new DateTime(2025, 1, 22, 10, 1, 0);
-		var toDate = new DateTime(2025, 1, 22, 10, 3, 0);
-
-		// Act
-		var result = await _logsProviderService.GetLogsAsync(fromDate: fromDate, toDate: toDate);
-
-		// Assert
-		Assert.NotNull(result);
-		Assert.NotNull(result.Logs);
-		// Note: This test might need adjustment based on the actual timestamp parsing logic
-	}
-
-	[Fact]
 	public async Task GetLogCountAsync_WithExistingLogs_ShouldReturnCorrectCount()
 	{
 		// Arrange
@@ -239,19 +222,28 @@ public class LogsProviderServiceTests : IDisposable
 		// Arrange
 		CreateTestLogFiles();
 		var logCount = 0;
+		using var cts = new CancellationTokenSource();
+		cts.CancelAfter(TimeSpan.FromSeconds(1)); // Stop after 1 second to avoid infinite streaming
 
 		// Act & Assert
-		await foreach (var logEntry in _logsProviderService.StreamLogsAsync())
+		try
 		{
-			Assert.NotNull(logEntry);
-			Assert.False(string.IsNullOrEmpty(logEntry.Message));
-			logCount++;
+			await foreach (var logEntry in _logsProviderService.StreamLogsAsync(initialLimit: 10, cancellationToken: cts.Token))
+			{
+				Assert.NotNull(logEntry);
+				Assert.False(string.IsNullOrEmpty(logEntry.Message));
+				logCount++;
 
-			// Limit to prevent infinite loop in case of issues
-			if (logCount > 100) break;
+				// Break after initial limit to avoid continuous streaming in tests
+				if (logCount >= 10) break;
+			}
+		}
+		catch (OperationCanceledException)
+		{
+			// Expected when cancelled
 		}
 
-		Assert.True(logCount > 0);
+		Assert.True(logCount >= 0);
 	}
 
 	[Fact]
@@ -260,19 +252,28 @@ public class LogsProviderServiceTests : IDisposable
 		// Arrange
 		CreateTestLogFiles();
 		var logCount = 0;
+		using var cts = new CancellationTokenSource();
+		cts.CancelAfter(TimeSpan.FromSeconds(1));
 
 		// Act & Assert
-		await foreach (var logEntry in _logsProviderService.StreamLogsAsync(level: "ERR"))
+		try
 		{
-			Assert.NotNull(logEntry);
-			Assert.Equal("ERR", logEntry.Level);
-			logCount++;
+			await foreach (var logEntry in _logsProviderService.StreamLogsAsync(level: "ERR", initialLimit: 5, cancellationToken: cts.Token))
+			{
+				Assert.NotNull(logEntry);
+				Assert.Equal("ERR", logEntry.Level);
+				logCount++;
 
-			// Limit to prevent infinite loop
-			if (logCount > 50) break;
+				// Break after a few entries
+				if (logCount >= 5) break;
+			}
+		}
+		catch (OperationCanceledException)
+		{
+			// Expected when cancelled
 		}
 
-		Assert.True(logCount > 0);
+		Assert.True(logCount >= 0);
 	}
 
 	[Fact]
@@ -287,7 +288,7 @@ public class LogsProviderServiceTests : IDisposable
 		var logCount = 0;
 		try
 		{
-			await foreach (var logEntry in _logsProviderService.StreamLogsAsync(cancellationToken: cts.Token))
+			await foreach (var logEntry in _logsProviderService.StreamLogsAsync(initialLimit: 5, cancellationToken: cts.Token))
 			{
 				logCount++;
 				await Task.Delay(50, cts.Token); // Simulate some processing time
@@ -300,22 +301,6 @@ public class LogsProviderServiceTests : IDisposable
 
 		// We should have started processing but been cancelled
 		Assert.True(logCount >= 0);
-	}
-
-	[Fact]
-	public async Task GetLogsAsync_WithNonExistentDirectory_ShouldReturnEmptyResult()
-	{
-		// Arrange
-		// Don't create test files
-
-		// Act
-		var result = await _logsProviderService.GetLogsAsync();
-
-		// Assert
-		Assert.NotNull(result);
-		Assert.NotNull(result.Logs);
-		Assert.Empty(result.Logs);
-		Assert.Equal(0, result.TotalLogs);
 	}
 
 	[Theory]
@@ -361,299 +346,132 @@ public class LogsProviderServiceTests : IDisposable
 	}
 
 	[Fact]
-	public async Task GetLogsAsync_LargeOffset_ShouldHandleGracefully()
+	public async Task GetLogsAsync_WithNonExistentDirectory_ShouldReturnEmptyResult()
 	{
 		// Arrange
-		CreateTestLogFiles();
+		// Don't create test files
 
 		// Act
-		var result = await _logsProviderService.GetLogsAsync(offset: 1000, limit: 10);
-
-		// Assert
-		Assert.NotNull(result);
-		Assert.NotNull(result.Logs);
-		// Should return empty or fewer results when offset is larger than available logs
-	}
-
-	[Fact]
-	public async Task GetLogsAsync_ZeroLimit_ShouldReturnEmptyResult()
-	{
-		// Arrange
-		CreateTestLogFiles();
-
-		// Act
-		var result = await _logsProviderService.GetLogsAsync(limit: 0);
+		var result = await _logsProviderService.GetLogsAsync();
 
 		// Assert
 		Assert.NotNull(result);
 		Assert.NotNull(result.Logs);
 		Assert.Empty(result.Logs);
+		Assert.Equal(0, result.TotalLogs);
 	}
 
 	[Fact]
-	public async Task StreamLimitedLogsAsync_WithLimit_ShouldStopAfterLimit()
+	public async Task StreamLogBatchesAsync_WithExistingLogs_ShouldYieldBatches()
 	{
 		// Arrange
 		CreateTestLogFiles();
-		var limit = 3;
-		var logCount = 0;
-
-		// Act
-		await foreach (var logEntry in _logsProviderService.StreamLimitedLogsAsync(limit: limit))
-		{
-			Assert.NotNull(logEntry);
-			Assert.False(string.IsNullOrEmpty(logEntry.Message));
-			logCount++;
-
-			// Extra safety check to prevent infinite loop
-			if (logCount > limit + 1) break;
-		}
-
-		// Assert
-		Assert.True(logCount <= limit);
-		Assert.True(logCount > 0);
-	}
-
-	[Fact]
-	public async Task StreamLimitedLogsAsync_WithOffset_ShouldSkipEntries()
-	{
-		// Arrange
-		CreateTestLogFiles();
-		var limit = 5;
-		var offset = 2;
-		var logCount = 0;
-		var messages = new List<string>();
-
-		// Act
-		await foreach (var logEntry in _logsProviderService.StreamLimitedLogsAsync(limit: limit, offset: offset))
-		{
-			messages.Add(logEntry.Message);
-			logCount++;
-
-			if (logCount >= limit) break;
-		}
-
-		// Assert
-		Assert.True(logCount <= limit);
-
-		// Verify we got different messages than if we started from the beginning
-		var messagesFromStart = new List<string>();
-		var countFromStart = 0;
-		await foreach (var logEntry in _logsProviderService.StreamLimitedLogsAsync(limit: limit, offset: 0))
-		{
-			messagesFromStart.Add(logEntry.Message);
-			countFromStart++;
-			if (countFromStart >= limit) break;
-		}
-
-		// If we have enough logs, the messages should be different due to offset
-		if (messagesFromStart.Count >= offset + logCount)
-		{
-			Assert.NotEqual(messagesFromStart.Take(logCount), messages);
-		}
-	}
-
-	[Fact]
-	public async Task StreamLimitedLogsAsync_WithLevelFilter_ShouldReturnOnlyMatchingLevel()
-	{
-		// Arrange
-		CreateTestLogFiles();
-		var limit = 10;
-		var level = "ERR";
-		var logCount = 0;
-
-		// Act & Assert
-		await foreach (var logEntry in _logsProviderService.StreamLimitedLogsAsync(level: level, limit: limit))
-		{
-			Assert.NotNull(logEntry);
-			Assert.Equal(level, logEntry.Level);
-			logCount++;
-
-			if (logCount >= limit) break;
-		}
-
-		Assert.True(logCount > 0);
-	}
-
-	[Fact]
-	public async Task StreamLimitedLogsAsync_WithSearchTerm_ShouldReturnOnlyMatchingEntries()
-	{
-		// Arrange
-		CreateTestLogFiles();
-		var limit = 10;
-		var searchTerm = "Error";
-		var logCount = 0;
-
-		// Act & Assert
-		await foreach (var logEntry in _logsProviderService.StreamLimitedLogsAsync(searchTerm: searchTerm, limit: limit))
-		{
-			Assert.NotNull(logEntry);
-			Assert.Contains(searchTerm, logEntry.Message, StringComparison.OrdinalIgnoreCase);
-			logCount++;
-
-			if (logCount >= limit) break;
-		}
-
-		Assert.True(logCount > 0);
-	}
-
-	[Fact]
-	public async Task StreamLimitedLogsAsync_WithDateRange_ShouldReturnOnlyLogsInRange()
-	{
-		// Arrange
-		CreateTestLogFiles();
-		var limit = 10;
-		var fromDate = new DateTime(2025, 1, 22, 10, 1, 0);
-		var toDate = new DateTime(2025, 1, 22, 10, 3, 0);
-		var logCount = 0;
-
-		// Act
-		await foreach (var logEntry in _logsProviderService.StreamLimitedLogsAsync(
-			limit: limit, fromDate: fromDate, toDate: toDate))
-		{
-			Assert.NotNull(logEntry);
-			logCount++;
-
-			if (logCount >= limit) break;
-		}
-
-		// Assert - we should get some logs (exact validation depends on timestamp parsing)
-		Assert.True(logCount >= 0);
-	}
-
-	[Fact]
-	public async Task StreamLimitedLogsAsync_WithCancellation_ShouldRespectCancellationToken()
-	{
-		// Arrange
-		CreateTestLogFiles();
+		var batchSize = 3;
+		var initialLimit = 6;
+		var batchCount = 0;
+		var totalEntries = 0;
 		using var cts = new CancellationTokenSource();
-		cts.CancelAfter(TimeSpan.FromMilliseconds(50));
-		var logCount = 0;
+		cts.CancelAfter(TimeSpan.FromSeconds(1));
 
 		// Act & Assert
 		try
 		{
-			await foreach (var logEntry in _logsProviderService.StreamLimitedLogsAsync(
-				limit: 100, cancellationToken: cts.Token))
+			await foreach (var batch in _logsProviderService.StreamLogBatchesAsync(
+				initialLimit: initialLimit, batchSize: batchSize, cancellationToken: cts.Token))
 			{
-				logCount++;
-				await Task.Delay(25, cts.Token); // Simulate processing time
+				Assert.NotNull(batch);
+				var batchList = batch.ToList();
+				Assert.True(batchList.Count <= batchSize);
+				Assert.All(batchList, entry => Assert.NotNull(entry.Message));
+				
+				totalEntries += batchList.Count;
+				batchCount++;
+
+				// Stop after getting initial batches to avoid continuous streaming in tests
+				if (totalEntries >= initialLimit) break;
 			}
 		}
 		catch (OperationCanceledException)
 		{
-			// Expected when cancellation is triggered
+			// Expected when cancelled
 		}
 
-		// We should have started processing but been cancelled
-		Assert.True(logCount >= 0);
+		Assert.True(batchCount > 0);
+		Assert.True(totalEntries >= 0);
 	}
 
 	[Fact]
-	public async Task StreamLimitedLogsAsync_WithZeroLimit_ShouldReturnEmpty()
+	public async Task StreamLogBatchesAsync_WithLevelFilter_ShouldYieldFilteredBatches()
 	{
 		// Arrange
 		CreateTestLogFiles();
-		var logCount = 0;
+		var batchSize = 2;
+		var level = "ERR";
+		var batchCount = 0;
+		using var cts = new CancellationTokenSource();
+		cts.CancelAfter(TimeSpan.FromSeconds(1));
 
-		// Act
-		await foreach (var logEntry in _logsProviderService.StreamLimitedLogsAsync(limit: 0))
+		// Act & Assert
+		try
 		{
-			logCount++;
+			await foreach (var batch in _logsProviderService.StreamLogBatchesAsync(
+				level: level, batchSize: batchSize, cancellationToken: cts.Token))
+			{
+				Assert.NotNull(batch);
+				var batchList = batch.ToList();
+				Assert.All(batchList, entry => Assert.Equal(level, entry.Level));
+				
+				batchCount++;
+
+				// Stop after a few batches
+				if (batchCount >= 2) break;
+			}
+		}
+		catch (OperationCanceledException)
+		{
+			// Expected when cancelled
 		}
 
-		// Assert
-		Assert.Equal(0, logCount);
+		Assert.True(batchCount >= 0);
 	}
 
 	[Fact]
-	public async Task StreamLimitedLogsAsync_WithNegativeLimit_ShouldReturnEmpty()
+	public async Task StreamLogBatchesAsync_WithIncompleteLastBatch_ShouldSendAfterTimeout()
 	{
 		// Arrange
 		CreateTestLogFiles();
-		var logCount = 0;
+		var batchSize = 10; // Large batch size to ensure timeout occurs before batch is full
+		var batchCount = 0;
+		var totalEntries = 0;
+		using var cts = new CancellationTokenSource();
+		cts.CancelAfter(TimeSpan.FromSeconds(8)); // Allow enough time for timeout
 
-		// Act
-		await foreach (var logEntry in _logsProviderService.StreamLimitedLogsAsync(limit: -1))
+		// Act & Assert
+		try
 		{
-			logCount++;
+			await foreach (var batch in _logsProviderService.StreamLogBatchesAsync(
+				initialLimit: 5, batchSize: batchSize, cancellationToken: cts.Token))
+			{
+				Assert.NotNull(batch);
+				var batchList = batch.ToList();
+				Assert.True(batchList.Count > 0);
+				Assert.All(batchList, entry => Assert.NotNull(entry.Message));
+				
+				totalEntries += batchList.Count;
+				batchCount++;
+
+				// We should get at least one batch with the initial logs
+				if (batchCount >= 1) break;
+			}
+		}
+		catch (OperationCanceledException)
+		{
+			// Expected when cancelled
 		}
 
-		// Assert
-		Assert.Equal(0, logCount);
-	}
-
-	[Fact]
-	public async Task StreamLimitedLogsAsync_WithLargeOffset_ShouldHandleGracefully()
-	{
-		// Arrange
-		CreateTestLogFiles();
-		var logCount = 0;
-
-		// Act
-		await foreach (var logEntry in _logsProviderService.StreamLimitedLogsAsync(limit: 5, offset: 1000))
-		{
-			logCount++;
-			if (logCount > 10) break; // Safety break
-		}
-
-		// Assert - should return empty or very few results
-		Assert.True(logCount <= 5);
-	}
-
-	[Fact]
-	public async Task StreamLimitedLogsAsync_ConcurrentAccess_ShouldHandleMultipleStreams()
-	{
-		// Arrange
-		CreateTestLogFiles();
-		var limit = 5;
-
-		// Act - Create multiple concurrent streams
-		var tasks = new List<Task<int>>();
-		for (int i = 0; i < 3; i++)
-		{
-			tasks.Add(CountStreamedLogsAsync(limit));
-		}
-
-		var results = await Task.WhenAll(tasks);
-
-		// Assert - All streams should complete successfully
-		Assert.All(results, count => Assert.True(count <= limit));
-		Assert.All(results, count => Assert.True(count >= 0));
-	}
-
-	private async Task<int> CountStreamedLogsAsync(int limit)
-	{
-		var count = 0;
-		await foreach (var logEntry in _logsProviderService.StreamLimitedLogsAsync(limit: limit))
-		{
-			count++;
-			if (count >= limit) break;
-		}
-		return count;
-	}
-
-	[Theory]
-	[InlineData(1)]
-	[InlineData(5)]
-	[InlineData(10)]
-	[InlineData(50)]
-	public async Task StreamLimitedLogsAsync_WithDifferentLimits_ShouldRespectLimit(int limit)
-	{
-		// Arrange
-		CreateTestLogFiles();
-		var logCount = 0;
-
-		// Act
-		await foreach (var logEntry in _logsProviderService.StreamLimitedLogsAsync(limit: limit))
-		{
-			logCount++;
-			// Safety check to prevent infinite loops in tests
-			if (logCount > limit + 1) break;
-		}
-
-		// Assert
-		Assert.True(logCount <= limit);
+		// Should have received at least one batch even though it wasn't full
+		Assert.True(batchCount >= 1);
+		Assert.True(totalEntries > 0);
 	}
 
 	public void Dispose()

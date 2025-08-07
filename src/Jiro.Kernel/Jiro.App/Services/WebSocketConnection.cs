@@ -793,20 +793,31 @@ public class WebSocketConnection : JiroInstanceBase, IDisposable
 			_webSocketLogger.LogWarning("🔥 CLIENT: HandleLogsStreamAsync CALLED! Level: {Level}, RequestId: {RequestId}",
 				request.Level ?? "all", request.RequestId);
 
-			// Create channel first (SignalR best practice)
-			var channel = Channel.CreateUnbounded<LogEntry>();
+			// Create bounded channel for backpressure control
+			var channel = Channel.CreateBounded<LogEntry>(new BoundedChannelOptions(1000)
+			{
+				FullMode = BoundedChannelFullMode.Wait,
+				SingleReader = true,
+				SingleWriter = true
+			});
+			
 			var writer = channel.Writer;
 			var reader = channel.Reader;
+			var cts = new CancellationTokenSource();
 
-			// Start background task to populate channel
+			// Start background task to populate channel with continuous streaming
 			_ = Task.Run(async () =>
 			{
 				try
 				{
-					await foreach (var logEntry in GetLogsStreamForSignalRAsync(request))
+					await foreach (var logEntry in GetContinuousLogsStreamAsync(request, cts.Token))
 					{
-						await writer.WriteAsync(logEntry);
+						await writer.WriteAsync(logEntry, cts.Token);
 					}
+				}
+				catch (OperationCanceledException)
+				{
+					_webSocketLogger.LogInformation("Logs streaming cancelled for RequestId: {RequestId}", request.RequestId);
 				}
 				catch (Exception ex)
 				{
@@ -814,11 +825,11 @@ public class WebSocketConnection : JiroInstanceBase, IDisposable
 				}
 				finally
 				{
-					writer.Complete();
+					writer.TryComplete();
 				}
-			});
+			}, cts.Token);
 
-			// Send stream to SignalR hub (fire and forget)
+			// Send stream to SignalR hub
 			_ = Task.Run(async () =>
 			{
 				try
@@ -830,10 +841,16 @@ public class WebSocketConnection : JiroInstanceBase, IDisposable
 				{
 					_webSocketLogger.LogError(ex, "Failed to send logs stream for RequestId: {RequestId}", request.RequestId);
 				}
-			});
+				finally
+				{
+					// Cancel the background task when streaming is done
+					cts.Cancel();
+					cts.Dispose();
+				}
+			}, CancellationToken.None);
 
-			_webSocketLogger.LogInformation("Completed HandleLogsStreamAsync for RequestId: {RequestId}", request.RequestId);
-			return Task.FromResult(new ActionResult { IsSuccess = true, Message = "Logs stream initiated successfully" });
+			_webSocketLogger.LogInformation("Initiated continuous logs streaming for RequestId: {RequestId}", request.RequestId);
+			return Task.FromResult(new ActionResult { IsSuccess = true, Message = "Continuous logs stream initiated successfully" });
 		}
 		catch (Exception ex)
 		{
@@ -843,58 +860,68 @@ public class WebSocketConnection : JiroInstanceBase, IDisposable
 	}
 
 	/// <summary>
-	/// Gets logs stream optimized for SignalR using StreamLimitedLogsAsync
+	/// Gets continuous logs stream for real-time monitoring using batches
 	/// </summary>
 	/// <param name="request">The logs request</param>
+	/// <param name="cancellationToken">Cancellation token</param>
 	/// <returns>An async enumerable of log entries</returns>
-	private async IAsyncEnumerable<LogEntry> GetLogsStreamForSignalRAsync(GetLogsRequest request, [EnumeratorCancellation] CancellationToken cancellationToken = default)
+	private async IAsyncEnumerable<LogEntry> GetContinuousLogsStreamAsync(GetLogsRequest request, [EnumeratorCancellation] CancellationToken cancellationToken = default)
 	{
-		_webSocketLogger.LogInformation("Starting GetLogsStreamForSignalRAsync for Level: {Level}, Limit: {Limit}, Offset: {Offset}, RequestId: {RequestId}",
-			request.Level ?? "all", request.Limit ?? 100, request.Offset ?? 0, request.RequestId);
+		_webSocketLogger.LogInformation("Starting batch logs stream for Level: {Level}, InitialLimit: {InitialLimit}, RequestId: {RequestId}",
+			request.Level ?? "all", request.Limit ?? 50, request.RequestId);
 
 		IServiceScope? scope = null;
 		var entryCount = 0;
+		var batchSize = Math.Min(request.Limit ?? 50, 20); // Max batch size of 20
+		
 		try
 		{
 			scope = _scopeFactory.CreateScope();
 			var logsService = scope.ServiceProvider.GetRequiredService<ILogsProviderService>();
 
-			// Use StreamLimitedLogsAsync for better performance and automatic stopping
-			await foreach (var log in logsService.StreamLimitedLogsAsync(
+			// Use batch streaming for better performance
+			await foreach (var logBatch in logsService.StreamLogBatchesAsync(
 				level: request.Level,
-				limit: request.Limit ?? 100,
-				offset: request.Offset ?? 0,
-				fromDate: null,
-				toDate: null,
-				searchTerm: null,
+				initialLimit: request.Limit ?? 50,
+				batchSize: batchSize,
 				cancellationToken: cancellationToken))
 			{
 				if (cancellationToken.IsCancellationRequested)
 				{
-					_webSocketLogger.LogInformation("GetLogsStreamForSignalRAsync cancelled after {EntryCount} entries for RequestId: {RequestId}",
+					_webSocketLogger.LogInformation("Batch logs stream cancelled after {EntryCount} entries for RequestId: {RequestId}",
 						entryCount, request.RequestId);
 					yield break;
 				}
 
-				yield return new LogEntry
+				// Stream each entry in the batch
+				foreach (var log in logBatch)
 				{
-					File = log.File,
-					Timestamp = log.Timestamp,
-					Level = log.Level,
-					Message = log.Message
-				};
+					if (cancellationToken.IsCancellationRequested)
+						yield break;
 
-				entryCount++;
+					yield return new LogEntry
+					{
+						File = log.File,
+						Timestamp = log.Timestamp,
+						Level = log.Level,
+						Message = log.Message
+					};
 
-				// Log progress every 50 entries
-				if (entryCount % 50 == 0)
+					entryCount++;
+				}
+
+				// Log progress every 10 batches
+				if (entryCount > 0 && entryCount % (batchSize * 10) == 0)
 				{
-					_webSocketLogger.LogDebug("Streamed {EntryCount} log entries for RequestId: {RequestId}",
+					_webSocketLogger.LogDebug("Streamed {EntryCount} log entries in batches for RequestId: {RequestId}",
 						entryCount, request.RequestId);
 				}
+
+				// Add small delay between batches to prevent overwhelming
+				await Task.Delay(10, cancellationToken);
 			}
 
-			_webSocketLogger.LogInformation("Completed GetLogsStreamForSignalRAsync with {EntryCount} entries for RequestId: {RequestId}",
+			_webSocketLogger.LogInformation("Completed batch logs streaming with {EntryCount} entries for RequestId: {RequestId}",
 				entryCount, request.RequestId);
 		}
 		finally

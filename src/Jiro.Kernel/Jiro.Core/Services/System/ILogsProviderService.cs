@@ -38,25 +38,21 @@ public interface ILogsProviderService
 	Task<IEnumerable<LogFileInfo>> GetLogFilesAsync();
 
 	/// <summary>
-	/// Streams logs in real-time (for future streaming implementation)
+	/// Streams logs continuously - first yields the last N logs, then streams new logs in real-time
 	/// </summary>
 	/// <param name="level">Log level filter (optional)</param>
+	/// <param name="initialLimit">Number of recent logs to fetch initially (default 50)</param>
 	/// <param name="cancellationToken">Cancellation token</param>
 	/// <returns>Async enumerable of log entries</returns>
-	IAsyncEnumerable<LogEntry> StreamLogsAsync(string? level = null, CancellationToken cancellationToken = default);
+	IAsyncEnumerable<LogEntry> StreamLogsAsync(string? level = null, int initialLimit = 50, CancellationToken cancellationToken = default);
 
 	/// <summary>
-	/// Streams a limited number of logs and then stops
+	/// Streams logs in batches - first yields the last N logs in batches, then streams new logs in real-time batches
 	/// </summary>
 	/// <param name="level">Log level filter (optional)</param>
-	/// <param name="limit">Maximum number of logs to stream before stopping</param>
-	/// <param name="offset">Number of logs to skip before streaming</param>
-	/// <param name="fromDate">Start date filter (optional)</param>
-	/// <param name="toDate">End date filter (optional)</param>
-	/// <param name="searchTerm">Search term to filter messages (optional)</param>
+	/// <param name="initialLimit">Number of recent logs to fetch initially (default 50)</param>
+	/// <param name="batchSize">Size of each batch (default 10)</param>
 	/// <param name="cancellationToken">Cancellation token</param>
-	/// <returns>Async enumerable of log entries that stops after the limit is reached</returns>
-	IAsyncEnumerable<LogEntry> StreamLimitedLogsAsync(string? level = null, int limit = 100, int offset = 0,
-		DateTime? fromDate = null, DateTime? toDate = null, string? searchTerm = null,
-		CancellationToken cancellationToken = default);
+	/// <returns>Async enumerable of log entry batches</returns>
+	IAsyncEnumerable<IEnumerable<LogEntry>> StreamLogBatchesAsync(string? level = null, int initialLimit = 50, int batchSize = 10, CancellationToken cancellationToken = default);
 }
