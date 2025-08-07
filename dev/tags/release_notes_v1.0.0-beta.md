@@ -4,7 +4,7 @@
 
 For detailed information about changes, new features, and breaking changes, see the [**📖 Changelog**](https://huebyte.github.io/Jiro/documentation/changelog/v1.0.0-beta.html).
 
-### 🔄 Commits in this release:
+### 🔄 Commits in this release
 
 - **Docs update && release pipeline fix** ([`d9dca7f`](https://github.com/huebyte/Jiro/commit/d9dca7f)) by @HueByte on 2025-07-12
 - **Adjustments** ([`b4b4df2`](https://github.com/huebyte/Jiro/commit/b4b4df2)) by @HueByte on 2025-07-12
@@ -87,10 +87,10 @@ For detailed information about changes, new features, and breaking changes, see 
 - **Session ID fixes && Logs streaming adjustments** ([`33aa4a1`](https://github.com/huebyte/Jiro/commit/33aa4a1)) by @HueByte on 2025-08-06
 - **Functioning streaming of the logs** ([`4fd55c7`](https://github.com/huebyte/Jiro/commit/4fd55c7)) by @HueByte on 2025-08-07
 - **Formatting** ([`372f236`](https://github.com/huebyte/Jiro/commit/372f236)) by @HueByte on 2025-08-07
-- **Merge pull request #27 from HueByte/dev** ([`8dae8f7`](https://github.com/huebyte/Jiro/commit/8dae8f7)) by @Hue on 2025-08-07
+- **Merge pull request #27 from HueByte/dev** ([`8dae8f7`](https://github.com/huebyte/Jiro/commit/8dae8f7)) by @HueByteon 2025-08-07
 - **Updated documentation** ([`db1e450`](https://github.com/huebyte/Jiro/commit/db1e450)) by @HueByte on 2025-08-07
 - **Cleanup** ([`9422153`](https://github.com/huebyte/Jiro/commit/9422153)) by @HueByte on 2025-08-07
-- **Merge pull request #31 from HueByte/dev** ([`55ff85e`](https://github.com/huebyte/Jiro/commit/55ff85e)) by @Hue on 2025-08-07
+- **Merge pull request #31 from HueByte/dev** ([`55ff85e`](https://github.com/huebyte/Jiro/commit/55ff85e)) by @HueByteon 2025-08-07
 - **Version bump** ([`3d92647`](https://github.com/huebyte/Jiro/commit/3d92647)) by @HueByte on 2025-08-07
 - **chore: format code and lint markdown for release v1.0.0-beta** ([`bf19e58`](https://github.com/huebyte/Jiro/commit/bf19e58)) by @HueByte on 2025-08-07
 - **Workflow fix** ([`983b448`](https://github.com/huebyte/Jiro/commit/983b448)) by @HueByte on 2025-08-07
