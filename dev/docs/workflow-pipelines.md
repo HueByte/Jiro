@@ -16,23 +16,23 @@ When a Pull Request is created, multiple validation workflows run in parallel:
 %%{init: {
   "theme": "base",
   "themeVariables": {
-    "background": "#1C1E26",
-    "primaryColor": "#FCD4B8",
-    "primaryTextColor": "#D5D8DA",
-    "primaryBorderColor": "#E95378",
-    "lineColor": "#6C6F93",
-    "sectionBkgColor": "#232530",
-    "altSectionBkgColor": "#2E303E", 
-    "gridColor": "#16161C",
-    "secondaryColor": "#26BBD9",
-    "tertiaryColor": "#27D797",
-    "cScale0": "#1C1E26",
-    "cScale1": "#232530",
-    "cScale2": "#2E303E",
-    "cScale3": "#6C6F93",
-    "cScale4": "#D5D8DA",
-    "clusterBkg": "#232530",
-    "clusterBorder": "#6C6F93"
+    "background": "#FFFFFF",
+    "primaryColor": "#2E7D32",
+    "primaryTextColor": "#000000",
+    "primaryBorderColor": "#1B5E20",
+    "lineColor": "#424242",
+    "sectionBkgColor": "#E8F5E9",
+    "altSectionBkgColor": "#C8E6C9", 
+    "gridColor": "#E0E0E0",
+    "secondaryColor": "#1976D2",
+    "tertiaryColor": "#7B1FA2",
+    "cScale0": "#FFFFFF",
+    "cScale1": "#F5F5F5",
+    "cScale2": "#E0E0E0",
+    "cScale3": "#9E9E9E",
+    "cScale4": "#000000",
+    "clusterBkg": "#F5F5F5",
+    "clusterBorder": "#757575"
   }
 }}%%
 graph TD
@@ -57,23 +57,23 @@ When PR is merged to main, production workflows execute:
 %%{init: {
   "theme": "base",
   "themeVariables": {
-    "background": "#1C1E26",
-    "primaryColor": "#FCD4B8",
-    "primaryTextColor": "#D5D8DA",
-    "primaryBorderColor": "#E95378",
-    "lineColor": "#6C6F93",
-    "sectionBkgColor": "#232530",
-    "altSectionBkgColor": "#2E303E", 
-    "gridColor": "#16161C",
-    "secondaryColor": "#26BBD9",
-    "tertiaryColor": "#27D797",
-    "cScale0": "#1C1E26",
-    "cScale1": "#232530",
-    "cScale2": "#2E303E",
-    "cScale3": "#6C6F93",
-    "cScale4": "#D5D8DA",
-    "clusterBkg": "#232530",
-    "clusterBorder": "#6C6F93"
+    "background": "#FFFFFF",
+    "primaryColor": "#2E7D32",
+    "primaryTextColor": "#000000",
+    "primaryBorderColor": "#1B5E20",
+    "lineColor": "#424242",
+    "sectionBkgColor": "#E8F5E9",
+    "altSectionBkgColor": "#C8E6C9", 
+    "gridColor": "#E0E0E0",
+    "secondaryColor": "#1976D2",
+    "tertiaryColor": "#7B1FA2",
+    "cScale0": "#FFFFFF",
+    "cScale1": "#F5F5F5",
+    "cScale2": "#E0E0E0",
+    "cScale3": "#9E9E9E",
+    "cScale4": "#000000",
+    "clusterBkg": "#F5F5F5",
+    "clusterBorder": "#757575"
   }
 }}%%
 graph TD
@@ -404,23 +404,23 @@ src/Jiro.Kernel/Jiro.App/Configuration/
 %%{init: {
   "theme": "base",
   "themeVariables": {
-    "background": "#1C1E26",
-    "primaryColor": "#FCD4B8",
-    "primaryTextColor": "#D5D8DA",
-    "primaryBorderColor": "#E95378",
-    "lineColor": "#6C6F93",
-    "sectionBkgColor": "#232530",
-    "altSectionBkgColor": "#2E303E", 
-    "gridColor": "#16161C",
-    "secondaryColor": "#26BBD9",
-    "tertiaryColor": "#27D797",
-    "cScale0": "#1C1E26",
-    "cScale1": "#232530",
-    "cScale2": "#2E303E",
-    "cScale3": "#6C6F93",
-    "cScale4": "#D5D8DA",
-    "clusterBkg": "#232530",
-    "clusterBorder": "#6C6F93"
+    "background": "#FFFFFF",
+    "primaryColor": "#2E7D32",
+    "primaryTextColor": "#000000",
+    "primaryBorderColor": "#1B5E20",
+    "lineColor": "#424242",
+    "sectionBkgColor": "#E8F5E9",
+    "altSectionBkgColor": "#C8E6C9", 
+    "gridColor": "#E0E0E0",
+    "secondaryColor": "#1976D2",
+    "tertiaryColor": "#7B1FA2",
+    "cScale0": "#FFFFFF",
+    "cScale1": "#F5F5F5",
+    "cScale2": "#E0E0E0",
+    "cScale3": "#9E9E9E",
+    "cScale4": "#000000",
+    "clusterBkg": "#F5F5F5",
+    "clusterBorder": "#757575"
   }
 }}%%
 graph LR
@@ -804,23 +804,23 @@ All scripts are available in both PowerShell (`.ps1`) and Bash (`.sh`) versions:
 %%{init: {
   "theme": "base",
   "themeVariables": {
-    "background": "#1C1E26",
-    "primaryColor": "#FCD4B8",
-    "primaryTextColor": "#D5D8DA",
-    "primaryBorderColor": "#E95378",
-    "lineColor": "#6C6F93",
-    "sectionBkgColor": "#232530",
-    "altSectionBkgColor": "#2E303E", 
-    "gridColor": "#16161C",
-    "secondaryColor": "#26BBD9",
-    "tertiaryColor": "#27D797",
-    "cScale0": "#1C1E26",
-    "cScale1": "#232530",
-    "cScale2": "#2E303E",
-    "cScale3": "#6C6F93",
-    "cScale4": "#D5D8DA",
-    "clusterBkg": "#232530",
-    "clusterBorder": "#6C6F93"
+    "background": "#FFFFFF",
+    "primaryColor": "#2E7D32",
+    "primaryTextColor": "#000000",
+    "primaryBorderColor": "#1B5E20",
+    "lineColor": "#424242",
+    "sectionBkgColor": "#E8F5E9",
+    "altSectionBkgColor": "#C8E6C9", 
+    "gridColor": "#E0E0E0",
+    "secondaryColor": "#1976D2",
+    "tertiaryColor": "#7B1FA2",
+    "cScale0": "#FFFFFF",
+    "cScale1": "#F5F5F5",
+    "cScale2": "#E0E0E0",
+    "cScale3": "#9E9E9E",
+    "cScale4": "#000000",
+    "clusterBkg": "#F5F5F5",
+    "clusterBorder": "#757575"
   }
 }}%%
 graph TD

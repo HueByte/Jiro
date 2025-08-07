@@ -39,16 +39,19 @@
 
 ## 🌟 What is Jiro?
 
-Meet **Jiro** – your personal AI assistant that combines the power of ChatGPT with a robust, extensible plugin system! Whether you need help with daily tasks, want to check the weather, manage conversations, or build custom integrations, Jiro is here to make your life easier and more productive.
+Meet **Jiro v1.0.0-beta "Kakushin"** – your production-ready AI assistant that combines the power of Large Language Models with a robust, extensible plugin system! Whether you need help with daily tasks, want to check the weather, manage conversations, or build custom integrations, Jiro is here to make your life easier and more productive.
 
-## ✨ What Makes Jiro Special?
+## ✨ What Makes Jiro Special? (v1.0.0-beta "Kakushin")
 
-🧠 **AI-Powered Conversations** - Leverage ChatGPT's intelligence for natural, context-aware interactions  
+🧠 **AI-Powered Conversations** - Leverage LLM intelligence for natural, context-aware interactions  
 🔌 **Plugin Architecture** - Extend functionality with custom commands and integrations  
 🌤️ **Built-in Weather** - Get real-time weather updates and forecasts  
-💬 **Session Management** - Maintain conversation context across multiple interactions  
+📡 **Real-time Log Streaming** - Continuous log monitoring with `StreamLogsAsync` and batch delivery  
+🔄 **Enhanced Session Management** - Client-side session ID generation with advanced caching  
+💬 **Multi-Client Support** - Web, CLI, and API interfaces with SignalR hub integration  
 🛡️ **Secure & Private** - Your data stays secure with robust authentication  
-🚀 **Modern Tech Stack** - Built with .NET 9, React, and modern web technologies  
+🚀 **Modern Tech Stack** - Built with .NET 9 and modern cloud-native technologies  
+🐳 **Production Ready** - Docker profiles with comprehensive environment configuration  
 
 ## 🎮 Quick Demo
 
@@ -218,7 +221,9 @@ Jiro is built as a modular, self-contained AI assistant that can run locally whi
     "cScale1": "#232530",
     "cScale2": "#2E303E",
     "cScale3": "#6C6F93",
-    "cScale4": "#D5D8DA"
+    "cScale4": "#D5D8DA",
+    "clusterBkg": "#232530",
+    "clusterBorder": "#6C6F93"
   }
 }}%%
 graph TB
@@ -228,20 +233,25 @@ graph TB
         WeatherAPI[🌤️ Weather Service<br/>Location & Forecast]
     end
 
-    subgraph "💻 Local Jiro Instance"
+    subgraph "💻 Local Jiro Instance (v1.0.0-beta)"
         subgraph "🎯 Client Layer"
             PythonCLI[🐍 Python CLI<br/>jiro.py]
-            WebClient[🌐 Web Interface<br/>Future Feature]
+            WebClient[🌐 Web Interface<br/>SignalR Integration]
+            APIClient[📡 API Clients<br/>Multi-Protocol Support]
         end
 
         subgraph "🚀 Jiro.App Layer"
             JiroApp[🎮 Jiro.App<br/>Main Host Application]
             RestAPI[🌐 REST API<br/>:18090]
             GrpcService[📡 gRPC Service<br/>JiroCloud Integration]
+            SignalRHub[🔄 SignalR Hub<br/>Real-time Communication]
         end
 
         subgraph "💼 Jiro.Core Layer"
-            ChatService[💬 Chat Service<br/>Conversation Management]
+            SessionManager[📝 Session Manager<br/>Advanced Caching & Lifecycle]
+            MessageCacheService[💾 Message Cache<br/>Performance Optimization]
+            LogsProviderService[📊 Logs Provider<br/>Real-time Log Streaming]
+            ChatService[💬 Chat Service<br/>LLM Integration]
             CmdSystem[⚡ Command System<br/>Plugin Framework]
             WeatherService[🌤️ Weather Service<br/>Location & Forecasts]
             PersonaService[👤 Persona Service<br/>AI Personality]
@@ -267,27 +277,39 @@ graph TB
 
     %% Client to Application Flow
     PythonCLI -->|HTTP Requests| RestAPI
-    WebClient -->|HTTP Requests| RestAPI
+    WebClient -->|SignalR Connection| SignalRHub
+    APIClient -->|Multi-Protocol| RestAPI
     RestAPI --> JiroApp
+    SignalRHub --> JiroApp
 
     %% External Service Integration
     JiroApp -.->|Optional| GrpcService
     GrpcService -.->|Commands| JiroCloud
-    ChatService -->|AI Requests| OpenAI
+    ChatService -->|LLM Requests| OpenAI
     WeatherService -->|API Calls| WeatherAPI
 
-    %% Core Service Interactions
+    %% v1.0.0-beta Core Service Interactions
+    JiroApp --> SessionManager
+    JiroApp --> MessageCacheService
+    JiroApp --> LogsProviderService
     JiroApp --> ChatService
     JiroApp --> CmdSystem
     JiroApp --> WeatherService
     JiroApp --> PersonaService
     JiroApp --> ConversationService
 
+    %% Real-time Features
+    LogsProviderService -->|Stream Logs| SignalRHub
+    SessionManager -->|Session Events| SignalRHub
+
     %% Plugin System
     CmdSystem --> BaseCommands
     CmdSystem --> CustomPlugins
 
-    %% Data Layer
+    %% Data Layer (v1.0.0-beta)
+    SessionManager --> EFCore
+    MessageCacheService --> EFCore
+    LogsProviderService --> EFCore
     ChatService --> EFCore
     WeatherService --> EFCore
     PersonaService --> EFCore
@@ -297,7 +319,7 @@ graph TB
     EFCore --> SQLite
     EFCore -.->|Docker| MySQL
 
-    %% Horizon Theme Styling
+    %% Horizon Theme Styling with High Contrast Text
     classDef external fill:#FAB795,stroke:#E6A66A,stroke-width:2px,color:#06060C
     classDef client fill:#26BBD9,stroke:#1A9CB8,stroke-width:2px,color:#06060C
     classDef app fill:#FCD4B8,stroke:#E29A6B,stroke-width:2px,color:#06060C
@@ -307,25 +329,29 @@ graph TB
     classDef plugins fill:#E95378,stroke:#F43E5C,stroke-width:2px,color:#06060C
 
     class JiroCloud,OpenAI,WeatherAPI external
-    class PythonCLI,WebClient client
-    class JiroApp,RestAPI,GrpcService app
-    class ChatService,CmdSystem,WeatherService,PersonaService,ConversationService core
+    class PythonCLI,WebClient,APIClient client
+    class JiroApp,RestAPI,GrpcService,SignalRHub app
+    class SessionManager,MessageCacheService,LogsProviderService,ChatService,CmdSystem,WeatherService,PersonaService,ConversationService core
     class EFCore,Repositories,Cache infra
     class SQLite,MySQL storage
     class BaseCommands,CustomPlugins plugins
 ```
 
-### 🔧 Architecture Components
+### 🔧 Architecture Components (v1.0.0-beta "Kakushin")
 
 #### **🚀 Jiro.App - Application Host**
 
 - **Main Host**: Central application with dependency injection and configuration
 - **REST API**: Primary interface on port 18090 for client communication
 - **gRPC Service**: Optional integration with JiroCloud for distributed commands
+- **SignalR Hub**: Real-time bidirectional communication for web clients
 
-#### **💡 Jiro.Core - Business Logic**
+#### **💡 Jiro.Core - Business Logic (Enhanced)**
 
-- **Chat Service**: Manages conversations and integrates with OpenAI
+- **Session Manager**: Advanced session lifecycle management with 5-day caching
+- **Message Cache Service**: Performance-optimized message operations
+- **Logs Provider Service**: Real-time log streaming with `StreamLogsAsync` and batch delivery
+- **Chat Service**: LLM integration with intelligent conversation management
 - **Command System**: Extensible plugin framework for adding new features
 - **Weather Service**: Provides location-based weather information
 - **Persona Service**: Handles AI personality and behavior customization
@@ -343,13 +369,16 @@ graph TB
 - **Custom Plugins**: Extensible via NuGet packages and the plugin framework
 - **Dynamic Loading**: Runtime discovery and registration of new commands
 
-### 🌟 Key Architectural Benefits
+### 🌟 Key Architectural Benefits (v1.0.0-beta)
 
 - **🏠 Self-Contained**: Runs completely locally with optional cloud features
 - **🔌 Extensible**: Plugin system allows easy addition of new commands
-- **⚡ Performance**: Memory caching and efficient data access patterns
-- **🐳 Deployable**: Docker support with MySQL for production environments
-- **🛡️ Flexible**: SQLite for development, MySQL for production scaling
+- **⚡ Performance**: Advanced caching, real-time streaming, and efficient data access
+- **🔄 Real-time**: SignalR hub integration for instant bidirectional communication
+- **📊 Observability**: Real-time log streaming and comprehensive monitoring
+- **🐳 Production Ready**: Docker profiles with comprehensive environment configuration
+- **🛡️ Scalable**: Multi-service architecture with session management and message caching
+- **📡 Multi-Protocol**: gRPC, REST, and WebSocket support for diverse client needs
 
 ## 📚 Documentation
 
@@ -450,13 +479,134 @@ Data/
 
 **Path Customization**: All paths are configurable via environment variables using the `JIRO_DataPaths__` prefix.
 
+### 🚀 GitHub Container Registry Deployment
+
+Jiro is automatically built and deployed to GitHub Container Registry through our CI/CD pipeline:
+
+#### **Pull Pre-built Images**
+
+```bash
+# Latest stable release
+docker pull ghcr.io/huebyte/jiro-kernel:latest
+
+# Specific version
+docker pull ghcr.io/huebyte/jiro-kernel:v1.0.0-beta
+
+# Development builds
+docker pull ghcr.io/huebyte/jiro-kernel:main
+```
+
+#### **Quick Deploy with GitHub Image**
+
+```bash
+# 1. Create your .env file
+cat > .env << 'EOF'
+# Required Configuration
+MYSQL_ROOT_PASSWORD=secure-root-password
+MYSQL_DATABASE=jiro
+MYSQL_USER=jiro
+MYSQL_PASSWORD=secure-user-password
+DB_SERVER=mysql
+
+# Application Configuration
+JIRO_ApiKey=your-secure-api-key
+JIRO_JiroApi=https://localhost:5001
+
+# AI Features (optional)
+OPENAI_API_KEY=sk-your-openai-api-key
+
+# Port Configuration
+JIRO_HTTP_PORT=8080
+JIRO_HTTPS_PORT=8443
+JIRO_ADDITIONAL_PORT=18090
+MYSQL_PORT=3306
+EOF
+
+# 2. Create docker-compose.yml using GitHub image
+cat > docker-compose.yml << 'EOF'
+version: '3.8'
+
+services:
+  jiro-kernel:
+    image: ghcr.io/huebyte/jiro-kernel:latest
+    container_name: jiro-kernel
+    ports:
+      - "${JIRO_HTTP_PORT:-8080}:8080"
+      - "${JIRO_HTTPS_PORT:-8443}:8443"
+      - "${JIRO_ADDITIONAL_PORT:-18090}:18090"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ConnectionStrings__JiroContext=Server=${DB_SERVER:-mysql};Database=${MYSQL_DATABASE:-jiro};Uid=${MYSQL_USER:-jiro};Pwd=${MYSQL_PASSWORD};
+      - JIRO_ApiKey=${JIRO_ApiKey}
+      - JIRO_Chat__AuthToken=${OPENAI_API_KEY}
+    volumes:
+      - jiro_database:/home/app/jiro/Data/Database
+      - jiro_logs:/home/app/jiro/Data/Logs
+      - jiro_plugins:/home/app/jiro/Data/Plugins
+      - jiro_themes:/home/app/jiro/Data/Themes
+      - jiro_messages:/home/app/jiro/Data/Messages
+    depends_on:
+      mysql:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  mysql:
+    image: mysql:8.0
+    container_name: jiro-mysql
+    ports:
+      - "${MYSQL_PORT:-3306}:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-jiro}
+      MYSQL_USER: ${MYSQL_USER:-jiro}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    volumes:
+      - jiro_mysql_data:/var/lib/mysql
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+
+volumes:
+  jiro_database:
+  jiro_logs:
+  jiro_plugins:
+  jiro_themes:
+  jiro_messages:
+  jiro_mysql_data:
+EOF
+
+# 3. Start the services
+docker-compose up -d
+
+# 4. Check logs
+docker-compose logs -f jiro-kernel
+```
+
+#### **Available Image Tags**
+
+| Tag | Description | Auto-Updated |
+|-----|-------------|--------------|
+| `latest` | Latest stable release | ✅ On new releases |
+| `main` | Latest development build | ✅ On main branch pushes |
+| `v1.0.0-beta` | Specific version | ❌ Static |
+| `pr-123` | Pull request builds | ❌ Testing only |
+
 ### Production Deployment
 
-- Use `docker-compose.yml` with proper `.env` configuration
-- Environment variables override `.env` values for secrets management
-- Persistent volumes for all data directories included
-- Health checks and proper networking configured
-- Organized data structure with separate volumes for each data type
+- **GitHub Container Registry**: Official images at `ghcr.io/huebyte/jiro-kernel`
+- **Automatic Updates**: Images built automatically on every release
+- **Multi-architecture**: Supports AMD64 and ARM64 architectures
+- **Security Scanning**: All images scanned with Trivy for vulnerabilities
+- **Environment Variables**: Override `.env` values for secrets management
+- **Persistent Volumes**: All data directories preserved across container restarts
+- **Health Checks**: Built-in health monitoring and automatic restart policies
 
 ## 🎓 Engineering Thesis Project
 
@@ -568,13 +718,25 @@ dotnet clean src/Main.sln && dotnet build src/Main.sln
 
 ## 🎯 Roadmap
 
-- [ ] 🧠 Enhanced AI model support (GPT-4, Claude, etc.)
+### ✅ Released in v1.0.0-beta "Kakushin"
+
+- ✅ **Real-time Log Streaming**: `StreamLogsAsync` with batch delivery
+- ✅ **Enhanced Session Management**: Advanced caching with 5-day expiration
+- ✅ **SignalR Integration**: Real-time bidirectional communication
+- ✅ **Service Architecture**: Separated SessionManager, MessageCacheService, LogsProviderService
+- ✅ **Docker Profiles**: Multi-profile deployment with comprehensive configuration
+- ✅ **GitHub Container Registry**: Automated builds and deployments
+
+### 🔮 Upcoming Features
+
+- [ ] 🧠 Enhanced AI model support (GPT-4, Claude, Gemini, etc.)
 - [ ] 📱 Mobile applications (iOS/Android)
 - [ ] 🔊 Voice interaction capabilities
 - [ ] 🌐 Multi-language support
-- [ ] 📊 Analytics and usage insights
+- [ ] 📊 Advanced analytics and usage insights
 - [ ] 🤖 Automated plugin marketplace
-- [ ] 🔗 Third-party service integrations (Discord, Slack, etc.)
+- [ ] 🔗 Third-party service integrations (Discord, Slack, Teams, etc.)
+- [ ] 🌍 Multi-tenant support for enterprise deployments
 
 ## 💖 Support the Project
 

@@ -19,18 +19,22 @@
 
 ## 🌟 Project Overview
 
-**Jiro** is a sophisticated, multi-layered AI virtual assistant platform that combines the power of OpenAI's ChatGPT with a robust custom command system and extensible plugin architecture. Built on modern .NET technologies, Jiro provides a comprehensive solution for AI-powered assistance, featuring real-time communication, intelligent conversation management, and modular service architecture.
+**Jiro v1.0.0-beta "Kakushin"** is a production-ready, enterprise-grade AI virtual assistant platform that combines the power of Large Language Models (LLMs) with a robust custom command system and extensible plugin architecture. Built on modern .NET 9 technologies following Clean Architecture principles, Jiro provides a comprehensive solution for AI-powered assistance, featuring real-time bidirectional communication, intelligent conversation management, and cloud-native deployment capabilities.
 
-### Key Features
+### Key Features (v1.0.0-beta)
 
-- **AI-Powered Conversations**: Integration with OpenAI GPT models for intelligent dialogue
+- **AI-Powered Conversations**: Integration with state-of-the-art LLMs for intelligent dialogue
 - **Plugin System**: Extensible command architecture for custom functionality
-- **Real-time Communication**: gRPC-based streaming for instant responses
-- **Multi-Client Support**: Web, Python CLI, and API interfaces
+- **Real-time Communication**: WebSocket + gRPC hybrid architecture for instant bidirectional streaming
+- **Real-time Log Streaming**: Continuous log monitoring with `StreamLogsAsync` and batch delivery
+- **Enhanced Session Management**: Client-side session ID generation with advanced caching
+- **Multi-Client Support**: Web, CLI, and API interfaces with SignalR hub integration
+- **Service Architecture**: Separated SessionManager, MessageCacheService, and LogsProviderService
 - **Intelligent Memory Management**: Conversation history optimization and persona management
 - **Weather Integration**: Real-time weather data with geolocation services
 - **Token Management**: Advanced token counting and optimization for cost efficiency
-- **Docker-Ready**: Full containerization support with multi-stage builds
+- **Docker Profiles**: Multi-profile deployment (default, docs, full) with comprehensive environment configuration
+- **90+ Configuration Options**: Flexible deployment with JIRO_ prefixed environment variables
 
 ## 🏗️ Architecture
 
@@ -67,7 +71,7 @@ Jiro follows a **clean architecture** pattern with clear separation of concerns:
 
 ### **AI & Machine Learning**
 
-- **OpenAI API**: GPT-4o Mini/Turbo models for conversation
+- **LLM Integration**: Support for advanced language models via OpenAI API
 - **Custom Token Management**: Tiktoken integration for token counting
 - **Conversation Optimization**: Intelligent history management
 
@@ -97,7 +101,7 @@ Jiro follows a **clean architecture** pattern with clear separation of concerns:
 
 - **Purpose**: Core conversation logic with OpenAI integration
 - **Features**:
-  - Direct chat completion with GPT models
+  - Direct chat completion with LLM models
   - Token usage tracking and optimization
   - Semaphore-based concurrency control
   - Temperature and parameter management
@@ -123,20 +127,33 @@ Jiro follows a **clean architecture** pattern with clear separation of concerns:
   - Dynamic persona updates based on conversation summaries
   - Real-time pricing calculations
 
-### **Message & Session Management**
+### **Message & Session Management (v1.0.0-beta)**
 
-#### **MessageManager**
+#### **SessionManager**
 
-- **Purpose**: Comprehensive message and session lifecycle management
+- **Purpose**: Dedicated chat session lifecycle management
 - **Features**:
-  - In-memory caching with database persistence
-  - Session creation and retrieval
-  - Message history management
-  - Cache invalidation strategies
-- **Performance Optimizations**:
-  - Lazy loading of message history
-  - Configurable message fetch limits
-  - Memory cache with TTL expiration
+  - Advanced session caching with 5-day default expiration
+  - Session state management with persistence and recovery
+  - Multi-session support with user-based isolation
+  - Session metadata tracking and analytics
+
+#### **MessageCacheService**
+
+- **Purpose**: Specialized message operations and optimization
+- **Features**:
+  - Message history optimization with performance-focused caching
+  - Message exchange handling with thread-safe operations
+  - Memory-efficient message storage with automatic cleanup
+  - Message retrieval optimization for large conversation histories
+
+#### **CompositeMessageManager**
+
+- **Purpose**: Unified message management orchestration
+- **Features**:
+  - Coordinates between SessionManager and MessageCacheService
+  - Provides high-level message operations with service abstraction
+  - Handles complex message workflows and cross-service coordination
 
 ### **AI Persona System**
 
@@ -304,7 +321,7 @@ service JiroHubProto {
   - `/reduce`: Message history optimization
   - `/tokenize`: Token counting for cost estimation
 - **Features**:
-  - Tiktoken integration for accurate GPT token counting
+  - Tiktoken integration for accurate LLM token counting
   - Automatic message pruning when limits exceeded
 
 ## 🗄️ Infrastructure & Database
@@ -381,7 +398,7 @@ services:
 
 ### **OpenAI Integration**
 
-- **Models**: GPT-4o Mini (primary), GPT-4 Turbo (optional)
+- **Models**: Multiple LLM options including latest generation models
 - **Temperature Control**: Configurable response creativity (default: 0.6)
 - **Token Management**: Advanced cost optimization
 - **Context Handling**: Intelligent conversation context management

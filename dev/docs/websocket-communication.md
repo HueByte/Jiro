@@ -2,16 +2,26 @@
 
 ## Overview
 
-Jiro implements a hybrid communication architecture that combines WebSocket connections for receiving commands and gRPC for sending command results. This design provides real-time command reception through SignalR WebSockets while ensuring reliable command result delivery via gRPC with retry mechanisms.
+Jiro implements a hybrid communication architecture that combines WebSocket connections for real-time bidirectional communication and gRPC for reliable service interactions. This design provides real-time command reception, live log streaming, and session management through SignalR WebSockets while ensuring reliable command result delivery via gRPC with retry mechanisms.
+
+### Key Features (v1.0.0-beta)
+
+- **Real-time log streaming** via `StreamLogsAsync` and `StreamLogBatchesAsync`
+- **Enhanced session management** with client-side session ID generation
+- **Improved WebSocket contracts** using `IJiroInstance` interface
+- **Bidirectional streaming** for logs, sessions, and configuration updates
 
 ## Architecture Components
 
 ### Core Services
 
 - **`JiroWebSocketService`**: Main orchestration service managing the entire communication lifecycle
-- **`SignalRWebSocketConnection`**: WebSocket implementation using SignalR for real-time command reception
+- **`WebSocketConnection`**: Enhanced WebSocket implementation using SignalR for real-time bidirectional communication
 - **`JiroGrpcService`**: gRPC client service for sending command results back to the server
 - **`ICommandQueueMonitor`**: Interface for monitoring command execution metrics
+- **`LogsProviderService`**: Real-time log streaming with continuous monitoring
+- **`SessionManager`**: Enhanced session lifecycle management with caching
+- **`MessageCacheService`**: Optimized message operations and caching
 
 ## Communication Flow
 
@@ -19,25 +29,25 @@ Jiro implements a hybrid communication architecture that combines WebSocket conn
 %%{init: {
   "theme": "base",
   "themeVariables": {
-    "background": "#1C1E26",
-    "primaryColor": "#FCD4B8",
-    "primaryTextColor": "#D5D8DA",
-    "primaryBorderColor": "#E95378",
-    "lineColor": "#6C6F93",
-    "sectionBkgColor": "#232530",
-    "altSectionBkgColor": "#2E303E",
-    "gridColor": "#16161C",
-    "secondaryColor": "#26BBD9",
-    "tertiaryColor": "#27D797",
-    "actorBkg": "#2E303E",
-    "actorBorder": "#6C6F93",
-    "actorTextColor": "#D5D8DA",
-    "activationBkgColor": "#FCD4B8",
-    "activationBorderColor": "#E29A6B",
-    "noteBkgColor": "#26BBD9",
-    "noteBorderColor": "#1A9CB8",
-    "noteTextColor": "#1C1E26",
-    "altColor": "#27D797"
+    "background": "#FFFFFF",
+    "primaryColor": "#2E7D32",
+    "primaryTextColor": "#000000",
+    "primaryBorderColor": "#1B5E20",
+    "lineColor": "#424242",
+    "sectionBkgColor": "#E8F5E9",
+    "altSectionBkgColor": "#C8E6C9",
+    "gridColor": "#E0E0E0",
+    "secondaryColor": "#1976D2",
+    "tertiaryColor": "#7B1FA2",
+    "actorBkg": "#E3F2FD",
+    "actorBorder": "#1565C0",
+    "actorTextColor": "#000000",
+    "activationBkgColor": "#FFF3E0",
+    "activationBorderColor": "#E65100",
+    "noteBkgColor": "#FFFDE7",
+    "noteBorderColor": "#F57C00",
+    "noteTextColor": "#000000",
+    "altColor": "#4CAF50"
   }
 }}%%
 sequenceDiagram
@@ -83,11 +93,11 @@ sequenceDiagram
     "gridColor": "#16161C",
     "secondaryColor": "#26BBD9",
     "tertiaryColor": "#27D797",
-    "cScale0": "#1C1E26",
-    "cScale1": "#232530",
-    "cScale2": "#2E303E",
-    "cScale3": "#6C6F93",
-    "cScale4": "#D5D8DA"
+    "cScale0": "#FFFFFF",
+    "cScale1": "#F5F5F5",
+    "cScale2": "#E0E0E0",
+    "cScale3": "#9E9E9E",
+    "cScale4": "#000000"
   }
 }}%%
 graph TB
@@ -125,10 +135,10 @@ graph TB
     WSConn <--> SignalR
     GrpcSvc --> GrpcServer
     
-    %% Horizon Theme Styling
-    classDef wsService fill:#26BBD9,stroke:#1A9CB8,stroke-width:2px,color:#06060C
-    classDef grpcService fill:#FCD4B8,stroke:#E29A6B,stroke-width:2px,color:#06060C
-    classDef wsConn fill:#27D797,stroke:#21BFC2,stroke-width:2px,color:#06060C
+    %% High Contrast Styling
+    classDef wsService fill:#2196F3,stroke:#0D47A1,stroke-width:2px,color:#FFFFFF
+    classDef grpcService fill:#FF9800,stroke:#E65100,stroke-width:2px,color:#000000
+    classDef wsConn fill:#4CAF50,stroke:#1B5E20,stroke-width:2px,color:#FFFFFF
     
     class WSService wsService
     class GrpcSvc grpcService
@@ -151,13 +161,13 @@ graph TB
     "gridColor": "#16161C",
     "secondaryColor": "#26BBD9",
     "tertiaryColor": "#27D797",
-    "cScale0": "#1C1E26",
-    "cScale1": "#232530",
-    "cScale2": "#2E303E",
-    "cScale3": "#6C6F93",
-    "cScale4": "#D5D8DA",
-    "clusterBkg": "#232530",
-    "clusterBorder": "#6C6F93"
+    "cScale0": "#FFFFFF",
+    "cScale1": "#F5F5F5",
+    "cScale2": "#E0E0E0",
+    "cScale3": "#9E9E9E",
+    "cScale4": "#000000",
+    "clusterBkg": "#F5F5F5",
+    "clusterBorder": "#757575"
   }
 }}%%
 graph LR
@@ -187,10 +197,10 @@ graph LR
     WSService -.-> Monitor
     WSService --> WSConn
     
-    %% Horizon Theme Styling
-    classDef scopeStyle fill:#26BBD9,stroke:#1A9CB8,stroke-width:2px,color:#06060C
-    classDef grpcStyle fill:#27D797,stroke:#21BFC2,stroke-width:2px,color:#06060C
-    classDef wsStyle fill:#FCD4B8,stroke:#E29A6B,stroke-width:2px,color:#06060C
+    %% High Contrast Styling
+    classDef scopeStyle fill:#2196F3,stroke:#0D47A1,stroke-width:2px,color:#FFFFFF
+    classDef grpcStyle fill:#4CAF50,stroke:#1B5E20,stroke-width:2px,color:#FFFFFF
+    classDef wsStyle fill:#FF9800,stroke:#E65100,stroke-width:2px,color:#000000
     
     class Scope scopeStyle
     class GrpcSvc grpcStyle
@@ -206,7 +216,7 @@ graph LR
   "instanceId": "user-123",
   "command": "chat Hello Jiro",
   "commandSyncId": "cmd-456-789",
-  "sessionId": "session-abc",
+  "sessionId": "session-abc",  // Now generated client-side
   "parameters": {
     "key1": "value1",
     "key2": "value2"
@@ -245,12 +255,12 @@ message ClientMessage {
     "gridColor": "#16161C",
     "secondaryColor": "#26BBD9",
     "tertiaryColor": "#27D797",
-    "cScale0": "#1C1E26",
-    "cScale1": "#232530",
-    "cScale2": "#2E303E",
-    "cScale3": "#6C6F93",
-    "cScale4": "#D5D8DA",
-    "stateLabelColor": "#D5D8DA"
+    "cScale0": "#FFFFFF",
+    "cScale1": "#F5F5F5",
+    "cScale2": "#E0E0E0",
+    "cScale3": "#9E9E9E",
+    "cScale4": "#000000",
+    "stateLabelColor": "#000000"
   }
 }}%%
 stateDiagram-v2
@@ -300,13 +310,13 @@ stateDiagram-v2
     "gridColor": "#16161C",
     "secondaryColor": "#26BBD9",
     "tertiaryColor": "#27D797",
-    "cScale0": "#1C1E26",
-    "cScale1": "#232530",
-    "cScale2": "#2E303E",
-    "cScale3": "#6C6F93",
-    "cScale4": "#D5D8DA",
-    "clusterBkg": "#232530",
-    "clusterBorder": "#6C6F93"
+    "cScale0": "#FFFFFF",
+    "cScale1": "#F5F5F5",
+    "cScale2": "#E0E0E0",
+    "cScale3": "#9E9E9E",
+    "cScale4": "#000000",
+    "clusterBkg": "#F5F5F5",
+    "clusterBorder": "#757575"
   }
 }}%%
 flowchart TD
@@ -323,10 +333,10 @@ flowchart TD
     Lost -->|No| Monitor
     Auto --> Try
     
-    %% Horizon Theme Styling
-    classDef successStyle fill:#27D797,stroke:#21BFC2,stroke-width:2px,color:#06060C
-    classDef failStyle fill:#E95378,stroke:#C7455C,stroke-width:2px,color:#06060C
-    classDef waitStyle fill:#FCD4B8,stroke:#E29A6B,stroke-width:2px,color:#06060C
+    %% High Contrast Styling
+    classDef successStyle fill:#4CAF50,stroke:#1B5E20,stroke-width:2px,color:#FFFFFF
+    classDef failStyle fill:#F44336,stroke:#B71C1C,stroke-width:2px,color:#FFFFFF
+    classDef waitStyle fill:#FFC107,stroke:#F57C00,stroke-width:2px,color:#000000
     
     class Success successStyle
     class Fail failStyle
@@ -349,13 +359,13 @@ flowchart TD
     "gridColor": "#16161C",
     "secondaryColor": "#26BBD9",
     "tertiaryColor": "#27D797",
-    "cScale0": "#1C1E26",
-    "cScale1": "#232530",
-    "cScale2": "#2E303E",
-    "cScale3": "#6C6F93",
-    "cScale4": "#D5D8DA",
-    "clusterBkg": "#232530",
-    "clusterBorder": "#6C6F93"
+    "cScale0": "#FFFFFF",
+    "cScale1": "#F5F5F5",
+    "cScale2": "#E0E0E0",
+    "cScale3": "#9E9E9E",
+    "cScale4": "#000000",
+    "clusterBkg": "#F5F5F5",
+    "clusterBorder": "#757575"
   }
 }}%%
 flowchart TD
@@ -367,10 +377,10 @@ flowchart TD
     RetryCheck -->|No| Error[Throw Exception]
     Backoff --> Attempt
     
-    %% Horizon Theme Styling
-    classDef completeStyle fill:#27D797,stroke:#21BFC2,stroke-width:2px,color:#06060C
-    classDef errorStyle fill:#E95378,stroke:#C7455C,stroke-width:2px,color:#06060C
-    classDef backoffStyle fill:#FCD4B8,stroke:#E29A6B,stroke-width:2px,color:#06060C
+    %% High Contrast Styling
+    classDef completeStyle fill:#4CAF50,stroke:#1B5E20,stroke-width:2px,color:#FFFFFF
+    classDef errorStyle fill:#F44336,stroke:#B71C1C,stroke-width:2px,color:#FFFFFF
+    classDef backoffStyle fill:#FFC107,stroke:#F57C00,stroke-width:2px,color:#000000
     
     class Complete completeStyle
     class Error errorStyle
@@ -448,11 +458,11 @@ services.AddSingleton<ICommandQueueMonitor, JiroWebSocketService>();
     "gridColor": "#16161C",
     "secondaryColor": "#26BBD9",
     "tertiaryColor": "#27D797",
-    "cScale0": "#1C1E26",
-    "cScale1": "#232530",
-    "cScale2": "#2E303E",
-    "cScale3": "#6C6F93",
-    "cScale4": "#D5D8DA",
+    "cScale0": "#FFFFFF",
+    "cScale1": "#F5F5F5",
+    "cScale2": "#E0E0E0",
+    "cScale3": "#9E9E9E",
+    "cScale4": "#000000",
     "actorBkg": "#2E303E",
     "actorBorder": "#6C6F93",
     "actorTextColor": "#D5D8DA",
@@ -540,6 +550,126 @@ public class MonitoringController : ControllerBase
 - **Resource Efficient**: Scoped dependency injection prevents resource leaks
 - **Concurrent Processing**: Multiple commands can be processed simultaneously
 - **Graceful Degradation**: System continues operating during temporary network issues
+
+## Real-Time Log Streaming (v1.0.0-beta)
+
+### Log Streaming Architecture
+
+The enhanced logging system provides real-time log streaming capabilities through WebSocket connections:
+
+```mermaid
+%%{init: {
+  "theme": "base",
+  "themeVariables": {
+    "background": "#FFFFFF",
+    "primaryColor": "#2E7D32",
+    "primaryTextColor": "#000000",
+    "primaryBorderColor": "#1B5E20",
+    "lineColor": "#424242",
+    "sectionBkgColor": "#E8F5E9",
+    "altSectionBkgColor": "#C8E6C9",
+    "gridColor": "#E0E0E0",
+    "secondaryColor": "#1976D2",
+    "tertiaryColor": "#7B1FA2",
+    "cScale0": "#FFFFFF",
+    "cScale1": "#F5F5F5",
+    "cScale2": "#E0E0E0",
+    "cScale3": "#9E9E9E",
+    "cScale4": "#000000"
+  }
+}}%%
+flowchart TD
+    subgraph "Log Streaming Pipeline"
+        Client[WebSocket Client] -->|Request Logs| Hub[SignalR Hub]
+        Hub --> LogService[LogsProviderService]
+        
+        LogService --> Stream{Streaming Mode}
+        Stream -->|Continuous| Async[StreamLogsAsync]
+        Stream -->|Batch| Batch[StreamLogBatchesAsync]
+        
+        Async --> Monitor[File Monitor]
+        Batch --> BatchProc[Batch Processor]
+        
+        Monitor -->|New Entries| Parser[Log Parser]
+        BatchProc -->|Batch Ready| Parser
+        
+        Parser -->|Structured Logs| Client
+    end
+    
+    %% High Contrast Styling
+    classDef clientStyle fill:#2196F3,stroke:#0D47A1,stroke-width:2px,color:#FFFFFF
+    classDef serviceStyle fill:#4CAF50,stroke:#1B5E20,stroke-width:2px,color:#FFFFFF
+    classDef processStyle fill:#FF9800,stroke:#E65100,stroke-width:2px,color:#000000
+    
+    class Client clientStyle
+    class LogService serviceStyle
+    class Parser processStyle
+```
+
+### Streaming Methods
+
+#### Continuous Log Streaming
+
+```csharp
+public async IAsyncEnumerable<LogEntry> StreamLogsAsync(
+    string? level = null, 
+    int initialLimit = 50,
+    [EnumeratorCancellation] CancellationToken cancellationToken = default)
+{
+    // Returns existing logs first
+    // Then continuously monitors for new entries
+    // Real-time delivery as logs are written
+}
+```
+
+#### Batch Log Streaming
+
+```csharp
+public async IAsyncEnumerable<IEnumerable<LogEntry>> StreamLogBatchesAsync(
+    string? level = null, 
+    int initialLimit = 50, 
+    int batchSize = 10,
+    [EnumeratorCancellation] CancellationToken cancellationToken = default)
+{
+    // Delivers logs in configurable batches
+    // Optimized for high-volume scenarios
+    // Reduces network overhead
+}
+```
+
+### Enhanced Log Parsing
+
+The log parser now supports:
+
+- **Timezone-aware timestamps**: Handles logs with timezone offsets (e.g., `+00:00`)
+- **Multi-line log entries**: Correctly groups stack traces and multi-line messages
+- **Regex pattern matching**: Intelligent parsing of various log formats
+- **Level filtering**: Real-time filtering by log level (INFO, WARN, ERROR, etc.)
+
+### WebSocket Events for Logging
+
+```csharp
+// Request continuous log stream
+connection.On<GetLogsRequest>("LogsStreamRequested", async (request) =>
+{
+    await foreach (var log in logsProvider.StreamLogsAsync(request.Level))
+    {
+        await connection.SendAsync("LogEntry", log);
+    }
+});
+
+// Request batch log stream
+connection.On<GetLogsRequest>("LogBatchesRequested", async (request) =>
+{
+    await foreach (var batch in logsProvider.StreamLogBatchesAsync(
+        request.Level, 
+        request.InitialLimit, 
+        request.BatchSize))
+    {
+        await connection.SendAsync("LogBatch", batch);
+    }
+});
+```
 
 ## Integration Points
 
