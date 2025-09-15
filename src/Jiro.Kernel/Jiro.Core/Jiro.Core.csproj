@@ -8,6 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Google.Protobuf" Version="3.32.1" />
     <PackageReference Include="Jiro.Commands" Version="3.0.4" />
     <PackageReference Include="Jiro.Shared" Version="1.4.4" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Abstractions" Version="2.3.0" />
