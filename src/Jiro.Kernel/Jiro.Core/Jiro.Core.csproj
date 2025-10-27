@@ -21,7 +21,7 @@
     <PackageReference Include="Microsoft.Extensions.Options" Version="9.0.8" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="9.0.8" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="9.0.8" />
-    <PackageReference Include="OpenAI" Version="2.3.0" />
+    <PackageReference Include="OpenAI" Version="2.5.0" />
     <PackageReference Include="TiktokenSharp" Version="1.1.7" />
   </ItemGroup>
 
