@@ -35,7 +35,7 @@ RUN dotnet publish Jiro.App/Jiro.App.csproj -c Release -o build \
 RUN test -f build/Configuration/appsettings.json || cp Jiro.App/Configuration/appsettings.example.json build/Configuration/appsettings.json
 
 # Stage 2: Runtime image
-FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS runtime
+FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS runtime
 ARG MAIN_WORK_DIR=/home/app/jiro
 WORKDIR ${MAIN_WORK_DIR}
 
