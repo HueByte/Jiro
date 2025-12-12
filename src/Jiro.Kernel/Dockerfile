@@ -1,17 +1,12 @@
-FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
+FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 ARG MAIN_WORK_DIR=/home/app/jiro
 WORKDIR ${MAIN_WORK_DIR}
 
-# Update and install required dependencies
-RUN apt-get update && apt-get -y upgrade && apt-get install -y \
-	build-essential gcc g++ curl tar pkg-config libtool m4 \
-	libpng-dev libjpeg-dev libxi6 libgl1-mesa-glx
-
-# Install Node.js for any frontend dependencies
-RUN curl -fsSL https://deb.nodesource.com/setup_lts.x | bash - && \
-	apt-get install -y nodejs
-
-WORKDIR ${MAIN_WORK_DIR}
+# Install minimal build dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+	ca-certificates \
+	&& apt-get clean \
+	&& rm -rf /var/lib/apt/lists/*
 
 # Copy solution and project files for dependency caching
 COPY Jiro.Kernel.sln ./
@@ -35,7 +30,7 @@ RUN dotnet publish Jiro.App/Jiro.App.csproj -c Release -o build \
 RUN test -f build/Configuration/appsettings.json || cp Jiro.App/Configuration/appsettings.example.json build/Configuration/appsettings.json
 
 # Stage 2: Runtime image
-FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS runtime
+FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS runtime
 ARG MAIN_WORK_DIR=/home/app/jiro
 WORKDIR ${MAIN_WORK_DIR}
 
@@ -43,7 +38,7 @@ WORKDIR ${MAIN_WORK_DIR}
 RUN useradd -ms /bin/bash jiro
 
 # For self-contained apps, minimal dependencies are needed
-RUN apt-get update && apt-get install -y \
+RUN apt-get update && apt-get install -y --no-install-recommends \
 	ca-certificates \
 	&& apt-get clean \
 	&& rm -rf /var/lib/apt/lists/*

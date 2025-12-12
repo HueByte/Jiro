@@ -15,7 +15,7 @@ $ProjectRoot = Split-Path -Parent $ScriptDir
 Push-Location $ProjectRoot
 
 $SolutionPath = "./src/Main.sln"
-$DockerfilePath = "./src/Jiro.Kernel/Jiro.App/Dockerfile"
+$DockerfilePath = "./src/Jiro.Kernel/Dockerfile"
 $DockerImageName = "jiro-kernel-test"
 $ProjectPath = "./src/Jiro.Kernel"
 
@@ -51,7 +51,7 @@ function Test-Prerequisites {
         Write-Success ".NET SDK version: $dotnetVersion"
     }
     catch {
-        Write-Error ".NET SDK not found. Please install .NET 9 SDK."
+        Write-Error ".NET SDK not found. Please install .NET 10 SDK."
         exit 1
     }
     
@@ -260,7 +260,7 @@ function Invoke-PerformanceTests {
         foreach ($project in $benchmarkProjects) {
             Write-Host "Running benchmarks in $($project.FullName)" -ForegroundColor Cyan
             try {
-                dotnet run --project $project.FullName --configuration $Configuration --framework net9.0 -- --filter "*"
+                dotnet run --project $project.FullName --configuration $Configuration --framework net10.0 -- --filter "*"
             }
             catch {
                 Write-Warning "Benchmark failed for $($project.Name)"

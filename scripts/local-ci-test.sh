@@ -61,7 +61,7 @@ PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
 cd "$PROJECT_ROOT"
 
 SOLUTION_PATH="./src/Main.sln"
-DOCKERFILE_PATH="./src/Jiro.Kernel/Jiro.App/Dockerfile"
+DOCKERFILE_PATH="./src/Jiro.Kernel/Dockerfile"
 DOCKER_IMAGE_NAME="jiro-kernel-test"
 PROJECT_PATH="./src/Jiro.Kernel"
 
@@ -90,7 +90,7 @@ check_prerequisites() {
     
     # Check .NET SDK
     if ! command -v dotnet &> /dev/null; then
-        print_error ".NET SDK not found. Please install .NET 9 SDK."
+        print_error ".NET SDK not found. Please install .NET 10 SDK."
         exit 1
     fi
     
@@ -276,7 +276,7 @@ performance_tests() {
         echo "Found benchmark projects. Running benchmarks..."
         for project in $BENCHMARK_PROJECTS; do
             echo "Running benchmarks in $project"
-            dotnet run --project "$project" --configuration "$CONFIGURATION" --framework net9.0 -- --filter "*" || true
+            dotnet run --project "$project" --configuration "$CONFIGURATION" --framework net10.0 -- --filter "*" || true
         done
         print_success "Benchmarks completed"
     else
