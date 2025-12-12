@@ -35,7 +35,7 @@ $config = @{
     ChatSystemMessage = "I want you to act as personal assistant called Jiro. You are friendly, funny and sarcastic. You can ask me anything you want and engage in conversation."
     ChatTokenLimit = 2000
     ChatEnabled = $true
-    JiroCloudApiUrl = "https://jiro.huebytes.com/api"
+    JiroCloudApiUrl = "https://jiro.huebytes.com/api/"
     JiroCloudGrpcServerUrl = "https://jiro.huebytes.com/grpc"
     JiroCloudGrpcMaxRetries = 3
     JiroCloudGrpcTimeoutMs = 30000
@@ -89,7 +89,7 @@ Write-Host "=== JiroCloud Configuration ===" -ForegroundColor Cyan
 Write-Host "Setting JiroCloud service URLs to default production endpoints:" -ForegroundColor Gray
 Write-Host "  • gRPC Server: $($config.JiroCloudGrpcServerUrl)" -ForegroundColor Gray
 Write-Host "  • WebSocket Hub: $($config.JiroCloudWebSocketHubUrl)" -ForegroundColor Gray
-Write-Host "  • API URL: https://jiro.huebytes.com/api" -ForegroundColor Gray
+Write-Host "  • API URL: https://jiro.huebytes.com/api/" -ForegroundColor Gray
 
 # Create .env file
 Write-Host ""

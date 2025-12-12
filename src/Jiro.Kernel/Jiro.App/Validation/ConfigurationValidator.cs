@@ -70,7 +70,7 @@ public static class ConfigurationValidator
 			// Set default JiroCloud API URL if missing
 			if (string.IsNullOrWhiteSpace(configuration.GetSection("JiroCloud:ApiUrl").Value))
 			{
-				configManager["JiroCloud:ApiUrl"] = "https://jiro.huebytes.com/api";
+				configManager["JiroCloud:ApiUrl"] = "https://jiro.huebytes.com/api/";
 			}
 
 			// Set default WebSocket Hub URL if missing

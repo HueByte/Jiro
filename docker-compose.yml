@@ -7,17 +7,17 @@ services:
     environment:
       # Core application configuration
       - JIRO_ApiKey=${JIRO_ApiKey}
-      
+
       # OpenAI configuration
       - OPENAI_API_KEY=${OPENAI_API_KEY}
       - JIRO_Chat__AuthToken=${JIRO_Chat__AuthToken:-${OPENAI_API_KEY}}
       - JIRO_Chat__SystemMessage=${JIRO_Chat__SystemMessage:-I want you to act as personal assistant called Jiro. You are friendly, funny and sarcastic. You can ask me anything you want and engage in conversation.}
       - JIRO_Chat__TokenLimit=${JIRO_Chat__TokenLimit:-2000}
       - JIRO_Chat__Enabled=${JIRO_Chat__Enabled:-true}
-      
+
       # JiroCloud service configuration
       - JIRO_JiroCloud__ApiKey=${JIRO_JiroCloud__ApiKey:-${JIRO_ApiKey}}
-      - JIRO_JiroCloud__ApiUrl=${JIRO_JiroCloud__ApiUrl:-https://jiro.huebytes.com/api}
+      - JIRO_JiroCloud__ApiUrl=${JIRO_JiroCloud__ApiUrl:-https://jiro.huebytes.com/api/}
       - JIRO_JiroCloud__Grpc__ServerUrl=${JIRO_JiroCloud__Grpc__ServerUrl:-https://jiro.huebytes.com/grpc}
       - JIRO_JiroCloud__Grpc__MaxRetries=${JIRO_JiroCloud__Grpc__MaxRetries:-3}
       - JIRO_JiroCloud__Grpc__TimeoutMs=${JIRO_JiroCloud__Grpc__TimeoutMs:-30000}
@@ -28,16 +28,16 @@ services:
       - JIRO_JiroCloud__WebSocket__ReconnectionDelayMs=${JIRO_JiroCloud__WebSocket__ReconnectionDelayMs:-5000}
       - JIRO_JiroCloud__WebSocket__ServerTimeoutMs=${JIRO_JiroCloud__WebSocket__ServerTimeoutMs:-30000}
       - JIRO_JiroCloud__WebSocket__Headers__User-Agent=${JIRO_JiroCloud__WebSocket__Headers__User-Agent:-Jiro-Bot/1.0}
-      
+
       # Database configuration (SQLite default)
       - JIRO_ConnectionStrings__JiroContext=${JIRO_ConnectionStrings__JiroContext:-Data Source=Data/Database/jiro.db}
-      
+
       # Data Paths configuration
       - JIRO_DataPaths__Logs=${JIRO_DataPaths__Logs:-Data/Logs}
       - JIRO_DataPaths__Messages=${JIRO_DataPaths__Messages:-Data/Messages}
       - JIRO_DataPaths__Plugins=${JIRO_DataPaths__Plugins:-Data/Plugins}
       - JIRO_DataPaths__Themes=${JIRO_DataPaths__Themes:-Data/Themes}
-      
+
       # Serilog configuration
       - JIRO_Serilog__MinimumLevel__Default=${JIRO_Serilog__MinimumLevel__Default:-Information}
       - JIRO_Serilog__MinimumLevel__Override__System=${JIRO_Serilog__MinimumLevel__Override__System:-Warning}

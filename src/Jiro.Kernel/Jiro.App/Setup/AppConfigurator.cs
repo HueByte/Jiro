@@ -44,7 +44,21 @@ public class AppConfigurator
 		using var scope = _app.Services.CreateScope();
 		var context = scope.ServiceProvider.GetRequiredService<JiroContext>();
 
-		context.Database.Migrate();
+		// Ensure database directory exists for SQLite
+		var connection = context.Database.GetDbConnection();
+		var dataSource = connection.DataSource;
+
+		// For Sqlite, DataSource is the file path
+		if (!string.IsNullOrWhiteSpace(dataSource))
+		{
+			var dbDirectory = Path.GetDirectoryName(dataSource);
+			if (!string.IsNullOrWhiteSpace(dbDirectory) && !Directory.Exists(dbDirectory))
+			{
+				Directory.CreateDirectory(dbDirectory);
+			}
+		}
+
+		context.Database.MigrateAsync().GetAwaiter().GetResult();
 
 		return this;
 	}

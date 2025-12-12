@@ -23,9 +23,9 @@ public class JiroCloudOptions : IOption
 	/// </summary>
 	/// <remarks>
 	/// This URL is used for making API requests to JiroCloud services.
-	/// Default value is set to "https://jiro.huebytes.com/api".
+	/// Default value is set to "https://jiro.huebytes.com/api/".
 	/// </remarks>
-	public string ApiUrl { get; set; } = "https://jiro.huebytes.com/api";
+	public string ApiUrl { get; set; } = "https://jiro.huebytes.com/api/";
 
 	/// <summary>
 	/// Gets or sets the gRPC configuration for JiroCloud communication.

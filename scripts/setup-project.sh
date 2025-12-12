@@ -77,7 +77,7 @@ config[ChatSystemMessage]="I want you to act as personal assistant called Jiro. 
 config[ChatTokenLimit]=2000
 config[ChatEnabled]="true"
 
-config[JiroCloudApiUrl]="https://jiro.huebytes.com/api"
+config[JiroCloudApiUrl]="https://jiro.huebytes.com/api/"
 config[JiroCloudGrpcServerUrl]="https://jiro.huebytes.com/grpc"
 config[JiroCloudGrpcMaxRetries]=3
 config[JiroCloudGrpcTimeoutMs]=30000
@@ -243,7 +243,7 @@ if [ -f "$APPSETTINGS_EXAMPLE" ]; then
         
         # Update JiroCloud values
         sed -i.bak "s|\"your-jirocloud-api-key-here\"|\"${config[JiroCloudApiKey]}\"|" "$APPSETTINGS"
-        sed -i.bak "s|\"ApiUrl\": \"https://jiro.huebytes.com/api\"|\"ApiUrl\": \"${config[JiroCloudApiUrl]}\"|" "$APPSETTINGS"
+        sed -i.bak "s|\"ApiUrl\": \"https://jiro.huebytes.com/api/\"|\"ApiUrl\": \"${config[JiroCloudApiUrl]}\"|" "$APPSETTINGS"
         sed -i.bak "s|\"ServerUrl\": \"https://jiro.huebytes.com/grpc\"|\"ServerUrl\": \"${config[JiroCloudGrpcServerUrl]}\"|" "$APPSETTINGS"
         sed -i.bak "s|\"MaxRetries\": [0-9]*|\"MaxRetries\": ${config[JiroCloudGrpcMaxRetries]}|" "$APPSETTINGS"
         sed -i.bak "s|\"TimeoutMs\": [0-9]*|\"TimeoutMs\": ${config[JiroCloudGrpcTimeoutMs]}|" "$APPSETTINGS"
