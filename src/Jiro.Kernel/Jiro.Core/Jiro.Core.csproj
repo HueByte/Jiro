@@ -22,7 +22,7 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="9.0.8" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="9.0.8" />
     <PackageReference Include="OpenAI" Version="2.3.0" />
-    <PackageReference Include="TiktokenSharp" Version="1.1.7" />
+    <PackageReference Include="TiktokenSharp" Version="1.2.0" />
   </ItemGroup>
 
   <!-- Exclude .proto files to prevent compilation conflicts with Jiro.Shared package -->
